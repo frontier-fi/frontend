@@ -36,7 +36,7 @@ export default function Terms() {
           <div className="subsection">
             <h2>1. Overview</h2>
             <p>
-              This Balancer Terms of Use document (“Terms” or “agreement”) (“Balancer ”, “we” and
+              This Balancer Terms of Use document (“Terms” or “agreement”) (“Balancer”, “we” and
               “us” refers to the Balancer Foundation and its subsidiaries including without
               limitation Balancer OpCo Limited) covers the website, Balancer Protocol user-interface
               and free application (collectively “the Site”) we own and administer, at times in
@@ -126,9 +126,9 @@ export default function Terms() {
           <div className="subsection">
             <h2>3. Access / Disclaimer of Warranties</h2>
             <p>
-              ACCESS TO THIS SITE AND THE PRODUCTS HEREIN ARE PROVIDED ON AN `&apos;`AS IS`&apos;`
-              AND `&apos;`AS AVAILABLE`&apos;` BASIS WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS
-              OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY,
+              ACCESS TO THIS SITE AND THE PRODUCTS HEREIN ARE PROVIDED ON AN &quot;AS IS&quot; AND
+              &quot;AS AVAILABLE&quot; BASIS WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR
+              IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY,
               FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. NO WARRANTY IS PROVIDED THAT
               THE SITE OR ANY PRODUCT WILL BE FREE FROM DEFECTS OR VIRUSES OR THAT OPERATION OF THE
               PRODUCT WILL BE UNINTERRUPTED. YOUR USE OF THE SITE AND ANY PRODUCT AND ANY MATERIAL
@@ -163,7 +163,7 @@ export default function Terms() {
               with all applicable domestic and international laws, statutes, ordinances, rules and
               regulations applicable to your use of the site (“Applicable Laws”). Likewise, we are
               not liable for any third-party services and are not responsible for the content or
-              services of these party’s.
+              services of these parties.
             </p>
             <p>
               As a condition to accessing or using the Site, you agree and represent that you will:
@@ -366,8 +366,8 @@ export default function Terms() {
               We have no control over third party websites and accept no legal responsibility for
               any content, material or information contained in them. The display of any hyperlink
               and reference to any third-party website does not mean that we endorse that third
-              party`&apos;`s website, products or services or opine on the accuracy or reliability
-              of such information. Your use of a third-party site may be governed by the terms and
+              party&apos;s website, products or services or opine on the accuracy or reliability of
+              such information. Your use of a third-party site may be governed by the terms and
               conditions of that third-party site.
             </p>
           </div>
@@ -394,7 +394,7 @@ export default function Terms() {
               Balancer is the owner of all intellectual property rights in the Site and the material
               published on them. To the extent practical, these works are protected by copyright
               laws and all such rights are reserved. www.Balancer.fi is the uniform resource locator
-              (`&apos;`URL`&apos;`) of Balancer. You will not make use of this URL (or any other URL
+              (&quot;URL&quot;) of Balancer. You will not make use of this URL (or any other URL
               owned by us) on another website or digital platform without our prior written consent.
               Any unauthorized use or reproduction may be prosecuted. You will retain ownership of
               all copyright in data you upload or submit by, through or to the Site. You grant us a
@@ -572,7 +572,7 @@ export default function Terms() {
               With regards to opportunity loss (e.g., loss of opportunity to place a payment
               instruction, resulting in loss of profits which could have been obtained) due to
               occurrences such as emergency situations and force majeure events, Balancer is under
-              no obligation to take any corrective action or measure and shall not under
+              no obligation to take any corrective action or measure and shall not under any
               circumstances be liable for any lost profits or other swapping losses.
             </p>
           </div>
