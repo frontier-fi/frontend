@@ -12,8 +12,6 @@ import { ApiToken } from '@repo/lib/modules/tokens/token.types'
 import { WrappedOrUnderlyingSelectModal } from '@repo/lib/modules/tokens/WrappedOrUnderlyingSelectModal'
 import { useState } from 'react'
 import { getWrappedAndUnderlyingTokenFn } from '../../../pool-tokens.utils'
-import { isV3LBP } from '@repo/lib/modules/pool/pool.helpers'
-import { useTokens } from '@repo/lib/modules/tokens/TokensProvider'
 import { isSameAddress } from '@balancer/sdk'
 
 type Props = { tokens: ApiToken[]; pool: Pool }
@@ -32,7 +30,6 @@ export function RemoveLiquidityProportional({ tokens, pool }: Props) {
   const [wrappedAndUnderlying, setWrappedAndUnderlying] = useState<ApiToken[] | undefined>()
   const nativeTokenSelectDisclosure = useDisclosure()
   const boostedTokenSelectDisclosure = useDisclosure()
-  const { priceFor } = useTokens()
 
   const isLoading = simulationQuery.isLoading || priceImpactQuery.isLoading
   const isInRecoveryMode = pool.dynamicData.isInRecoveryMode
@@ -90,14 +87,6 @@ export function RemoveLiquidityProportional({ tokens, pool }: Props) {
             You&apos;re expected to get (if no slippage)
           </Text>
           {poolTokens.map(token => {
-            const lbpProps = isV3LBP(pool)
-              ? {
-                  pool,
-                  logoURI: token.logoURI || '',
-                  customUsdPrice: priceFor(token.address as Address, pool.chain),
-                }
-              : {}
-
             return (
               <TokenRow
                 address={token.address as Address}
@@ -105,7 +94,6 @@ export function RemoveLiquidityProportional({ tokens, pool }: Props) {
                 isLoading={isLoading}
                 key={token.address}
                 value={amountOutForToken(token.address as Address)}
-                {...lbpProps}
                 {...(!isInRecoveryMode ? { toggleTokenSelect: getToggleTokenCallback(token) } : {})}
               />
             )

@@ -40,7 +40,7 @@ export function ShareYieldFeesCheckbox({
       {!paysYieldFees && !isMarketRateProvider ? (
         isBalancer ? (
           <BalAlert
-            content="Pools that don’t share yield fees with Balancer are unlikely to receive approval for a BAL liquidity mining gauge due to misalignment with the Balancer ecosystem."
+            content="Pools that don’t share yield fees with Frontier Finance are unlikely to receive approval for a BAL liquidity mining gauge due to misalignment with the Frontier Finance ecosystem."
             status="warning"
           />
         ) : (

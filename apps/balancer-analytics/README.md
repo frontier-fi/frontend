@@ -1,7 +1,7 @@
 # Balancer Analytics
 
-Standalone analytics surface aggregating Balancer v2 and v3 data, hosted as a third app inside
-`frontend-monorepo` alongside `frontend-v3` and `beets-frontend-v3`.
+Standalone analytics surface aggregating Balancer v2 and v3 data, hosted inside `frontend-monorepo`
+alongside `frontend-v3`.
 
 ## Phase 0 status
 

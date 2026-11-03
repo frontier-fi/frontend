@@ -121,7 +121,7 @@ export function PoolSettingsRadioGroup({
                             />
                             {name === 'poolHooksContract' && (
                               <BalAlert
-                                content="All new hook contracts must pass a review before 'Add Liquidity' is enabled for users on the Balancer UI."
+                                content="All new hook contracts must pass a review before 'Add Liquidity' is enabled for users on the Frontier Finance UI."
                                 status="warning"
                                 title="Unrecognized hooks require review"
                                 w="full"

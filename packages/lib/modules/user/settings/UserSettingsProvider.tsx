@@ -21,7 +21,6 @@ const DEFAULT_CURRENCY = SupportedCurrency.USD
 const DEFAULT_SLIPPAGE = '0.5' // 0.5%
 const DEFAULT_ENABLE_SIGNATURES: YesNo = 'yes'
 const DEFAULT_ACCEPTED_POLICIES: string[] = []
-const DEFAULT_ALLOW_SOUNDS: YesNo = 'yes'
 const DEFAULT_ENABLE_TX_BUNDLING: YesNo = 'yes'
 
 function isValidSlippage(value: string): boolean {
@@ -36,14 +35,12 @@ export function useUserSettingsLogic({
   initSlippage,
   initEnableSignatures,
   initAcceptedPolicies,
-  initAllowSounds,
   initEnableTxBundling,
 }: {
   initCurrency: SupportedCurrency
   initSlippage: string
   initEnableSignatures: YesNo
   initAcceptedPolicies: string[]
-  initAllowSounds: YesNo
   initEnableTxBundling: YesNo
 }) {
   const isMounted = useIsMounted()
@@ -67,13 +64,6 @@ export function useUserSettingsLogic({
 
   const enableSignatures = isMounted ? _enableSignatures : initEnableSignatures
   const shouldUseSignatures = enableSignatures === 'yes'
-
-  const [_allowSounds, setAllowSounds] = useLocalStorage<YesNo>(
-    LS_KEYS.UserSettings.AllowSounds,
-    initAllowSounds
-  )
-
-  const allowSounds = isMounted ? _allowSounds : initAllowSounds
 
   const fallbackSlippage = isValidSlippage(initSlippage) ? initSlippage : DEFAULT_SLIPPAGE
   const storedSlippage = isMounted ? _slippage : initSlippage
@@ -137,14 +127,12 @@ export function useUserSettingsLogic({
     enableSignatures,
     shouldUseSignatures,
     acceptedPolicies,
-    allowSounds,
     enableTxBundling,
     shouldUseTxBundling,
     setCurrency,
     setSlippage,
     setEnableSignatures,
     setAcceptedPolicies,
-    setAllowSounds,
     setEnableTxBundling,
   }
 }
@@ -155,7 +143,6 @@ type ProviderProps = PropsWithChildren<{
   initPoolListView?: string
   initEnableSignatures?: string
   initAcceptedPolicies?: string[]
-  initAllowSounds?: string
   initEnableTxBundling?: string
 }>
 
@@ -164,7 +151,6 @@ export function UserSettingsProvider({
   initSlippage,
   initEnableSignatures,
   initAcceptedPolicies,
-  initAllowSounds,
   initEnableTxBundling,
   children,
 }: ProviderProps) {
@@ -172,7 +158,6 @@ export function UserSettingsProvider({
   const _initSlippage = (initSlippage as string) || DEFAULT_SLIPPAGE
   const _initEnableSignatures = (initEnableSignatures as YesNo) || DEFAULT_ENABLE_SIGNATURES
   const _initAcceptedPolicies = initAcceptedPolicies || DEFAULT_ACCEPTED_POLICIES
-  const _initAllowSounds = (initAllowSounds as YesNo) || DEFAULT_ALLOW_SOUNDS
   const _initEnableTxBundling = (initEnableTxBundling as YesNo) || DEFAULT_ENABLE_TX_BUNDLING
 
   const hook = useUserSettingsLogic({
@@ -180,7 +165,6 @@ export function UserSettingsProvider({
     initSlippage: _initSlippage,
     initEnableSignatures: _initEnableSignatures,
     initAcceptedPolicies: _initAcceptedPolicies,
-    initAllowSounds: _initAllowSounds,
     initEnableTxBundling: _initEnableTxBundling,
   })
 

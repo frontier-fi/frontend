@@ -1,7 +1,7 @@
 import type { Address } from 'viem'
 
 /*
-  Every Balancer V1 (BPool / ConfigurableRightsPool) pool ever deployed. V1 lived only on
+  Every Frontier Finance V1 (BPool / ConfigurableRightsPool) pool ever deployed. V1 lived only on
   Ethereum mainnet and the BFactory was frozen long ago, so this list is a constant.
 
   Discovered once from `LOG_NEW_POOL` events on BFactory

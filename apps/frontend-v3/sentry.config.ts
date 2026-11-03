@@ -1,4 +1,7 @@
 import type { SentryBuildOptions } from '@sentry/nextjs/config'
+import { isSentryEnabled } from '@repo/lib/config/sentry'
+
+export { isSentryEnabled }
 
 const isProd = process.env.NEXT_PUBLIC_APP_ENV === 'prod'
 

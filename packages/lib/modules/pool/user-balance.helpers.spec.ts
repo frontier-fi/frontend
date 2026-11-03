@@ -1,8 +1,5 @@
 import { aWjAuraWethPoolElementMock } from '@repo/lib/test/msw/builders/gqlPoolElement.builders'
-import type {
-  GqlPoolUserBalance,
-  GqlUserStakedBalance,
-} from '@repo/lib/shared/services/api/graphql-derived-types'
+import type { GqlPoolUserBalance } from '@repo/lib/shared/services/api/graphql-derived-types'
 import { GqlPoolStakingTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import {
   calcNonOnChainFetchedStakedBalance,
@@ -18,26 +15,10 @@ import {
   hasStakedBalanceFor,
   hasBalancerStakedBalance,
   hasTinyBalance,
+  getUserStakedBalances,
 } from './user-balance.helpers'
 
-const apiStakedBalances: GqlUserStakedBalance[] = [
-  {
-    balance: '0',
-    balanceUsd: 0,
-    stakingType: GqlPoolStakingTypeValues.Gauge,
-    stakingId: '0xe99a452a65e5bb316febac5de83a1ca59f6a3a94', //Preferential gauge
-    __typename: 'GqlUserStakedBalance',
-  },
-  {
-    balance: '52.123',
-    balanceUsd: 7.9,
-    stakingType: GqlPoolStakingTypeValues.Gauge,
-    stakingId: '0x55ec14e951b1c25ab09132dae12363bea0d20105', //Non preferential gauge
-    __typename: 'GqlUserStakedBalance',
-  },
-]
-
-test('User balance helpers', () => {
+test('User balance helpers — Frontier has no stakedBalances', () => {
   const pool = aWjAuraWethPoolElementMock()
 
   const userBalanceMock: GqlPoolUserBalance = {
@@ -46,7 +27,6 @@ test('User balance helpers', () => {
     walletBalanceUsd: 200,
     totalBalance: '175',
     totalBalanceUsd: 300,
-    stakedBalances: apiStakedBalances,
   }
 
   pool.userBalance = userBalanceMock
@@ -55,9 +35,10 @@ test('User balance helpers', () => {
   expect(getUserTotalBalanceUsd(pool)).toBe(300)
   expect(getUserTotalBalanceInt(pool)).toBe(175000000000000000000n)
 
-  expect(calcTotalStakedBalance(pool)).toBe('52.123')
-  expect(calcTotalStakedBalanceUsd(pool)).toBe(7.9)
-  expect(calcTotalStakedBalanceInt(pool)).toBe(52123000000000000000n)
+  expect(getUserStakedBalances(pool)).toEqual([])
+  expect(calcTotalStakedBalance(pool)).toBe('0')
+  expect(calcTotalStakedBalanceUsd(pool)).toBe(0)
+  expect(calcTotalStakedBalanceInt(pool)).toBe(0n)
 
   expect(getUserWalletBalance(pool)).toBe('100')
   expect(getUserWalletBalanceUsd(pool)).toBe(200)
@@ -65,7 +46,7 @@ test('User balance helpers', () => {
 
   expect(calcNonOnChainFetchedStakedBalance(pool)).toBe('0')
 
-  expect(hasBalancerStakedBalance(pool)).toBeTruthy()
+  expect(hasBalancerStakedBalance(pool)).toBeFalsy()
   expect(hasStakedBalanceFor(pool, GqlPoolStakingTypeValues.FreshBeets)).toBeFalsy()
   expect(hasTinyBalance(pool)).toBeFalsy()
 })
@@ -79,7 +60,6 @@ test('has tiny balance', () => {
     walletBalanceUsd: 0,
     totalBalance: '0.12345',
     totalBalanceUsd: 0.0009,
-    stakedBalances: [],
   }
 
   pool.userBalance = userBalanceMock
@@ -96,7 +76,6 @@ describe('invalid balance fallbacks', () => {
       walletBalanceUsd: 200,
       totalBalance: '',
       totalBalanceUsd: 300,
-      stakedBalances: [],
     }
 
     expect(getUserTotalBalance(pool)).toBe('0')
@@ -111,13 +90,12 @@ describe('invalid balance fallbacks', () => {
       walletBalanceUsd: 200,
       totalBalance: null as any,
       totalBalanceUsd: 300,
-      stakedBalances: [],
     }
 
     expect(getUserTotalBalanceInt(pool)).toBe(0n)
   })
 
-  test('calcStakedBalance handles invalid staked balances', () => {
+  test('calcStakedBalance ignores API stakedBalances on Frontier', () => {
     const pool = aWjAuraWethPoolElementMock()
 
     pool.userBalance = {
@@ -126,26 +104,10 @@ describe('invalid balance fallbacks', () => {
       walletBalanceUsd: 200,
       totalBalance: '175',
       totalBalanceUsd: 300,
-      stakedBalances: [
-        {
-          balance: ' ',
-          balanceUsd: 0,
-          stakingType: GqlPoolStakingTypeValues.Gauge,
-          stakingId: '0x1',
-          __typename: 'GqlUserStakedBalance',
-        },
-        {
-          balance: '52.123',
-          balanceUsd: 7.9,
-          stakingType: GqlPoolStakingTypeValues.Gauge,
-          stakingId: '0x2',
-          __typename: 'GqlUserStakedBalance',
-        },
-      ],
     }
 
-    expect(calcTotalStakedBalance(pool)).toBe('52.123')
-    expect(calcTotalStakedBalanceUsd(pool)).toBe(7.9)
+    expect(calcTotalStakedBalance(pool)).toBe('0')
+    expect(calcTotalStakedBalanceUsd(pool)).toBe(0)
   })
 
   test('handles scientific notation from API balances', () => {
@@ -157,19 +119,10 @@ describe('invalid balance fallbacks', () => {
       walletBalanceUsd: 0,
       totalBalance: '6.1713167421e-8',
       totalBalanceUsd: 0,
-      stakedBalances: [
-        {
-          balance: '6.1713167421e-8',
-          balanceUsd: 0,
-          stakingType: GqlPoolStakingTypeValues.Gauge,
-          stakingId: '0x1',
-          __typename: 'GqlUserStakedBalance',
-        },
-      ],
     }
 
     expect(getUserWalletBalanceInt(pool)).toBe(61713167421n)
     expect(getUserTotalBalanceInt(pool)).toBe(61713167421n)
-    expect(calcTotalStakedBalanceInt(pool)).toBe(61713167421n)
+    expect(calcTotalStakedBalanceInt(pool)).toBe(0n)
   })
 })

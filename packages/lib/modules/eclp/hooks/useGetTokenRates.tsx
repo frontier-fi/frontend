@@ -1,4 +1,4 @@
-import { getChainId } from '@repo/lib/config/app.config'
+import { getChainId, getVaultV3Address } from '@repo/lib/config/app.config'
 import { useReadContract } from 'wagmi'
 import { gyroEclpPoolAbi } from '../../web3/contracts/abi/generated'
 import { Pool } from '../../pool/pool.types'
@@ -6,20 +6,20 @@ import { Address } from 'viem'
 import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { isV3Pool } from '../../pool/pool.helpers'
 import { useMemo } from 'react'
-import { AddressProvider, vaultExtensionAbi_V3 } from '@balancer/sdk'
+import { vaultExtensionAbi_V3 } from '@balancer/sdk'
 
 export function useGetTokenRates(pool: Pool) {
   const chainId = getChainId(pool.chain)
   const isV3 = isV3Pool(pool)
 
-  const contractAddress: Address = isV3 ? AddressProvider.Vault(chainId) : (pool.address as Address)
+  const contractAddress: Address = isV3 ? getVaultV3Address(chainId) : (pool.address as Address)
 
   const query = useReadContract({
     chainId,
     abi: isV3 ? vaultExtensionAbi_V3 : gyroEclpPoolAbi,
     functionName: isV3 ? 'getPoolTokenRates' : 'getTokenRates',
     address: contractAddress,
-    query: { enabled: pool.type === GqlPoolTypeValues.GyroE },
+    query: { enabled: pool.type === GqlPoolTypeValues.Eclp },
     args: isV3 ? [pool.address as Address] : [],
   })
 

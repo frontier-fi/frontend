@@ -5,7 +5,7 @@ import {
   GetTokenPricesDocument,
   GetTokensDocument,
 } from '@repo/lib/shared/services/api/generated/graphql'
-import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { isSameAddress } from '@repo/lib/shared/utils/addresses'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
 import { bn, Numberish, isBnParseable } from '@repo/lib/shared/utils/numbers'
@@ -27,7 +27,7 @@ import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 export type UseTokensResult = ReturnType<typeof useTokensLogic>
 export const TokensContext = createContext<UseTokensResult | null>(null)
 
-export type GetTokenFn = (address: string, chain: GqlChain) => ApiToken | undefined
+export type GetTokenFn = (address: string, chain: AppChain) => ApiToken | undefined
 
 const POLL_INTERVAL = mins(3).toMs()
 
@@ -64,21 +64,21 @@ export function useTokensLogic() {
 
   const prices = tokenPricesData?.tokenPrices || []
 
-  const getToken = (address: string, chain: GqlChain | number): ApiToken | undefined => {
+  const getToken = (address: string, chain: AppChain | number): ApiToken | undefined => {
     const chainKey = typeof chain === 'number' ? 'chainId' : 'chain'
     return tokens.find(token => isSameAddress(token.address, address) && token[chainKey] === chain)
   }
 
-  function getNativeAssetToken(chain: GqlChain | number) {
+  function getNativeAssetToken(chain: AppChain | number) {
     return getToken(getNativeAssetAddress(chain), chain)
   }
 
-  function getWrappedNativeAssetToken(chain: GqlChain | number) {
+  function getWrappedNativeAssetToken(chain: AppChain | number) {
     return getToken(getWrappedNativeAssetAddress(chain), chain)
   }
 
   const getTokensByChain = useCallback(
-    (chain: number | GqlChain): GqlToken[] => {
+    (chain: number | AppChain): GqlToken[] => {
       const chainKey = typeof chain === 'number' ? 'chainId' : 'chain'
       const result = tokens.filter(token => token[chainKey] === chain)
       // Limit to 10 tokens in Anvil fork to avoid Swap performance issues
@@ -98,7 +98,7 @@ export function useTokensLogic() {
 
   function usdValueForTokenAddress(
     address: string,
-    chain: GqlChain,
+    chain: AppChain,
     amount: Numberish,
     customUsdPrice?: string
   ) {
@@ -109,7 +109,7 @@ export function useTokensLogic() {
       .toFixed()
   }
 
-  const priceFor = (address: string, chain: GqlChain): number => {
+  const priceFor = (address: string, chain: AppChain): number => {
     const chainPrices = prices.filter(price => price.chain === chain)
     const price = chainPrices.find(price => isSameAddress(price.address, address))
     if (!price) return 0
@@ -121,7 +121,7 @@ export function useTokensLogic() {
     tokenAddress: Address | string,
     tokenBalance: string,
     totalLiquidity: string,
-    chain: GqlChain
+    chain: AppChain
   ): string => {
     const tokenPrice = priceFor(tokenAddress, chain)
     const totalLiquidityBn = bn(totalLiquidity || 0)
@@ -132,7 +132,7 @@ export function useTokensLogic() {
   }
 
   const calcTotalUsdValue = useCallback(
-    (poolTokens: PoolToken[], chain: GqlChain) => {
+    (poolTokens: PoolToken[], chain: AppChain) => {
       return poolTokens
         .reduce((total, token) => {
           if (!isBnParseable(token.balance)) return total

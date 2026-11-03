@@ -26,22 +26,22 @@ export default function DebugPools() {
         <VStack align="start" margin="xs" padding="0">
           <Heading size="md">V3 reference pools</Heading>
           <Link as={NextLink} href="/pools/sepolia/v3/0xe69b70a86a4e1fd33da95693a1ae12be1c26c8ea">
-            Sepolia WEIGHTED (Balancer 50 BAL 50 DAI-aave)
+            Sepolia WEIGHTED (Frontier Finance 50 BAL 50 DAI-aave)
           </Link>
           <Link as={NextLink} href="/pools/sepolia/v3/0xa8c18ce5e987d7d82ccaccb93223e9bb5df4a3c0">
-            Sepolia WEIGHTED with Proportional joins (Balancer 50 BAL 50 WETH -ExitFee Hook)
+            Sepolia WEIGHTED with Proportional joins (Frontier Finance 50 BAL 50 WETH -ExitFee Hook)
           </Link>
           <Link as={NextLink} href="/pools/sepolia/v3/0xd63db0b88dca565633fb8d70a70b9b8093d34a7e">
-            Sepolia reference BOOSTED pool (Balancer USDC/USDT)
+            Sepolia reference BOOSTED pool (Frontier Finance USDC/USDT)
           </Link>
           <Link as={NextLink} href="/pools/sepolia/v3/0xc9233cc69435591b193b50f702ac31e404a08b10">
-            Sepolia reference NESTED pool (Balancer 50 WETH 50 USD)
+            Sepolia reference NESTED pool (Frontier Finance 50 WETH 50 USD)
           </Link>
           <Link as={NextLink} href="/pools/sepolia/v3/0x42de4fa875126fdbaf590b2fc3802adbca58acee">
-            Sepolia reference STABLE NESTED pool (Balancer DAI/USDC/USDT)
+            Sepolia reference STABLE NESTED pool (Frontier Finance DAI/USDC/USDT)
           </Link>
           <Link as={NextLink} href="/pools/sepolia/v3/0xe69b70a86a4e1fd33da95693a1ae12be1c26c8ea">
-            Sepolia reference STABLE NON-NESTED pool (Balancer 50 BAL 50 DAI)
+            Sepolia reference STABLE NON-NESTED pool (Frontier Finance 50 BAL 50 DAI)
           </Link>
         </VStack>
 
@@ -87,7 +87,7 @@ export default function DebugPools() {
             as={NextLink}
             href="/pools/gnosis/v2/0x66888e4f35063ad8bb11506a6fde5024fb4f1db0000100000000000000000053"
           >
-            Gnosis NESTED (Balancer staBAL3-WETH-WBTC)
+            Gnosis NESTED (Frontier Finance staBAL3-WETH-WBTC)
           </Link>
           <Link
             as={NextLink}

@@ -12,9 +12,6 @@ export default function Debug() {
         <Link as={NextLink} href="/debug/impersonate">
           Impersonate
         </Link>
-        <Link as={NextLink} href="/debug/pools">
-          Pools
-        </Link>
         <Link as={NextLink} href="/debug/token-select">
           Token select
         </Link>

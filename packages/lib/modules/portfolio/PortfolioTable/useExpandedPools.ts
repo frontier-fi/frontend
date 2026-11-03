@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { Pool } from '../../pool/pool.types'
 import { isVebalPool } from '../../pool/pool.helpers'
 import { getCanStake } from '../../pool/actions/stake.helpers'
-import { GqlPoolStakingTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 
 export enum ExpandedPoolType {
   StakedBal = 'staked-bal',
@@ -50,38 +49,17 @@ export const STAKING_LABEL_MAP: Record<StakingFilterKeyType, string> = {
   [StakingFilterKey.Default]: 'N/A',
 }
 
+/**
+ * Frontier has no stakedBalances — expand wallet/unstaked positions only.
+ */
 export function useExpandedPools(pools: Pool[]) {
   const expandedPools = useMemo(() => {
     const expandedPools: ExpandedPoolInfo[] = []
 
     pools.forEach(pool => {
       const isVeBal = isVebalPool(pool.id)
-
-      const stakedBalancesBalUsd =
-        pool.userBalance?.stakedBalances
-          ?.filter(balance =>
-            (
-              [
-                GqlPoolStakingTypeValues.Gauge,
-                GqlPoolStakingTypeValues.VeBal,
-                GqlPoolStakingTypeValues.FreshBeets,
-              ] as string[]
-            ).includes(balance.stakingType)
-          )
-          .reduce((acc, balance) => acc + Number(balance.balanceUsd), 0) || 0
-
+      const stakedBalancesBalUsd = 0
       const walletBalanceUsd = pool.userBalance?.walletBalanceUsd || 0
-
-      if (stakedBalancesBalUsd > 0) {
-        const poolType = isVeBal ? ExpandedPoolType.Locked : ExpandedPoolType.StakedBal
-
-        expandedPools.push({
-          ...pool,
-          poolType,
-          poolPositionUsd: stakedBalancesBalUsd,
-          uniqueKey: generateUniqueKey(pool.id, poolType),
-        })
-      }
 
       if (walletBalanceUsd > 0) {
         const canStake = getCanStake(pool)

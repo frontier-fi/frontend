@@ -13,7 +13,7 @@ import { Center, VStack } from '@chakra-ui/react'
 export default function Page() {
   const labels: TransactionLabels = {
     title: 'Revoke relayer approval',
-    description: 'Revoke Balancer relayer approval',
+    description: 'Revoke Frontier Finance relayer approval',
     init: 'Revoke relayer approval',
     confirming: 'Confirming relayer approval revoke...',
     confirmed: 'Relayer revoked!',

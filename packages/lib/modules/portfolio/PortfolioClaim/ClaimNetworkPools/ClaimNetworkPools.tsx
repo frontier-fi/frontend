@@ -11,25 +11,17 @@ import {
   HStack,
   Button,
   useDisclosure,
-  Link,
   Box,
 } from '@chakra-ui/react'
 import { usePortfolio } from '../../PortfolioProvider'
-import { ClaimNetworkBlock } from './ClaimNetworkBlock'
-import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
-import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
-import { chainToSlugMap } from '../../../pool/pool.utils'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
-import { useMemo, useState, type ReactNode } from 'react'
-import ClaimProtocolRevenueModal from '../ClaimProtocolRevenueModal'
-import { useRouter } from 'next/navigation'
+import { useMemo, type ReactNode } from 'react'
 import FadeInOnView from '@repo/lib/shared/components/containers/FadeInOnView'
 import { useHasMerklRewards } from '../../merkl/useHasMerklRewards'
 import { MerklAlert } from '../../merkl/MerklAlert'
 import { motion } from 'motion/react'
-import { easeOut } from 'motion'
-import { isBalancer, isBeets, PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
-import { getChainId, getChainName } from '@repo/lib/config/app.config'
+import { isBalancer, PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { getChainId } from '@repo/lib/config/app.config'
 import { useBreakpoints } from '@repo/lib/shared/hooks/useBreakpoints'
 import { NetworkIcon } from '@repo/lib/shared/components/icons/NetworkIcon'
 import { WalletIcon } from '@repo/lib/shared/components/icons/WalletIcon'
@@ -39,10 +31,11 @@ import { sumRecoveredFundsTotal, useRecoveredFunds } from '../recovered-funds/us
 import { ClaimRecoveredFundsModal } from '../recovered-funds/ClaimRecoveredFundsModal'
 import { BalAlertLink } from '@repo/lib/shared/components/alerts/BalAlertLink'
 import { RecoveredFundsLearnMoreModal } from '../recovered-funds/RecoveredFundsLearnMoreModal'
-import { isChainDeprecated } from '@repo/lib/modules/chains/chain.utils'
+import { GqlChainValues, type AppChain } from '@repo/lib/shared/services/api/graphql-enums'
+import { ClaimNetworkBlock } from './ClaimNetworkBlock'
 
 interface NetworkConfig {
-  chain: GqlChain
+  chain: AppChain
   name: string
   displayProps?: Record<string, any>
 }
@@ -61,26 +54,17 @@ const balancerNetworksConfig: NetworkConfig[] = [
   },
 ]
 
-const beetsNetworksConfig: NetworkConfig[] = [
-  { chain: GqlChainValues.Sonic, name: 'Sonic', displayProps: {} },
-]
-
 const SLOT_COUNT = 3
 const GRID_COLUMNS = { base: 1, md: 2, lg: 3 }
 
+/**
+ * Gauge claim network UI is disabled on Frontier (no gauges).
+ * Keeps Merkl alert + non-gauge recovered funds claim surface.
+ */
 export function ClaimNetworkPools() {
-  const {
-    poolsByChainMap,
-    protocolRewardsBalance,
-    totalFiatClaimableBalanceByChain,
-    poolsWithOnchainUserBalances,
-    isLoadingRewards,
-    isLoadingPortfolio,
-  } = usePortfolio()
+  const { poolsWithOnchainUserBalances, isLoadingPortfolio } = usePortfolio()
 
   const { hasRecoveredFunds, claims: recoveredFundsClaims } = useRecoveredFunds()
-
-  const [isOpenedProtocolRevenueModal, setIsOpenedProtocolRevenueModal] = useState(false)
 
   const {
     isOpen: isClaimRecoveredFundModalOpen,
@@ -95,9 +79,6 @@ export function ClaimNetworkPools() {
   } = useDisclosure()
 
   const { isConnected } = useUserAccount()
-  const router = useRouter()
-
-  const hasProtocolRewards = protocolRewardsBalance && protocolRewardsBalance.isGreaterThan(0)
 
   const chainIds = PROJECT_CONFIG.merklRewardsChains.map(chain => getChainId(chain))
   const { hasMerklRewards } = useHasMerklRewards(poolsWithOnchainUserBalances, chainIds)
@@ -105,48 +86,15 @@ export function ClaimNetworkPools() {
   const { isDesktop } = useBreakpoints()
   const iconSize = isDesktop ? 12 : 8
 
-  const currentNetworks = isBeets ? beetsNetworksConfig : balancerNetworksConfig
+  const currentNetworks = balancerNetworksConfig
 
-  const poolsWithChain = Object.entries(poolsByChainMap).sort(
-    ([a], [b]) =>
-      (totalFiatClaimableBalanceByChain[b]?.toNumber() || 0) -
-      (totalFiatClaimableBalanceByChain[a]?.toNumber() || 0)
-  )
-
-  const hasChainRewards = Object.values(totalFiatClaimableBalanceByChain).some(
-    balance => balance.toNumber() > 0
-  )
-
-  const noRewards = !hasProtocolRewards && !hasChainRewards
-
-  const deprecatedChains = poolsWithChain
-    .map(item => item[0])
-    .filter(chain => isChainDeprecated(chain as GqlChain)) as GqlChain[]
-
-  // Build claimable items
   const claimableItems = useMemo(() => {
-    const items = []
-
-    poolsWithChain.forEach(([, pools]) => {
-      const firstPool = pools[0]
-      const chainBalance = firstPool ? totalFiatClaimableBalanceByChain[firstPool.chain] : undefined
-
-      if (firstPool && chainBalance && chainBalance.toNumber() > 0) {
-        items.push({
-          type: 'chain',
-          chain: firstPool.chain,
-          amount: chainBalance.toNumber(),
-        })
-      }
-    })
-
-    if (hasProtocolRewards) {
-      items.push({
-        type: 'protocol',
-        chain: GqlChainValues.Mainnet,
-        amount: protocolRewardsBalance.toNumber(),
-      })
-    }
+    const items: {
+      type: string
+      chain: AppChain
+      amount: number
+      icon?: string
+    }[] = []
 
     if (isBalancer && hasRecoveredFunds) {
       items.push({
@@ -157,16 +105,18 @@ export function ClaimNetworkPools() {
       })
     }
 
-    // Sort by amount (highest first)
     return items.sort((a, b) => b.amount - a.amount)
-  }, [
-    poolsWithChain,
-    totalFiatClaimableBalanceByChain,
-    hasProtocolRewards,
-    protocolRewardsBalance,
-    hasRecoveredFunds,
-    recoveredFundsClaims,
-  ])
+  }, [hasRecoveredFunds, recoveredFundsClaims])
+
+  const hasClaimableContent =
+    claimableItems.length > 0 || hasMerklRewards || (isBalancer && hasRecoveredFunds)
+
+  // Empty network placeholders (Eth / Arb / Base "Nothing to claim") are intentional
+  // on Balancer when gauges exist elsewhere; Frontier has no gauges, so hide the
+  // section entirely until there is something concrete to claim.
+  if (!isLoadingPortfolio && isConnected && !hasClaimableContent) {
+    return null
+  }
 
   return (
     <FadeInOnView>
@@ -188,12 +138,7 @@ export function ClaimNetworkPools() {
             />
           </AnimatedAlert>
         )}
-        {deprecatedChains.length > 0 && (
-          <AnimatedAlert>
-            <DeprecatedChainsAlert chains={deprecatedChains} />
-          </AnimatedAlert>
-        )}
-        {isLoadingRewards || isLoadingPortfolio ? (
+        {isLoadingPortfolio ? (
           <SimpleGrid columns={GRID_COLUMNS} spacing="md">
             {Array.from({ length: SLOT_COUNT }).map((_, index) => (
               <Skeleton height="85px" key={`claim-network-skeleton-${index}`} w="full" />
@@ -242,69 +187,18 @@ export function ClaimNetworkPools() {
                 <MerklAlert />
               </AnimatedAlert>
             )}
-            {noRewards && (
-              <SimpleGrid columns={GRID_COLUMNS} spacing="md">
-                {currentNetworks.map(network => (
-                  <Card
-                    flex="1"
-                    key={network.name}
-                    p={['sm', 'md']}
-                    shadow="innerLg"
-                    variant="level1"
-                    w="full"
-                    {...network.displayProps}
-                  >
-                    <Flex alignItems="center" justifyContent="space-between">
-                      <HStack gap="ms">
-                        <NetworkIcon chain={network.chain} shadow="md" size={iconSize} />
-                        <Stack gap={1}>
-                          <Heading size="sm" textTransform="capitalize">
-                            {network.name}
-                          </Heading>
-                        </Stack>
-                      </HStack>
-                      <Text fontSize="sm" variant="secondary">
-                        Nothing to claim
-                      </Text>
-                    </Flex>
-                  </Card>
-                ))}
-              </SimpleGrid>
-            )}
             {claimableItems.length > 0 && (
               <SimpleGrid columns={GRID_COLUMNS} spacing="md">
-                {claimableItems.map((item, index) => {
-                  const handleClick = () => {
-                    switch (item.type) {
-                      case 'protocol':
-                        setIsOpenedProtocolRevenueModal(true)
-                        break
-                      case 'recovered-funds':
-                        openClaimRecoveredFundModal()
-                        break
-                      default:
-                        router.push(`/portfolio/${chainToSlugMap[item.chain]}`)
-                    }
-                  }
-
-                  return (
-                    <motion.div
-                      animate={{ opacity: 1, scale: 1 }}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      key={`item-${index}`}
-                      style={{ transformOrigin: 'top' }}
-                      transition={{ duration: 0.3, delay: index * 0.08, ease: easeOut }}
-                    >
-                      <ClaimNetworkBlock
-                        chain={item.chain}
-                        icon={item.icon}
-                        networkTotalClaimableFiatBalance={item.amount}
-                        onClick={handleClick}
-                        title={getCardTitle(item.type)}
-                      />
-                    </motion.div>
-                  )
-                })}
+                {claimableItems.map((item, index) => (
+                  <ClaimNetworkBlock
+                    chain={item.chain}
+                    icon={item.icon}
+                    key={`item-${index}`}
+                    networkTotalClaimableFiatBalance={item.amount}
+                    onClick={openClaimRecoveredFundModal}
+                    title="v2 incident recovered funds"
+                  />
+                ))}
                 {claimableItems.length < SLOT_COUNT &&
                   Array.from({ length: SLOT_COUNT - claimableItems.length }).map((_, i) => {
                     const slotIndex = claimableItems.length + i
@@ -321,10 +215,6 @@ export function ClaimNetworkPools() {
           </>
         )}
       </Stack>
-      <ClaimProtocolRevenueModal
-        isOpen={isOpenedProtocolRevenueModal}
-        onClose={() => setIsOpenedProtocolRevenueModal(false)}
-      />
 
       <ClaimRecoveredFundsModal
         isOpen={isClaimRecoveredFundModalOpen}
@@ -343,56 +233,5 @@ function AnimatedAlert({ children }: { children: ReactNode }) {
     <motion.div animate={{ opacity: 1, height: 'auto' }} initial={{ opacity: 0, height: 0 }} layout>
       {children}
     </motion.div>
-  )
-}
-
-function getCardTitle(itemType: string) {
-  switch (itemType) {
-    case 'protocol':
-      return 'Balancer protocol revenue'
-    case 'recovered-funds':
-      return 'v2 incident recovered funds'
-    default:
-      return undefined
-  }
-}
-
-function DeprecatedChainsAlert({ chains }: { chains: GqlChain[] }) {
-  const listFormatter = new Intl.ListFormat('en-GB', {
-    style: 'long',
-    type: 'conjunction',
-  })
-
-  const chainNames = listFormatter.format(chains.map(getChainName))
-  const title = `${chainNames} ${chains.length > 1 ? 'are' : 'is'} being sunset on Balancer soon.`
-  const content = `Claim your incentives asap before ${chains.length > 1 ? 'they are' : 'it is'} no longer supported.`
-
-  const learnMoreLink =
-    'https://forum.balancer.fi/t/bip-906-deprecation-of-polygon-zkevm-fraxtal-and-mode/6951'
-
-  return (
-    <BalAlert
-      content={
-        <HStack>
-          <Text color="#000" fontWeight="bold">
-            {title}
-          </Text>
-          <Text color="#000">{content}</Text>
-          <Link
-            _hover={{
-              color: '#555',
-            }}
-            color="#000"
-            fontWeight="bold"
-            href={learnMoreLink}
-            isExternal
-            textDecoration="underline"
-          >
-            Learn more
-          </Link>
-        </HStack>
-      }
-      status="warning"
-    />
   )
 }

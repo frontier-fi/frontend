@@ -1,12 +1,12 @@
 {
-  "short_name": "Balancer",
-  "name": "Balancer",
-  "description": "Balancer is a battle-tested toolkit for true AMM experimentation and innovation.",
+  "short_name": "Frontier Finance",
+  "name": "Frontier Finance",
+  "description": "Frontier Finance is a battle-tested toolkit for true AMM experimentation and innovation.",
   "icons": [
     {
-      "src": "/images/icons/balancer.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "/images/icons/0xff.png",
+      "sizes": "150x150",
+      "type": "image/png"
     },
     {
       "src": "/favicon.ico",

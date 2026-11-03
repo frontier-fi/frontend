@@ -29,7 +29,9 @@ export function createWalletConnectConnector({ index, walletConnectProjectId }: 
     metadata: {
       name: PROJECT_CONFIG.projectName,
       description: '',
-      url: PROJECT_CONFIG.projectUrl,
+      // Match the page host. A hardcoded production URL warns on localhost, and
+      // WalletConnect then replaces it with the page URL anyway.
+      url: typeof window !== 'undefined' ? window.location.origin : PROJECT_CONFIG.projectUrl,
       icons: [PROJECT_CONFIG.projectLogo],
     },
     // Enforce wallet connect popup always on top

@@ -50,6 +50,15 @@ export function useProportionalInputs() {
 
     setReferenceAmountAddress(tokenAddress)
 
+    // Controlled TokenInputs read from humanAmountsIn — always apply the typed
+    // amount. Proportional siblings need on-chain pool state (SDK
+    // getPoolStateWithBalancesV3 via AddressProvider.Vault); until that is
+    // ready, keep the single-token input so typing is never blocked.
+    if (!poolStateWithBalances) {
+      setHumanAmountsIn([{ tokenAddress, humanAmount, symbol: token.symbol }])
+      return
+    }
+
     const proportionalHumanAmountsIn = _calculateProportionalHumanAmountsIn({
       token,
       humanAmount,

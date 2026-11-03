@@ -6,7 +6,8 @@ import type {
 import { GetPoolQuery } from '@repo/lib/shared/services/api/generated/graphql'
 import type { GqlChain, GqlPoolType } from '@repo/lib/shared/services/api/generated/graphql'
 import {
-  GqlPoolAprItemTypeValues,
+  AppChain,
+  GqlChainValues,
   GqlPoolTypeValues,
 } from '@repo/lib/shared/services/api/graphql-enums'
 import { Numberish, bn, fNum, isBnParseable } from '@repo/lib/shared/utils/numbers'
@@ -19,7 +20,6 @@ import { ClaimablePool } from './actions/claim/ClaimProvider'
 import {
   BaseVariant,
   FetchPoolProps,
-  PartnerVariant,
   PoolAction,
   PoolListItem,
   PoolVariant,
@@ -27,7 +27,6 @@ import {
 } from './pool.types'
 import { Pool } from './pool.types'
 import { isSameAddress } from '@balancer/sdk'
-import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 
 // URL slug for each chain
 export enum ChainSlug {
@@ -48,8 +47,8 @@ export enum ChainSlug {
   Monad = 'monad',
 }
 
-// Maps GraphQL chain enum to URL slug
-export const chainToSlugMap: Partial<Record<GqlChain, ChainSlug>> = {
+// Maps app chain ids to URL slug (AppChain is a superset of Frontier API GqlChain)
+export const chainToSlugMap: Partial<Record<AppChain, ChainSlug>> = {
   [GqlChainValues.Mainnet]: ChainSlug.Ethereum,
   [GqlChainValues.Arbitrum]: ChainSlug.Arbitrum,
   [GqlChainValues.Polygon]: ChainSlug.Polygon,
@@ -65,19 +64,15 @@ export const chainToSlugMap: Partial<Record<GqlChain, ChainSlug>> = {
   [GqlChainValues.Monad]: ChainSlug.Monad,
 }
 
-export function getChainSlug(chainSlug: ChainSlug): GqlChain {
-  const slugToChainMap = invert(chainToSlugMap) as Record<ChainSlug, GqlChain>
+export function getChainSlug(chainSlug: ChainSlug): AppChain {
+  const slugToChainMap = invert(chainToSlugMap) as Record<ChainSlug, AppChain>
   const chain = slugToChainMap[chainSlug]
   if (!chain) throw new Error(`Chain ${chainSlug} is not a valid chainName`)
   return chain
 }
 
-function getVariant(type: GqlPoolType, protocolVersion: number | undefined): PoolVariant {
-  // if a pool has certain properties return a custom variant
-  if (type === GqlPoolTypeValues.CowAmm) return PartnerVariant.cow
+function getVariant(_type: GqlPoolType, protocolVersion: number | undefined): PoolVariant {
   if (protocolVersion === 3) return BaseVariant.v3
-
-  // default variant
   return BaseVariant.v2
 }
 
@@ -136,23 +131,6 @@ export function getTotalApr(aprItems: GqlPoolAprItem[]): [BigNumber, BigNumber] 
     .forEach(item => {
       if (!isBnParseable(item.apr)) return
 
-      if (item.type === GqlPoolAprItemTypeValues.StakingBoost) {
-        maxTotal = bn(item.apr).plus(maxTotal)
-        return
-      }
-
-      if (item.type === GqlPoolAprItemTypeValues.VeBalEmissions) {
-        // We don't add this to maxTotal as is already included on the staking boost
-        minTotal = bn(item.apr).plus(minTotal)
-        return // Deprecated, should be 0 once emissions stop
-      }
-
-      if (item.type === GqlPoolAprItemTypeValues.MaBeetsEmissions) {
-        minTotal = bn(item.apr).plus(minTotal)
-        maxTotal = bn(item.apr).plus(maxTotal)
-        return
-      }
-
       minTotal = bn(item.apr).plus(minTotal)
       maxTotal = bn(item.apr).plus(maxTotal)
     })
@@ -181,25 +159,11 @@ export function getTotalAprRaw(aprItems: GqlPoolAprItem[]): string {
   return minTotal.toString()
 }
 
-// Maps GraphQL pool type enum to human readable label for UI.
+// Maps GraphQL pool type enum to human readable label for UI (Frontier: W / S / ECLP only).
 const poolTypeLabelMap: Partial<Record<GqlPoolType, string>> = {
   [GqlPoolTypeValues.Weighted]: 'Weighted',
-  [GqlPoolTypeValues.Element]: 'Element',
-  [GqlPoolTypeValues.Gyro]: '2-CLP',
-  [GqlPoolTypeValues.Gyro3]: '3-CLP',
-  [GqlPoolTypeValues.GyroE]: 'E-CLP',
-  [GqlPoolTypeValues.Investment]: 'Managed',
-  [GqlPoolTypeValues.LiquidityBootstrapping]: 'Dynamic LBP',
-  [GqlPoolTypeValues.MetaStable]: 'Stable',
-  [GqlPoolTypeValues.PhantomStable]: 'Stable',
   [GqlPoolTypeValues.Stable]: 'Stable',
-  [GqlPoolTypeValues.Unknown]: 'Unknown',
-  [GqlPoolTypeValues.Fx]: 'FX',
-  [GqlPoolTypeValues.ComposableStable]: 'Stable',
-  [GqlPoolTypeValues.CowAmm]: 'CoW AMM',
-  [GqlPoolTypeValues.QuantAmmWeighted]: 'BTF',
-  [GqlPoolTypeValues.Reclamm]: 'AutoRange',
-  [GqlPoolTypeValues.FixedLbp]: 'Fixed LBP',
+  [GqlPoolTypeValues.Eclp]: 'E-CLP',
 }
 
 export function getPoolTypeLabel(type: GqlPoolType): string {
@@ -232,8 +196,9 @@ export const poolMouseEnterHandler = (
   router.prefetch(poolPath)
 }
 
-export function isComposableStablePool(pool: GetPoolQuery['pool']) {
-  return pool.__typename === 'GqlPoolComposableStable'
+/** Frontier API has no composable stable pools (WEIGHTED | STABLE | ECLP only). */
+export function isComposableStablePool(_pool?: GetPoolQuery['pool']): boolean {
+  return false
 }
 
 export function getProportionalExitAmountsForBptIn(
@@ -268,24 +233,9 @@ export function getProportionalExitAmountsFromScaledBptIn(
  * @description Returns a map of pool by gauge id
  * @example getPoolsByGaugesMap(pools) => { '0x123': pool1, '0x456': pool2 }
  */
-export function getPoolsByGaugesMap(pools: ClaimablePool[]) {
-  return pools.reduce((acc: Record<string, ClaimablePool>, pool) => {
-    const gaugeId = pool.staking?.gauge?.id || ''
-
-    if (gaugeId) {
-      acc[gaugeId] = pool
-    }
-
-    pool.staking?.gauge?.otherGauges?.forEach(otherGauge => {
-      const otherGaugeId = otherGauge.id
-
-      if (otherGaugeId) {
-        acc[otherGaugeId] = pool
-      }
-    })
-
-    return acc
-  }, {})
+/** Frontier has no gauges — always empty. */
+export function getPoolsByGaugesMap(_pools: ClaimablePool[]): Record<string, ClaimablePool> {
+  return {}
 }
 
 export function calcPotentialYieldFor(pool: Pool, amountUsd: Numberish): string {
@@ -298,8 +248,8 @@ export function getXavePoolLink(chain: string, poolAddress: string) {
   return `https://app.xave.co/pool/${chain.toLowerCase()}/${poolAddress}`
 }
 
-export function shouldHideSwapFee(poolType: GqlPoolType) {
-  return poolType === GqlPoolTypeValues.CowAmm
+export function shouldHideSwapFee(_poolType: GqlPoolType) {
+  return false
 }
 
 export function shouldCallComputeDynamicSwapFee(pool: Pool) {

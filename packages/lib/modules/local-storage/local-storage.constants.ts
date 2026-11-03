@@ -8,7 +8,6 @@ export const LS_KEYS = {
     EnableSignatures: 'userSettings.EnableSignatures',
     PoolListView: 'userSettings.PoolListView',
     AcceptedPolicies: 'userSettings.AcceptedPolicies',
-    AllowSounds: 'userSettings.AllowSounds',
     EnableTxBundling: 'userSettings.EnableTxBundling',
   },
   CrossChainSync: {

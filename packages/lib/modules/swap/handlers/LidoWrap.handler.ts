@@ -13,10 +13,10 @@ import { Address, encodeFunctionData, formatUnits } from 'viem'
 import { Hex } from 'viem'
 import { bn } from '@repo/lib/shared/utils/numbers'
 import { getViemClient } from '@repo/lib/shared/services/viem/viem.client'
-import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 
-const lidoRateProviderMap: Partial<Record<GqlChain, Address>> = {
+const lidoRateProviderMap: Partial<Record<AppChain, Address>> = {
   [GqlChainValues.Mainnet]: '0x72d07d7dca67b8a406ad1ec34ce969c90bfee768',
 }
 
@@ -93,7 +93,7 @@ export class LidoWrapHandler implements SwapHandler {
     })
   }
 
-  private async applyRate(amount: string, wrapType: WrapType | null, chain: GqlChain) {
+  private async applyRate(amount: string, wrapType: WrapType | null, chain: AppChain) {
     const viemClient = getViemClient(chain)
     const rateProviderAddress = lidoRateProviderMap[chain]
 

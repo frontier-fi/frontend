@@ -1,5 +1,6 @@
 import { Address } from 'viem'
 import type { GqlChain } from '../shared/services/api/generated/graphql'
+import type { AppChain } from '../shared/services/api/graphql-enums'
 import { chains } from '@repo/lib/modules/web3/ChainConfig'
 import { PoolIssue } from '../modules/pool/alerts/pool-issues/PoolIssue.type'
 import { SupportedWrapHandler } from '../modules/swap/swap.types'
@@ -100,7 +101,8 @@ export interface NetworkConfig {
   chainId: SupportedChainId
   name: string
   shortName: string
-  chain: GqlChain
+  /** App chain id (network configs). Superset of Frontier API `GqlChain`. */
+  chain: AppChain
   iconPath: string
   rpcUrl?: string
   blockExplorer: BlockExplorerConfig
@@ -152,6 +154,8 @@ type OptionsConfig = {
   hidePoolTags: string[]
   hidePoolTypes: PoolFilterType[]
   hideProtocolVersion: string[]
+  /** When true, omit the Hooks filter section from the pools Filters popover. */
+  hideHooksFilters?: boolean
   showPoolName: boolean
   showMaBeets: boolean
   allowCreateWallet: boolean
@@ -198,7 +202,7 @@ export type PromoItem = {
 }
 
 export interface ProjectConfig {
-  projectId: 'beets' | 'balancer'
+  projectId: 'balancer'
   projectUrl: string
   projectName: string
   projectLogo: string
@@ -212,7 +216,7 @@ export interface ProjectConfig {
   options: OptionsConfig
   links: Links
   footer: { linkSections: LinkSection[] }
-  cowSupportedNetworks: GqlChain[]
+  cowSupportedNetworks: AppChain[]
   networksForProtocolStats?: GqlChain[]
   partnerCards?: PartnerCard[]
   merklRewardsChains: GqlChain[]

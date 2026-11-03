@@ -5,7 +5,7 @@ import {
 import { Address } from 'viem'
 
 const FEE_MANAGERS_METADATA_URL =
-  'https://raw.githubusercontent.com/balancer/metadata/refs/heads/main/fee_managers/index.json'
+  'https://raw.githubusercontent.com/frontier-fi/metadata/refs/heads/main/fee_managers/index.json'
 
 export enum FeeManagersId {
   EZKL = 'fee_manager_ezkl',

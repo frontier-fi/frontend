@@ -1,9 +1,10 @@
-import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
+import '@repo/lib/config/frontier/addresses'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { keyBy } from 'lodash'
 import { Config, NetworkConfig, SupportedChainId } from './config.types'
 import networks from './networks'
-import { zeroAddress } from 'viem'
+import { Address, zeroAddress } from 'viem'
 
 if (!process.env.NEXT_PUBLIC_BALANCER_API_URL) {
   throw new Error(
@@ -30,12 +31,12 @@ export const shouldUseAnvilFork = !!process.env.NEXT_PUBLIC_E2E_DEV
 const networksByChainId = keyBy(config.networks, 'chainId')
 
 /**
- * Fetches network config by chainId or network name type from API (GqlChain). If chain
- * param is not provided or incorrect, it will return the defaultNetwork config.
+ * Fetches network config by chainId or app chain id. If chain param is not provided
+ * or incorrect, it will return the defaultNetwork config.
  */
 export function getNetworkConfig(
-  chain?: GqlChain | number,
-  defaultNetwork?: GqlChain
+  chain?: AppChain | number,
+  defaultNetwork?: AppChain
 ): NetworkConfig {
   // cannot get default network directly from config here
   if (!chain) return config.networks[defaultNetwork || GqlChainValues.Mainnet] as NetworkConfig
@@ -47,31 +48,31 @@ export function getNetworkConfig(
   return config.networks[chain] || (config.networks.MAINNET as NetworkConfig)
 }
 
-export function getChainId(gqlChain: GqlChain): SupportedChainId {
+export function getChainId(gqlChain: AppChain): SupportedChainId {
   return getNetworkConfig(gqlChain).chainId as SupportedChainId
 }
 
-export function getGqlChain(chainId: SupportedChainId): GqlChain {
+export function getGqlChain(chainId: SupportedChainId): AppChain {
   return getNetworkConfig(chainId).chain
 }
 
-export function getNativeAsset(chainId: GqlChain | SupportedChainId) {
+export function getNativeAsset(chainId: AppChain | SupportedChainId) {
   return getNetworkConfig(chainId).tokens.nativeAsset
 }
 
-export function getNativeAssetAddress(chainId: GqlChain | SupportedChainId) {
+export function getNativeAssetAddress(chainId: AppChain | SupportedChainId) {
   return getNetworkConfig(chainId).tokens.nativeAsset.address
 }
 
-export function getWrappedNativeAssetAddress(chainId: GqlChain | SupportedChainId) {
+export function getWrappedNativeAssetAddress(chainId: AppChain | SupportedChainId) {
   return getNetworkConfig(chainId).tokens.addresses.wNativeAsset
 }
 
-export function getChainName(chainId: GqlChain | SupportedChainId) {
+export function getChainName(chainId: AppChain | SupportedChainId) {
   return getNetworkConfig(chainId).name
 }
 
-export function getChainShortName(chainId: GqlChain | SupportedChainId) {
+export function getChainShortName(chainId: AppChain | SupportedChainId) {
   return getNetworkConfig(chainId).shortName
 }
 
@@ -82,4 +83,25 @@ export function hasRelayerBeenDeployed(chainId: SupportedChainId) {
     config.contracts.balancer.relayerV6 !== zeroAddress &&
     config.contracts.balancer.vaultV2 !== zeroAddress
   )
+}
+
+/** Vault from network config (populated via SDK AddressProvider, same as Balancer). */
+export function getVaultV3Address(chainId: AppChain | number): Address {
+  const vault = getNetworkConfig(chainId).contracts.balancer.vaultV3
+
+  if (!vault) {
+    throw new Error(`Missing vaultV3 for chain ${chainId}`)
+  }
+
+  return vault
+}
+
+export function getRouterAddress(chainId: AppChain | number): Address {
+  const router = getNetworkConfig(chainId).contracts.balancer.router
+
+  if (!router) {
+    throw new Error(`Missing router for chain ${chainId}`)
+  }
+
+  return router
 }

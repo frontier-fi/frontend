@@ -4,9 +4,10 @@ import { bn } from '@repo/lib/shared/utils/numbers'
 import { Text } from '@chakra-ui/react'
 import { BalAlert } from '../../../shared/components/alerts/BalAlert'
 import { useReadContracts } from 'wagmi'
-import { vaultAdminAbi_V3, AddressProvider } from '@balancer/sdk'
+import { vaultAdminAbi_V3 } from '@balancer/sdk'
 import { formatUnits, erc4626Abi, Address } from 'viem'
 import { isSameAddress } from '@repo/lib/shared/utils/addresses'
+import { getVaultV3Address } from '@repo/lib/config/app.config'
 
 type UseBufferBalanceWarningParams = {
   validTokens: ApiToken[]
@@ -74,8 +75,8 @@ export function useBufferBalanceWarning(params: UseBufferBalanceWarningParams) {
         content={
           <>
             <Text color="black" mb="sm">
-              Liquidity buffers in v3 Boosted pools facilitate instant, gas-efficient transitions
-              between the wrapped yield generating tokens and the unwrapped underlying tokens.
+              Liquidity buffers Boosted pools facilitate instant, gas-efficient transitions between
+              the wrapped yield generating tokens and the unwrapped underlying tokens.
             </Text>
             <Text color="black">
               Unfortunately, the {selectedTokenSymbol} in this pool's buffer is too small to allow
@@ -156,7 +157,7 @@ function useLiquidityBuffers(wrappedTokens: ApiToken[]) {
     contracts: wrappedTokens.map(token => ({
       chainId: token.chainId,
       abi: vaultAdminAbi_V3,
-      address: AddressProvider.Vault(token.chainId),
+      address: getVaultV3Address(token.chainId),
       functionName: 'getBufferBalance' as const,
       args: [token.address],
     })),
@@ -169,7 +170,7 @@ function useLiquidityBuffers(wrappedTokens: ApiToken[]) {
       abi: erc4626Abi,
       address: token.address as Address,
       functionName: 'maxDeposit' as const,
-      args: [AddressProvider.Vault(token.chainId)],
+      args: [getVaultV3Address(token.chainId)],
     })),
   })
 
@@ -179,7 +180,7 @@ function useLiquidityBuffers(wrappedTokens: ApiToken[]) {
       abi: erc4626Abi,
       address: token.address as Address,
       functionName: 'maxWithdraw' as const,
-      args: [AddressProvider.Vault(token.chainId)],
+      args: [getVaultV3Address(token.chainId)],
     })),
   })
 

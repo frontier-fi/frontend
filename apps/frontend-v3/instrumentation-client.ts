@@ -3,8 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from '@sentry/nextjs'
-import { sentryDSN } from './sentry.config'
-import { isProd } from '@repo/lib/config/app.config'
+import { isSentryEnabled, sentryDSN } from './sentry.config'
 import {
   customizeEvent,
   getErrorTextFromTop3Frames,
@@ -13,8 +12,7 @@ import {
 import { isSwapWithNoPathsError } from '@repo/lib/shared/utils/error-filters'
 
 Sentry.init({
-  // Change this value only if you need to debug in development (we have a custom developmentSentryDSN for that)
-  enabled: isProd,
+  enabled: isSentryEnabled,
   dsn: sentryDSN,
 
   // Adjust this value in production, or use tracesSampler for greater control

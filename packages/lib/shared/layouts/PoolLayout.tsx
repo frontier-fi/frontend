@@ -39,11 +39,11 @@ export async function generatePoolMetadata({
   return {
     metadata: {
       title: `Liquidity Pool (${variant}): ${pool.name}`,
-      description: `${poolSymbol} is a Balancer ${variant} ${getPoolTypeLabel(
+      description: `${poolSymbol} is a Frontier Finance ${variant} ${getPoolTypeLabel(
         pool.type
       )} liquidity pool which contains ${poolTokenString}.`,
     },
-    pool,
+    pool: pool as Pool,
   }
 }
 

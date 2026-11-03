@@ -137,7 +137,9 @@ function getStakingAddresses(pool: Pool): Address[] {
   const preferentialGaugeAddress = pool.staking?.gauge?.gaugeAddress as Address
 
   const nonPreferentialGaugeAddresses =
-    pool.staking?.gauge?.otherGauges?.map(otherGauge => otherGauge.gaugeAddress as Address) || []
+    pool.staking?.gauge?.otherGauges?.map(
+      (otherGauge: { gaugeAddress?: string }) => otherGauge.gaugeAddress as Address
+    ) || []
 
   return [preferentialGaugeAddress, ...nonPreferentialGaugeAddresses].filter(Boolean)
 }

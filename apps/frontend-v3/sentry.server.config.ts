@@ -3,11 +3,10 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from '@sentry/nextjs'
-import { sentryDSN } from './sentry.config'
-import { isProd } from '@repo/lib/config/app.config'
+import { isSentryEnabled, sentryDSN } from './sentry.config'
 
 Sentry.init({
-  enabled: isProd,
+  enabled: isSentryEnabled,
   dsn: sentryDSN,
   // Adjust this value in production, or use tracesSampler for greater control
   tracesSampleRate: 0,

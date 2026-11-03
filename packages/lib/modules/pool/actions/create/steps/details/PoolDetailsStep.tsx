@@ -15,7 +15,7 @@ export function PoolDetailsStep() {
   const [poolType] = useWatch({ control: poolCreationForm.control, name: ['poolType'] })
   const { isEclpParamsValid } = useValidateEclpParams()
 
-  // CoW AMM has no pool settings config because built on Balancer v1
+  // CoW AMM has no pool settings config because built on Frontier Finance v1
   const showPoolSettings = !isCowPool(poolType)
 
   const poolCreationFormState = useFormState({ control: poolCreationForm.control })

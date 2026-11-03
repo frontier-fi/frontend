@@ -3,14 +3,13 @@ import { useEffect } from 'react'
 import { usePoolCreationForm } from '../PoolCreationFormProvider'
 import { isCowProtocol, isBalancerProtocol } from '../helpers'
 import type { GqlPoolType } from '@repo/lib/shared/services/api/generated/graphql'
-import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { PoolType } from '@balancer/sdk'
 
 interface UseProtocolSearchParams {
   poolType: GqlPoolType
 }
 
-export function useProtocolSearchParams({ poolType }: UseProtocolSearchParams) {
+export function useProtocolSearchParams({ poolType: _poolType }: UseProtocolSearchParams) {
   const { poolCreationForm, resetPoolCreationForm, isFirstStep } = usePoolCreationForm()
   const searchParams = useSearchParams()
 
@@ -18,19 +17,18 @@ export function useProtocolSearchParams({ poolType }: UseProtocolSearchParams) {
 
   const isProtocolParamCow = !!protocolSearchParam && isCowProtocol(protocolSearchParam)
   const isProtocolParamBalancer = !!protocolSearchParam && isBalancerProtocol(protocolSearchParam)
-  const isCowAmm = poolType === GqlPoolTypeValues.CowAmm
 
-  const showCowAmmWarning = isProtocolParamCow && !isCowAmm && !isFirstStep
-  const showBalancerWarning = isProtocolParamBalancer && isCowAmm && !isFirstStep
+  // Cow AMM is not a Frontier pool type — never treat current form as CoW AMM
+  const showCowAmmWarning = false
+  const showBalancerWarning = false
 
-  const shouldSwitchToCowProtocol = isProtocolParamCow && !showCowAmmWarning && isFirstStep
-
-  const shouldSwitchToBalancerProtocol =
-    isProtocolParamBalancer && !showBalancerWarning && isFirstStep
+  const shouldSwitchToCowProtocol = isProtocolParamCow && isFirstStep
+  const shouldSwitchToBalancerProtocol = isProtocolParamBalancer && isFirstStep
 
   const setupCowCreation = () => {
+    // Frontier has no CowAmm POOL_TYPES entry — fall back to Stable under CoW protocol label
     poolCreationForm.setValue('protocol', 'CoW')
-    poolCreationForm.setValue('poolType', PoolType.CowAmm)
+    poolCreationForm.setValue('poolType', PoolType.Stable)
     poolCreationForm.trigger('protocol')
     poolCreationForm.trigger('poolType')
   }

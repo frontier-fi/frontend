@@ -12,7 +12,7 @@ export function PoolTypeStep() {
   const { control } = poolCreationForm
   const formState = useFormState({ control: poolCreationForm.control })
 
-  // Only offer protocol choice for CoW AMM creation on Balancer project (NOT beets)
+  // Only offer protocol choice for CoW AMM creation on Frontier Finance project (NOT beets)
   const showChooseProtocol = isBalancer
 
   return (

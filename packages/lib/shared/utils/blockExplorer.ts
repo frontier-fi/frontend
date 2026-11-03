@@ -1,30 +1,30 @@
 import { getNetworkConfig } from '@repo/lib/config/app.config'
-import type { GqlChain } from '../services/api/generated/graphql'
+import type { AppChain } from '../services/api/graphql-enums'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 
 const defaultChain = PROJECT_CONFIG.defaultNetwork
 
-export function getBlockExplorerName(chain?: GqlChain) {
+export function getBlockExplorerName(chain?: AppChain) {
   const _chain = chain || defaultChain
   return getNetworkConfig(_chain).blockExplorer.name
 }
 
-export function getBlockExplorerTxUrl(txHash: string, chain: GqlChain) {
+export function getBlockExplorerTxUrl(txHash: string, chain: AppChain) {
   return `${getBlockExplorerUrl(chain)}/tx/${txHash}`
 }
 
-export function getBlockExplorerAddressUrl(address: string, chain: GqlChain) {
+export function getBlockExplorerAddressUrl(address: string, chain: AppChain) {
   return `${getBlockExplorerUrl(chain)}/address/${address}`
 }
 
-export function getBlockExplorerTokenUrl(tokenAddress: string, chain: GqlChain) {
+export function getBlockExplorerTokenUrl(tokenAddress: string, chain: AppChain) {
   return `${getBlockExplorerUrl(chain)}/token/${tokenAddress}`
 }
 
-export function getBlockExplorerBlockUrl(block: number, chain: GqlChain) {
+export function getBlockExplorerBlockUrl(block: number, chain: AppChain) {
   return `${getBlockExplorerUrl(chain)}/block/${block}`
 }
 
-function getBlockExplorerUrl(chain: GqlChain) {
+function getBlockExplorerUrl(chain: AppChain) {
   return `${getNetworkConfig(chain).blockExplorer.baseUrl}`
 }

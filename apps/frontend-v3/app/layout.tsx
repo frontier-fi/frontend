@@ -11,8 +11,8 @@ import { BalancerLogoType } from '@bal/lib/components/imgs/BalancerLogoType'
 import { Footer } from '@repo/lib/shared/components/navs/Footer'
 
 export const metadata: Metadata = {
-  title: `Balancer—DeFi Liquidity Pools`,
-  description: `Explore liquidity pools on Balancer and earn passively in yield-bearing pools.`,
+  title: `Frontier Finance—DeFi Liquidity Pools`,
+  description: `Explore liquidity pools on Frontier Finance and earn passively in yield-bearing pools.`,
   icons: [
     { rel: 'icon', type: 'image/x-icon', url: '/favicon.ico' },
     {
@@ -29,9 +29,9 @@ export const metadata: Metadata = {
     },
   ],
   openGraph: {
-    title: `Balancer—DeFi Liquidity Pools`,
-    description: `Explore liquidity pools on Balancer and earn passively in yield-bearing pools.`,
-    siteName: 'Balancer',
+    title: `Frontier Finance—DeFi Liquidity Pools`,
+    description: `Explore liquidity pools on Frontier Finance and earn passively in yield-bearing pools.`,
+    siteName: 'Frontier Finance',
     type: 'website',
   },
   other: {
@@ -53,7 +53,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
             {children}
             <Footer
               logoType={<BalancerLogoType />}
-              subTitle="Balancer is a battle-tested toolkit for true AMM experimentation and innovation."
+              subTitle="Frontier Finance is a battle-tested toolkit for true AMM experimentation and innovation."
               title="AMMs made easy"
             />
             <SpeedInsights />

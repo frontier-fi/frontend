@@ -1,10 +1,13 @@
-import { withSentryConfig } from '@sentry/nextjs/config'
-import { sentryOptions } from './sentry.config'
 import type { NextConfig } from 'next'
 
 /** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
   serverExternalPackages: ['thread-stream', 'real-require', 'encoding'],
+  experimental: {
+    // Frontier API has a small Prisma pool; avoid SSG workers opening too many connections.
+    staticGenerationMaxConcurrency: 2,
+    staticGenerationRetryCount: 1,
+  },
   logging: {
     fetches: {
       fullUrl: true,
@@ -33,19 +36,6 @@ const nextConfig: NextConfig = {
   headers: manifestHeaders,
   reactCompiler: true,
   redirects: async () => [
-    // Pool + LBP creation is disabled for now: the pages still exist, but every
-    // entry point lands on home. Temporary (307) so browsers/search engines do
-    // not cache it before the creator is re-enabled.
-    {
-      source: '/create/:path*',
-      destination: '/',
-      permanent: false,
-    },
-    {
-      source: '/lbp/create/:path*',
-      destination: '/',
-      permanent: false,
-    },
     {
       source: '/pools/mode/:path*',
       destination: 'https://legacy.balancer.fi',
@@ -56,18 +46,58 @@ const nextConfig: NextConfig = {
       destination: 'https://legacy.balancer.fi',
       permanent: true,
     },
+    // LBP, veBAL, and Cow AMM are out of scope for Frontier.
+    {
+      source: '/lbp',
+      destination: '/',
+      permanent: false,
+    },
+    {
+      source: '/lbp/:path*',
+      destination: '/',
+      permanent: false,
+    },
     {
       source: '/vebal',
-      destination: '/vebal/manage',
-      permanent: true,
+      destination: '/',
+      permanent: false,
+    },
+    {
+      source: '/vebal/:path*',
+      destination: '/',
+      permanent: false,
+    },
+    {
+      source: '/pools/cow',
+      destination: '/pools',
+      permanent: false,
+    },
+    {
+      source: '/pools/cow/:path*',
+      destination: '/pools',
+      permanent: false,
+    },
+    // Gauges are not deployed. Staking BAL or BPTs is unavailable.
+    {
+      source: '/pools/:chain/:variant/:id/stake',
+      destination: '/pools/:chain/:variant/:id',
+      permanent: false,
+    },
+    {
+      source: '/pools/:chain/:variant/:id/unstake',
+      destination: '/pools/:chain/:variant/:id',
+      permanent: false,
+    },
+    {
+      source: '/pools/:chain/:variant/:id/migrate-stake',
+      destination: '/pools/:chain/:variant/:id',
+      permanent: false,
     },
   ],
 }
 
-// Avoid sentry setup in CI
-const config = process.env.CI === 'true' ? nextConfig : withSentryConfig(nextConfig, sentryOptions)
-
-export default config
+// Sentry build wrapper disabled (see isSentryEnabled in sentry.config.ts).
+export default nextConfig
 
 /**
  * Add specific CORS headers to the manifest.json file

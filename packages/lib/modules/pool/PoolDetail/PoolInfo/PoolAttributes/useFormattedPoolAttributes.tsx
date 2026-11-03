@@ -4,12 +4,11 @@ import { useMemo } from 'react'
 import { usePool } from '../../../PoolProvider'
 import { format } from 'date-fns'
 import { zeroAddress } from 'viem'
-import { abbreviateAddress } from '@repo/lib/shared/utils/addresses'
+import { abbreviateAddress, isSameAddress } from '@repo/lib/shared/utils/addresses'
 import { fNum } from '@repo/lib/shared/utils/numbers'
 import {
   isBoosted,
   isCowAmmPool,
-  isDynamicLBP,
   isQuantAmmPool,
   isStable,
   isV2Pool,
@@ -35,10 +34,6 @@ function getPoolTypeText(pool: Pool) {
     return 'Boosted'
   }
 
-  if (isDynamicLBP(pool)) {
-    return `Dynamic Liquidity Bootstrapping Pool (${pool.isSeedless ? 'seedless' : 'seeded'})`
-  }
-
   return getPoolTypeLabel(pool.type)
 }
 
@@ -52,11 +47,19 @@ export function useFormattedPoolAttributes() {
   const delegateOwner = PROJECT_CONFIG.delegateOwner
 
   const poolOwnerData = useMemo(() => {
-    if (!pool) return
-    const { owner, swapFeeManager, chain } = pool
-    if (!owner) return
+    if (!pool?.swapFeeManager) return
+    const { swapFeeManager, chain } = pool
 
-    if ((owner === zeroAddress && isV2) || isCowAmmPool(pool.type)) {
+    // swapFeeManager replaces the deprecated owner field. Zero means immutable on v2
+    // and governance on v3.
+    const isImmutable =
+      isCowAmmPool(pool.type) || (isSameAddress(swapFeeManager, zeroAddress) && isV2)
+
+    const isGovernance =
+      isSameAddress(swapFeeManager, delegateOwner) ||
+      (isSameAddress(swapFeeManager, zeroAddress) && isV3)
+
+    if (isImmutable) {
       return {
         title: 'No owner',
         link: '',
@@ -65,7 +68,7 @@ export function useFormattedPoolAttributes() {
       }
     }
 
-    if (owner === delegateOwner || (owner === zeroAddress && isV3)) {
+    if (isGovernance) {
       return {
         title: `Delegate ${isV2 ? 'owner' : 'manager'}`,
         link: '',
@@ -78,15 +81,9 @@ export function useFormattedPoolAttributes() {
 
     const editableBy = `editable by ${isV2 ? 'pool owner' : 'swap fee manager'}`
 
-    const link = isV2
-      ? getBlockExplorerAddressUrl(owner, chain)
-      : swapFeeManager
-        ? getBlockExplorerAddressUrl(swapFeeManager, chain)
-        : ''
-
     return {
-      title: abbreviateAddress((isV2 ? owner : swapFeeManager) || ''),
-      link,
+      title: abbreviateAddress(swapFeeManager),
+      link: getBlockExplorerAddressUrl(swapFeeManager, chain),
       editableText: editableBy,
       attributeImmutabilityText: isStable(pool.type)
         ? ` except for swap fees and AMP factor ${editableBy}`
@@ -98,6 +95,8 @@ export function useFormattedPoolAttributes() {
     if (!pool) return []
     const { name, symbol, createTime, dynamicData, type, chain } = pool
     const networkConfig = getNetworkConfig(chain)
+
+    const editNote = poolOwnerData?.editableText ? ` (${poolOwnerData.editableText})` : ''
 
     const attributes = compact([
       {
@@ -113,8 +112,8 @@ export function useFormattedPoolAttributes() {
         value: getPoolTypeText(pool),
       },
       {
-        title: 'Protocol version',
-        value: isCowAmmPool(pool.type) ? 'Balancer CoW AMM' : `Balancer v${pool.protocolVersion}`,
+        title: 'Protocol',
+        value: isCowAmmPool(pool.type) ? 'CoW AMM' : 'Frontier Finance',
       },
       {
         title: 'Network',
@@ -122,12 +121,12 @@ export function useFormattedPoolAttributes() {
       },
       {
         title: 'Swap fees',
-        value: `${fNum('feePercent', dynamicData.swapFee, { hideSmallPercentage: false })} (${poolOwnerData?.editableText})`,
+        value: `${fNum('feePercent', dynamicData.swapFee, { hideSmallPercentage: false })}${editNote}`,
       },
       isStable(pool.type) && 'amp' in pool
         ? {
             title: 'AMP factor',
-            value: `${fNum('integer', pool.amp)} (${poolOwnerData?.editableText})`,
+            value: `${fNum('integer', pool.amp)}${editNote}`,
           }
         : null,
       poolOwnerData
@@ -141,7 +140,7 @@ export function useFormattedPoolAttributes() {
         title: 'Attribute immutability',
         value: isQuantAmmPool(type)
           ? 'Immutable except for swap fees editable by governance, and dynamic weight shifts per smart contract.'
-          : `Immutable${poolOwnerData?.attributeImmutabilityText}`,
+          : `Immutable${poolOwnerData?.attributeImmutabilityText ?? ''}`,
       },
       {
         title: 'Creation date',

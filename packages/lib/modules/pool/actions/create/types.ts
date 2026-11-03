@@ -4,11 +4,7 @@ import {
   PoolType,
   CreatePoolV3WeightedInput,
   CreatePoolV3StableInput,
-  CreatePoolStableSurgeInput,
-  CreatePoolReClammInput as CreatePoolAutoRangeInput,
   CreatePoolGyroECLPInput,
-  CreatePoolLiquidityBootstrappingInput,
-  CreatePoolLiquidityBootstrappingFixedPriceInput,
 } from '@balancer/sdk'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { Address } from 'viem'
@@ -22,13 +18,7 @@ export type ExtendedInitPoolInput = Omit<InitPoolInputV3, 'amountsIn'> & {
   amountsIn: InitPoolInputAmount[]
 }
 
-export type SupportedPoolTypes =
-  | PoolType.Stable
-  | PoolType.Weighted
-  | PoolType.StableSurge
-  | PoolType.ReClamm
-  | PoolType.GyroE
-  | PoolType.CowAmm
+export type SupportedPoolTypes = PoolType.Stable | PoolType.Weighted | PoolType.GyroE
 
 export type PoolTypeDetails = {
   label: string
@@ -83,21 +73,5 @@ export type EclpConfigForm = {
   peakPrice: string
 }
 
-type CreateCowAmmInput = {
-  symbol: string
-  name: string
-  poolType: PoolType.CowAmm
-  chainId: number
-  protocolVersion: 1
-  poolTokens: PoolCreationToken[]
-}
-
 export type CreatePoolInput =
-  | CreatePoolV3WeightedInput
-  | CreatePoolV3StableInput
-  | CreatePoolStableSurgeInput
-  | CreatePoolAutoRangeInput
-  | CreatePoolGyroECLPInput
-  | CreateCowAmmInput
-  | CreatePoolLiquidityBootstrappingInput
-  | CreatePoolLiquidityBootstrappingFixedPriceInput
+  CreatePoolV3WeightedInput | CreatePoolV3StableInput | CreatePoolGyroECLPInput

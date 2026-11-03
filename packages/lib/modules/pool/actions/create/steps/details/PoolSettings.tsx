@@ -39,16 +39,6 @@ export function PoolSettings() {
 
   const { poolHooksWhitelist } = usePoolHooksWhitelist(network)
 
-  const filteredPoolHooksOptions = poolHooksWhitelist.filter(hook => {
-    if (isStableSurgePool(poolType)) {
-      return hook.label === 'StableSurge' // this pool type requires use of stable surge hook
-    } else if (!isStablePool(poolType)) {
-      return hook.label !== 'StableSurge' // remove stable surge hook from options for non-stable pool types
-    } else {
-      return true
-    }
-  })
-
   const poolRoleAccountOptions: PoolSettingsOption[] = [
     { label: `Delegate to the ${PROJECT_CONFIG.projectName} DAO`, value: zeroAddress },
     {
@@ -66,10 +56,8 @@ export function PoolSettings() {
     })),
   ]
 
-  const poolHooksOptions: PoolSettingsOption[] = [
-    { label: 'No hooks', value: zeroAddress },
-    ...(filteredPoolHooksOptions || []),
-  ]
+  // Only "No hooks" + "Custom" (appended by PoolSettingsRadioGroup).
+  const poolHooksOptions: PoolSettingsOption[] = [{ label: 'No hooks', value: zeroAddress }]
 
   useEffect(() => {
     if (isStableSurgePool(poolType) && poolHooksWhitelist) {
@@ -165,7 +153,7 @@ export function PoolSettings() {
           name="poolCreator"
           options={poolRoleAccountOptions}
           title="Pool creator"
-          tooltip="The address empowered to set a pool creator fee. Choose the Balancer DAO option to give all fees to the protocol and LPs."
+          tooltip="The address empowered to set a pool creator fee. Choose the Frontier Finance DAO option to give all fees to the protocol and LPs."
           validate={validatePoolSettings.poolRoleAccount}
         />
       )}

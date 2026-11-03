@@ -38,7 +38,7 @@ const contracts = [
     url: 'https://docs.balancer.fi/concepts/explore-available-balancer-pools/',
     shortDescription: 'Handles math for pool operations',
     description:
-      'Balancer Pools are smart contracts that define how traders can swap between tokens on Balancer Protocol. The architecture of Balancer Protocol empowers anyone to create custom pool types. What makes Balancer Pools unique from those of other protocols is their unparalleled flexibility. With the introduction of Hooks and Dynamic Swap Fees, the degree of customization is boundless.\n\nBalancer has already developed, audited and deployed a variety of pool types showcasing diverse functionalities. These pools are readily accessible for existing use cases without requiring permission. ',
+      'Frontier Finance Pools are smart contracts that define how traders can swap between tokens on Frontier Finance Protocol. The architecture of Frontier Finance Protocol empowers anyone to create custom pool types. What makes Frontier Finance Pools unique from those of other protocols is their unparalleled flexibility. With the introduction of Hooks and Dynamic Swap Fees, the degree of customization is boundless.\n\nBalancer has already developed, audited and deployed a variety of pool types showcasing diverse functionalities. These pools are readily accessible for existing use cases without requiring permission. ',
     tags: {
       'Existing pool types': [
         'Weighted pools',
@@ -54,7 +54,7 @@ const contracts = [
     url: 'https://docs.balancer.fi/concepts/vault/',
     shortDescription: 'Handles accounting & holds tokens',
     description:
-      'The Vault is the core of the Balancer protocol; it is a smart contract that holds and manages all tokens in each Balancer pool. First introduced in Balancer v2, the vault architecture separates token accounting from pool logic, allowing for simplified pool contracts that focus on the implementation of their swap, add liquidity and remove liquidity logic.',
+      'The Vault is the core of the Frontier Finance protocol; it is a smart contract that holds and manages all tokens in each Frontier Finance pool. The vault architecture separates token accounting from pool logic, allowing for simplified pool contracts that focus on the implementation of their swap, add liquidity and remove liquidity logic.',
     tags: {
       Features: [
         'Transient accounting',
@@ -200,7 +200,7 @@ export function Contracts() {
                 />
                 <FadeIn delay={0.2} direction="up" duration={0.6}>
                   <Text color="font.secondary" fontSize="lg">
-                    The four main contracts of Balancer v3 enhance flexibility and minimize the
+                    The four main contracts of Frontier Finance enhance flexibility and minimize the
                     intricacies involved in constructing pools, empowering builders to focus on
                     innovation rather than grappling with complex code.
                   </Text>

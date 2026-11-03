@@ -83,7 +83,7 @@ export function usePoolListLogic({
       queryVariables.textSearch || '',
       queryVariables.where.protocolVersionIn?.join(',') || '',
       queryVariables.where.poolTypeIn?.join(',') || '',
-      queryVariables.where.poolTypeNotIn?.join(',') || '',
+      (queryVariables.where as { poolTypeNotIn?: string[] }).poolTypeNotIn?.join(',') || '',
       queryVariables.where.tagIn?.join(',') || '',
       queryVariables.where.tagNotIn?.join(',') || '',
     ],

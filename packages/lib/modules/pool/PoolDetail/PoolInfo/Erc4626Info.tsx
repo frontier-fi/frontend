@@ -80,7 +80,7 @@ function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
           </VStack>
           {data.reviewFile && (
             <Link
-              href={`https://github.com/balancer/code-review/blob/main/erc4626/${data.reviewFile}`}
+              href={`https://github.com/frontier-fi/code-review/blob/main/erc4626/${data.reviewFile}`}
               target="_blank"
             >
               <HStack gap="xxs">

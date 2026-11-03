@@ -342,10 +342,7 @@ function AddTokenButton({
       case PoolType.Weighted:
         return 'Only 8 tokens can be added to a Weighted pool'
       case PoolType.Stable:
-      case PoolType.StableSurge:
         return 'Only 5 tokens can be added to a Stable pool'
-      case PoolType.ReClamm:
-        return 'Only 2 tokens can be added to an AutoRange pool'
       case PoolType.GyroE:
         return 'Only 2 tokens can be added to a Gyro pool'
       default:

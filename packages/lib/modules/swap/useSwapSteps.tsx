@@ -21,8 +21,8 @@ import { parseAmount } from '@repo/lib/shared/utils/numbers'
 
 type Params = SwapStepParams & {
   vaultAddress: Address
-  isLbpSwap: boolean
-  isLbpProjectTokenBuy: boolean
+  isLbpSwap?: boolean
+  isLbpProjectTokenBuy?: boolean
 }
 
 export function useSwapSteps({
@@ -34,8 +34,7 @@ export function useSwapSteps({
   swapAction,
   tokenInInfo,
   tokenOutInfo,
-  isLbpSwap,
-  isLbpProjectTokenBuy,
+  isLbpSwap = false,
 }: Params) {
   const chain = swapState.selectedChain
   const chainId = getChainId(chain)
@@ -117,8 +116,6 @@ export function useSwapSteps({
     swapAction,
     tokenInInfo,
     tokenOutInfo,
-    isLbpSwap,
-    isLbpProjectTokenBuy,
   })
 
   // native tokenIn does not require permit2 signature

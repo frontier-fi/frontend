@@ -8,10 +8,10 @@ import { GqlSorSwapTypeValues } from '@repo/lib/shared/services/api/graphql-enum
 
 export function SwapRate({
   customTokenUsdPrice,
-  isLbpSwap,
+  isLbpSwap = false,
 }: {
   customTokenUsdPrice?: number
-  isLbpSwap: boolean
+  isLbpSwap?: boolean
 }) {
   const [priceDirection, setPriceDirection] = useState<'givenIn' | 'givenOut'>('givenIn')
   const { simulationQuery, tokenInInfo, tokenOutInfo } = useSwap()

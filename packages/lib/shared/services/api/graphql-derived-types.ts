@@ -11,10 +11,7 @@ import type {
   GetPoolEventsQuery,
   PoolTokensFragment,
   HookFragment,
-  LbpV3CommonMetadataFieldsFragment,
   Erc4626ReviewDataFragment,
-  GetVeBalUserQuery,
-  GetStakedSonicDataQuery,
 } from './generated/graphql.ts'
 
 // ── Token types ──
@@ -27,38 +24,33 @@ export type GqlToken = Omit<_GqlTokenData, 'coingeckoId' | 'priceRateProviderDat
   coingeckoId: string | null
   priceRateProviderData: _GqlTokenData['priceRateProviderData']
 }
-// Alias for consumers using old PascalCase
-export type GqlLbpTopTrade = GqlLBPTopTrade
 export type GqlTokenPrice = GetTokenPricesQuery['tokenPrices'][number]
 
 // ── Pool discriminated union members ──
 
-export type GqlPoolElement = Extract<GetPoolQuery['pool'], { __typename: 'GqlPoolElement' }>
+/** Any concrete pool returned by GetPool (Weighted | Stable | Eclp). */
+export type GqlPoolElement = GetPoolQuery['pool'] & {
+  /** Optional — Frontier schema omits gauges; kept for stake UI + test mocks. */
+  staking?: any
+  owner?: string
+  poolCreator?: string
+}
 export type GqlPoolWeighted = Extract<GetPoolQuery['pool'], { __typename: 'GqlPoolWeighted' }>
-export type GqlPoolGyro = Extract<GetPoolQuery['pool'], { __typename: 'GqlPoolGyro' }>
-export type GqlPoolComposableStable = Extract<
-  GetPoolQuery['pool'],
-  { __typename: 'GqlPoolComposableStable' }
->
-export type GqlPoolLiquidityBootstrapping = Extract<
-  GetPoolQuery['pool'],
-  { __typename: 'GqlPoolLiquidityBootstrapping' }
->
-export type GqlPoolQuantAmmWeighted = Extract<
-  GetPoolQuery['pool'],
-  { __typename: 'GqlPoolQuantAmmWeighted' }
->
-
-// ── LBP-specific pool types (use fragment exports directly when possible) ──
-
-export type GqlPoolLiquidityBootstrappingV3 = Extract<
-  GetPoolQuery['pool'],
-  { __typename: 'GqlPoolLiquidityBootstrappingV3' }
->
-export type GqlPoolFixedPriceLbp = Extract<
-  GetPoolQuery['pool'],
-  { __typename: 'GqlPoolFixedPriceLBP' }
->
+/** Frontier API renamed Gyro ECLP pools to `GqlPoolEclp` / type `ECLP`. */
+export type GqlPoolEclp = Extract<GetPoolQuery['pool'], { __typename: 'GqlPoolEclp' }>
+/** @deprecated Use GqlPoolEclp — kept as an alias for existing helpers. */
+export type GqlPoolGyro = GqlPoolEclp
+export type GqlPoolStable = Extract<GetPoolQuery['pool'], { __typename: 'GqlPoolStable' }>
+/** Removed from Frontier schema — kept as never for leftover imports. */
+export type GqlPoolComposableStable = never
+export type GqlPoolQuantAmmWeighted = never
+export type GqlPoolLiquidityBootstrapping = never
+/** Structural stub — LBP pages redirect away on Frontier but hydrate helpers remain. */
+export type GqlPoolLiquidityBootstrappingV3 = {
+  isSeedless?: boolean
+  [key: string]: unknown
+}
+export type GqlPoolFixedPriceLbp = never
 
 // ── Common pool type: union of all pool __typename variants ──
 
@@ -73,23 +65,36 @@ export type GqlPoolMinimal = GetPoolsQuery['pools'][number]
 export type GqlPoolTokenDetail = PoolTokensFragment
 export type GqlNestedPool = NonNullable<PoolTokensFragment['nestedPool']>
 
-// ── Staking types (extracted from GetPoolsQuery) ──
+// ── Staking types (Frontier schema currently omits staking on pools) ──
 
-export type GqlPoolStaking = NonNullable<GetPoolsQuery['pools'][number]['staking']>
-export type GqlPoolStakingGauge = NonNullable<GqlPoolStaking['gauge']>
-export type GqlPoolStakingOtherGauge = NonNullable<
-  NonNullable<GqlPoolStakingGauge['otherGauges']>
->[number]
-export type GqlPoolStakingGaugeReward = NonNullable<
-  NonNullable<GqlPoolStakingGauge['rewards']>
->[number]
+export type GqlPoolStaking = {
+  type?: string | null
+  gauge?: GqlPoolStakingGauge | null
+}
+export type GqlPoolStakingGauge = {
+  gaugeAddress?: string
+  otherGauges?: GqlPoolStakingOtherGauge[] | null
+}
+export type GqlPoolStakingOtherGauge = {
+  gaugeAddress?: string
+}
+export type GqlPoolStakingGaugeReward = {
+  tokenAddress?: string
+  rewardPerSecond?: string
+}
 
 // ── User balance types ──
 
-export type GqlPoolUserBalance = NonNullable<GetPoolsQuery['pools'][number]['userBalance']>
-export type GqlUserStakedBalance = NonNullable<
-  NonNullable<GqlPoolUserBalance['stakedBalances']>
->[number]
+export type GqlPoolUserBalance = NonNullable<GetPoolsQuery['pools'][number]['userBalance']> & {
+  stakedBalances?: GqlUserStakedBalance[] | null
+}
+export type GqlUserStakedBalance = {
+  __typename?: 'GqlUserStakedBalance'
+  stakingId: string
+  balance: string
+  balanceUsd: number
+  stakingType: string
+}
 
 // ── Pool event types ──
 
@@ -101,10 +106,12 @@ export type GqlPoolSwapEventV3 = Extract<
   GetPoolEventsQuery['poolEvents'][number],
   { __typename: 'GqlPoolSwapEventV3' }
 >
-export type GqlPoolSwapEventCowAmm = Extract<
-  GetPoolEventsQuery['poolEvents'][number],
-  { __typename: 'GqlPoolSwapEventCowAmm' }
->
+/** Cow AMM events are not in the Frontier schema; keep a structural stub for leftover UI. */
+export type GqlPoolSwapEventCowAmm = {
+  __typename: 'GqlPoolSwapEventCowAmm'
+  tokenIn: { address: string; amount: string }
+  tokenOut: { address: string; amount: string }
+}
 
 // ── APR item types ──
 
@@ -139,8 +146,15 @@ export type GqlPriceRateProviderUpgradeableComponent = NonNullable<
   NonNullable<GqlPriceRateProviderData['upgradeableComponents']>
 >[number]
 
-export type GqlHook = HookFragment
-export type GqlHookReviewData = NonNullable<HookFragment['reviewData']>
+/** Frontier hooks have no review data; shape kept structurally so review UI can short-circuit. */
+export type GqlHookReviewData = {
+  warnings?: string[] | null
+  summary?: string | null
+  reviewFile?: string | null
+}
+export type GqlHook = HookFragment & {
+  reviewData?: GqlHookReviewData | null
+}
 
 export type Erc4626ReviewData = Erc4626ReviewDataFragment
 
@@ -168,23 +182,17 @@ export type MevTaxHookParams = {
   maxMevSwapFeePercentage: string | null
 }
 
-// ── LBP-specific additional types ──
+// ── Quant / veBAL / STS / LBP stubs (removed from Frontier documents) ──
 
-export type GqlLBPTopTrade = NonNullable<
-  NonNullable<LbpV3CommonMetadataFieldsFragment['topTrades']>
->[number]
+export type QuantAmmWeightSnapshot = {
+  timestamp: number
+  weights?: string[] | null
+}
 
-// ── Quant AMM types ──
-
-export type QuantAmmWeightSnapshot = NonNullable<
-  Extract<GetPoolQuery['pool'], { __typename: 'GqlPoolQuantAmmWeighted' }> extends {
-    weightSnapshots?: Array<infer T> | null
-  }
-    ? T
-    : never
->
-
-// ── Misc types from other queries ──
-
-export type GqlVeBalLockSnapshot = GetVeBalUserQuery['veBalGetUser']['lockSnapshots'][number]
-export type GqlStakedSonicData = GetStakedSonicDataQuery['stsGetGqlStakedSonicData']
+export type GqlVeBalLockSnapshot = never
+export type GqlStakedSonicData = never
+export type GqlLBPTopTrade = {
+  value: string
+  address: string
+  timestamp?: number
+}

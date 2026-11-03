@@ -28,8 +28,8 @@ export function useCreatePoolBuildCall({ createPoolInput, enabled }: Props) {
         data: callData,
         to,
       }
-    } else if (createPoolInput.protocolVersion === 1) {
-      const { name, symbol } = createPoolInput
+    } else if ((createPoolInput.protocolVersion as number) === 1) {
+      const { name, symbol } = createPoolInput as { name?: string; symbol?: string }
       const chain = getGqlChain(createPoolInput.chainId)
       const { contracts } = getNetworkConfig(chain)
       const to = contracts.balancer.bCoWFactory
@@ -39,7 +39,7 @@ export function useCreatePoolBuildCall({ createPoolInput, enabled }: Props) {
       const data = encodeFunctionData({
         abi: parseAbi(['function newBPool(string name, string symbol)']),
         functionName: 'newBPool',
-        args: [name, symbol],
+        args: [name ?? '', symbol ?? ''],
       })
 
       return {

@@ -17,7 +17,6 @@ import { ArrowUpRight } from 'lucide-react'
 import { Picture } from '../other/Picture'
 
 export enum RedirectPartner {
-  Beets = 'beets',
   CoW = 'cow',
   Aave = 'aave',
   Gyro = 'gyro',
@@ -46,15 +45,6 @@ type PartnerInfo = {
 }
 
 const partnerInfo: PartnerInfo = {
-  [RedirectPartner.Beets]: {
-    shortName: 'Beets',
-    fullName: 'Beets',
-    category: 'AMM / DEX',
-    description:
-      'Beets is a community-driven DEX and DeFi powerhouse governed by the BEETS token and living on Sonic.',
-    url: 'https://beets.fi',
-    imageName: 'beets',
-  },
   [RedirectPartner.CoW]: {
     shortName: 'CoW',
     fullName: 'CoW Protocol',

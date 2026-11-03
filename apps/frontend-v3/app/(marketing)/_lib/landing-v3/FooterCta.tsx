@@ -100,13 +100,13 @@ export function FooterCta() {
             letterSpacing="-0.04rem"
             lineHeight={1}
             pr={{ base: 0.8, lg: 0.9 }}
-            text="Build on Balancer"
+            text="Build on Frontier Finance"
           />
           <Box>
             <Text color="font.secondary" textAlign="center" w="38ch">
               Launch faster with the most extensive DeFi toolkit made for creating AMMs / liquidity
-              pools. Get day-1 swap volume via Balancer’s aggregator integrations and incentive
-              system.
+              pools. Get day-1 swap volume via Frontier Finance’s aggregator integrations and
+              incentive system.
             </Text>
           </Box>
           <HStack justifyContent="center" ref={ref} spacing="md">
@@ -123,12 +123,12 @@ export function FooterCta() {
               variant="primary"
               w={{ base: '150px', lg: '180px' }}
             >
-              View v3 docs
+              View docs
             </MotionButton>
             <MotionButton
               animate={isInView ? { opacity: 1 } : {}}
               as={Link}
-              href="https://github.com/balancer/scaffold-balancer-v3"
+              href="https://github.com/frontier-fi/"
               initial={{ opacity: 0 }}
               rel="noopener"
               rightIcon={<ArrowUpRight size="14px" />}
@@ -138,7 +138,7 @@ export function FooterCta() {
               variant="secondary"
               w={{ base: '150px', lg: '180px' }}
             >
-              Prototype on v3
+              Code & Contracts
             </MotionButton>
           </HStack>
         </VStack>

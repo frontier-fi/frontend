@@ -15,8 +15,14 @@ import { useCurrency } from '@repo/lib/shared/hooks/useCurrency'
 import { isCowAmmPool } from '../../../pool.helpers'
 import { PoolChartTab, usePoolChartTabs } from './PoolChartTabsProvider'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
-import { alignUtcWithLocalDay } from '@repo/lib/shared/utils/time'
+
 type NonEmptyPoolChartPeriods = [PoolChartPeriod, ...PoolChartPeriod[]]
+
+/** Map API UTC-midnight snapshot timestamps to local midnight of the same Y-M-D. */
+function utcMidnightToLocalCalendarMidnight(utcMidnightUnix: number): number {
+  const utc = new Date(utcMidnightUnix * 1000)
+  return new Date(utc.getUTCFullYear(), utc.getUTCMonth(), utc.getUTCDate()).getTime() / 1000
+}
 
 const MIN_DISPLAY_PERIOD_DAYS = 30
 
@@ -286,10 +292,19 @@ export function usePoolChartsLogic() {
   }, [data?.snapshots, activeTab])
 
   const processedChartData = useMemo(() => {
+    // Bucket days in the browser's local timezone so labels match the user's calendar
+    // (e.g. NYC evening still shows "today" as Oct 27 while UTC has rolled to Oct 28).
     const today = new Date()
-    today.setUTCHours(0, 0, 0, 0)
+    today.setHours(0, 0, 0, 0)
 
-    const firstChartDataEl = chartData[0]
+    // API snapshots are UTC midnight; remap to local midnight of the same Y-M-D so we
+    // only show a calendar day once it exists for the user locally.
+    const localChartData: [number, string][] = chartData.map(([timestamp, value]) => [
+      utcMidnightToLocalCalendarMidnight(timestamp),
+      value,
+    ])
+
+    const firstChartDataEl = localChartData[0]
     const processedElements: [number, string][] = []
     const isSelectedTabTVL = activeTab.value === PoolChartTab.TVL
 
@@ -315,7 +330,7 @@ export function usePoolChartsLogic() {
 
     for (let i = 0; i < iterateTo; i++) {
       const currentDay = new Date(today)
-      currentDay.setUTCDate(today.getUTCDate() - i)
+      currentDay.setDate(today.getDate() - i)
       const timestamp = currentDay.getTime() / 1000
 
       // If the active tab is TVL, we check if there is enough data to display
@@ -323,7 +338,7 @@ export function usePoolChartsLogic() {
       // and fill start of the selected range with initialTotalLiquidity
       if (activeTab.value === PoolChartTab.TVL) {
         if (i === 0) {
-          const existingEntry = chartData.find(item => item[0] === timestamp)
+          const existingEntry = localChartData.find(item => item[0] === timestamp)
 
           if (existingEntry) {
             processedElements.push(existingEntry)
@@ -331,7 +346,7 @@ export function usePoolChartsLogic() {
             processedElements.push([timestamp, pool.dynamicData.totalLiquidity])
           }
         } else if (i === iterateTo - 1) {
-          const existingEntry = chartData.find(item => item[0] === timestamp)
+          const existingEntry = localChartData.find(item => item[0] === timestamp)
 
           if (existingEntry) {
             processedElements.push(existingEntry)
@@ -345,7 +360,7 @@ export function usePoolChartsLogic() {
             processedElements.push([timestamp, isEarlierThanCreation ? '0' : initialTotalLiquidity])
           }
         } else {
-          const existingEntry = chartData.find(item => item[0] === timestamp)
+          const existingEntry = localChartData.find(item => item[0] === timestamp)
 
           if (existingEntry) {
             processedElements.push(existingEntry)
@@ -357,7 +372,7 @@ export function usePoolChartsLogic() {
 
       // If the active tab is not TVL, we check if there is enough data to display
       // for each day and if not, add 0 to days without data
-      const existingEntry = chartData.find(item => item[0] === timestamp)
+      const existingEntry = localChartData.find(item => item[0] === timestamp)
 
       if (existingEntry) {
         processedElements.push(existingEntry)
@@ -366,9 +381,8 @@ export function usePoolChartsLogic() {
       }
     }
 
-    // timestamps from chartData are UTC midnight, but echarts interprets timestamp using local timezone
-    // so we adjust by offset to display correct day on chart
-    return processedElements.map(([timestamp, value]) => [alignUtcWithLocalDay(timestamp), value])
+    // Local midnights — ECharts already interprets timestamps in the browser timezone.
+    return processedElements
   }, [
     activePeriod.value,
     activeTab.value,

@@ -12,7 +12,6 @@ import {
 } from '@chakra-ui/react'
 import { DefaultPageContainer } from '@repo/lib/shared/components/containers/DefaultPageContainer'
 import Noise from '@repo/lib/shared/components/layout/Noise'
-import { BeetsIcon } from '@repo/lib/shared/components/icons/logos/BeetsIcon'
 import { CowIcon } from '@repo/lib/shared/components/icons/logos/CowIcon'
 import { GyroIcon } from '@repo/lib/shared/components/icons/logos/GyroIcon'
 import { XaveIcon } from '@repo/lib/shared/components/icons/logos/XaveIcon'
@@ -117,7 +116,7 @@ export function Grow() {
           />
           <FadeIn delay={0.2} direction="up" duration={0.6}>
             <Text color="font.secondary" fontSize="lg" maxW="2xl">
-              Balancer v3 is DeFi infrastructure to be built on.
+              Frontier Finance is DeFi infrastructure to be built on.
               {isMobile ? <>&nbsp;</> : <br />}
               Our growth is your growth.
             </Text>
@@ -191,10 +190,7 @@ export function Grow() {
             {/* EMPTY */}
           </MotionGridItem>
           <MotionGridItem colSpan={{ base: 6, lg: 2 }} order={6} variants={gridItemVariants}>
-            <PartnerButton
-              icon={<BeetsIcon size={80} />}
-              onClick={() => openRedirectModal(RedirectPartner.Beets)}
-            />
+            {/* Beets partner removed */}
           </MotionGridItem>
           <MotionGridItem
             colSpan={{ base: 12, lg: 6 }}
@@ -250,7 +246,7 @@ export function Grow() {
           </MotionGridItem>
         </MotionGrid>
         <Text color="font.secondary" fontSize="sm" mt="xl">
-          * Data includes liquidity and volume on Balancer v2, v3 & CoW AMM.
+          * Data includes liquidity and volume on Frontier Finance & CoW AMM.
         </Text>
       </DefaultPageContainer>
       <PartnerRedirectModal

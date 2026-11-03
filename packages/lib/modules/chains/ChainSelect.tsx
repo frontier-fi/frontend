@@ -1,6 +1,6 @@
 import { getChainShortName } from '@repo/lib/config/app.config'
 import { NetworkIcon } from '@repo/lib/shared/components/icons/NetworkIcon'
-import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { Box, HStack, Text, Center, VStack, Divider } from '@chakra-ui/react'
 import {
   GroupBase,
@@ -22,9 +22,9 @@ import { PlugIcon } from '@repo/lib/shared/components/icons/PlugIcon'
 import { WalletIcon } from '@repo/lib/shared/components/icons/WalletIcon'
 
 type Props = {
-  value: GqlChain
-  onChange(value: GqlChain): void
-  chains?: GqlChain[]
+  value: AppChain
+  onChange(value: AppChain): void
+  chains?: AppChain[]
 }
 
 type ChainOption = SelectOption & {
@@ -34,7 +34,7 @@ type ChainOption = SelectOption & {
 function DropdownIndicator({
   ...props
 }: DropdownIndicatorProps<SelectOption, false, GroupBase<SelectOption>>) {
-  const chain = (props.selectProps.value as SelectOption)?.value as GqlChain
+  const chain = (props.selectProps.value as SelectOption)?.value as AppChain
   const hasBalance = useHasNativeBalance(chain)
 
   return (

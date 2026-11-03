@@ -4,7 +4,7 @@ import { fNum } from '@repo/lib/shared/utils/numbers'
 import { TokenIcon } from '../../tokens/TokenIcon'
 import { TokenIconStack } from '../../tokens/TokenIconStack'
 import { usePoolMetadata } from '../metadata/usePoolMetadata'
-import { isLiquidityBootstrapping, isStableLike } from '../pool.helpers'
+import { isStableLike } from '../pool.helpers'
 import { getUserReferenceTokens } from '../pool-tokens.utils'
 import { PoolCore, PoolToken } from '../pool.types'
 import { ApiToken } from '@repo/lib/modules/tokens/token.types'
@@ -300,7 +300,6 @@ export function PoolListTokenPills({ pool, ...props }: PoolListTokenPillsProps) 
       iconUrl={iconUrl}
       poolName={name}
       poolType={pool.type}
-      protocolVersion={pool.protocolVersion}
       tokens={tokens}
       {...props}
     />
@@ -312,7 +311,6 @@ type PoolTokenPillsProps = {
   isTokenInWallet?: IsTokenInWallet
   poolName: string | undefined
   poolType: GqlPoolType
-  protocolVersion: number
   tokens: (PoolToken | ApiToken)[]
   iconUrl?: string
   iconSize?: number
@@ -324,7 +322,6 @@ function PoolTokenPills({
   isTokenInWallet,
   poolName,
   poolType,
-  protocolVersion,
   tokens,
   iconSize = 24,
   iconUrl,
@@ -332,7 +329,6 @@ function PoolTokenPills({
   ...badgeProps
 }: PoolTokenPillsProps) {
   const shouldUseStablePills = isStableLike(poolType)
-  const isV3LBP = isLiquidityBootstrapping(poolType) && protocolVersion === 3
 
   if (poolName) {
     return (
@@ -364,7 +360,6 @@ function PoolTokenPills({
       chain={chain}
       iconSize={iconSize}
       isTokenInWallet={isTokenInWallet}
-      preciseWeight={isV3LBP}
       tokens={tokens}
       {...badgeProps}
     />

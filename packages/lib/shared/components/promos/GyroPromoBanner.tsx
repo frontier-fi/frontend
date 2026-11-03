@@ -122,7 +122,7 @@ export function GyroPromoBanner() {
                         textWrap: 'balance',
                       }}
                     >
-                      Next-gen Gyroscope pools are now live on Balancer v3
+                      Next-gen Gyroscope pools are now live on Frontier Finance
                     </Text>
                   </Box>
                 </Box>

@@ -156,7 +156,7 @@ export function usePoolExplorer({ filters, sortKey, sortDir, pageIndex, pageSize
       orderDirection: GqlPoolOrderDirectionValues.Desc,
       // Mirrors frontend-v3's default exclusions:
       //  · BLACK_LISTED — Balancer's curated bad-data / scam pool list
-      //    (sourced from github.com/balancer/metadata). Pools flagged for
+      //    (sourced from github.com/frontier-fi/metadata). Pools flagged for
       //    broken price oracles get added here; reporting an offender to
       //    the metadata repo is the right fix for false-TVL outliers.
       //  · LIQUIDITY_BOOTSTRAPPING — transient sale pools, not real liquidity.

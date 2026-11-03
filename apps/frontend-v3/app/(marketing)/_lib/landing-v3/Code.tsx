@@ -82,8 +82,8 @@ export function Code() {
           />
           <FadeIn delay={0.2} direction="up" duration={0.6}>
             <Text color="font.secondary" fontSize="lg" maxW="2xl">
-              Balancer v3’s architecture focuses on simplicity, flexibility, and extensibility at
-              its core. The v3 Vault more formally defines the requirements of a custom pool,
+              Frontier Finance’s architecture focuses on simplicity, flexibility, and extensibility
+              at its core. The Vault more formally defines the requirements of a custom pool,
               shifting core design patterns out of the pool and into the Vault.
             </Text>
           </FadeIn>
@@ -142,7 +142,7 @@ export function Code() {
                       letterSpacing="-0.04rem"
                       lineHeight={1}
                       pr={{ base: 'xxs', lg: '0.9' }}
-                      text="Building on v3 is simple"
+                      text="Building is simple"
                     />
                     <FadeIn delay={0.2} direction="up" duration={0.6}>
                       <Text color="font.secondary">

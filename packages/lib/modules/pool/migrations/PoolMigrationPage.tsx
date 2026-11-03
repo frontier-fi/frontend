@@ -15,6 +15,7 @@ import { RemoveLiquidityProvider } from '../actions/remove-liquidity/RemoveLiqui
 import { TokenInputsValidationProvider } from '../../tokens/TokenInputsValidationProvider'
 import { Permit2SignatureProvider } from '../../tokens/approvals/permit2/Permit2SignatureProvider'
 import { PoolProvider } from '../PoolProvider'
+import type { GetPoolQuery } from '@repo/lib/shared/services/api/generated/graphql'
 import { AddLiquidityProvider } from '../actions/add-liquidity/AddLiquidityProvider'
 import { MigrateLiquidityProvider, useFetchPool } from './MigrateLiquidityProvider'
 import { PoolMigrationModal } from './PoolMigrationModal'
@@ -58,10 +59,14 @@ export function PoolMigrationPage({ id, chain, variant }: PoolPathProps) {
           <PermitSignatureProvider>
             <PoolActionsLayout closeButton={false}>
               <PriceImpactProvider>
-                <RemoveLiquidityProvider mute={true}>
+                <RemoveLiquidityProvider>
                   <TokenInputsValidationProvider>
                     <Permit2SignatureProvider>
-                      <PoolProvider chain={gqlChain} data={newPool} id={migration.new.id}>
+                      <PoolProvider
+                        chain={gqlChain}
+                        data={newPool as GetPoolQuery}
+                        id={migration.new.id}
+                      >
                         <AddLiquidityProvider>
                           <MigrateLiquidityProvider
                             chainId={migration.old.chainId}

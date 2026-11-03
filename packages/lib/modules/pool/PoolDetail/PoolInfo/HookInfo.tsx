@@ -75,7 +75,7 @@ function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
           </VStack>
           {data?.reviewFile && (
             <Link
-              href={`https://github.com/balancer/code-review/blob/main/hooks/${data.reviewFile}`}
+              href={`https://github.com/frontier-fi/code-review/blob/main/hooks/${data.reviewFile}`}
               target="_blank"
             >
               <HStack gap="xxs">
@@ -93,14 +93,11 @@ function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
 }
 
 export function HookInfoPopOver({ data, level, children }: HookInfoPopOverProps) {
+  // Frontier hooks have no reviewData — show minimal info without warnings
   const body = data ? (
     <PopoverInfoBody data={data} level={level} />
   ) : (
-    <Text fontSize="sm">
-      Hook data is missing.
-      <br />
-      Proceed with caution.
-    </Text>
+    <Text fontSize="sm">Hook address registered. Review data is unavailable.</Text>
   )
 
   return (

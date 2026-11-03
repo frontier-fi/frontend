@@ -1,8 +1,9 @@
 import { useReadContract } from '@repo/lib/shared/utils/wagmi'
 import { Address, parseAbi } from 'viem'
-import { AddressProvider, PoolType } from '@balancer/sdk'
+import { PoolType } from '@balancer/sdk'
 import { cowAmmPoolAbi } from '@repo/lib/modules/web3/contracts/abi/cowAmmAbi'
 import { isCowPool } from '@repo/lib/modules/pool/actions/create/helpers'
+import { getVaultV3Address } from '@repo/lib/config/app.config'
 
 type Params = {
   chainId: number
@@ -32,7 +33,7 @@ export function useIsPoolInitialized({ chainId, poolAddress, poolType }: Params)
   } = useReadContract({
     chainId,
     abi: parseAbi(['function isPoolInitialized(address) view returns (bool)']),
-    address: AddressProvider.Vault(chainId),
+    address: getVaultV3Address(chainId),
     functionName: 'isPoolInitialized',
     args: poolAddress ? [poolAddress] : undefined,
     query: { enabled: !!poolAddress && !isBalancerV1 },

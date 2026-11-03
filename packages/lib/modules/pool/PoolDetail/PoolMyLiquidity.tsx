@@ -152,7 +152,7 @@ export default function PoolMyLiquidity() {
       case 'total':
         return 'My total balance'
       case 'gauge':
-        return isVeBal ? 'Locked' : 'Staked on Balancer'
+        return isVeBal ? 'Locked' : 'Staked on Frontier Finance'
       case 'unstaked':
         return isVeBal ? 'Unlocked' : 'My unstaked balance'
       default:

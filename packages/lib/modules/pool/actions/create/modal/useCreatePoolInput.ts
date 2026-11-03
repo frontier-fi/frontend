@@ -3,12 +3,12 @@ import { TokenType, CreatePoolV3BaseInput, PoolType } from '@balancer/sdk'
 import { zeroAddress } from 'viem'
 import { PERCENTAGE_DECIMALS, DEFAULT_DECIMALS } from '../constants'
 import { getNetworkConfig, getGqlChain } from '@repo/lib/config/app.config'
-import { invertNumber, parseAmount } from '@repo/lib/shared/utils/numbers'
+import { parseAmount } from '@repo/lib/shared/utils/numbers'
 import { CreatePoolInput } from '../types'
 import { calculateRotationComponents } from '../steps/details/gyro.helpers'
 
 export function useCreatePoolInput(chainId: number): CreatePoolInput {
-  const { poolCreationForm, autoRangeConfigForm, eclpConfigForm } = usePoolCreationForm()
+  const { poolCreationForm, eclpConfigForm } = usePoolCreationForm()
 
   const {
     poolType,
@@ -28,9 +28,6 @@ export function useCreatePoolInput(chainId: number): CreatePoolInput {
   if (!poolTokens[0]?.address || !poolTokens[1]?.address) {
     throw new Error('Pool token address missing for pool creation')
   }
-
-  const areTokensInOrder =
-    poolTokens[0]?.address?.toLowerCase() < poolTokens[1]?.address?.toLowerCase()
 
   const chain = getGqlChain(chainId)
   const { tokens } = getNetworkConfig(chain)
@@ -60,7 +57,7 @@ export function useCreatePoolInput(chainId: number): CreatePoolInput {
     }),
   }
 
-  if (poolType === PoolType.Stable || poolType === PoolType.StableSurge) {
+  if (poolType === PoolType.Stable) {
     return {
       ...baseInput,
       poolType,
@@ -81,39 +78,6 @@ export function useCreatePoolInput(chainId: number): CreatePoolInput {
     }
   }
 
-  if (poolType === PoolType.ReClamm) {
-    const {
-      initialMinPrice,
-      initialMaxPrice,
-      initialTargetPrice,
-      priceShiftDailyRate,
-      centerednessMargin,
-    } = autoRangeConfigForm.getValues()
-
-    // must invert params if tokens are not in order
-    const minPrice = areTokensInOrder ? initialMinPrice : invertNumber(initialMaxPrice)
-    const maxPrice = areTokensInOrder ? initialMaxPrice : invertNumber(initialMinPrice)
-    const targetPrice = areTokensInOrder ? initialTargetPrice : invertNumber(initialTargetPrice)
-
-    const priceParams = {
-      initialMinPrice: parseAmount(minPrice, DEFAULT_DECIMALS),
-      initialMaxPrice: parseAmount(maxPrice, DEFAULT_DECIMALS),
-      initialTargetPrice: parseAmount(targetPrice, DEFAULT_DECIMALS),
-      // hardcoded prices to not include rate until new AutoRange deployments.
-      // without rate means boosted must be priced in terms of underlying
-      tokenAPriceIncludesRate: false,
-      tokenBPriceIncludesRate: false,
-    }
-
-    return {
-      ...baseInput,
-      poolType,
-      priceParams,
-      priceShiftDailyRate: parseAmount(priceShiftDailyRate, PERCENTAGE_DECIMALS),
-      centerednessMargin: parseAmount(centerednessMargin, PERCENTAGE_DECIMALS),
-    }
-  }
-
   if (poolType === PoolType.GyroE) {
     const { alpha, beta, peakPrice, lambda } = eclpConfigForm.getValues()
     const { c, s } = calculateRotationComponents(peakPrice || '')
@@ -128,10 +92,6 @@ export function useCreatePoolInput(chainId: number): CreatePoolInput {
     }
 
     return { ...baseInput, poolType, eclpParams }
-  }
-
-  if (poolType === PoolType.CowAmm) {
-    return { name, symbol, poolType, chainId, protocolVersion: 1, poolTokens }
   }
 
   throw new Error('Invalid pool type for useCreatePoolInput')

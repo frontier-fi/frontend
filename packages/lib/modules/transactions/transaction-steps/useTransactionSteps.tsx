@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react'
 import { getTransactionState, Retry, TransactionState, TransactionStep } from './lib'
-import { useTxSound } from './useTxSound'
 import { ensureError, ErrorCause, ErrorWithCauses } from '@repo/lib/shared/utils/errors'
 import { useToast } from '@chakra-ui/react'
 import { resetTransaction } from './transaction.helper'
@@ -11,15 +10,9 @@ import { useTransactionState } from '@repo/lib/modules/transactions/transaction-
 
 export type TransactionStepsResponse = ReturnType<typeof useTransactionSteps>
 
-export function useTransactionSteps(
-  steps: TransactionStep[] = [],
-  isLoading = false,
-  mute = false
-) {
+export function useTransactionSteps(steps: TransactionStep[] = [], isLoading = false) {
   const currentStepIndex = findCurrentIndex(steps)
   const { isOnSuccessCalled, updateOnSuccessCalled, setOnSuccessCalled } = useTransactionState()
-
-  const { playTxSound } = useTxSound()
 
   const currentStep = steps[currentStepIndex]
 
@@ -94,14 +87,6 @@ export function useTransactionSteps(
 
     steps?.[currentStepIndex]?.onActivated?.()
   }, [currentStepIndex, isLoading, steps.length])
-
-  // On last transaction success, play success sound.
-  // TODO move this to a global tx state management system in later refactor.
-  useEffect(() => {
-    if (lastTransaction?.result.isSuccess && currentStep && !mute) {
-      playTxSound(currentStep.stepType)
-    }
-  }, [lastTransaction?.result.isSuccess])
 
   return {
     steps,

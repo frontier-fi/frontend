@@ -40,7 +40,10 @@ export function usePoolCreationTransactions({
 
   // cow requires pool deployment to happen before we know the spender
   const cowSpenderAdress = poolAddress ? poolAddress : zeroAddress
-  const spenderAddress = protocolVersion === 1 ? cowSpenderAdress : getSpenderForCreatePool(chain)
+
+  const spenderAddress =
+    (protocolVersion as number) === 1 ? cowSpenderAdress : getSpenderForCreatePool(chain)
+
   const isPermit2 = protocolVersion === 3
 
   const { isLoading: isLoadingTokenApprovalSteps, steps: tokenApprovalSteps } =

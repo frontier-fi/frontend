@@ -1,16 +1,13 @@
 'use client'
 
 import { useTransactionSteps } from '@repo/lib/modules/transactions/transaction-steps/useTransactionSteps'
-import { useTokenAllowances } from '@repo/lib/modules/web3/useTokenAllowances'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { LABELS } from '@repo/lib/shared/labels'
 import { isDisabledWithReason } from '@repo/lib/shared/utils/functions/isDisabledWithReason'
 import { createContext, PropsWithChildren, useMemo } from 'react'
-import { Address } from 'viem'
 import { usePool } from '../../PoolProvider'
 import { useStakeSteps } from './useStakeSteps'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
-import { bn } from '@repo/lib/shared/utils/numbers'
 import { HumanAmount } from '@balancer/sdk'
 import {
   getStakedBalance,
@@ -18,37 +15,25 @@ import {
   getUserWalletBalanceUsd,
 } from '../../user-balance.helpers'
 import { GqlPoolStakingTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
+import { bn } from '@repo/lib/shared/utils/numbers'
 
 export type UseStakeResponse = ReturnType<typeof useStakeLogic>
 export const StakeContext = createContext<UseStakeResponse | null>(null)
 
 export function useStakeLogic() {
-  const { userAddress, isConnected } = useUserAccount()
-  const { pool, chainId, isLoadingOnchainUserBalances } = usePool()
+  const { isConnected } = useUserAccount()
+  const { pool, isLoadingOnchainUserBalances } = usePool()
 
-  const { isDisabled, disabledReason } = isDisabledWithReason([
-    !isConnected,
-    LABELS.walletNotConnected,
-  ])
+  const { isDisabled, disabledReason } = isDisabledWithReason(
+    [!isConnected, LABELS.walletNotConnected],
+    [true, 'Staking is unavailable on Frontier']
+  )
 
-  const tokenAllowances = useTokenAllowances({
-    chainId,
-    userAddress,
-    spenderAddress: pool.staking?.address as Address,
-    tokenAddresses: [pool.address as Address],
-  })
-
-  /**
-   * Step construction
-   */
   const { isLoadingSteps, steps } = useStakeSteps(pool)
   const transactionSteps = useTransactionSteps(steps, isLoadingSteps)
 
   const stakeTxHash = transactionSteps.lastTransaction?.result?.data?.transactionHash
 
-  /**
-   * Side-effects
-   */
   const stakedBalance = getStakedBalance(pool, GqlPoolStakingTypeValues.Gauge)
 
   const { quoteAmountIn, quoteAmountInUsd } = useMemo(() => {
@@ -70,7 +55,7 @@ export function useStakeLogic() {
     quoteAmountIn,
     quoteAmountInUsd,
     stakedBalance,
-    tokenAllowances,
+    tokenAllowances: undefined,
     stakeTxHash,
     isLoading: isLoadingSteps,
   }

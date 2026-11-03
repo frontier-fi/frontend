@@ -12,7 +12,7 @@ export default function PoolWeightChartLegend({ displayTokens }: { displayTokens
             background="none"
             fontSize="1rem"
             fontWeight="normal"
-            key={`token-weight-chart-legend-${token.symbol}`}
+            key={`token-weight-chart-legend-${token.address}-${i}`}
           >
             <HStack spacing="1">
               <Box

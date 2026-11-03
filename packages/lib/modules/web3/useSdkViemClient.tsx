@@ -56,7 +56,11 @@ export function useSdkWalletClient() {
   }
 
   return {
-    sdkClient: sdkClient ? (sdkClient.extend(publicActions) as PublicWalletClient) : undefined,
+    // wagmi/viem WalletClient and SDK PublicWalletClient diverge across viem minors
+    // (e.g. `scope`); cast via unknown until SDK aligns with the app's viem version.
+    sdkClient: sdkClient
+      ? (sdkClient.extend(publicActions) as unknown as PublicWalletClient)
+      : undefined,
     isLoading,
   }
 }

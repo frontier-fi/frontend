@@ -35,7 +35,6 @@ query GetPools(
       fees24h
       holdersCount
       swapFee
-      swapsCount
       totalShares
       aprItems {
         id
@@ -46,39 +45,9 @@ query GetPools(
         rewardTokenAddress
       }
     }
-    staking {
-      id
-      type
-      chain
-      address
-      gauge {
-        id
-        gaugeAddress
-        version
-        status
-        workingSupply
-        otherGauges {
-          gaugeAddress
-          version
-          status
-          id
-          rewards {
-            id
-            tokenAddress
-            rewardPerSecond
-          }
-        }
-        rewards {
-          id
-          rewardPerSecond
-          tokenAddress
-        }
-      }
-    }
     factory
     id
     name
-    owner
     swapFeeManager
     pauseManager
     poolCreator
@@ -89,19 +58,9 @@ query GetPools(
       totalBalanceUsd
       walletBalance
       walletBalanceUsd
-      stakedBalances {
-        balance
-        balanceUsd
-        stakingType
-        stakingId
-      }
     }
     poolTokens {
       ...PoolTokens
-    }
-    lbpParams {
-      startTime
-      endTime
     }
   }
   count: poolGetPoolsCount(

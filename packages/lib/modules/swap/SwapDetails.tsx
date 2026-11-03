@@ -93,7 +93,7 @@ export function OrderRoute() {
               </PopoverTrigger>
               <PopoverContent maxW="300px" p="sm" w="auto">
                 <Text fontSize="sm" variant="secondary">
-                  Balancer Vault version and number of swap hops
+                  Frontier Finance Vault version and number of swap hops
                 </Text>
               </PopoverContent>
             </Popover>
@@ -115,7 +115,7 @@ export function OrderRoute() {
               </PopoverTrigger>
               <PopoverContent maxW="300px" p="sm" w="auto">
                 <Text fontSize="sm" variant="secondary">
-                  Balancer Vault version and number of swap hops
+                  Frontier Finance Vault version and number of swap hops
                 </Text>
               </PopoverContent>
             </Popover>

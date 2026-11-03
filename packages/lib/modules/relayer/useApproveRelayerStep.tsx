@@ -39,11 +39,11 @@ export function useApproveRelayerStep(
 
   const labels: TransactionLabels = {
     title: 'Approve relayer',
-    description: 'Approve the Balancer relayer.',
+    description: 'Approve the Frontier Finance relayer.',
     init: 'Approve relayer',
     confirming: 'Confirming approval...',
     confirmed: 'Relayer approved!',
-    tooltip: 'Approve the Balancer relayer.',
+    tooltip: 'Approve the Frontier Finance relayer.',
   }
 
   const txSimulationMeta = sentryMetaForWagmiSimulation(

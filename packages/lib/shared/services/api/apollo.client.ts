@@ -2,10 +2,11 @@ import { config } from '@repo/lib/config/app.config'
 import { ApolloLink, HttpLink, type NormalizedCacheObject } from '@apollo/client'
 import { ApolloClient, InMemoryCache, SSRMultipartLink } from '@apollo/client-integration-nextjs'
 
-const defaultHeaders = {
-  'x-graphql-client-name': 'FrontendClient',
-  'x-graphql-client-version': '1.0.0',
-}
+// Browser GraphQL goes through the same-origin `/api/graphql` proxy.
+// Frontier's Apollo server answers CORS preflight (OPTIONS) with HTTP 400
+// (CSRF guard), so the browser blocks cross-origin POSTs. SSR can call the
+// API URL directly.
+const browserGraphqlPath = '/api/graphql'
 
 // ── Optional Apollo cache persistence ───────────────────────────────────
 //
@@ -93,8 +94,7 @@ function attachCachePersistence(cache: InMemoryCache, key: string): void {
 
 export function createApolloClient(options: { persistKey?: string } = {}) {
   const httpLink = new HttpLink({
-    uri: config.apiUrl,
-    headers: defaultHeaders,
+    uri: typeof window === 'undefined' ? config.apiUrl : browserGraphqlPath,
   })
 
   const cache = new InMemoryCache({

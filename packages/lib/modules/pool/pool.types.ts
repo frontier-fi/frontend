@@ -1,13 +1,11 @@
 import type {
   GqlNestedPool,
+  GqlPoolElement,
   QuantAmmWeightSnapshot,
-  GqlPoolLiquidityBootstrappingV3,
-  GqlPoolFixedPriceLbp,
 } from '@repo/lib/shared/services/api/graphql-derived-types'
 import {
   GetPoolsQuery,
   GetPoolsQueryVariables,
-  GetPoolQuery,
 } from '@repo/lib/shared/services/api/generated/graphql'
 import type {
   GqlChain,
@@ -18,11 +16,39 @@ import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { Address, Hex } from 'viem'
 import { ApiToken } from '../tokens/token.types'
 
-export type Pool = GetPoolQuery['pool']
+export type Pool = GqlPoolElement
+/** @deprecated Prefer Pool['staking'] — kept for leftover imports. */
+export type LegacyPoolStaking = NonNullable<Pool['staking']>
+
+/** Legacy LBP shape. Frontier pools do not include these fields. */
+export type LbpV3 = Pool & {
+  startTime: number
+  endTime: number
+  /** Address string in some call sites; token object in others. */
+  projectToken?: any
+  projectTokenIndex: number
+  reserveTokenIndex: number
+  projectTokenRate?: string
+  reserveToken?: any
+  isProjectTokenSwapInBlocked?: boolean
+  topTrades?: Array<{
+    value: string
+    address: string
+    timestamp?: number
+  }>
+  lbpName?: string
+  description?: string
+  website?: string
+  x?: string | null
+  discord?: string | null
+  telegram?: string | null
+  owner?: string
+  poolCreator?: string
+  isSeedless?: boolean
+}
 export type PoolId = Hex
 export type PoolList = GetPoolsQuery['pools']
 export type PoolListItem = PoolList[0]
-export type LbpV3 = GqlPoolLiquidityBootstrappingV3 | GqlPoolFixedPriceLbp
 
 type ApiTokenWithNestedPool = ApiToken & { nestedPool?: GqlNestedPool }
 export type VotingPool = Pick<
@@ -91,7 +117,6 @@ export interface PoolsQueryVariables extends GetPoolsQueryVariables {
 export const poolTypeFilters = [
   GqlPoolTypeValues.Weighted,
   GqlPoolTypeValues.Stable,
-  GqlPoolTypeValues.LiquidityBootstrapping,
   GqlPoolTypeValues.Gyro,
   GqlPoolTypeValues.CowAmm,
   GqlPoolTypeValues.Fx,
@@ -101,20 +126,26 @@ export const poolTypeFilters = [
 
 export type PoolFilterType = (typeof poolTypeFilters)[number]
 
+/** Pool types accepted by the live Frontier GraphQL schema. */
+export const API_GQL_POOL_TYPES = [
+  GqlPoolTypeValues.Weighted,
+  GqlPoolTypeValues.Stable,
+  GqlPoolTypeValues.Eclp,
+] as const satisfies readonly GqlPoolType[]
+
+export type ApiGqlPoolType = (typeof API_GQL_POOL_TYPES)[number]
+
+export function isApiGqlPoolType(type: string): type is ApiGqlPoolType {
+  return (API_GQL_POOL_TYPES as readonly string[]).includes(type)
+}
+
 // We need to map toggalable pool types to their corresponding set of GqlPoolTypes.
+// Values not in API_GQL_POOL_TYPES are filtered out before queries hit the API.
 export const POOL_TYPE_MAP: { [key in PoolFilterType]: GqlPoolType[] } = {
   [GqlPoolTypeValues.Weighted]: [GqlPoolTypeValues.Weighted],
-  [GqlPoolTypeValues.Stable]: [
-    GqlPoolTypeValues.Stable,
-    GqlPoolTypeValues.ComposableStable,
-    GqlPoolTypeValues.MetaStable,
-  ],
-  [GqlPoolTypeValues.LiquidityBootstrapping]: [GqlPoolTypeValues.LiquidityBootstrapping],
-  [GqlPoolTypeValues.Gyro]: [
-    GqlPoolTypeValues.Gyro,
-    GqlPoolTypeValues.Gyro3,
-    GqlPoolTypeValues.GyroE,
-  ],
+  [GqlPoolTypeValues.Stable]: [GqlPoolTypeValues.Stable],
+  // Frontier renamed Gyro ECLP pools to type ECLP.
+  [GqlPoolTypeValues.Gyro]: [GqlPoolTypeValues.Eclp],
   [GqlPoolTypeValues.CowAmm]: [GqlPoolTypeValues.CowAmm],
   [GqlPoolTypeValues.Fx]: [GqlPoolTypeValues.Fx],
   [GqlPoolTypeValues.QuantAmmWeighted]: [GqlPoolTypeValues.QuantAmmWeighted],

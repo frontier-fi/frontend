@@ -1,5 +1,5 @@
 import { Circle, SquareProps } from '@chakra-ui/react'
-import type { GqlChain } from '../../services/api/generated/graphql'
+import type { AppChain } from '../../services/api/graphql-enums'
 import { getNetworkConfig } from '@repo/lib/config/app.config'
 import Image from 'next/image'
 
@@ -8,7 +8,7 @@ export function NetworkIcon({
   size = 12,
   withPadding = true,
   ...rest
-}: { chain: GqlChain; withPadding?: boolean } & SquareProps) {
+}: { chain: AppChain; withPadding?: boolean } & SquareProps) {
   const { iconPath, shortName } = getNetworkConfig(chain)
 
   const imageSize = Number(size) * (withPadding ? 2 : 3) + 8

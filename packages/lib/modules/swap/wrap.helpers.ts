@@ -1,4 +1,4 @@
-import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { Address } from 'viem'
 import { isNativeAsset, isWrappedNativeAsset } from '../tokens/token.helpers'
 import { getNetworkConfig } from '@repo/lib/config/app.config'
@@ -7,14 +7,14 @@ import { LidoWrapHandler } from './handlers/LidoWrap.handler'
 import { SwapHandler } from './handlers/Swap.handler'
 import { OWrapType, SupportedWrapHandler, WrapType } from './swap.types'
 
-export function isNativeWrap(tokenIn: Address, tokenOut: Address, chain: GqlChain) {
+export function isNativeWrap(tokenIn: Address, tokenOut: Address, chain: AppChain) {
   const tokenInIsNative = isNativeAsset(tokenIn, chain) || isWrappedNativeAsset(tokenIn, chain)
   const tokenOutIsNative = isNativeAsset(tokenOut, chain) || isWrappedNativeAsset(tokenOut, chain)
 
   return tokenInIsNative && tokenOutIsNative
 }
 
-export function isSupportedWrap(tokenIn: Address, tokenOut: Address, chain: GqlChain) {
+export function isSupportedWrap(tokenIn: Address, tokenOut: Address, chain: AppChain) {
   const networkConfig = getNetworkConfig(chain)
   const supportedWrappers = networkConfig.tokens.supportedWrappers || []
   return supportedWrappers.some(wrapper =>
@@ -22,11 +22,11 @@ export function isSupportedWrap(tokenIn: Address, tokenOut: Address, chain: GqlC
   )
 }
 
-export function isWrapOrUnwrap(tokenIn: Address, tokenOut: Address, chain: GqlChain) {
+export function isWrapOrUnwrap(tokenIn: Address, tokenOut: Address, chain: AppChain) {
   return isNativeWrap(tokenIn, tokenOut, chain) || isSupportedWrap(tokenIn, tokenOut, chain)
 }
 
-export function getWrapConfig(tokenIn: Address, tokenOut: Address, chain: GqlChain) {
+export function getWrapConfig(tokenIn: Address, tokenOut: Address, chain: AppChain) {
   const networkConfig = getNetworkConfig(chain)
   const supportedWrappers = networkConfig.tokens.supportedWrappers || []
   if (!isSupportedWrap(tokenIn, tokenOut, chain)) throw new Error('Unsupported wrap')
@@ -43,7 +43,7 @@ export function getWrapConfig(tokenIn: Address, tokenOut: Address, chain: GqlCha
 export function getWrapHandlerClass(
   tokenIn: Address,
   tokenOut: Address,
-  chain: GqlChain
+  chain: AppChain
 ): new () => SwapHandler {
   const wrapper = getWrapConfig(tokenIn, tokenOut, chain)
 
@@ -55,7 +55,7 @@ export function getWrapHandlerClass(
   }
 }
 
-export function getWrapType(tokenIn: Address, tokenOut: Address, chain: GqlChain): WrapType | null {
+export function getWrapType(tokenIn: Address, tokenOut: Address, chain: AppChain): WrapType | null {
   if (isNativeAsset(tokenIn, chain) && isWrappedNativeAsset(tokenOut, chain)) {
     return OWrapType.WRAP
   } else if (isWrappedNativeAsset(tokenIn, chain) && isNativeAsset(tokenOut, chain)) {
@@ -68,7 +68,7 @@ export function getWrapType(tokenIn: Address, tokenOut: Address, chain: GqlChain
   return null
 }
 
-export function getWrapperForBaseToken(baseToken: Address, chain: GqlChain) {
+export function getWrapperForBaseToken(baseToken: Address, chain: AppChain) {
   const networkConfig = getNetworkConfig(chain)
   const supportedWrappers = networkConfig.tokens.supportedWrappers || []
   return supportedWrappers.find(wrapper => isSameAddress(wrapper.baseToken, baseToken))

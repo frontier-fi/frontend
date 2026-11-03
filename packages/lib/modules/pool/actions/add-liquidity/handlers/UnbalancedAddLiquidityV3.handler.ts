@@ -7,7 +7,7 @@ import { constructBaseBuildCallInput } from './add-liquidity.utils'
 /**
  * UnbalancedAddLiquidityV3Handler is a handler that implements the
  * AddLiquidityHandler interface for unbalanced V3 adds, e.g. where the user
- * specifies the token amounts in. It uses the Balancer SDK to implement it's
+ * specifies the token amounts in. It uses the Frontier Finance SDK to implement it's
  * methods. It also handles the case where one of the input tokens is the native
  * asset instead of the wrapped native asset.
  */

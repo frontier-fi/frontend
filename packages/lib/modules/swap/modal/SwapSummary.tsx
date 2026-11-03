@@ -12,7 +12,6 @@ import { HumanAmount } from '@balancer/sdk'
 import { slippageDiffLabel } from '@repo/lib/shared/utils/slippage'
 import { AnimateHeightChange } from '@repo/lib/shared/components/animations/AnimateHeightChange'
 import { CardPopAnim } from '@repo/lib/shared/components/animations/CardPopAnim'
-import { CustomToken } from '@repo/lib/modules/tokens/token.types'
 import { GasCostSummaryCard } from '@repo/lib/modules/transactions/transaction-steps/GasCostSummaryCard'
 import { GqlSorSwapTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import {
@@ -44,9 +43,6 @@ export function SwapSummary({
     swapTxConfirmed,
     simulationQuery,
     hasQuoteContext,
-    isLbpSwap,
-    lbpToken,
-    isLbpProjectTokenBuy,
     swapType,
   } = useSwap()
 
@@ -148,10 +144,6 @@ export function SwapSummary({
           }
           tokenAddress={shouldShowReceipt ? sentToken.tokenAddress : tokenIn.address}
           tokenAmount={shouldShowReceipt ? sentToken.humanAmount : inAmountWithSlippage}
-          {...(isLbpSwap &&
-            !isLbpProjectTokenBuy && {
-              customToken: lbpToken as CustomToken,
-            })}
         />
       </Card>
 
@@ -162,10 +154,6 @@ export function SwapSummary({
           rightElement={outTokenRightElement()}
           tokenAddress={shouldShowReceipt ? receivedToken.tokenAddress : tokenOut.address}
           tokenAmount={shouldShowReceipt ? receivedToken.humanAmount : outAmountWithSlippage}
-          {...(isLbpSwap &&
-            isLbpProjectTokenBuy && {
-              customToken: lbpToken as CustomToken,
-            })}
         />
       </Card>
 
@@ -187,7 +175,7 @@ export function SwapSummary({
                 <Text color="grayText" fontSize="sm">
                   Exchange rate
                 </Text>
-                <SwapRate isLbpSwap={isLbpSwap || false} />
+                <SwapRate />
               </HStack>
             </Card>
           </CardPopAnim>

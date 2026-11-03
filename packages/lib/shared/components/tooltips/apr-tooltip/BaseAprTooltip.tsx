@@ -1,10 +1,6 @@
 import type { GqlPoolAprItem } from '@repo/lib/shared/services/api/graphql-derived-types'
-import type {
-  GqlChain,
-  GqlHookType,
-  GqlPoolType,
-} from '@repo/lib/shared/services/api/generated/graphql'
-import { GqlHookTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
+import type { GqlHookType, GqlPoolType } from '@repo/lib/shared/services/api/generated/graphql'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import {
   PlacementWithLogical,
   Popover,
@@ -23,6 +19,7 @@ import {
   merklIncentivesTooltipText,
   surplusIncentivesTooltipText,
   SupportedHookType,
+  dynamicSwapFeesTooltipText as dynamicSwapFeesTooltipTextByHook,
 } from '@repo/lib/shared/hooks/useAprTooltip'
 import { TooltipAprItem } from './TooltipAprItem'
 import type BigNumber from 'bignumber.js'
@@ -42,7 +39,7 @@ interface Props {
   shouldDisplayBaseTooltip?: boolean
   usePortal?: boolean
   children?: ReactNode | (({ isOpen }: { isOpen: boolean }) => ReactNode)
-  chain: GqlChain
+  chain: AppChain
   hookType?: GqlHookType
 }
 
@@ -63,15 +60,9 @@ const defaultNumberFormatter = (value: string) => bn(value)
 export const defaultDisplayValueFormatterWithCanBeNegative = (value: BigNumber) =>
   fNum('apr', value.toString(), { canBeNegative: true })
 
-function getDynamicSwapFeesLabel(hookType: GqlHookType) {
-  switch (hookType) {
-    case GqlHookTypeValues.MevTax:
-      return 'MEV Capture hook'
-    case GqlHookTypeValues.StableSurge:
-      return 'Stable Surge hook'
-    default:
-      return 'Dynamic Swap Fees '
-  }
+function getDynamicSwapFeesLabel(_hookType: GqlHookType) {
+  // Frontier API only exposes UNKNOWN — MEV_TAX / STABLE_SURGE fall through to default
+  return 'Dynamic Swap Fees '
 }
 
 function BaseAprTooltip({
@@ -125,7 +116,6 @@ function BaseAprTooltip({
     maBeetsTotalAprDisplayed,
     maBeetsRewardTooltipText,
     dynamicSwapFeesDisplayed,
-    dynamicSwapFeesTooltipText,
     fuulIncentivesDisplayed,
     fuulTooltipText,
   } = useAprTooltip({
@@ -165,7 +155,7 @@ function BaseAprTooltip({
               apr={dynamicSwapFeesDisplayed}
               displayValueFormatter={usedDisplayValueFormatter}
               title={getDynamicSwapFeesLabel(hookType)}
-              tooltipText={dynamicSwapFeesTooltipText[hookType as SupportedHookType]}
+              tooltipText={dynamicSwapFeesTooltipTextByHook[hookType as SupportedHookType]}
             />
           </>
         ) : null}

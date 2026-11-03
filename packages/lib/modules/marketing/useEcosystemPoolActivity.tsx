@@ -2,7 +2,8 @@
 import * as echarts from 'echarts/core'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { format, millisecondsToSeconds, secondsToMinutes } from 'date-fns'
-import type { GqlChain, GqlPoolEventType } from '@repo/lib/shared/services/api/generated/graphql'
+import type { GqlPoolEventType } from '@repo/lib/shared/services/api/generated/graphql'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { GqlChainValues, GqlPoolEventTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import EChartsReactCore from 'echarts-for-react/lib/core'
 import { useTheme as useChakraTheme } from '@chakra-ui/react'
@@ -31,15 +32,15 @@ export type ChartInfoMetaData = {
   tokens: ChartInfoTokens[]
   tx: string
   usdValue: string
-  chain: GqlChain
+  chain: AppChain
   type: GqlPoolEventType
 }
 
 type ChartEl = [number, string, ChartInfoMetaData]
 
-export type ChartInfo = Partial<Record<GqlChain, ChartEl[]>>
+export type ChartInfo = Partial<Record<AppChain, ChartEl[]>>
 
-export const gradientMap: Partial<Record<GqlChain, { from: string; to: string }>> = {
+export const gradientMap: Partial<Record<AppChain, { from: string; to: string }>> = {
   [GqlChainValues.Arbitrum]: {
     from: '#6C80A7',
     to: '#2D374B',
@@ -86,7 +87,7 @@ export const gradientMap: Partial<Record<GqlChain, { from: string; to: string }>
   },
 }
 
-function getDefaultChainMeta(): Partial<Record<GqlChain, []>> {
+function getDefaultChainMeta(): Partial<Record<AppChain, []>> {
   return {
     [GqlChainValues.Mainnet]: [],
     [GqlChainValues.Arbitrum]: [],
@@ -300,7 +301,7 @@ export function useEcosystemPoolActivityChart() {
   const { getToken } = useTokens()
   const { toCurrency } = useCurrency()
   const [activeTab, setActiveTab] = useState<PoolActivityChartTypeTab>(tabsList[0]!)
-  const [activeNetwork, setActiveNetwork] = useState<GqlChain | 'all'>('all')
+  const [activeNetwork, setActiveNetwork] = useState<AppChain | 'all'>('all')
   const theme = useChakraTheme()
   const now = useCurrentDate()
 
@@ -338,10 +339,7 @@ export function useEcosystemPoolActivityChart() {
         })
       }
 
-      if (
-        item.__typename === 'GqlPoolSwapEventV3' ||
-        item.__typename === 'GqlPoolSwapEventCowAmm'
-      ) {
+      if (item.__typename === 'GqlPoolSwapEventV3') {
         tokens.push({
           token: getToken(item.tokenIn.address, chain),
           amount: item.tokenIn.amount,
@@ -350,6 +348,21 @@ export function useEcosystemPoolActivityChart() {
         tokens.push({
           token: getToken(item.tokenOut.address, chain),
           amount: item.tokenOut.amount,
+        })
+      } else if ((item.__typename as string) === 'GqlPoolSwapEventCowAmm') {
+        const cow = item as unknown as {
+          tokenIn: { address: string; amount: string }
+          tokenOut: { address: string; amount: string }
+        }
+
+        tokens.push({
+          token: getToken(cow.tokenIn.address, chain),
+          amount: cow.tokenIn.amount,
+        })
+
+        tokens.push({
+          token: getToken(cow.tokenOut.address, chain),
+          amount: cow.tokenOut.amount,
         })
       }
 
@@ -380,7 +393,7 @@ export function useEcosystemPoolActivityChart() {
     )
 
     const total = Object.keys(chartData).reduce((acc, chain) => {
-      return acc + (chartData[chain as GqlChain] || []).length
+      return acc + (chartData[chain as AppChain] || []).length
     }, 0)
 
     return { total, elapsedMinutes }

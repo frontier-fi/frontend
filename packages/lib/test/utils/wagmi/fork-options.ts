@@ -12,7 +12,6 @@ import {
   plasmaTokenBalances,
   monadTokenBalances,
 } from './fork-default-balances'
-import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { hyperEVM } from '@balancer/sdk'
 
 export type TokenBalance = {
@@ -50,8 +49,7 @@ const defaultForkBalances: TokenBalancesByChain = {
   [monad.id]: monadTokenBalances,
 }
 
-const isBeets = PROJECT_CONFIG.projectId === 'beets'
 export const defaultManualForkOptions = {
-  chainId: isBeets ? sonic.id : mainnet.id, // Change this id for manual tests on different chains
+  chainId: mainnet.id, // Change this id for manual tests on different chains
   forkBalances: defaultForkBalances,
 }

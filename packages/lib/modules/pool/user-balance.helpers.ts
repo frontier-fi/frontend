@@ -4,9 +4,22 @@ import { PoolListItem } from './pool.types'
 import { parseUnits } from 'viem'
 import { BPT_DECIMALS } from './pool.constants'
 import { HumanAmount } from '@balancer/sdk'
-import type { GqlPoolStakingType } from '@repo/lib/shared/services/api/generated/graphql'
-import { GqlPoolStakingTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
-import { hasNonPreferentialStakedBalance, hasPreferentialGauge } from './actions/stake.helpers'
+import {
+  GqlPoolStakingType,
+  GqlPoolStakingTypeValues,
+} from '@repo/lib/shared/services/api/graphql-enums'
+
+/** Frontier does not return gauge or veBAL stake balances. */
+type UserStakedBalance = {
+  stakingType: GqlPoolStakingType
+  stakingId: string
+  balance: string
+  balanceUsd: number
+}
+
+export function getUserStakedBalances(_pool: Pool | PoolListItem): UserStakedBalance[] {
+  return []
+}
 
 export function calcStakedBalance(
   pool: Pool | PoolListItem,
@@ -15,9 +28,11 @@ export function calcStakedBalance(
   const userBalance = pool.userBalance
   if (!userBalance) return '0'
 
+  const stakedBalances = getUserStakedBalances(pool)
+
   const filteredBalances = stakingType
-    ? userBalance.stakedBalances.filter(stakedBalance => stakedBalance.stakingType === stakingType)
-    : userBalance.stakedBalances
+    ? stakedBalances.filter(stakedBalance => stakedBalance.stakingType === stakingType)
+    : stakedBalances
 
   return safeSum(
     filteredBalances.map(stakedBalance =>
@@ -40,7 +55,7 @@ export function calcTotalStakedBalanceUsd(pool: Pool): number {
 
   return Number(
     safeSum(
-      userBalance.stakedBalances.map(stakedBalance =>
+      getUserStakedBalances(pool).map(stakedBalance =>
         isBnParseable(stakedBalance.balanceUsd) ? bn(stakedBalance.balanceUsd) : bn(0)
       )
     )
@@ -107,7 +122,7 @@ export function calcNonOnChainFetchedStakedBalance(pool: Pool): string {
   const userBalance = pool.userBalance
   if (!userBalance) return '0'
 
-  const nonOnChainFetchedStakedBalances = userBalance.stakedBalances
+  const nonOnChainFetchedStakedBalances = getUserStakedBalances(pool)
     .filter(balance => balance.stakingType !== GqlPoolStakingTypeValues.Gauge)
     .map(stakedBalance => stakedBalance.balance)
 
@@ -119,31 +134,10 @@ type StakedBalance = {
   balanceUsd: number
 }
 
-export function getStakedBalance(pool: Pool, stakingType: GqlPoolStakingType): StakedBalance {
-  const zeroStakedBalance = {
+export function getStakedBalance(_pool: Pool, _stakingType: GqlPoolStakingType): StakedBalance {
+  return {
     balance: '0' as HumanAmount,
     balanceUsd: 0,
-  }
-
-  const userBalance = pool.userBalance
-  if (!userBalance) return zeroStakedBalance
-
-  const stakingAddress =
-    stakingType === GqlPoolStakingTypeValues.Gauge ? pool.staking?.gauge?.id : undefined
-
-  const stakedBalance = userBalance.stakedBalances.find(
-    balance =>
-      balance.stakingType === stakingType &&
-      (balance.stakingId === stakingAddress || stakingType === GqlPoolStakingTypeValues.VeBal)
-  )
-
-  if (!stakedBalance) {
-    return zeroStakedBalance
-  }
-
-  return {
-    balance: stakedBalance.balance as HumanAmount,
-    balanceUsd: stakedBalance.balanceUsd,
   }
 }
 
@@ -180,7 +174,7 @@ export function hasStakedBalanceFor(
   const userBalance = pool.userBalance
   if (!userBalance) return false
 
-  return userBalance.stakedBalances.some(
+  return getUserStakedBalances(pool).some(
     balance =>
       balance.stakingType === stakingType &&
       isBnParseable(balance.balance) &&
@@ -195,7 +189,7 @@ export function hasStakingType(
   const userBalance = pool.userBalance
   if (!userBalance) return false
 
-  return userBalance.stakedBalances.some(balance => balance.stakingType === stakingType)
+  return getUserStakedBalances(pool).some(balance => balance.stakingType === stakingType)
 }
 
 export function hasTinyBalance(pool: Pool | PoolListItem, minUsdBalance = 0.01): boolean {
@@ -204,7 +198,6 @@ export function hasTinyBalance(pool: Pool | PoolListItem, minUsdBalance = 0.01):
   return bn(getUserTotalBalanceUsd(pool)).lt(minUsdBalance)
 }
 
-export function shouldMigrateStake(pool: Pool): boolean {
-  const hasNonPreferentialBalance = hasNonPreferentialStakedBalance(pool)
-  return hasPreferentialGauge(pool) && hasNonPreferentialBalance
+export function shouldMigrateStake(_pool: Pool): boolean {
+  return false
 }

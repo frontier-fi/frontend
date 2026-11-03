@@ -19,12 +19,10 @@ export function aGqlPoolMinimalMock(...options: Partial<GqlPoolMinimal>[]): GqlP
       fees24h: '5450.619941007149',
       holdersCount: '1917',
       swapFee: '0.01',
-      swapsCount: '58991',
     },
     factory: '0xa5bf2ddf098bb0ef6d120c98217dd6b141c74ee0',
     id: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
     name: 'Balancer 80 BAL 20 WETH',
-    owner: '0xba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1b',
     symbol: 'B-80BAL-20WETH',
     type: GqlPoolTypeValues.Weighted,
   }

@@ -123,10 +123,10 @@ test('uses custom remove liquidity handler selector and forwards handler to cust
     () =>
       useRemoveLiquidityLogic(
         undefined,
-        false,
         handlerSelector,
         undefined,
-        useRemoveLiquiditySteps
+        useRemoveLiquiditySteps,
+        false
       ),
     {
       wrapper: buildDefaultPoolTestProvider(poolMock, DefaultRemoveLiquidityTestProvider),

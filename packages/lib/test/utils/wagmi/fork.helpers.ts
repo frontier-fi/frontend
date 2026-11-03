@@ -2,9 +2,8 @@ import { Address, createPublicClient, createTestClient, http, isAddress, PublicC
 import { SetBalanceMutation } from '../../anvil/useSetErc20Balance'
 import { TokenBalance, TokenBalancesByChain } from './fork-options'
 import { createConfig } from 'wagmi'
-import { mainnet, sonic } from 'viem/chains'
+import { mainnet } from 'viem/chains'
 import { drpcUrlByChainId } from '@repo/lib/shared/utils/rpc'
-import { isBeets } from '@repo/lib/config/getProjectConfig'
 
 /*
   E2E dev tests use an anvil fork to impersonate and test with default anvil accounts
@@ -15,7 +14,7 @@ export const defaultAnvilAccount = '0x3B7D260597A3e3f90274563a9e481618C6B951Eb'
 export const defaultAnvilForkRpcUrl = 'http://127.0.0.1:8545'
 
 const chain = {
-  ...(isBeets ? sonic : mainnet),
+  ...mainnet,
   rpcUrls: {
     default: {
       http: [defaultAnvilForkRpcUrl],

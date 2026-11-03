@@ -1,1 +1,1 @@
-pnpm lint-staged
+NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=8192}" pnpm lint-staged --concurrent 1

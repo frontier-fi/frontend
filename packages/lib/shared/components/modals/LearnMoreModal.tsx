@@ -17,7 +17,6 @@ import {
   Link,
 } from '@chakra-ui/react'
 import { ArrowUpRight, HelpCircle } from 'lucide-react'
-import { getDiscordLink } from '@repo/lib/shared/utils/links'
 
 type LearnMoreModalProps = {
   listItems: string[]
@@ -81,13 +80,13 @@ export function LearnMoreModal({
                   as={Link}
                   display="flex"
                   gap="1"
-                  href={getDiscordLink() || ''}
+                  href="https://github.com/frontier-fi/"
                   isExternal
                   minWidth="184px"
                   size="md"
                   variant="tertiary"
                 >
-                  Get help on Discord
+                  Get help on GitHub
                   <ArrowUpRight size={14} />
                 </Button>
               </HStack>

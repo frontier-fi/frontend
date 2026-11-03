@@ -16,6 +16,7 @@
  */
 import { TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
 import { buildTenderlyUrl } from '@repo/lib/modules/web3/useTenderly'
+import { isSentryEnabled } from '@repo/lib/config/sentry'
 import { captureException } from '@sentry/nextjs'
 import { ScopeContext } from '@sentry/core'
 import { Address, Hex } from 'viem'
@@ -23,11 +24,13 @@ import { Address, Hex } from 'viem'
 // Wraps Sentry's captureException to allow for additional context or to use
 // where we don't want to throw an error.
 export function captureError(error: Error, context?: Partial<ScopeContext>): void {
+  if (!isSentryEnabled) return
   captureException(error, { ...context })
 }
 
 // Wraps Sentry's captureException to capture an error without throwing.
 export function captureErrorMessage(errorMessage: string, context?: Partial<ScopeContext>): void {
+  if (!isSentryEnabled) return
   captureException(new Error(errorMessage), { ...context })
 }
 

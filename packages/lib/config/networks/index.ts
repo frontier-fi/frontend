@@ -1,5 +1,5 @@
-import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
-import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
+import '@repo/lib/config/frontier/addresses'
+import { AppChain, GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { NetworkConfig } from '../config.types'
 import arbitrum from './arbitrum'
 import avalanche from './avalanche'
@@ -14,8 +14,8 @@ import sonic from './sonic'
 import hyperevm from './hyperevm'
 import plasma from './plasma'
 import monad from './monad'
-export type GqlChainValues = `${GqlChain}`
-export type NetworkConfigs = Partial<Record<GqlChainValues, NetworkConfig>>
+export type { AppChain as GqlChainValues }
+export type NetworkConfigs = Partial<Record<AppChain, NetworkConfig>>
 
 const networkConfigs: NetworkConfigs = {
   [GqlChainValues.Arbitrum]: arbitrum,
@@ -33,7 +33,7 @@ const networkConfigs: NetworkConfigs = {
   [GqlChainValues.Monad]: monad,
 }
 
-export function getNetworkConfig(chain: GqlChain) {
+export function getNetworkConfig(chain: AppChain) {
   const networkConfig = networkConfigs[chain]
   if (!networkConfig) throw new Error(`Missing network config for chain ${chain}`)
 

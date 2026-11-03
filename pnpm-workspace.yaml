@@ -3,6 +3,9 @@ packages:
   - "packages/*"
 
 allowBuilds:
+  # Git-hosted Frontier fork — prepare runs tsup to produce dist/
+  "@balancer/sdk": true
+  "@balancer/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/4356e40fb42edf6a795df67035aa2db74cad45fb": true
   "@parcel/watcher": true
   "@sentry/cli": true
   "@reown/appkit": true
@@ -33,6 +36,8 @@ peerDependencyRules:
     msw: ">=2.4.9"
 
 overrides:
+  # Frontier fork until published to npm (Sepolia vault/router addresses).
+  "@balancer/sdk": "github:frontier-fi/sdk#main"
   # Remove debug's optional color peer so every app shares the same
   # Chakra/Emotion/Next instances (see PR #2883). Keep this declarative:
   # Renovate disables pnpmfile hooks when generating lockfiles.
@@ -50,7 +55,7 @@ publicHoistPattern:
   - "@reown/*" # Fix for @reown/appkit resolution in Next + pnpm
 
 minimumReleaseAgeExclude:
-  - "@balancer/sdk@6.2.0"
+  - "@balancer/sdk"
   - "@eslint-react/ast@5.19.1"
   - "@eslint-react/core@5.19.1"
   - "@eslint-react/eslint-plugin@5.19.1"

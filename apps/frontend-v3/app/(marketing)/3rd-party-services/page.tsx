@@ -62,10 +62,10 @@ export default function Cookies() {
                   <em>Last Updated: April 2025</em>
                 </p>
                 <p>
-                  Balancer is an open source, permissionless, decentralized protocol. The smart
-                  contracts that power the ecosystem may be used by anyone. This website is the
-                  Balancer Foundation&apos;s front-end to the ecosystem and it is also open-source.
-                  You are free to fork it on Github and modify it as you wish.
+                  Frontier Finance is an open source, permissionless, decentralized protocol. The
+                  smart contracts that power the ecosystem may be used by anyone. This website is
+                  the Frontier Finance Foundation&apos;s front-end to the ecosystem and it is also
+                  open-source. You are free to fork it on Github and modify it as you wish.
                 </p>
               </Box>
               <p>This website uses the following 3rd party services:</p>

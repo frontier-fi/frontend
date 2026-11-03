@@ -1,9 +1,10 @@
-import { PublicWalletClient, AddressProvider } from '@balancer/sdk'
+import { PublicWalletClient } from '@balancer/sdk'
 import { signPermit2Initialization } from '@repo/lib/modules/tokens/approvals/permit2/signPermit2Initialization'
 import { SignPermit2Fn as SignPermit2Fn } from '@repo/lib/modules/tokens/approvals/permit2/useSignPermit2'
 import { useSignPermit2Step } from '@repo/lib/modules/transactions/transaction-steps/useSignPermit2Step'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { ExtendedInitPoolInput } from '@repo/lib/modules/pool/actions/create/types'
+import { getRouterAddress } from '@repo/lib/config/app.config'
 
 type Params = {
   initPoolInput: ExtendedInitPoolInput
@@ -35,7 +36,7 @@ export function useSignPermit2InitializeStep({ initPoolInput, isComplete }: Para
     tokenAmountsIn,
     isPermit2: true,
     isSimulationReady: true,
-    spender: AddressProvider.Router(chainId),
+    spender: getRouterAddress(chainId),
     isComplete,
   })
 

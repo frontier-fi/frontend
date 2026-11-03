@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
-import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
+import { AppChain, GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { getNetworkConfig } from './index'
 
 describe('getNetworkConfig', () => {
   it('resolves a config for every supported chain', () => {
-    const chains = Object.values(GqlChainValues) as GqlChain[]
+    const chains = Object.values(GqlChainValues)
 
     for (const chain of chains) {
       const config = getNetworkConfig(chain)
@@ -18,7 +17,7 @@ describe('getNetworkConfig', () => {
   })
 
   it('throws for unknown chains', () => {
-    expect(() => getNetworkConfig('UNKNOWN' as GqlChain)).toThrow(
+    expect(() => getNetworkConfig('UNKNOWN' as AppChain)).toThrow(
       /Missing network config for chain UNKNOWN/
     )
   })

@@ -1,34 +1,9 @@
 import { Pool } from '../../pool/pool.types'
-import type { StableSurgeHookParams } from '@repo/lib/shared/services/api/graphql-derived-types'
-import { GqlHookTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
-import { useGetPoolTokensWithActualWeights } from '../../pool/useGetPoolTokensWithActualWeights'
 
-export function useStableSurgeMetrics(pool: Pool) {
-  const { poolTokensWithActualWeights } = useGetPoolTokensWithActualWeights(pool)
-
-  if (!pool.hook || pool.hook.type !== GqlHookTypeValues.StableSurge) return { surging: false }
-
-  const percentages = Object.values(poolTokensWithActualWeights).map(p => parseFloat(p))
-  const totalImbalance = calculateTotalImbalance(percentages)
-
-  const hookParams = pool.hook.params as StableSurgeHookParams
-  const surgeThreshold = parseFloat(hookParams.surgeThresholdPercentage || '0')
-
-  return {
-    surging: totalImbalance > surgeThreshold,
-  }
-}
-
-function calculateMedian(percentages: number[]) {
-  const sortedPercentages = [...percentages].sort((a, b) => a - b)
-  const mid = Math.floor(sortedPercentages.length / 2)
-  return sortedPercentages.length % 2 === 0
-    ? (sortedPercentages[mid - 1]! + sortedPercentages[mid]!) / 2
-    : sortedPercentages[mid]!
-}
-
-function calculateTotalImbalance(percentages: number[]) {
-  const median = calculateMedian(percentages)
-
-  return percentages.reduce((sum, percentage) => sum + Math.abs(percentage - median!), 0)
+/**
+ * Frontier API only exposes hook type UNKNOWN — StableSurge params are unavailable.
+ * Always short-circuit without reading hook.params.
+ */
+export function useStableSurgeMetrics(_pool: Pool) {
+  return { surging: false }
 }

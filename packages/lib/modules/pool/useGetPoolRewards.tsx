@@ -1,53 +1,21 @@
 import { Pool } from './pool.types'
 import type { GqlToken } from '@repo/lib/shared/services/api/graphql-derived-types'
-import { sumBy } from 'lodash'
 import { useTokens } from '../tokens/TokensProvider'
-import { bn, Numberish, isBnParseable } from '@repo/lib/shared/utils/numbers'
+import { Numberish } from '@repo/lib/shared/utils/numbers'
 import { calcPotentialYieldFor } from './pool.utils'
-import { oneWeekInSecs } from '@repo/lib/shared/utils/time'
 
+/**
+ * Frontier has no pool.staking gauges — weekly gauge rewards are always empty.
+ */
 export function useGetPoolRewards(pool: Pool) {
-  const { priceFor, getToken, isLoadingTokens, isLoadingTokenPrices } = useTokens()
+  const { isLoadingTokens, isLoadingTokenPrices } = useTokens()
 
-  const currentRewards = pool.staking?.gauge?.rewards || []
-
-  const currentRewardsPerWeek = currentRewards.map(reward => {
-    return {
-      ...reward,
-      rewardPerWeek: isBnParseable(reward.rewardPerSecond)
-        ? bn(reward.rewardPerSecond).times(oneWeekInSecs)
-        : bn(0),
-    }
-  })
-
-  // In case a reward token is undefined, it's icon in TokenIconStack will be a random one
-  const tokens = currentRewardsPerWeek
-    .filter(reward => reward.rewardPerWeek.gt(0))
-    .map(reward => getToken(reward.tokenAddress, pool.chain)) as GqlToken[]
-
-  const weeklyRewards = sumBy(currentRewardsPerWeek, reward =>
-    bn(priceFor(reward.tokenAddress, pool.chain)).times(reward.rewardPerWeek).toNumber()
-  )
-
-  // Map token addresses to their weekly reward amounts
-  const weeklyRewardsByToken = Object.fromEntries(
-    currentRewards.map(reward => [
-      reward.tokenAddress,
-      isBnParseable(reward.rewardPerSecond)
-        ? bn(reward.rewardPerSecond).times(oneWeekInSecs).toString()
-        : '0',
-    ])
-  )
+  const tokens: GqlToken[] = []
+  const weeklyRewards = 0
+  const weeklyRewardsByToken: Record<string, string> = {}
 
   function calculatePotentialYield(totalUSDValue: Numberish) {
-    const potentialYield = calcPotentialYieldFor(pool, totalUSDValue)
-
-    const weeklyYield =
-      weeklyRewards && bn(potentialYield).gt(weeklyRewards)
-        ? weeklyRewards.toString()
-        : potentialYield
-
-    return weeklyYield
+    return calcPotentialYieldFor(pool, totalUSDValue)
   }
 
   return {

@@ -1,4 +1,4 @@
 export type LinkSection = {
   title: string
-  links: { href: string; label: string; isExternal?: boolean }[]
+  links: { href?: string; label: string; isExternal?: boolean }[]
 }

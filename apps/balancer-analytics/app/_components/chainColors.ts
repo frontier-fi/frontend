@@ -10,7 +10,5 @@ export const CHAIN_COLORS: Partial<Record<GqlChain, string>> = {
   GNOSIS: '#3E6957',
   AVALANCHE: '#E84142',
   OPTIMISM: '#FF0420',
-  FRAXTAL: '#000000',
-  MODE: '#DFFE00',
   SEPOLIA: '#A0AEC0',
 }

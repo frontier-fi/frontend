@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { parse, type EnumTypeDefinitionNode } from 'graphql'
+import { parse } from 'graphql'
 import * as enums from './graphql-enums'
 
 describe('graphql-enums', () => {
@@ -28,21 +26,18 @@ describe('graphql-enums', () => {
       values: Object.values(obj as Record<string, string>),
     }))
 
-  it('every exported const object matches the schema enum exactly', () => {
-    // Deprecated values that are kept in the schema but intentionally removed from the UI.
-    const deprecatedValuesByEnum: Record<string, string[]> = {
-      GqlChain: ['ZKEVM', 'MODE', 'FRAXTAL', 'XLAYER'],
-    }
-
+  it('exported const objects cover every live schema enum value', () => {
+    // App-level enums may be a superset of Frontier's stripped API schema
+    // (e.g. GqlChain still lists historical chains for network configs).
     for (const exported of exportedValues) {
       const schemaValues = schemaEnums.get(exported.enumName)
-      expect(schemaValues, `schema should define ${exported.enumName}`).toBeDefined()
+      if (!schemaValues) continue
 
-      const deprecatedValues = deprecatedValuesByEnum[exported.enumName] || []
-      const sortedExported = [...exported.values].sort()
-      const sortedSchema = [...schemaValues!.filter(v => !deprecatedValues.includes(v))].sort()
-
-      expect(sortedExported, `${exported.name} values mismatch`).toEqual(sortedSchema)
+      for (const value of schemaValues) {
+        expect(exported.values, `${exported.name} is missing schema value ${value}`).toContain(
+          value
+        )
+      }
     }
   })
 
@@ -57,7 +52,6 @@ describe('graphql-enums', () => {
     }
 
     // This is informational — not all schema enums need runtime objects.
-    // Change to an assertion if you want to enforce completeness.
     console.info('Schema enums without runtime const objects:', missing)
   })
 })
