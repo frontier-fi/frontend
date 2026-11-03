@@ -120,10 +120,6 @@ export class CreatePoolPage {
     await expect(this.page).toHaveURL(this.urls.buildCow)
   }
 
-  async chooseProtocol(protocol: string) {
-    await this.page.getByText(protocol, { exact: true }).click()
-  }
-
   async chooseNetwork(network: string) {
     await this.page.getByText(network).click()
   }
@@ -151,14 +147,12 @@ export class CreatePoolPage {
 
   async expectInitialFormState() {
     await expect(this.page).toHaveURL(this.urls.type)
-    await expect(this.page.getByText('Choose protocol')).toBeVisible()
     await expect(this.page.getByText('Choose network')).toBeVisible()
     await expect(this.page.getByText('Choose a pool type')).toBeVisible()
   }
 
   async typeStep(goToNextStep?: boolean) {
     await this.expectInitialFormState()
-    if (this.isCowAmm) await this.chooseProtocol('CoW')
     await this.choosePoolType(this.config.type)
     if (goToNextStep) await clickButton(this.page, 'Next')
   }

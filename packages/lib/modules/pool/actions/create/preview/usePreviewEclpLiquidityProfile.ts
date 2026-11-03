@@ -30,7 +30,9 @@ export function usePreviewEclpLiquidityProfile(): ECLPLiquidityProfile {
 
   const { c, s } = calculateRotationComponents(peakPrice || '')
 
-  const tokenRateScalingFactorString = '1'
+  // Match live pool charts: scale draw by rate ratio, then divide for display
+  // so the axis stays in underlying (rate-adjusted) price space.
+  const tokenRateScalingFactorString = priceRateRatio.toString()
 
   const liquidityData = drawLiquidityECLP(
     isGyroEllipticPool(poolType),
