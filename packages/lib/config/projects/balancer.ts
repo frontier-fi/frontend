@@ -29,7 +29,8 @@ export const ProjectConfigBalancer: ProjectConfig = {
   defaultNetwork: GqlChainValues.Sepolia,
   ensNetwork: GqlChainValues.Sepolia,
   delegateOwner: '0xba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1b',
-  merklRewardsChains: [GqlChainValues.Sepolia],
+  // Merkl does not support Sepolia (api.merkl.xyz returns 400); leave empty until a Merkl chain is live.
+  merklRewardsChains: [],
   options: {
     poolDisplayType: PoolDisplayType.TokenPills,
     hidePoolTags: ['DYNAMIC_ECLP', 'VE8020'],

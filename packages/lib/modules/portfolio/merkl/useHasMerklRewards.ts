@@ -16,29 +16,22 @@ export function useHasMerklRewards(poolsWithOnchainUserBalances: Pool[], chainId
 
       try {
         const response = await fetch(url)
-        const rewards = (await response.json()) as MerklRewardsResponse
+        if (!response.ok) return false
 
-        /*
-    const hasMerklRewards = poolsWithOnchainUserBalances.some(pool => {
-      if (!rewards) return false
-      // In the future we would expect to have a dedicated endpoint with the matching between balancer pool id and campaign id
-      return false
-    })
-    */
+        const rewards = (await response.json()) as MerklRewardsResponse
 
         if (!rewards || !Array.isArray(rewards)) return false
 
         // If any of the rewards has pending rewards or unclaimed amounts, return true
         return rewards.some(chainRewards => {
           return chainRewards.rewards.some(reward => {
-            // Check if there are any pending rewards
             const pendingAmount = Number(reward.pending || 0)
             const unclaimedAmount = Number(reward.amount || 0) - Number(reward.claimed || 0)
             return pendingAmount > 0 || unclaimedAmount > 0
           })
         })
-      } catch (error) {
-        console.error(`Error fetching Merkl rewards for chain ${chainId}:`, error)
+      } catch {
+        // Network/CORS failures should not surface as portfolio errors
         return false
       }
     })
