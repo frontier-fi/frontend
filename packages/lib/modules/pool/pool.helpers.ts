@@ -353,7 +353,6 @@ export function shouldBlockAddLiquidity(pool: Pool, metadata?: PoolMetadata) {
 export function getPoolAddBlockedReason(pool: Pool, metadata?: PoolMetadata): string[] {
   // we allow the metadata to override the default behavior
   if (metadata?.allowAddLiquidity === true) return []
-  if (pool.chain === GqlChainValues.Sepolia) return []
 
   const reasons: string[] = []
 
@@ -378,6 +377,13 @@ export function getPoolAddBlockedReason(pool: Pool, metadata?: PoolMetadata): st
     )
   }
 
+  if (isChainDeprecated(pool.chain)) {
+    reasons.push(`${getChainName(pool.chain)} is being sunset on ${PROJECT_CONFIG.projectName}`)
+  }
+
+  // Mainnet registry review checks (hooks, rate providers, ERC4626, token allowlist) are skipped on Sepolia testnet
+  if (pool.chain === GqlChainValues.Sepolia) return reasons
+
   if (pool.hook && !hasReviewedHook(pool.hook)) reasons.push('Unreviewed hook')
 
   if (
@@ -386,10 +392,6 @@ export function getPoolAddBlockedReason(pool: Pool, metadata?: PoolMetadata): st
     (pool.hook as { reviewData?: { summary?: string } }).reviewData?.summary === 'unsafe'
   ) {
     reasons.push('Unsafe hook')
-  }
-
-  if (isChainDeprecated(pool.chain)) {
-    reasons.push(`${getChainName(pool.chain)} is being sunset on Frontier Finance`)
   }
 
   const poolTokens = pool.poolTokens as GqlPoolTokenDetail[]
@@ -447,10 +449,10 @@ export function shouldBlockRemoveLiquidity(pool: Pool) {
 }
 
 export function getPoolRemoveBlockedReason(pool: Pool): string[] {
-  if (pool.chain === GqlChainValues.Sepolia) return []
-
   const hasUnstakedBalance = bn(getUserWalletBalance(pool)).gt(0)
-  const hasTooSmallBalance = isTooSmallToRemoveUsd(getUserWalletBalanceUsd(pool))
+
+  const hasTooSmallBalance =
+    pool.chain !== GqlChainValues.Sepolia && isTooSmallToRemoveUsd(getUserWalletBalanceUsd(pool))
 
   const reasons: string[] = []
 

@@ -22,25 +22,30 @@ import pluralize from 'pluralize'
 import { BaseDefaultSwapHandler } from './handlers/BaseDefaultSwap.handler'
 import { getFullPriceImpactLabel, getMaxSlippageLabel } from '../price-impact/price-impact.utils'
 import { RoutesPopover } from './RoutesCard'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 
 export function OrderRoute() {
   const { simulationQuery, tokenIn, tokenOut, selectedChain } = useSwap()
 
   const queryData = simulationQuery.data as SdkSimulateSwapResponse
-  const orderRouteVersion = queryData ? queryData.protocolVersion : 2
 
   const pathsCount = queryData?.paths?.length || 0
 
   const hopCount = queryData?.paths
-    ? queryData.paths.reduce((acc, path) => {
-        return acc + (path.isBuffer || []).filter(buffer => buffer === false).length
-      }, 0)
+    ? (() => {
+        const nonBufferHops = queryData.paths.reduce((acc, path) => {
+          return acc + (path.isBuffer || []).filter(buffer => buffer === false).length
+        }, 0)
+
+        const totalSteps = queryData.paths.reduce((acc, path) => acc + (path.pools?.length || 0), 0)
+        return nonBufferHops > 0 ? nonBufferHops : totalSteps
+      })()
     : queryData?.hopCount || 0
 
   function getRouteHopsLabel() {
     if (hopCount === 0) return 'Unknown'
     const pathsText = pathsCount > 1 ? `${pathsCount} paths, ` : ''
-    return `${pathsText}${hopCount} ${pluralize('hop', hopCount)} (Bv${orderRouteVersion})`
+    return `${pathsText}${hopCount} ${pluralize('hop', hopCount)}`
   }
 
   const label = getRouteHopsLabel()
@@ -58,7 +63,6 @@ export function OrderRoute() {
               chain={selectedChain}
               maxHops={hopCount}
               paths={queryData.paths || []}
-              protocolVersion={orderRouteVersion}
               totalInputAmount={Number(tokenIn.amount)}
               totalOutputAmount={Number(tokenOut.amount)}
             >
@@ -93,7 +97,7 @@ export function OrderRoute() {
               </PopoverTrigger>
               <PopoverContent maxW="300px" p="sm" w="auto">
                 <Text fontSize="sm" variant="secondary">
-                  Frontier Finance Vault version and number of swap hops
+                  {PROJECT_CONFIG.projectName} Vault version and number of swap hops
                 </Text>
               </PopoverContent>
             </Popover>
@@ -115,7 +119,7 @@ export function OrderRoute() {
               </PopoverTrigger>
               <PopoverContent maxW="300px" p="sm" w="auto">
                 <Text fontSize="sm" variant="secondary">
-                  Frontier Finance Vault version and number of swap hops
+                  {PROJECT_CONFIG.projectName} Vault version and number of swap hops
                 </Text>
               </PopoverContent>
             </Popover>

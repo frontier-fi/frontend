@@ -28,8 +28,6 @@ import { getFeeManagersMetadata } from '@repo/lib/modules/fee-managers/getFeeMan
 import { getPoolMigrations } from '@repo/lib/modules/pool/migrations/getPoolMigrations'
 import { PoolMigrationsProvider } from '@repo/lib/modules/pool/migrations/PoolMigrationsProvider'
 
-export const revalidate = 60
-
 const isProductionBuild = process.env.NEXT_PHASE === 'phase-production-build'
 
 async function fetchProtocolStats(): Promise<GetProtocolStatsQuery | undefined> {

@@ -37,6 +37,11 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   redirects: async () => [
     {
+      source: '/',
+      destination: '/pools',
+      permanent: false,
+    },
+    {
       source: '/pools/mode/:path*',
       destination: 'https://legacy.balancer.fi',
       permanent: true,
@@ -49,22 +54,22 @@ const nextConfig: NextConfig = {
     // LBP, veBAL, and Cow AMM are out of scope for Frontier.
     {
       source: '/lbp',
-      destination: '/',
+      destination: '/pools',
       permanent: false,
     },
     {
       source: '/lbp/:path*',
-      destination: '/',
+      destination: '/pools',
       permanent: false,
     },
     {
       source: '/vebal',
-      destination: '/',
+      destination: '/pools',
       permanent: false,
     },
     {
       source: '/vebal/:path*',
-      destination: '/',
+      destination: '/pools',
       permanent: false,
     },
     {

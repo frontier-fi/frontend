@@ -11,9 +11,11 @@ import { resolve } from 'path'
 const requireFromHere = createRequire(resolve(__dirname, '__fake.js'))
 const pluginLoader = async (name: string) => import(requireFromHere.resolve(name))
 
+const schemaUrl = process.env.NEXT_PUBLIC_BALANCER_API_URL || 'https://api.frontier.fi/graphql'
+
 const config: CodegenConfig = {
   schema: {
-    [process.env.NEXT_PUBLIC_BALANCER_API_URL as string]: {
+    [schemaUrl]: {
       headers: {
         'Accept-Encoding': 'identity', // Prevent gzip-compressed responses that the schema loader can't decompress
       },
@@ -144,7 +146,7 @@ export type GqlPoolType =
   | 'WEIGHTED';`,
 }
 
-const GENERATED_GRAPHQL = resolve(__dirname, 'shared/services/api/generated/graphql.ts')
+const GENERATED_GRAPHQL = resolve(__dirname, 'generated/graphql.ts')
 
 function widenGeneratedEnums(...paths: string[]) {
   const fromHook = paths.flatMap(listGeneratedFiles).filter(f => f.endsWith('graphql.ts'))

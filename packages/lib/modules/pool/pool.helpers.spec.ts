@@ -249,13 +249,23 @@ describe('shouldBlockAddLiquidity', () => {
     expect(shouldBlockAddLiquidity(pool, { allowAddLiquidity: true })).toBe(false)
   })
 
-  it('should not block for Sepolia pools', () => {
+  it('should not block Sepolia pools for unreviewed tokens or rate providers', () => {
     const pool = getApiPoolMock(usdcUsdtAaveBoosted)
-    pool.dynamicData.isPaused = true
+    getPoolToken(pool, 0).isAllowed = false
+    getPoolToken(pool, 0).erc4626ReviewData = null
     pool.chain = GqlChainValues.Sepolia
 
     expect(shouldBlockAddLiquidity(pool)).toBe(false)
     expect(getPoolAddBlockedReason(pool)).toHaveLength(0)
+  })
+
+  it('should still block Sepolia pools when paused', () => {
+    const pool = getApiPoolMock(usdcUsdtAaveBoosted)
+    pool.dynamicData.isPaused = true
+    pool.chain = GqlChainValues.Sepolia
+
+    expect(shouldBlockAddLiquidity(pool)).toBe(true)
+    expect(getPoolAddBlockedReason(pool)).toEqual(['Paused pool'])
   })
 })
 

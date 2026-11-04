@@ -31,7 +31,7 @@ export type GqlTokenPrice = GetTokenPricesQuery['tokenPrices'][number]
 /** Any concrete pool returned by GetPool (Weighted | Stable | Eclp). */
 export type GqlPoolElement = GetPoolQuery['pool'] & {
   /** Optional — Frontier schema omits gauges; kept for stake UI + test mocks. */
-  staking?: any
+  staking?: GqlPoolStaking | null
   owner?: string
   poolCreator?: string
 }
@@ -68,17 +68,50 @@ export type GqlNestedPool = NonNullable<PoolTokensFragment['nestedPool']>
 // ── Staking types (Frontier schema currently omits staking on pools) ──
 
 export type GqlPoolStaking = {
+  id?: string
   type?: string | null
+  address?: string
+  chain?: string
   gauge?: GqlPoolStakingGauge | null
+  aura?: {
+    id?: string
+    apr?: number
+    auraPoolAddress?: string
+    auraPoolId?: string
+    isShutdown?: boolean
+  } | null
+  reliquary?: {
+    levels?: Array<{
+      id?: string
+      apr?: number
+      allocationPoints?: number
+      balance?: string
+      level?: number
+    }> | null
+  } | null
+  vebal?: {
+    id?: string
+    vebalAddress?: string
+  } | null
 }
 export type GqlPoolStakingGauge = {
+  id?: string
   gaugeAddress?: string
+  version?: number
+  status?: string
+  workingSupply?: string
   otherGauges?: GqlPoolStakingOtherGauge[] | null
+  rewards?: GqlPoolStakingGaugeReward[] | null
 }
 export type GqlPoolStakingOtherGauge = {
+  id?: string
   gaugeAddress?: string
+  version?: number
+  status?: string
+  rewards?: GqlPoolStakingGaugeReward[] | null
 }
 export type GqlPoolStakingGaugeReward = {
+  id?: string
   tokenAddress?: string
   rewardPerSecond?: string
 }

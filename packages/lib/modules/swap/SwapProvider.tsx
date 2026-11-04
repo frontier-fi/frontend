@@ -501,7 +501,7 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
     isBnParseable(swapState.tokenOut.amount) && bn(swapState.tokenOut.amount).gt(0)
 
   const protocolVersion =
-    ((simulationQuery.data as SdkSimulateSwapResponse)?.protocolVersion as ProtocolVersion) || 2
+    ((simulationQuery.data as SdkSimulateSwapResponse)?.protocolVersion as ProtocolVersion) || 3
 
   const { vaultAddress } = useVault(protocolVersion)
 

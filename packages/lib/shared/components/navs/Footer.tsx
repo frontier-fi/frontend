@@ -42,8 +42,8 @@ function CardContent({ linkSections, logoType, title, subTitle }: CardContentPro
       <Stack
         align="start"
         direction={{ base: 'column', lg: 'row' }}
-        justify="space-between"
-        spacing={{ base: 'lg', lg: 'md' }}
+        justify={{ base: 'start', lg: 'end' }}
+        spacing={{ base: 'lg', lg: '3xl' }}
         w="full"
       >
         {linkSections.map(section => (
@@ -125,17 +125,23 @@ function LegalLinks({ legalLinks }: { legalLinks: AppLink[] }) {
       w="full"
       wrap="wrap"
     >
-      {legalLinks.map(link => (
-        <Link
-          as={NextLink}
-          color="font.secondary"
-          fontSize={{ base: 'xs', md: 'sm' }}
-          href={link.href || '#'}
-          key={link.href || link.label}
-        >
-          {link.label}
-        </Link>
-      ))}
+      {legalLinks.map(link =>
+        link.href ? (
+          <Link
+            as={NextLink}
+            color="font.secondary"
+            fontSize={{ base: 'xs', md: 'sm' }}
+            href={link.href}
+            key={link.href}
+          >
+            {link.label}
+          </Link>
+        ) : (
+          <Link color="font.secondary" fontSize={{ base: 'xs', md: 'sm' }} key={link.label}>
+            {link.label}
+          </Link>
+        )
+      )}
     </HStack>
   )
 }

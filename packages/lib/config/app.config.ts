@@ -39,13 +39,13 @@ export function getNetworkConfig(
   defaultNetwork?: AppChain
 ): NetworkConfig {
   // cannot get default network directly from config here
-  if (!chain) return config.networks[defaultNetwork || GqlChainValues.Mainnet] as NetworkConfig
+  if (!chain) return config.networks[defaultNetwork || GqlChainValues.Sepolia] as NetworkConfig
 
   if (typeof chain === 'number') {
-    return networksByChainId[chain] || (config.networks.MAINNET as NetworkConfig)
+    return networksByChainId[chain] || (config.networks.SEPOLIA as NetworkConfig)
   }
 
-  return config.networks[chain] || (config.networks.MAINNET as NetworkConfig)
+  return config.networks[chain] || (config.networks.SEPOLIA as NetworkConfig)
 }
 
 export function getChainId(gqlChain: AppChain): SupportedChainId {

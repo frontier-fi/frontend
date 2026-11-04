@@ -15,7 +15,6 @@ import {
   Text,
   useBreakpointValue,
   VStack,
-  Link,
 } from '@chakra-ui/react'
 import FadeInOnView from '@repo/lib/shared/components/containers/FadeInOnView'
 import { useUserAccount } from '../../web3/UserAccountProvider'
@@ -35,7 +34,6 @@ import { MigrationAlert } from '../../pool/migrations/MigrationAlert'
 import { isChainDeprecated } from '../../chains/chain.utils'
 import { BalAlert } from '@repo/lib/shared/components/alerts/BalAlert'
 import { memo, useMemo } from 'react'
-import { isBalancer } from '@repo/lib/config/getProjectConfig'
 
 const rowProps = (needsLastColumnWider: boolean) => ({
   px: [0, 4],
@@ -158,7 +156,7 @@ export function PortfolioTable() {
             content={`You have ${deprecatedChainPools} affected ${deprecatedChainPools === 1 ? 'position' : 'positions'} on this chains.
             Please remove your liquidity asap.`}
             status="warning"
-            title="Mode and Fraxtal are being sunset on Frontier Finance"
+            title={`Mode and Fraxtal are being sunset on ${projectName}`}
           />
         )}
 
@@ -218,15 +216,6 @@ export function PortfolioTable() {
               Hide pools under $0.01
             </Text>
           </Checkbox>
-        )}
-        {isBalancer && (
-          <Text color="font.secondary" fontSize="sm">
-            Any positions for legacy chains can be found on{' '}
-            <Link href="https://legacy.balancer.fi" isExternal textDecoration="underline">
-              legacy.balancer.fi
-            </Link>
-            .
-          </Text>
         )}
       </VStack>
     </FadeInOnView>

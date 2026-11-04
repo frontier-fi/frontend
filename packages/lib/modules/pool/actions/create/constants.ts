@@ -71,7 +71,7 @@ export const POOL_TYPES: Record<SupportedPoolTypes, PoolTypeDetails> = {
   },
 }
 
-export const BALANCER_PROTOCOL_ID = 'Frontier Finance'
+export const BALANCER_PROTOCOL_ID = PROJECT_CONFIG.projectName
 export const COW_PROTOCOL_ID = 'CoW'
 
 export enum WeightedPoolStructure {

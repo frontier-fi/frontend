@@ -61,7 +61,7 @@ export const rpcOverrides: Partial<Record<AppChain, string | undefined>> = {
   [GqlChainValues.Optimism]: getPrivateRpcUrl(GqlChainValues.Optimism),
   [GqlChainValues.Polygon]: getPrivateRpcUrl(GqlChainValues.Polygon),
   // Sepolia is not on dRPC free plan — omit private override so SDK/wagmi use
-  // rpcFallbacks (1rpc.io/sepolia). getPoolStateWithBalancesV3 uses a single URL
+  // rpcFallbacks (sepolia.gateway.tenderly.co). getPoolStateWithBalancesV3 uses a single URL
   // with no transport fallback, so a gated private RPC breaks add liquidity.
   [GqlChainValues.Sonic]: getPrivateRpcUrl(GqlChainValues.Sonic),
   [GqlChainValues.Hyperevm]: getPrivateRpcUrl(GqlChainValues.Hyperevm),

@@ -59,11 +59,11 @@ export const ProjectConfigBalancer: ProjectConfig = {
       },
     ],
     legalLinks: [
-      { label: 'Terms of use', href: '/terms-of-use' },
-      { label: 'Privacy policy', href: '/privacy-policy' },
-      { label: 'Cookies policy', href: '/cookies-policy' },
-      { label: '3rd party services', href: '/3rd-party-services' },
-      { label: 'Risks', href: '/risks' },
+      { label: 'Terms of use' },
+      { label: 'Privacy policy' },
+      { label: 'Cookies policy' },
+      { label: '3rd party services' },
+      { label: 'Risks' },
     ],
   },
   footer: {
@@ -87,10 +87,6 @@ export const ProjectConfigBalancer: ProjectConfig = {
           { label: 'Swap tokens', href: '/swap' },
           { label: 'View portfolio', href: '/portfolio' },
         ],
-      },
-      {
-        title: 'Ecosystem',
-        links: [{ label: 'Bug bounties' }, { label: 'Analytics' }, { label: 'Brand assets' }],
       },
     ],
   },

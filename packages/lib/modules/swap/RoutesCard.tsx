@@ -43,11 +43,26 @@ export function RoutesVisualization({
   const { getToken, priceFor } = useTokens()
   const { toCurrency } = useCurrency()
 
-  const inputToken = getToken(paths[0]!.tokens[0]!.address, chain)!
-  const outputToken = getToken(paths[0]!.tokens[paths[0]!.tokens.length - 1]!.address, chain)!
+  const firstPath = paths[0]
+  const rawInputAddress = firstPath?.tokens[0]?.address ?? ''
+  const rawOutputAddress = firstPath?.tokens[firstPath.tokens.length - 1]?.address ?? ''
+  const inputToken = rawInputAddress ? getToken(rawInputAddress, chain) : undefined
+  const outputToken = rawOutputAddress ? getToken(rawOutputAddress, chain) : undefined
 
-  const inputValue = bn(totalInputAmount).times(priceFor(inputToken.address, chain))
-  const outputValue = bn(totalOutputAmount).times(priceFor(outputToken.address, chain))
+  const inputSymbol =
+    inputToken?.symbol || (rawInputAddress ? `${rawInputAddress.slice(0, 6)}…` : '')
+
+  const outputSymbol =
+    outputToken?.symbol || (rawOutputAddress ? `${rawOutputAddress.slice(0, 6)}…` : '')
+
+  const inputValue = bn(totalInputAmount).times(
+    inputToken ? priceFor(inputToken.address, chain) : 0
+  )
+
+  const outputValue = bn(totalOutputAmount).times(
+    outputToken ? priceFor(outputToken.address, chain) : 0
+  )
+
   const outputPercentage = inputValue.isZero() ? 0 : outputValue.div(inputValue).toNumber()
 
   return (
@@ -61,14 +76,14 @@ export function RoutesVisualization({
           <HStack justify="space-between" w="full">
             <HStack>
               <Text fontSize="sm" fontWeight="bold" letterSpacing="normal">
-                {`${fNum('token', totalInputAmount)} ${inputToken.symbol}`}
+                {`${fNum('token', totalInputAmount)} ${inputSymbol}`}
               </Text>
               <Text color="font.secondary">
                 <ArrowRight size="16" />
               </Text>
             </HStack>
             <Text fontSize="sm" fontWeight="bold" letterSpacing="normal">
-              {`${fNum('token', totalOutputAmount)} ${outputToken.symbol}`}
+              {`${fNum('token', totalOutputAmount)} ${outputSymbol}`}
             </Text>
           </HStack>
         </VStack>
@@ -97,7 +112,6 @@ type RoutesPopoverProps = {
   chain: GqlChain
   totalInputAmount: number
   totalOutputAmount: number
-  protocolVersion: number
   maxHops: number
 }
 
@@ -140,21 +154,17 @@ type Props = {
   chain: GqlChain
   totalInputAmount: number
   totalOutputAmount: number
-  protocolVersion: number
 }
 
-export function RoutesCard({
-  paths,
-  chain,
-  totalInputAmount,
-  totalOutputAmount,
-  protocolVersion,
-}: Props) {
+export function RoutesCard({ paths, chain, totalInputAmount, totalOutputAmount }: Props) {
   if (!paths || paths.length === 0) return null
 
-  const maxHops = paths.reduce((acc, path) => {
+  const nonBufferHops = paths.reduce((acc, path) => {
     return acc + (path.isBuffer || []).filter(buffer => buffer === false).length
   }, 0)
+
+  const totalSteps = paths.reduce((acc, path) => acc + (path.pools?.length || 0), 0)
+  const maxHops = nonBufferHops > 0 ? nonBufferHops : Math.max(1, totalSteps)
 
   return (
     <Box pt="3" w="full">
@@ -165,7 +175,7 @@ export function RoutesCard({
           </Text>
           <Text color="font.secondary" fontSize="sm">
             {paths.length > 1 ? `${paths.length} paths, ` : ''}
-            {maxHops} {pluralize('hop', maxHops)} (Bv{protocolVersion})
+            {maxHops} {pluralize('hop', maxHops)}
           </Text>
         </HStack>
 

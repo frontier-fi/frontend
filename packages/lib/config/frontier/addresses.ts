@@ -53,17 +53,13 @@ export const FRONTIER_SEPOLIA: FrontierChainAddresses & { chainId: typeof sepoli
   gyroEclpPoolFactory: '0xED6D268cAdBea94c34E531C3401d41a882D66A8D',
 }
 
-const registeredChainIds = new Set<number>()
-
 /**
  * Patch Balancer SDK `balancerV3Contracts` for a Frontier chain so
  * `AddressProvider.*` and SDK helpers (e.g. getPoolStateWithBalancesV3) hit
  * Frontier, not Balancer, deployments.
  */
 export function registerFrontierChain(chainId: number, addresses: FrontierChainAddresses) {
-  // Always use the canonical vault — same address on every Frontier chain.
-  const vault = FRONTIER_VAULT
-  mutableMap(balancerV3Contracts.Vault)[chainId] = vault
+  mutableMap(balancerV3Contracts.Vault)[chainId] = addresses.vault
   mutableMap(balancerV3Contracts.VaultAdmin)[chainId] = addresses.vaultAdmin
   mutableMap(balancerV3Contracts.VaultExtension)[chainId] = addresses.vaultExtension
   mutableMap(balancerV3Contracts.Router)[chainId] = addresses.router
@@ -81,13 +77,7 @@ export function registerFrontierChain(chainId: number, addresses: FrontierChainA
     mutableMap(balancerV3Contracts.UnbalancedAddViaSwapRouter)[chainId] =
       addresses.unbalancedAddViaSwapRouter
   }
-
-  registeredChainIds.add(chainId)
 }
-
-/** @deprecated use FRONTIER_SEPOLIA / registerFrontierChain */
-export const applyFrontierSepoliaSdkAddresses = () =>
-  registerFrontierChain(FRONTIER_SEPOLIA.chainId, FRONTIER_SEPOLIA)
 
 // Apply Sepolia on import — must run before any AddressProvider / network config eval.
 registerFrontierChain(FRONTIER_SEPOLIA.chainId, FRONTIER_SEPOLIA)

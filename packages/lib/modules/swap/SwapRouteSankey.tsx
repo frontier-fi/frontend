@@ -70,6 +70,8 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
       .filter(l => l.source.startsWith('0:'))
       .reduce((sum, l) => sum + l.value, 0)
 
+    const rootInputSymbol = graph.nodes.find(n => n.depth === 0)?.symbol ?? ''
+
     const data = graph.nodes.map(n => {
       const baseLabel = {
         color: labelColor,
@@ -162,11 +164,13 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
               ? `<div style="opacity:.65;font-size:11px;margin-top:4px">Pool ${escapeHtml(params.data.poolId.slice(0, 10))}…</div>`
               : ''
 
+            const unitSuffix = rootInputSymbol ? ` ${escapeHtml(rootInputSymbol)}` : ''
+
             return `<div style="${tooltipStyles}">
               <div style="color:${tooltipHeading};font-weight:600;margin-bottom:4px">
                 ${escapeHtml(src?.symbol ?? '')} → ${escapeHtml(tgt?.symbol ?? '')}
               </div>
-              <div>${fNum('token', value)} <span style="opacity:.7">(${fNum('sharePercent', pct)})</span></div>
+              <div>${fNum('token', value)}${unitSuffix} <span style="opacity:.7">(${fNum('sharePercent', pct)} of input)</span></div>
               ${poolLine}
             </div>`
           }

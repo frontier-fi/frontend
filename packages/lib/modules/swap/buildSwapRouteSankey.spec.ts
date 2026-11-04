@@ -71,4 +71,45 @@ describe('buildSwapRouteSankey', () => {
     expect(graph.links).toHaveLength(2)
     expect(graph.links[0]?.value).toBeCloseTo(0.25)
   })
+
+  test('omits poolId on buffer hops and falls back to address prefix for unknown tokens', () => {
+    const unknownToken = '0xdeadbeef00000000000000000000000000000001'
+
+    const path = {
+      tokens: [
+        { address: DAI, decimals: 18 },
+        { address: unknownToken, decimals: 18 },
+      ],
+      pools: ['0x87be519ba74b9118b4b5e572440dabc0b35bf964'],
+      isBuffer: [true],
+      inputAmountRaw: 500000000000000000n,
+      outputAmountRaw: 500000000000000000n,
+      protocolVersion: 3,
+    } as Path
+
+    const graph = buildSwapRouteSankey([path], GqlChainValues.Sepolia, getToken)
+
+    expect(graph.nodes.map(n => n.symbol)).toEqual(['DAI', '0xdead…'])
+    expect(graph.links).toHaveLength(1)
+    expect(graph.links[0]?.poolId).toBeUndefined()
+    expect(graph.links[0]?.value).toBeCloseTo(0.5)
+  })
+
+  test('skips empty paths and zero inputAmountRaw paths', () => {
+    const zeroPath = {
+      tokens: [
+        { address: DAI, decimals: 18 },
+        { address: USDC, decimals: 6 },
+      ],
+      pools: ['0x87be519ba74b9118b4b5e572440dabc0b35bf964'],
+      isBuffer: [false],
+      inputAmountRaw: 0n,
+      outputAmountRaw: 0n,
+      protocolVersion: 3,
+    } as Path
+
+    const graph = buildSwapRouteSankey([zeroPath], GqlChainValues.Sepolia, getToken)
+
+    expect(graph).toEqual({ nodes: [], links: [], maxDepth: 0 })
+  })
 })

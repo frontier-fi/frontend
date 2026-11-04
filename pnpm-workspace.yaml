@@ -37,7 +37,7 @@ peerDependencyRules:
 
 overrides:
   # Frontier fork until published to npm (Sepolia vault/router addresses).
-  "@balancer/sdk": "github:frontier-fi/sdk#main"
+  "@balancer/sdk": "github:frontier-fi/sdk#4356e40fb42edf6a795df67035aa2db74cad45fb"
   # Remove debug's optional color peer so every app shares the same
   # Chakra/Emotion/Next instances (see PR #2883). Keep this declarative:
   # Renovate disables pnpmfile hooks when generating lockfiles.
