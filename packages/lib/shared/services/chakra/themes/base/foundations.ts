@@ -1,4 +1,4 @@
-export const DEFAULT_THEME_COLOR_MODE = 'dark'
+export const DEFAULT_THEME_COLOR_MODE = 'light'
 
 export const fonts = {
   heading: `inherit`,

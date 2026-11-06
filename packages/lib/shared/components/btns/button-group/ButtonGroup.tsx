@@ -137,12 +137,7 @@ function GroupOptionButton({
           sx={isCompact ? { bg: 'background.level4' } : undefined}
         />
       )}
-      <Box
-        fontSize={fontSize}
-        position="relative"
-        sx={isCompact && isActive ? { color: 'white' } : undefined}
-        zIndex="8"
-      >
+      <Box fontSize={fontSize} position="relative" zIndex="8">
         {option.label}
       </Box>
     </Button>

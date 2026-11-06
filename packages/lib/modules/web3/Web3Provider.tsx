@@ -1,7 +1,7 @@
 'use client'
 
 import '@rainbow-me/rainbowkit/styles.css'
-import { RainbowKitProvider, Theme, darkTheme } from '@rainbow-me/rainbowkit'
+import { RainbowKitProvider, Theme, lightTheme } from '@rainbow-me/rainbowkit'
 import { WagmiProvider } from 'wagmi'
 import { ReactQueryClientProvider } from '@repo/lib/shared/app/react-query.provider'
 import { useTheme } from '@chakra-ui/react'
@@ -81,7 +81,7 @@ export function Web3Provider({ children }: PropsWithChildren) {
     },
   }
 
-  const customTheme = merge(darkTheme(), {
+  const customTheme = merge(lightTheme(), {
     ...sharedConfig,
   } as Theme)
 

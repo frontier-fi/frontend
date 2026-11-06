@@ -69,7 +69,7 @@ export function getComponents(tokens: any, primaryTextColor: string) {
             width: 'full',
           },
           icon: {
-            color: 'green.500',
+            color: 'orange.500',
           },
           button: {
             width: 'full',
@@ -102,7 +102,7 @@ export function getComponents(tokens: any, primaryTextColor: string) {
             border: '1px solid',
             bg: 'input.bgFocus',
             borderColor: 'input.borderFocus',
-            color: 'white',
+            color: 'input.fontFocus',
             shadow: 'input.innerFocus',
           },
           _focusVisible: {
@@ -163,7 +163,7 @@ export function getComponents(tokens: any, primaryTextColor: string) {
             border: '1px solid',
             bg: 'input.bgFocus',
             borderColor: 'input.borderFocus',
-            color: 'white',
+            color: 'input.fontFocus',
             boxShadow: 'input.innerFocus',
           },
           _focusVisible: {
@@ -582,7 +582,7 @@ export function getComponents(tokens: any, primaryTextColor: string) {
           _hover: {
             shadow: 'sm',
           },
-          color: 'font.dark',
+          color: 'white',
         },
         goldSecondary: {
           background: 'background.gold',
@@ -656,7 +656,7 @@ export function getComponents(tokens: any, primaryTextColor: string) {
           _hover: {
             transform: 'none',
           },
-          color: 'background.level3',
+          color: 'gray.700',
         },
         buttonGroupActiveGray: {
           background: 'white',
@@ -670,7 +670,7 @@ export function getComponents(tokens: any, primaryTextColor: string) {
           _hover: {
             transform: 'none',
           },
-          color: 'background.level3',
+          color: 'white',
         },
         buttonGroupInactiveGray: {
           background: 'white',
@@ -684,7 +684,7 @@ export function getComponents(tokens: any, primaryTextColor: string) {
           _hover: {
             transform: 'none',
           },
-          color: 'gray.400',
+          color: 'gray.700',
         },
         buttonGroupInactiveCompact: {
           backgroundColor: 'transparent',
@@ -747,7 +747,7 @@ export function getComponents(tokens: any, primaryTextColor: string) {
         },
         overlay: {
           backdropFilter: 'blur(4px)',
-          bg: 'rgba(0,0,0,0.7)',
+          bg: 'rgba(0,0,0,0.85)',
         },
       },
       sizes: {
@@ -773,7 +773,7 @@ export function getComponents(tokens: any, primaryTextColor: string) {
         },
         overlay: {
           backdropFilter: 'blur(4px)',
-          bg: 'rgba(0,0,0,0.7)',
+          bg: 'rgba(0,0,0,0.85)',
         },
       },
     },
@@ -789,7 +789,7 @@ export function getComponents(tokens: any, primaryTextColor: string) {
           bg: 'background.level3',
           borderColor: 'background.level3',
           color: 'background.level3',
-          '--popper-arrow-shadow-color': 'border.base',
+          '--popper-arrow-shadow-color': '#fff',
         },
         closeButton: {
           color: 'font.primary',
@@ -801,7 +801,7 @@ export function getComponents(tokens: any, primaryTextColor: string) {
         header: {
           borderBottomWidth: '1px',
           borderBottomColor: 'border.divider',
-          boxShadow: '0px 1px 0px 0px rgba(255, 255, 255, 0.15)',
+          boxShadow: '0px 1px 0px 0px rgba(255, 255, 255, 1)',
           paddingInlineStart: 0,
           paddingInlineEnd: 0,
           marginInline: 3,
@@ -942,7 +942,7 @@ export function getComponents(tokens: any, primaryTextColor: string) {
             backgroundColor: 'transparent',
             backgroundImage: `radial-gradient(
                   farthest-corner at 80px 0px,
-                  rgba(180, 189, 200, 0.1) 0%,
+                  rgba(235, 220, 204, 0.3) 0%,
                   rgba(255, 255, 255, 0.0) 100%
                 )`,
           },
@@ -1096,7 +1096,7 @@ export function getComponents(tokens: any, primaryTextColor: string) {
             width: '16px',
           },
           track: {
-            bg: '#282D34', // fix: what token?
+            bg: '#D7D2CB', // inversion of #282D34
             height: '5px',
           },
         },
@@ -1116,7 +1116,7 @@ export function getComponents(tokens: any, primaryTextColor: string) {
       baseStyle: {
         borderColor: 'border.divider',
         borderWidth: '1px',
-        boxShadow: '0px 1px 0px 0px rgba(255, 255, 255, 0.15)',
+        boxShadow: '0px 1px 0px 0px rgba(255, 255, 255, 1)',
       },
     },
     Alert: {
@@ -1132,16 +1132,16 @@ export function getComponents(tokens: any, primaryTextColor: string) {
           rounded: 'md',
           alignItems: 'center',
           "&[data-status='info']": {
-            backgroundColor: 'var(--chakra-colors-purple-300)',
+            backgroundColor: 'var(--chakra-colors-purple-200)',
           },
           "&[data-status='warning']": {
-            backgroundColor: 'var(--chakra-colors-orange-300)',
+            backgroundColor: 'var(--chakra-colors-orange-200)',
           },
           "&[data-status='success']": {
-            backgroundColor: 'var(--chakra-colors-green-400)',
+            backgroundColor: 'var(--chakra-colors-green-300)',
           },
           "&[data-status='error']": {
-            backgroundColor: 'var(--chakra-colors-red-400)',
+            backgroundColor: 'var(--chakra-colors-red-300)',
           },
         },
         title: {

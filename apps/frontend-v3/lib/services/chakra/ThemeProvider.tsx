@@ -8,8 +8,8 @@ import { useCow } from '@repo/lib/modules/cow/useCow'
 import { useIsMounted } from '@repo/lib/shared/hooks/useIsMounted'
 
 // Manager shape expected by ChakraProvider colorModeManager (StorageManager may be unexported)
-const forcedDarkManager = {
-  get: () => 'dark' as const,
+const forcedLightManager = {
+  get: () => 'light' as const,
   set: () => {},
   type: 'localStorage' as const,
 }
@@ -25,7 +25,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   return (
     <ChakraProvider
-      colorModeManager={forcedDarkManager}
+      colorModeManager={forcedLightManager}
       cssVarsRoot="body"
       theme={theme}
       toastOptions={{ defaultOptions: { position: 'bottom-left' } }}
