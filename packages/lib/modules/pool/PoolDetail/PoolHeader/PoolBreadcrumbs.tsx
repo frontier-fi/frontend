@@ -2,13 +2,9 @@ import { Box, Breadcrumb, BreadcrumbItem, BreadcrumbLink, Button } from '@chakra
 import { usePool } from '../../PoolProvider'
 import { ChevronRight, Home } from 'lucide-react'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
-import { isCowAmmPool } from '../../pool.helpers'
 
 export function PoolBreadcrumbs() {
   const { pool } = usePool()
-
-  const poolsLabel = isCowAmmPool(pool.type) ? 'CoW pools' : 'Pools'
-  const poolsHref = isCowAmmPool(pool.type) ? '/pools/cow' : '/pools'
 
   return (
     <Breadcrumb
@@ -23,15 +19,15 @@ export function PoolBreadcrumbs() {
       spacing="sm"
     >
       <BreadcrumbItem>
-        <BreadcrumbLink href="/">
+        <BreadcrumbLink href="/pools">
           <Button color="grayText" size="xs" variant="link">
             <Home size={16} />
           </Button>
         </BreadcrumbLink>
       </BreadcrumbItem>
       <BreadcrumbItem>
-        <BreadcrumbLink fontWeight="medium" href={poolsHref}>
-          {poolsLabel}
+        <BreadcrumbLink fontWeight="medium" href="/pools">
+          Pools
         </BreadcrumbLink>
       </BreadcrumbItem>
       <BreadcrumbItem isCurrentPage>
