@@ -18,7 +18,7 @@ import { useWagmiConfig } from './WagmiConfigProvider'
 export function Web3Provider({ children }: PropsWithChildren) {
   const isMounted = useIsMounted()
 
-  const { colors, radii, shadows, semanticTokens, fonts } = useTheme()
+  const { radii, shadows, semanticTokens, fonts } = useTheme()
 
   const { wagmiConfig } = useWagmiConfig()
 
@@ -48,7 +48,7 @@ export function Web3Provider({ children }: PropsWithChildren) {
       walletLogo: shadows.md,
     },
     colors: {
-      accentColor: colors.purple[500],
+      accentColor: '#0DB2D0',
       // accentColorForeground: '...',
       // actionButtonBorder: '...',
       // actionButtonBorderMobile: '...',

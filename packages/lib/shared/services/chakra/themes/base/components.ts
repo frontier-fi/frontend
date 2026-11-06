@@ -531,11 +531,11 @@ export function getComponents(tokens: any, primaryTextColor: string) {
           backgroundPosition: '0% 0%',
           backgroundSize: '120% 100%',
           transition: 'background-position 0.4s ease, box-shadow 0.3s ease',
-          boxShadow: '0 3px 20px hsla(245, 97%, 76%, 0.4)',
+          boxShadow: '0 3px 20px rgba(13, 178, 208, 0.3)',
           _hover: {
             backgroundPosition: '100% 0%',
             color: 'font.dark',
-            boxShadow: '0 3px 20px hsla(9, 85%, 71%, 0.4)',
+            boxShadow: '0 3px 20px rgba(80, 187, 119, 0.38)',
             _disabled: {
               boxShadow: 'none',
             },

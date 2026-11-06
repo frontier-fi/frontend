@@ -108,7 +108,7 @@ export function PreviewAutoRangeConfig({
 
                 {priceShiftDailyRate && (
                   <Box
-                    bg="linear-gradient(89.81deg, rgba(179, 174, 245, 0.1) -1.06%, rgba(215, 203, 231, 0.1) 27.62%, rgba(229, 200, 200, 0.1) 49.42%, rgba(234, 168, 121, 0.1) 98.68%);"
+                    bg="linear-gradient(89.81deg, rgba(102, 123, 190, 0.12) -1.06%, rgba(13, 178, 208, 0.12) 49.42%, rgba(80, 187, 119, 0.12) 98.68%);"
                     borderRadius="md"
                     p={2.5}
                   >
@@ -116,7 +116,7 @@ export function PreviewAutoRangeConfig({
                       fontSize="xs"
                       sx={{
                         background:
-                          'linear-gradient(89.81deg, #B3AEF5 -1.06%, #D7CBE7 27.62%, #E5C8C8 49.42%, #EAA879 98.68%)',
+                          'linear-gradient(89.81deg, #4F66B0 -1.06%, #0B9BB6 49.42%, #3EA865 98.68%)',
                         backgroundClip: 'text',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
