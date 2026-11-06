@@ -21,6 +21,7 @@ import {
 import { useUserSettings } from './UserSettingsProvider'
 import { blockInvalidNumberInput, bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { Percent, Settings } from 'lucide-react'
+import { ColorModePreference } from './color-mode'
 import { CurrencySelect } from './CurrencySelect'
 import { EnableTxBundleSetting } from './EnableTxBundlesSetting'
 import { useEffect, useRef, useState } from 'react'
@@ -143,13 +144,38 @@ export function EnableSignaturesSelect() {
   return <Switch isChecked={enableSignatures === 'yes'} onChange={handleChange} />
 }
 
+const COLOR_MODE_OPTIONS: { value: ColorModePreference; label: string }[] = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+]
+
+export function ColorModeSelect() {
+  const { colorModePreference, setColorModePreference } = useUserSettings()
+
+  return (
+    <HStack>
+      {COLOR_MODE_OPTIONS.map(option => (
+        <Button
+          key={option.value}
+          onClick={() => setColorModePreference(option.value)}
+          size="xs"
+          variant={colorModePreference === option.value ? 'outline' : 'solid'}
+        >
+          <Text>{option.label}</Text>
+        </Button>
+      ))}
+    </HStack>
+  )
+}
+
 export function UserSettings() {
   const { slippage, setSlippage } = useUserSettings()
 
   return (
     <Popover isLazy>
       <PopoverTrigger>
-        <Button p="0" variant="tertiary">
+        <Button aria-label="Settings" p="0" variant="tertiary">
           <Settings size={18} />
         </Button>
       </PopoverTrigger>
@@ -164,6 +190,12 @@ export function UserSettings() {
             </Heading>
           </HStack>
           <VStack align="start" p="md" spacing="lg">
+            <Box w="full">
+              <Heading pb="2" size="sm">
+                Appearance
+              </Heading>
+              <ColorModeSelect />
+            </Box>
             <Box w="full">
               <Heading pb="2" size="sm">
                 Currency
