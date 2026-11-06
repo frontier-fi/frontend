@@ -64,6 +64,11 @@ export function RoutesVisualization({
   )
 
   const outputPercentage = inputValue.isZero() ? 0 : outputValue.div(inputValue).toNumber()
+  const valueDelta = -(1 - outputPercentage)
+  const valueDeltaLabel = fNum('sharePercent', valueDelta, { hideSmallPercentage: false })
+
+  const signedValueDeltaLabel =
+    valueDelta > 0 && !valueDeltaLabel.startsWith('+') ? `+${valueDeltaLabel}` : valueDeltaLabel
 
   return (
     <VStack align="stretch" spacing="3" w="full">
@@ -96,11 +101,7 @@ export function RoutesVisualization({
       <HStack color="font.secondary" fontSize="sm" gap="1.5" justify="center" w="full">
         <Text>{toCurrency(inputValue)}</Text>
         <ArrowRight size="14" />
-        <Text>
-          {`${toCurrency(outputValue)} (${fNum('sharePercent', -(1 - outputPercentage), {
-            hideSmallPercentage: false,
-          })})`}
-        </Text>
+        <Text>{`${toCurrency(outputValue)} (${signedValueDeltaLabel})`}</Text>
       </HStack>
     </VStack>
   )

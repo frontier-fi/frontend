@@ -10,6 +10,8 @@ export type SwapSankeyNode = {
   depth: number
   address: string
   symbol: string
+  /** Bar color so the sink token matches the colored hop columns. */
+  color: string
   logoURI?: string
 }
 
@@ -40,6 +42,13 @@ function colorFor(chain: GqlChain, address: string) {
   return getTokenColor(chain, normalized, hash % 16).from
 }
 
+/** `0xdeadbeef…0001` → `0xdea...001` */
+function shortAddress(address: string) {
+  const normalized = address.toLowerCase()
+  if (normalized.length <= 10) return normalized
+  return `${normalized.slice(0, 5)}...${normalized.slice(-3)}`
+}
+
 /**
  * Convert Balancer SOR `Path[]` into a left→right Sankey graph.
  * Each hop becomes a ribbon; split routes show as parallel ribbons that merge at the out token.
@@ -59,11 +68,14 @@ export function buildSwapRouteSankey(
 
     const token = getToken(address, chain)
 
+    const normalized = address.toLowerCase()
+
     nodes.set(id, {
       name: id,
       depth,
-      address: address.toLowerCase(),
-      symbol: token?.symbol || `${address.slice(0, 6)}…`,
+      address: normalized,
+      symbol: token?.symbol || shortAddress(normalized),
+      color: colorFor(chain, normalized),
       logoURI: token?.logoURI ?? undefined,
     })
 

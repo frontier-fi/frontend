@@ -21,7 +21,6 @@ type Props = {
   height?: number
 }
 
-const NODE_BAR = '#94a3b8'
 const LINK_OPACITY = 0.45
 const LINK_OPACITY_FOCUS = 0.85
 const ICON_SIZE = 14
@@ -73,11 +72,17 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
     const rootInputSymbol = graph.nodes.find(n => n.depth === 0)?.symbol ?? ''
 
     const data = graph.nodes.map(n => {
+      // Alternate above/below so neighboring hop labels don't sit on the same line.
+      const position = n.depth % 2 === 0 ? 'top' : 'bottom'
+
       const baseLabel = {
         color: labelColor,
-        fontSize: 12,
-        distance: 8,
-        position: 'right' as const,
+        fontSize: 11,
+        distance: 6,
+        position,
+        align: 'center' as const,
+        width: 76,
+        overflow: 'truncate' as const,
       }
 
       let label: Record<string, unknown> = {
@@ -88,7 +93,7 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
       if (n.logoURI) {
         label = {
           ...baseLabel,
-          formatter: `{icon|} {sym|${n.symbol}}`,
+          formatter: `{icon|}{sym|${n.symbol}}`,
           rich: {
             icon: {
               backgroundColor: { image: n.logoURI },
@@ -98,9 +103,11 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
             },
             sym: {
               color: labelColor,
-              fontSize: 12,
+              fontSize: 11,
               verticalAlign: 'middle',
               padding: [0, 0, 0, 2],
+              width: 56,
+              overflow: 'truncate',
             },
           },
         }
@@ -109,7 +116,11 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
       return {
         name: n.name,
         depth: n.depth,
-        itemStyle: { color: NODE_BAR, borderColor: NODE_BAR },
+        itemStyle: {
+          color: n.color,
+          borderColor: n.color,
+          borderWidth: 0,
+        },
         label,
       }
     })
@@ -201,11 +212,11 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
         {
           type: 'sankey',
           left: 8,
-          right: 88,
-          top: 8,
-          bottom: 8,
-          nodeWidth: 14,
-          nodeGap: 10,
+          right: 16,
+          top: 28,
+          bottom: 28,
+          nodeWidth: 22,
+          nodeGap: 12,
           orient: 'horizontal',
           draggable: false,
           emphasis: { focus: 'adjacency' },
