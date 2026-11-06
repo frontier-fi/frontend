@@ -1,8 +1,8 @@
-import type { GqlChain } from '../services/api/generated/graphql'
+import type { AppChain } from '../services/api/graphql-enums'
 import { GqlChainValues } from '../services/api/graphql-enums'
 import { ChainId } from '@balancer/sdk'
 
-const chainToDrpcName: Partial<Record<GqlChain, string | undefined>> = {
+const chainToDrpcName: Partial<Record<AppChain, string | undefined>> = {
   [GqlChainValues.Mainnet]: 'ethereum',
   [GqlChainValues.Arbitrum]: 'arbitrum',
   [GqlChainValues.Optimism]: 'optimism',
@@ -34,7 +34,7 @@ const chainIdToDrpcName: Partial<Record<number, string | undefined>> = {
   [ChainId.MONAD]: 'monad',
 }
 
-export function drpcUrl(chain: GqlChain, privateKey: string) {
+export function drpcUrl(chain: AppChain, privateKey: string) {
   const chainSlug = chainToDrpcName[chain]
   if (!chainSlug) throw new Error(`Invalid chain: ${chain}`)
   return `https://lb.drpc.live/${chainSlug}/${privateKey}`

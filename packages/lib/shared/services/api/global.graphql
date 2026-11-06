@@ -42,23 +42,3 @@ query GetTokenPrices($chains: [GqlChain!]!) {
     updatedAt
   }
 }
-
-query GetTokensDynamicData($addresses: [String!]!, $chain: GqlChain!) {
-  dynamicData: tokenGetTokensDynamicData(addresses: $addresses, chain: $chain) {
-    ath
-    atl
-    fdv
-    high24h
-    id
-    low24h
-    marketCap
-    price
-    priceChange24h
-    priceChangePercent7d
-    priceChangePercent14d
-    priceChangePercent24h
-    priceChangePercent30d
-    tokenAddress
-    updatedAt
-  }
-}

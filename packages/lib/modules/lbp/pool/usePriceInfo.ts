@@ -1,18 +1,5 @@
-import { useQuery } from '@apollo/client/react'
-import {
-  GetFixedLbpPriceInfoDocument,
-  GetLbpPriceInfoDocument,
-  GqlChain,
-  LbpPriceChartDataFragment,
-} from '@repo/lib/shared/services/api/generated/graphql'
-import {
-  isAfter,
-  isBefore,
-  millisecondsToSeconds,
-  secondsToMilliseconds,
-  startOfHour,
-} from 'date-fns'
-import { bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
+import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
+import { isAfter, isBefore } from 'date-fns'
 import { Address } from 'viem'
 import { now } from '@repo/lib/shared/utils/time'
 
@@ -39,71 +26,13 @@ export type HourlyDataPoint = {
   volume: number
 }
 
-export function usePriceInfo(chain: GqlChain, poolId: Address, isFixedLbp = false) {
-  const apiResult = useQuery(isFixedLbp ? GetFixedLbpPriceInfoDocument : GetLbpPriceInfoDocument, {
-    variables: {
-      poolId: poolId.toLowerCase(),
-      chain,
-      dataPoints: 5000,
-    },
-  })
-
-  const snapshots = apiResult.data?.prices ? toLbpSnapshots(apiResult.data.prices) : []
-  const hourlyData = apiResult.data?.prices ? aggregateToHourlyData(apiResult.data.prices) : []
-
+/** LBP price charts are not on the Frontier API. Callers get empty series. */
+export function usePriceInfo(_chain: GqlChain, _poolId: Address, _isFixedLbp = false) {
   return {
-    isLoading: apiResult.loading,
-    snapshots,
-    hourlyData,
+    isLoading: false,
+    snapshots: [] as LbpSnapshot[],
+    hourlyData: [] as HourlyDataPoint[],
   }
-}
-
-function toLbpSnapshots(apiPrices: LbpPriceChartDataFragment[]): LbpSnapshot[] {
-  return apiPrices.map(price => ({
-    timestamp: new Date(secondsToMilliseconds(price.timestamp)),
-    projectTokenPrice: isBnParseable(price.projectTokenPrice)
-      ? bn(price.projectTokenPrice)
-          .times(price.reservePrice || 1)
-          .toNumber()
-      : 0,
-    reserveTokenPrice: price.reservePrice,
-    cumulativeVolume: price.cumulativeVolume,
-    cumulativeFees: price.cumulativeFees,
-    tvl: price.tvl,
-    projectTokenBalance: price.projectTokenBalance,
-    reserveTokenBalance: price.reserveTokenBalance,
-  }))
-}
-
-function aggregateToHourlyData(prices: LbpPriceChartDataFragment[]): HourlyDataPoint[] {
-  const hourlyDataMap = new Map<number, HourlyDataPoint>()
-
-  prices.forEach(price => {
-    const timestamp = secondsToMilliseconds(parseInt(price.timestamp.toString()))
-    const hourStart = millisecondsToSeconds(startOfHour(timestamp).getTime())
-    const volume = parseFloat(price.volume?.toString() || '0')
-    const fees = parseFloat(price.fees?.toString() || '0')
-    const tvl = parseFloat(price.tvl?.toString() || '0')
-
-    const existing = hourlyDataMap.get(hourStart)
-
-    if (existing) {
-      existing.volume += volume
-      existing.fees += fees
-      // Use the latest TVL for the hour
-      existing.tvl = tvl
-    } else {
-      hourlyDataMap.set(hourStart, {
-        timestamp: hourStart,
-        volume,
-        fees,
-        tvl,
-      })
-    }
-  })
-
-  // Convert map to array and sort by timestamp
-  return Array.from(hourlyDataMap.values()).sort((a, b) => a.timestamp - b.timestamp)
 }
 
 export function getCurrentPrice(snapshots: LbpSnapshot[]) {

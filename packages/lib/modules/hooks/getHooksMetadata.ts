@@ -5,7 +5,7 @@ import {
 import { Address } from 'viem'
 
 const HOOKS_METADATA_URL =
-  'https://raw.githubusercontent.com/balancer/metadata/refs/heads/main/hooks/index.json'
+  'https://raw.githubusercontent.com/frontier-fi/metadata/refs/heads/main/hooks/index.json'
 
 export type HooksMetadata = {
   id: string

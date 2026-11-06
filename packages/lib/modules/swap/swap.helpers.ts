@@ -1,6 +1,7 @@
 import { Address } from 'viem'
 import { OSwapAction, SdkSimulateSwapResponse, SwapAction, SwapState } from './swap.types'
-import type { GqlChain, GqlSorSwapType } from '@repo/lib/shared/services/api/generated/graphql'
+import type { GqlSorSwapType } from '@repo/lib/shared/services/api/generated/graphql'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { GqlSorSwapTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import {
   getNativeAssetAddress,
@@ -38,18 +39,18 @@ export function parseSwapError(msg?: string): string {
   return pattern ? pattern.message : msg
 }
 
-export function getAuraBalAddress(chainId: GqlChain) {
+export function getAuraBalAddress(chainId: AppChain) {
   return getNetworkConfig(chainId).tokens.addresses.auraBal
 }
 
-export function getBalAddress(chainId: GqlChain) {
+export function getBalAddress(chainId: AppChain) {
   return getNetworkConfig(chainId).tokens.addresses.bal
 }
 
 export function isAuraBalSwap(
   tokenIn: Address,
   tokenOut: Address,
-  chain: GqlChain,
+  chain: AppChain,
   swapType: GqlSorSwapType
 ) {
   const auraBAL = getAuraBalAddress(chain)

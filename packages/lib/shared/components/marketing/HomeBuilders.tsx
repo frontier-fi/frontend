@@ -38,9 +38,9 @@ export function HomeBuilders() {
               }}
               w="full"
             >
-              Balancer is a Decentralized Finance (DeFi) protocol that provides permissionless
-              technology to streamline AMM development for developers and empower liquidity
-              providers with an ever-expanding DEX product suite.
+              Frontier Finance is a Decentralized Finance (DeFi) protocol that provides
+              permissionless technology to streamline AMM development for developers and empower
+              liquidity providers with an ever-expanding DEX product suite.
             </Text>
           </FadeInOnView>
         </Box>
@@ -135,8 +135,8 @@ export function HomeBuilders() {
                       textWrap: 'balance',
                     }}
                   >
-                    Plug into Balancer&lsquo;s veBAL incentive mechanism and grants framework to
-                    bootstrap AMM liquidity.
+                    Plug into Frontier Finance&lsquo;s veBAL incentive mechanism and grants
+                    framework to bootstrap AMM liquidity.
                   </Text>
                 </Flex>
               </Card>
@@ -192,7 +192,7 @@ export function HomeBuilders() {
                       yStart="-10%"
                     >
                       <Picture
-                        altText="The Balancer network"
+                        altText="The Frontier Finance network"
                         defaultImgType="jpg"
                         imgAvif
                         imgAvifDark

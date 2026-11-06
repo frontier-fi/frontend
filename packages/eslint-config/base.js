@@ -76,6 +76,16 @@ const baseConfig = [
     },
     rules: {
       'turbo/no-undeclared-env-vars': 'warn',
+      // Allow intentionally unused params/vars prefixed with `_` (stubs after schema trim).
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
       // Disable the 'no-explicit-any' rule to prevent warnings about using 'any' type
       '@typescript-eslint/no-explicit-any': 'off',
       '@stylistic/jsx-sort-props': ['error', { ignoreCase: true }],

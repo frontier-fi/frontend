@@ -40,6 +40,13 @@ pnpm dev:bal
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+If you don't need to edit GraphQL files you can skip GraphQL code generation which runs much faster
+on older machines:
+
+```bash
+pnpm --filter frontend-v3 dev:no-gen
+```
+
 ## Developing on a local fork
 
 1. Create a `.env.local` file in the root of project:

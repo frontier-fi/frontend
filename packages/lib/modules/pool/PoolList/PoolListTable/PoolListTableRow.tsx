@@ -22,11 +22,6 @@ import { getPoolPath } from '../../pool.utils'
 import { getUserTotalBalanceUsd } from '../../user-balance.helpers'
 import { usePoolList } from '../PoolListProvider'
 import { PoolListPoolDisplay } from '../PoolListPoolDisplay'
-import { isLiquidityBootstrapping, isV3Pool } from '../../pool.helpers'
-import { isDev, isStaging } from '@repo/lib/config/app.config'
-import { isAfter, secondsToMilliseconds } from 'date-fns'
-import { now } from '@repo/lib/shared/utils/time'
-import { TooltipWithTouch } from '@repo/lib/shared/components/tooltips/TooltipWithTouch'
 import { usePoolTags } from '../../tags/PoolTagsProvider'
 import { PoolTag } from '../../tags/getPoolTags'
 
@@ -49,8 +44,6 @@ export function PoolListTableRow({ pool, keyValue, needsMarginForPoints, ...rest
   const { toCurrency } = useCurrency()
 
   const hasPoints = pool.tags?.some(tag => tag === 'POINTS')
-
-  const isV3LBP = isV3Pool(pool) && isLiquidityBootstrapping(pool.type)
 
   const { getPoolTags } = usePoolTags()
   const poolTags = getPoolTags(pool)
@@ -104,25 +97,13 @@ export function PoolListTableRow({ pool, keyValue, needsMarginForPoints, ...rest
               </Text>
             </GridItem>
             <GridItem textAlign="right">
-              <TooltipWithTouch
-                bg="background.base"
-                color="font.secondary"
-                label={lbpTooltipText(pool)}
-                placement="top"
+              <Text
+                fontWeight="medium"
+                textAlign="right"
+                title={toCurrency(pool.dynamicData.volume24h, { abbreviated: false })}
               >
-                <Text
-                  fontWeight="medium"
-                  textAlign="right"
-                  textDecoration={
-                    isV3LBP && !lbpSaleIsOngoing(pool) && (isDev || isStaging)
-                      ? 'line-through'
-                      : 'none'
-                  }
-                  title={toCurrency(pool.dynamicData.volume24h, { abbreviated: false })}
-                >
-                  {toCurrency(pool.dynamicData.volume24h)}
-                </Text>
-              </TooltipWithTouch>
+                {toCurrency(pool.dynamicData.volume24h)}
+              </Text>
             </GridItem>
             <GridItem justifySelf="end" pr={{ base: 'md', lg: 'sm', xl: '0' }}>
               <HStack gap="xxs" mr={needsMarginForPoints && !hasPoints ? '12px' : '0'} pr="0">
@@ -157,38 +138,6 @@ export function PoolListTableRow({ pool, keyValue, needsMarginForPoints, ...rest
       </Box>
     </FadeInOnView>
   )
-}
-
-function lbpSaleIsOngoing(pool: PoolListItem) {
-  const startTime = secondsToMilliseconds(pool.lbpParams?.startTime || 0)
-  const endTime = secondsToMilliseconds(pool.lbpParams?.endTime || 0)
-  const hasStarted = Boolean(startTime && isAfter(now(), startTime))
-  const hasEnded = Boolean(endTime && isAfter(now(), endTime))
-
-  return hasStarted && !hasEnded
-}
-
-function lbpTooltipText(pool: PoolListItem) {
-  const isV3LBP = isV3Pool(pool) && isLiquidityBootstrapping(pool.type)
-  if (!isV3LBP || (!isDev && !isStaging)) return ''
-
-  const startTime = secondsToMilliseconds(pool.lbpParams?.startTime || 0)
-  const hasStarted = Boolean(startTime && isAfter(now(), startTime))
-
-  if (!hasStarted) {
-    return `Since the LBP has not started, this pool won't route swaps
-    or allow interaction outside of the pool creator.`
-  }
-
-  const endTime = secondsToMilliseconds(pool.lbpParams?.endTime || 0)
-  const hasEnded = Boolean(endTime && isAfter(now(), endTime))
-
-  if (hasEnded) {
-    return `Since the LBP has ended, this pool won't route swaps
-    or allow interaction outside of the pool creator.`
-  }
-
-  return ''
 }
 
 function PointsInfo({ tags }: { tags: PoolTag[] }) {

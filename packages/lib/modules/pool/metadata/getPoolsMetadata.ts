@@ -2,7 +2,7 @@ import { mins } from '@repo/lib/shared/utils/time'
 import { AlertStatus } from '@chakra-ui/react'
 
 const POOLS_METADATA_URL =
-  'https://raw.githubusercontent.com/balancer/metadata/main/pools/index.json'
+  'https://raw.githubusercontent.com/frontier-fi/metadata/main/pools/index.json'
 
 type PoolWarning = {
   text: string

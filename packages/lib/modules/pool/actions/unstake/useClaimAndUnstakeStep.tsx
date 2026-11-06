@@ -65,9 +65,10 @@ export function useClaimAndUnstakeStep({
     tooltip: 'Claim incentives and unstake LP tokens from gauge.',
   }
 
-  const stakingService = pool.staking
-    ? selectStakingService(pool.chain, pool.staking?.type)
-    : undefined
+  const staking = (pool as { staking?: { type: Parameters<typeof selectStakingService>[1] } })
+    .staking
+
+  const stakingService = staking ? selectStakingService(pool.chain, staking.type) : undefined
 
   const hasUnclaimedBalRewards = balRewards.length > 0
 

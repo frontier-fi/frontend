@@ -11,12 +11,7 @@ import {
 
 const RESOURCE_LINKS = {
   'Builder resources': [
-    {
-      label: 'v3 Scaffold',
-      href: 'https://github.com/balancer/scaffold-balancer-v3',
-      isExternal: true,
-    },
-    { label: 'Code & Contracts', href: 'https://github.com/balancer', isExternal: true },
+    { label: 'Code & Contracts', href: 'https://github.com/frontier-fi/', isExternal: true },
     {
       label: 'Data & Analytics',
       href: 'https://docs.balancer.fi/data-and-analytics/data-and-analytics/subgraph.html',
@@ -35,7 +30,7 @@ const RESOURCE_LINKS = {
   ],
   'In the docs': [
     {
-      label: 'v3 core concepts',
+      label: 'Core concepts',
       href: 'https://docs.balancer.fi/concepts/core-concepts/introduction.html',
       isExternal: true,
     },
@@ -65,7 +60,7 @@ const RESOURCE_LINKS = {
 const CREATE_POOL_LINKS = {
   'Create a pool': [
     {
-      label: 'Balancer',
+      label: 'Frontier Finance',
       href: `/create?protocol=${BALANCER_PROTOCOL_ID.toLowerCase()}`,
       icon: <BalancerIconCircular size={32} />,
     },

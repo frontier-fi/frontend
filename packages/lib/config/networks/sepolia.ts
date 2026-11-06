@@ -1,11 +1,14 @@
+import '@repo/lib/config/frontier/addresses'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { NetworkConfig } from '../config.types'
 import { convertHexToLowerCase } from '@repo/lib/shared/utils/objects'
-import { AddressProvider, PERMIT2 } from '@balancer/sdk'
+import { AddressProvider, ChainId, PERMIT2 } from '@balancer/sdk'
 import { sepolia } from 'viem/chains'
 
+const chainId = ChainId.SEPOLIA
+
 const networkConfig: NetworkConfig = {
-  chainId: 11155111,
+  chainId: sepolia.id,
   name: 'Ethereum Testnet Sepolia',
   shortName: 'Sepolia',
   chain: GqlChainValues.Sepolia,
@@ -35,19 +38,20 @@ const networkConfig: NetworkConfig = {
   contracts: {
     multicall2: '0xca11bde05977b3631167028862be2a173976ca11',
     balancer: {
+      // Same pattern as other networks: SDK AddressProvider (Frontier Sepolia on frontier-fi/sdk).
       vaultV2: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-      vaultV3: AddressProvider.Vault(sepolia.id),
-      router: AddressProvider.Router(sepolia.id),
-      batchRouter: AddressProvider.BatchRouter(sepolia.id),
-      compositeLiquidityRouterBoosted: AddressProvider.CompositeLiquidityRouter(sepolia.id),
+      vaultV3: AddressProvider.Vault(chainId),
+      router: AddressProvider.Router(chainId),
+      batchRouter: AddressProvider.BatchRouter(chainId),
+      compositeLiquidityRouterBoosted: AddressProvider.CompositeLiquidityRouter(chainId),
       relayerV6: '0x7852fB9d0895e6e8b3EedA553c03F6e2F9124dF9',
       minter: '0x1783Cd84b3d01854A96B4eD5843753C2CcbD574A',
-      vaultAdminV3: AddressProvider.VaultAdmin(sepolia.id),
-      unbalancedAddViaSwapRouter: AddressProvider.UnbalancedAddViaSwapRouter(sepolia.id),
-      bCoWFactory: '0x1E3D76AC2BB67a2D7e8395d3A624b30AA9056DF9',
+      vaultAdminV3: AddressProvider.VaultAdmin(chainId),
+      // Not deployed on Frontier Sepolia (AddressProvider throws if called).
+      unbalancedAddViaSwapRouter: undefined,
+      bCoWFactory: undefined,
     },
-    veBAL: '0x150A72e4D4d81BbF045565E232c50Ed0931ad795',
-    permit2: PERMIT2[sepolia.id],
+    permit2: PERMIT2[chainId],
   },
   pools: convertHexToLowerCase({
     issues: {},

@@ -1,1 +1,6 @@
-pnpm lint-staged
+# GUI Git (Cursor/VS Code) does not load shell rc files, so pnpm is often missing
+# from PATH. Prepend the usual install locations before invoking lint-staged.
+export PATH="${HOME}/Library/pnpm/bin:${HOME}/.local/share/pnpm:${HOME}/.local/bin:/opt/homebrew/bin:/usr/local/bin:${PATH}"
+export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=8192}"
+
+pnpm lint-staged --concurrent 1

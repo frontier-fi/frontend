@@ -1,12 +1,11 @@
 'use client'
 
-import { Button, Divider, HStack, ModalFooter, VStack, Link } from '@chakra-ui/react'
+import { Button, Divider, HStack, ModalFooter, VStack } from '@chakra-ui/react'
 import { useStepWithTxBatch } from '@repo/lib/modules/transactions/transaction-steps/tx-batch.hooks'
 import { AnimatePresence, motion } from 'motion/react'
 import { PropsWithChildren } from 'react'
-import { CornerDownLeft, MessageSquare } from 'lucide-react'
+import { CornerDownLeft } from 'lucide-react'
 import { TransactionStep } from '../../../modules/transactions/transaction-steps/lib'
-import { getDiscordLink } from '../../utils/links'
 
 export function SuccessActions({
   returnLabel,
@@ -27,22 +26,6 @@ export function SuccessActions({
           variant="ghost"
         >
           {returnLabel}
-        </Button>
-        <Button
-          _hover={{
-            color: 'font.maxContrast',
-            textDecoration: 'none',
-            background: 'whiteAlpha.200',
-          }}
-          as={Link}
-          fontSize="xs !important"
-          href={getDiscordLink()}
-          isExternal
-          leftIcon={<MessageSquare size="14" />}
-          size="xs"
-          variant="ghost"
-        >
-          Ask on Discord
         </Button>
       </HStack>
     </VStack>

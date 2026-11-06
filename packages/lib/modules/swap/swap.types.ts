@@ -1,8 +1,8 @@
 import {
   SorGetSwapPathsQuery,
-  GqlChain,
   GqlSorSwapType,
 } from '@repo/lib/shared/services/api/generated/graphql'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import {
   AuraBalSwapQueryOutput,
   ExactInQueryOutput,
@@ -23,11 +23,11 @@ export type SwapState = {
   tokenIn: SwapTokenInput
   tokenOut: SwapTokenInput
   swapType: GqlSorSwapType
-  selectedChain: GqlChain
+  selectedChain: AppChain
 }
 
 export type SimulateSwapInputs = {
-  chain: GqlChain
+  chain: AppChain
   tokenIn: Address
   tokenOut: Address
   swapType: GqlSorSwapType

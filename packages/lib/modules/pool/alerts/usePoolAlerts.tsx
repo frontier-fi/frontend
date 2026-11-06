@@ -1,19 +1,14 @@
 import { getChainId, getNetworkConfig } from '@repo/lib/config/app.config'
-import { BalAlertButton } from '@repo/lib/shared/components/alerts/BalAlertButton'
-import { BalAlertContent } from '@repo/lib/shared/components/alerts/BalAlertContent'
 import type { GqlPoolTokenDetail } from '@repo/lib/shared/services/api/graphql-derived-types'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
-import { usePathname, useRouter } from 'next/navigation'
 import { useMemo, useState, useCallback } from 'react'
 import { Pool } from '../pool.types'
-import { migrateStakeTooltipLabel } from '../actions/stake.helpers'
 import {
   hasRateProvider,
   hasReviewedHook,
   hasReviewedRateProvider,
   isV2Pool,
 } from '../pool.helpers'
-import { shouldMigrateStake } from '../user-balance.helpers'
 import { VulnerabilityDataMap } from './pool-issues/PoolIssue.labels'
 import { PoolIssue } from './pool-issues/PoolIssue.type'
 import { BalAlertProps } from '@repo/lib/shared/components/alerts/BalAlert'
@@ -28,8 +23,6 @@ export type PoolAlert = {
 } & BalAlertProps
 
 export function usePoolAlerts(pool: Pool) {
-  const pathname = usePathname()
-  const router = useRouter()
   const { hooks } = useHook(pool)
   const poolMetadata = usePoolMetadata(pool)
   const { isAnyTokenWithoutPrice, poolWarning } = usePoolTokenPriceWarnings(pool)
@@ -123,7 +116,7 @@ export function usePoolAlerts(pool: Pool) {
           hook?.addresses[getChainId(pool.chain)]?.includes(pool.hook.address as Address)
       )?.name
 
-      if (!hasReviewedHook(hook)) {
+      if ('reviewData' in hook && !hasReviewedHook(hook)) {
         alerts.push({
           identifier: `PoolHookNotReviewed`,
           content: `This pool contains a hook called ${hookName} which has not been reviewed. For your safety, you can’t interact with this pool on this UI.`,
@@ -132,7 +125,12 @@ export function usePoolAlerts(pool: Pool) {
         })
       }
 
-      if (hook.reviewData?.summary === 'unsafe') {
+      const hookReviewData =
+        'reviewData' in hook
+          ? (hook as { reviewData?: { summary?: string; warnings?: string[] } }).reviewData
+          : undefined
+
+      if (hookReviewData?.summary === 'unsafe') {
         alerts.push({
           identifier: `PoolHookReviewedUnsafe`,
           content: `This pool contains a hook called ${hookName} which has been reviewed as 'unsafe'. For your safety, you can’t interact with this pool on this UI.`,
@@ -141,7 +139,7 @@ export function usePoolAlerts(pool: Pool) {
         })
       }
 
-      if (hook.reviewData?.summary === 'safe' && hook.reviewData?.warnings.length > 0) {
+      if (hookReviewData?.summary === 'safe' && (hookReviewData.warnings?.length ?? 0) > 0) {
         alerts.push({
           identifier: `PoolHookReviewedSafeWithWarnings`,
           content: `This pool contains a a hook called ${hookName} which has been reviewed as ‘safe’ but with warnings. Please review it in the Pool contracts section.`,
@@ -167,7 +165,7 @@ export function usePoolAlerts(pool: Pool) {
               hook?.addresses[getChainId(pool.chain)]?.includes(nestedPool.hook.address as Address)
           )?.name
 
-          if (!hasReviewedHook(nestedPool.hook)) {
+          if ('reviewData' in nestedPool.hook && !hasReviewedHook(nestedPool.hook)) {
             alerts.push({
               identifier: `NestedPoolHookNotReviewed`,
               content: `This pool contains a nested pool with a hook called ${hookName} which has not been reviewed. For your safety, you can’t interact with this pool on this UI.`,
@@ -176,7 +174,16 @@ export function usePoolAlerts(pool: Pool) {
             })
           }
 
-          if (nestedPool.hook?.reviewData?.summary === 'unsafe') {
+          const nestedHookReviewData =
+            'reviewData' in nestedPool.hook
+              ? (
+                  nestedPool.hook as {
+                    reviewData?: { summary?: string; warnings?: string[] }
+                  }
+                ).reviewData
+              : undefined
+
+          if (nestedHookReviewData?.summary === 'unsafe') {
             alerts.push({
               identifier: `NestedPoolHookReviewedUnsafe`,
               content: `This pool contains a nested pool with a hook called ${hookName} which has been reviewed as 'unsafe'. For your safety, you can’t interact with this pool on this UI.`,
@@ -186,8 +193,8 @@ export function usePoolAlerts(pool: Pool) {
           }
 
           if (
-            nestedPool.hook?.reviewData?.summary === 'safe' &&
-            nestedPool.hook?.reviewData?.warnings.length > 0
+            nestedHookReviewData?.summary === 'safe' &&
+            (nestedHookReviewData.warnings?.length ?? 0) > 0
           ) {
             alerts.push({
               identifier: `NestedPoolHookReviewedSafeWithWarnings`,
@@ -230,32 +237,9 @@ export function usePoolAlerts(pool: Pool) {
     return alerts
   }
 
-  const getUserAlerts = (pool: Pool): PoolAlert[] => {
-    const alerts: PoolAlert[] = []
-
-    function MigrateStakeContent() {
-      return (
-        <BalAlertContent
-          title="Migrate to the new veBAL staking gauge for future BAL liquidity incentives"
-          tooltipLabel={migrateStakeTooltipLabel}
-        >
-          <BalAlertButton onClick={() => router.push(`${pathname}/migrate-stake`)}>
-            Migrate
-          </BalAlertButton>
-        </BalAlertContent>
-      )
-    }
-
-    if (shouldMigrateStake(pool)) {
-      alerts.push({
-        identifier: 'shouldMigrateStake',
-        content: MigrateStakeContent(),
-        status: 'warning',
-        isSoftWarning: false,
-      })
-    }
-
-    return alerts
+  const getUserAlerts = (_pool: Pool): PoolAlert[] => {
+    // Frontier has no gauges — migrate-stake alert removed.
+    return []
   }
 
   const getPoolAlerts = (pool: Pool): PoolAlert[] => {
@@ -317,8 +301,6 @@ export function usePoolAlerts(pool: Pool) {
     poolMetadata,
     isAnyTokenWithoutPrice,
     poolWarning,
-    pathname,
-    router,
     getNetworkPoolAlerts,
     getTokenPoolAlerts,
     getUserAlerts,

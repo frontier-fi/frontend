@@ -114,7 +114,7 @@ export function PoolSnapshotValues() {
         <VStack align="flex-start" spacing="xxs" w="full">
           <LabelWithTooltip
             label="Weekly incentives"
-            tooltip={`The weekly liquidity mining incentives for this pool. It includes incentives from ${isBalancer ? 'the Balancer Protocol (as determined by veBAL voting)' : 'Beets'} and from unaffiliated third parties. Users must stake to get these.`}
+            tooltip={`The weekly liquidity mining incentives for this pool. It includes incentives from ${isBalancer ? 'the Frontier Finance Protocol (as determined by veBAL voting)' : 'Beets'} and from unaffiliated third parties. Users must stake to get these.`}
           />
           {poolStatsValues ? (
             <HStack>

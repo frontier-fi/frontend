@@ -1,5 +1,5 @@
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
-import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 
 import { abbreviateAddress } from '@repo/lib/shared/utils/addresses'
 import { useEnsAvatar, useEnsName } from 'wagmi'
@@ -17,7 +17,7 @@ export function EnsOrAddress({
   chain,
 }: {
   userAddress: `0x${string}`
-  chain: GqlChain
+  chain: AppChain
 }) {
   const chainId = getChainId(PROJECT_CONFIG.ensNetwork) // perform ENS lookup through ensNetwork
   const { data: name } = useEnsName({ address: userAddress, chainId })

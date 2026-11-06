@@ -143,16 +143,6 @@ export function EnableSignaturesSelect() {
   return <Switch isChecked={enableSignatures === 'yes'} onChange={handleChange} />
 }
 
-function ToggleAllowSounds() {
-  const { allowSounds, setAllowSounds } = useUserSettings()
-
-  const handleChange = () => {
-    setAllowSounds(allowSounds === 'yes' ? 'no' : 'yes')
-  }
-
-  return <Switch isChecked={allowSounds === 'yes'} onChange={handleChange} />
-}
-
 export function UserSettings() {
   const { slippage, setSlippage } = useUserSettings()
 
@@ -195,16 +185,6 @@ export function UserSettings() {
                 doesn&apos;t support signatures, you can turn it off.
               </Text>
               <EnableSignaturesSelect />
-            </Box>
-            <Box w="full">
-              <Heading pb="xs" size="sm">
-                Sound effects
-              </Heading>
-              <Text color="font.secondary" fontSize="sm" pb="sm">
-                Allow sound effects for successful transactions. Disable if you prefer a silent
-                experience.
-              </Text>
-              <ToggleAllowSounds />
             </Box>
             <EnableTxBundleSetting />
           </VStack>

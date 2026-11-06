@@ -9,7 +9,8 @@ import { useNetworkConfig } from '@repo/lib/config/useNetworkConfig'
 import { useMakeVarPersisted } from '@repo/lib/shared/hooks/useMakeVarPersisted'
 import { useVault } from '@repo/lib/shared/hooks/useVault'
 import { LABELS } from '@repo/lib/shared/labels'
-import type { GqlChain, GqlSorSwapType } from '@repo/lib/shared/services/api/generated/graphql'
+import type { GqlSorSwapType } from '@repo/lib/shared/services/api/generated/graphql'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { GqlSorSwapTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { isSameAddress, selectByAddress } from '@repo/lib/shared/utils/addresses'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
@@ -51,14 +52,13 @@ import {
   isSupportedWrap,
   isWrapOrUnwrap,
 } from './wrap.helpers'
-import { LbpV3, Pool } from '../pool/pool.types'
+import { Pool } from '../pool/pool.types'
 import { getStandardRootTokens, isStandardOrUnderlyingRootToken } from '../pool/pool-tokens.utils'
 import { getChildTokens } from '../pool/pool-tokens.utils'
 import { supportsNestedActions } from '../pool/actions/LiquidityActionHelpers'
 import { ProtocolVersion } from '../pool/pool.types'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { ApiToken } from '../tokens/token.types'
-import { isV3LBP } from '@repo/lib/modules/pool/pool.helpers'
 
 export type UseSwapResponse = ReturnType<typeof useSwapLogic>
 export const SwapContext = createContext<UseSwapResponse | null>(null)
@@ -76,7 +76,7 @@ export type PathParams = {
 function selectSwapHandler(
   tokenInAddress: Address,
   tokenOutAddress: Address,
-  chain: GqlChain,
+  chain: AppChain,
   swapType: GqlSorSwapType,
   apolloClient: ApolloClient,
   tokens: ApiToken[]
@@ -103,11 +103,8 @@ export type SwapProviderProps = {
 export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapProviderProps) {
   const urlTxHash = pathParams.urlTxHash
   const isPoolSwapUrl = useIsPoolSwapUrl()
-  const isLbpSwap = pool && isV3LBP(pool)
-  const lbpPool = pool as LbpV3
 
   const isPoolSwap = pool && poolActionableTokens // Hint to tell TS that pool and poolActionableTokens must be defined when poolSwap
-  const shouldDiscardOldPersistedValue = isPoolSwapUrl || isLbpSwap
 
   const swapStateVar = useMakeVarPersisted<SwapState>(
     {
@@ -124,8 +121,8 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
       swapType: GqlSorSwapTypeValues.ExactIn,
       selectedChain: isPoolSwap ? pool.chain : PROJECT_CONFIG.defaultNetwork,
     },
-    isLbpSwap ? 'lbpSwapState' : 'swapState',
-    shouldDiscardOldPersistedValue,
+    'swapState',
+    isPoolSwapUrl,
     sanitizeSwapState
   )
 
@@ -181,11 +178,6 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
 
   const tokenInUsd = usdValueForToken(tokenInInfo, swapState.tokenIn.amount)
   const tokenOutUsd = usdValueForToken(tokenOutInfo, swapState.tokenOut.amount)
-
-  const lbpToken = isLbpSwap ? lbpPool.poolTokens[lbpPool.projectTokenIndex] : undefined
-
-  const isLbpProjectTokenBuy =
-    isLbpSwap && lbpToken && swapState.tokenOut.address === lbpToken.address
 
   const getSwapAmount = () => {
     const swapState = swapStateVar()
@@ -247,7 +239,7 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
     }
   }
 
-  function setSelectedChain(_selectedChain: GqlChain) {
+  function setSelectedChain(_selectedChain: AppChain) {
     const defaultTokenState = getDefaultTokenState(_selectedChain)
     swapStateVar(defaultTokenState)
     resetPriceImpact()
@@ -313,27 +305,19 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
   ) {
     const state = swapStateVar()
 
-    const amountObj = isLbpSwap
+    /*
+      When copy-pasting a swap URL with a token amount, the tokenOutInfo can be undefined
+      so we set amount as zero instead of crashing the app
+    */
+    const amountObj = tokenInInfo
       ? {
           amount: amount,
-          scaledAmount: scaleTokenAmount(
-            amount,
-            lbpPool.poolTokens[lbpPool.projectTokenIndex] as unknown as ApiToken
-          ),
+          scaledAmount: scaleTokenAmount(amount, tokenInInfo),
         }
-      : /*
-          When copy-pasting a swap URL with a token amount, the tokenOutInfo can be undefined
-          so we set amount as zero instead of crashing the app
-        */
-        tokenInInfo
-        ? {
-            amount: amount,
-            scaledAmount: scaleTokenAmount(amount, tokenInInfo),
-          }
-        : {
-            amount: '0',
-            scaledAmount: 0n,
-          }
+      : {
+          amount: '0',
+          scaledAmount: 0n,
+        }
 
     const newState = {
       ...state,
@@ -366,27 +350,19 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
   ) {
     const state = swapStateVar()
 
-    const amountObj = isLbpSwap
+    /*
+      When copy-pasting a swap URL with a token amount, the tokenOutInfo can be undefined
+      so we set amount as zero instead of crashing the app
+    */
+    const amountObj = tokenOutInfo
       ? {
           amount: amount,
-          scaledAmount: scaleTokenAmount(
-            amount,
-            lbpPool.poolTokens[lbpPool.projectTokenIndex] as unknown as ApiToken
-          ),
+          scaledAmount: scaleTokenAmount(amount, tokenOutInfo),
         }
-      : /*
-          When copy-pasting a swap URL with a token amount, the tokenOutInfo can be undefined
-          so we set amount as zero instead of crashing the app
-        */
-        tokenOutInfo
-        ? {
-            amount: amount,
-            scaledAmount: scaleTokenAmount(amount, tokenOutInfo),
-          }
-        : {
-            amount: '0',
-            scaledAmount: 0n,
-          }
+      : {
+          amount: '0',
+          scaledAmount: 0n,
+        }
 
     const newState = {
       ...state,
@@ -415,7 +391,7 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
     }
   }
 
-  function getDefaultTokenState(chain: GqlChain) {
+  function getDefaultTokenState(chain: AppChain) {
     const swapState = swapStateVar()
 
     const {
@@ -463,7 +439,7 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
   }
 
   function replaceUrlPath() {
-    if (isPoolSwapUrl || isLbpSwap) return // Avoid redirection when the swap is within a pool or LBP page
+    if (isPoolSwapUrl) return // Avoid redirection when the swap is within a pool page
     const { selectedChain, tokenIn, tokenOut, swapType } = swapState
     const networkConfig = getNetworkConfig(selectedChain)
     const { popularTokens } = networkConfig.tokens
@@ -525,7 +501,7 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
     isBnParseable(swapState.tokenOut.amount) && bn(swapState.tokenOut.amount).gt(0)
 
   const protocolVersion =
-    ((simulationQuery.data as SdkSimulateSwapResponse)?.protocolVersion as ProtocolVersion) || 2
+    ((simulationQuery.data as SdkSimulateSwapResponse)?.protocolVersion as ProtocolVersion) || 3
 
   const { vaultAddress } = useVault(protocolVersion)
 
@@ -552,13 +528,8 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
     simulationQuery,
     wethIsEth,
     swapAction,
-    tokenInInfo:
-      isLbpSwap && !isLbpProjectTokenBuy && lbpToken
-        ? (lbpToken as unknown as ApiToken)
-        : tokenInInfo,
+    tokenInInfo,
     tokenOutInfo,
-    isLbpSwap: !!isLbpSwap,
-    isLbpProjectTokenBuy: !!isLbpProjectTokenBuy,
   })
 
   const transactionSteps = useTransactionSteps(steps, isLoadingSteps)
@@ -617,10 +588,7 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
     if (!slugChain) throw new Error(`Chain slug not found for chain ${pool.chain}`)
     setInitialChain(slugChain)
 
-    if (isLbpSwap) {
-      setInitialTokenIn(lbpPool.poolTokens[lbpPool.reserveTokenIndex]!.address)
-      setInitialTokenOut(lbpPool.poolTokens[lbpPool.projectTokenIndex]!.address)
-    } else if (supportsNestedActions(pool)) {
+    if (supportsNestedActions(pool)) {
       setInitialTokenIn(tokenIn)
 
       if (isStandardOrUnderlyingRootToken(pool, tokenIn as Address)) {
@@ -723,7 +691,7 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
 
   // If token out value changes when swapping exact in, recalculate price impact.
   useEffect(() => {
-    if (!isLbpSwap && swapState.swapType === GqlSorSwapTypeValues.ExactIn) {
+    if (swapState.swapType === GqlSorSwapTypeValues.ExactIn) {
       calcPriceImpact()
     }
   }, [tokenOutUsd])
@@ -769,9 +737,6 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
     pool,
     poolActionableTokens,
     protocolVersion,
-    isLbpSwap,
-    lbpToken,
-    isLbpProjectTokenBuy,
     replaceUrlPath,
     resetSwapAmounts,
     setTokenSelectKey,

@@ -28,8 +28,6 @@ fragment PoolTokens on GqlPoolTokenDetail {
   decimals
   name
   symbol
-  priority
-  tradable
   canUseBufferForSwaps
   useWrappedForAddRemove
   useUnderlyingForAddRemove
@@ -93,7 +91,6 @@ fragment PoolTokens on GqlPoolTokenDetail {
   isErc4626
   maxDeposit
   maxWithdraw
-  isBufferAllowed
   underlyingToken {
     ...UnderlyingToken
   }

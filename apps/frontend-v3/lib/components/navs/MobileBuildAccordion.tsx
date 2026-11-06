@@ -24,7 +24,7 @@ import {
 
 const CREATE_POOL_LINKS = [
   {
-    label: 'Balancer',
+    label: 'Frontier Finance',
     href: `/create?protocol=${BALANCER_PROTOCOL_ID.toLowerCase()}`,
     icon: <BalancerIconCircular size={24} />,
   },
@@ -37,12 +37,8 @@ const CREATE_POOL_LINKS = [
 
 const RESOURCE_LINKS = [
   {
-    label: 'v3 Scaffold',
-    href: 'https://github.com/balancer/scaffold-balancer-v3',
-  },
-  {
     label: 'Code & Contracts',
-    href: 'https://github.com/balancer',
+    href: 'https://github.com/frontier-fi/',
   },
   {
     label: 'Documentation',

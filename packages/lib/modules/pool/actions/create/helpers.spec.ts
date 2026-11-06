@@ -27,17 +27,17 @@ import {
 } from './helpers'
 
 describe('getGqlPoolType', () => {
-  it('maps every SDK pool type to its GQL counterpart', () => {
+  it('maps supported SDK pool types to Frontier GQL counterparts', () => {
     expect(getGqlPoolType(PoolType.Weighted)).toBe(GqlPoolTypeValues.Weighted)
     expect(getGqlPoolType(PoolType.Stable)).toBe(GqlPoolTypeValues.Stable)
-    expect(getGqlPoolType(PoolType.StableSurge)).toBe(GqlPoolTypeValues.Stable)
-    expect(getGqlPoolType(PoolType.GyroE)).toBe(GqlPoolTypeValues.GyroE)
-    expect(getGqlPoolType(PoolType.ReClamm)).toBe(GqlPoolTypeValues.Reclamm)
-    expect(getGqlPoolType(PoolType.CowAmm)).toBe(GqlPoolTypeValues.CowAmm)
+    expect(getGqlPoolType(PoolType.GyroE)).toBe(GqlPoolTypeValues.Eclp)
   })
 
   it('throws for unmapped pool types', () => {
     expect(() => getGqlPoolType(undefined as unknown as PoolType)).toThrow(/Invalid pool type/)
+    expect(() => getGqlPoolType(PoolType.CowAmm)).toThrow(/Invalid pool type/)
+    expect(() => getGqlPoolType(PoolType.ReClamm)).toThrow(/Invalid pool type/)
+    expect(() => getGqlPoolType(PoolType.StableSurge)).toThrow(/Invalid pool type/)
   })
 })
 
@@ -175,11 +175,12 @@ describe('protocol predicates', () => {
   it('detects CoW protocol case-insensitively', () => {
     expect(isCowProtocol('CoW')).toBe(true)
     expect(isCowProtocol('cow')).toBe(true)
-    expect(isCowProtocol('Balancer v3')).toBe(false)
+    expect(isCowProtocol('Frontier Finance')).toBe(false)
   })
 
   it('detects Balancer protocol case-insensitively', () => {
-    expect(isBalancerProtocol('Balancer v3')).toBe(true)
+    expect(isBalancerProtocol('Frontier Finance')).toBe(true)
+    expect(isBalancerProtocol('Frontier Finance v3')).toBe(true)
     expect(isBalancerProtocol('balancer v3')).toBe(true)
     expect(isBalancerProtocol('CoW')).toBe(false)
   })

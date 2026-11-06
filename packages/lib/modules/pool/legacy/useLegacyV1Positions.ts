@@ -108,7 +108,7 @@ async function readPoolBatch(
 }
 
 /*
-  V1 predates the vault and is not covered by the Balancer API, so a holder's positions are only
+  V1 predates the vault and is not covered by the Frontier Finance API, so a holder's positions are only
   visible as BPT balances on the pool contracts themselves.
 
   A failed read is never treated as a zero balance: `balanceOf` cannot revert on these pools, so a
@@ -140,7 +140,10 @@ async function scanLegacyV1Positions(
     const { positions: found, failedCalls } = await readPoolBatch(client, batch, userAddress)
 
     positions.push(...found)
-    if (failedCalls > 0) throw new Error('Balancer V1 scan: RPC dropped part of the pool sweep')
+
+    if (failedCalls > 0) {
+      throw new Error('Frontier Finance V1 scan: RPC dropped part of the pool sweep')
+    }
   }
 
   return positions

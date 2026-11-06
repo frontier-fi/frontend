@@ -4,19 +4,16 @@ import {
   Center,
   HStack,
   Icon,
-  PopoverContent,
   Text,
   TextProps,
   useColorModeValue,
 } from '@chakra-ui/react'
 import BaseAprTooltip, { BaseAprTooltipProps } from './BaseAprTooltip'
-import { Info } from 'lucide-react'
 import { getTotalAprLabel } from '@repo/lib/modules/pool/pool.utils'
 import StarsIcon from '../../icons/StarsIcon'
 import { PoolListItem } from '@repo/lib/modules/pool/pool.types'
 import { FeaturedPool } from '@repo/lib/modules/pool/PoolProvider'
 import { Pool } from '@repo/lib/modules/pool/pool.types'
-import { isLBP } from '@repo/lib/modules/pool/pool.helpers'
 import type { GqlPoolAprItemType } from '@repo/lib/shared/services/api/generated/graphql'
 import { GqlPoolAprItemTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import StarIcon from '../../icons/StarIcon'
@@ -108,9 +105,7 @@ export function SparklesIcon({
   return (
     <Box h="auto" minW="16px" w="16px">
       <Center w="16px">
-        {isLBP(pool.type) ? (
-          <Icon as={Info} boxSize={4} color={isOpen ? 'inherit' : 'gray.400'} />
-        ) : hasOnlySwapApr ? (
+        {hasOnlySwapApr ? (
           <Icon
             as={StarIcon}
             boxSize={4}
@@ -145,25 +140,12 @@ function MainAprTooltip({
   const isAprNegative = aprToShow.trim().startsWith('-')
 
   // hoverColor here is used for the text and therefore can use a semantic token
-  const hoverColor = isLBP(pool.type)
-    ? 'inherit'
-    : isAprNegative
-      ? 'font.warning'
-      : 'font.highlight'
-
-  const customPopoverContent = isLBP(pool.type) ? (
-    <PopoverContent p="md">
-      <Text color="font.secondary" fontSize="sm">
-        LBP APRs cannot be realized by LPs.
-      </Text>
-    </PopoverContent>
-  ) : undefined
+  const hoverColor = isAprNegative ? 'font.warning' : 'font.highlight'
 
   return (
     <BaseAprTooltip
       {...props}
       chain={pool.chain}
-      customPopoverContent={customPopoverContent}
       hookType={isPool(pool) ? pool.hook?.type : undefined}
       poolType={pool.type}
       totalBaseText="Total APR"
@@ -175,14 +157,12 @@ function MainAprTooltip({
               _hover={{ color: hoverColor }}
               color={isOpen ? hoverColor : 'font.primary'}
               gap="xs"
-              opacity={isLBP(pool.type) ? 0.5 : 1}
             >
               {!onlySparkles && (
                 <Text
                   color={isOpen || isAprNegative ? hoverColor : 'font.primary'}
                   noOfLines={2}
                   textAlign="left"
-                  textDecoration={isLBP(pool.type) ? 'line-through' : 'none'}
                   whiteSpace="pre-wrap"
                   {...textProps}
                 >

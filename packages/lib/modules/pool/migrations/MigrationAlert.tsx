@@ -48,7 +48,7 @@ function AlertWithBalance({ pool }: Props) {
         content={
           <HStack justifyContent="space-between" w="full">
             <Text color="black">
-              {`Migrate your position from ${pool.name} (on ${getChainName(pool.chain)}) to the recommended v3 pool:`}
+              {`Migrate your position from ${pool.name} (on ${getChainName(pool.chain)}) to the recommended pool:`}
               <Link href={poolPath} textDecoration="underline">
                 {abbreviateAddress(pool.address)}
               </Link>
@@ -72,7 +72,7 @@ function AlertWithoutBalance({ pool }: Props) {
     <BalAlert
       content={
         <Text color="black">
-          The recommended similar pool on v3 for migration is:{' '}
+          The recommended similar pool for migration is:{' '}
           <Link href={poolPath} textDecoration="underline">
             {pool.address}
           </Link>

@@ -13,7 +13,7 @@ export default function Cookies() {
           <FadeInOnView>
             <div className="subsection">
               <Box mt="3xl">
-                <h1>Balancer Cookies&nbsp;Policy</h1>
+                <h1>Frontier Finance Cookies&nbsp;Policy</h1>
                 <p>
                   <em>Last Updated: October 2023</em>
                 </p>
@@ -24,10 +24,10 @@ export default function Cookies() {
             <div className="subsection">
               <h2>I. Introduction and Scope of Policy</h2>
               <p>
-                This Cookies Policy (“Policy”) applies to your interaction with the Balancer
-                Foundation, its subsidiary, Balancer OpCo Limited, and material service providers
-                operating under a legal agreement (“Balancer Foundation,” “Balancer,” “we,” “our,”
-                or “us”).
+                This Cookies Policy (“Policy”) applies to your interaction with the Frontier Finance
+                Foundation, its subsidiary, Frontier Finance OpCo Limited, and material service
+                providers operating under a legal agreement (“Frontier Finance Foundation,”
+                “Frontier Finance,” “we,” “our,” or “us”).
               </p>
             </div>
           </FadeInOnView>
@@ -44,7 +44,8 @@ export default function Cookies() {
               <p>
                 We do not generally use cookies; however our third party vendors do. We do not
                 intentionally collect information to customize your experience on the website or the
-                Balancer.fi user interface (UI) to the Balancer Protocol. (“Sites” or “Site”).
+                Balancer.fi user interface (UI) to the Frontier Finance Protocol. (“Sites” or
+                “Site”).
               </p>
               <p>
                 Industry standards are currently evolving, and we may not separately respond to or

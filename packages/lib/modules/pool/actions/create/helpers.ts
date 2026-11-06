@@ -15,10 +15,8 @@ import {
 const sdkToGqlPoolType: Partial<Record<PoolType, GqlPoolType>> = {
   [PoolType.Weighted]: GqlPoolTypeValues.Weighted,
   [PoolType.Stable]: GqlPoolTypeValues.Stable,
-  [PoolType.StableSurge]: GqlPoolTypeValues.Stable,
-  [PoolType.GyroE]: GqlPoolTypeValues.GyroE,
-  [PoolType.ReClamm]: GqlPoolTypeValues.Reclamm,
-  [PoolType.CowAmm]: GqlPoolTypeValues.CowAmm,
+  // Frontier API exposes ECLP (not GYROE) for Gyro elliptic CLPs
+  [PoolType.GyroE]: GqlPoolTypeValues.Eclp,
 }
 
 export function getGqlPoolType(poolType: PoolType): GqlPoolType {
@@ -119,7 +117,13 @@ export function isCowProtocol(protocol: string): boolean {
 }
 
 export function isBalancerProtocol(protocol: string): boolean {
-  return protocol.toLowerCase() === BALANCER_PROTOCOL_ID.toLowerCase()
+  const normalized = protocol.toLowerCase()
+  return (
+    normalized === BALANCER_PROTOCOL_ID.toLowerCase() ||
+    normalized === 'frontier finance v3' ||
+    normalized === 'balancer v3' ||
+    normalized === 'balancer'
+  )
 }
 
 export function isPoolCreatorEnabled(poolType: PoolType): boolean {

@@ -8,6 +8,7 @@ import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
 import { isDisabledWithReason } from '@repo/lib/shared/utils/functions/isDisabledWithReason'
 import { bn, isZero } from '@repo/lib/shared/utils/numbers'
 import { HumanAmount } from '@balancer/sdk'
+import { Address } from 'viem'
 import { createContext, PropsWithChildren, useEffect, useMemo } from 'react'
 import { PoolListItem } from '../../pool.types'
 import { usePool } from '../../PoolProvider'
@@ -34,7 +35,7 @@ export function useUnstakeLogic() {
   const rewardAmounts: HumanTokenAmount[] = useMemo(
     () =>
       allClaimableRewards.map(reward => ({
-        tokenAddress: reward.tokenAddress,
+        tokenAddress: reward.tokenAddress as Address,
         humanAmount: reward.humanBalance as HumanAmount,
       })),
     [allClaimableRewards]

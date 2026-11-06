@@ -4,7 +4,7 @@ import {
   getWrappedNativeAssetAddress,
 } from '@repo/lib/config/app.config'
 import { SupportedChainId } from '@repo/lib/config/config.types'
-import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { includesAddress, isSameAddress } from '@repo/lib/shared/utils/addresses'
 import { Address } from 'viem'
 import { HumanTokenAmountWithSymbol, TokenBase } from './token.types'
@@ -15,25 +15,25 @@ import { PoolToken } from '../pool/pool.types'
 import { ApiToken, ApiOrCustomToken } from './token.types'
 import mainnetNetworkConfig from '@repo/lib/config/networks/mainnet'
 
-export function isNativeAsset(token: TokenBase | string, chain: GqlChain | SupportedChainId) {
+export function isNativeAsset(token: TokenBase | string, chain: AppChain | SupportedChainId) {
   return nativeAssetFilter(chain)(token)
 }
 
 export function isWrappedNativeAsset(
   token: TokenBase | string,
-  chain: GqlChain | SupportedChainId
+  chain: AppChain | SupportedChainId
 ) {
   return wrappedNativeAssetFilter(chain)(token)
 }
 
 export function isNativeOrWrappedNative(
   token: TokenBase | string,
-  chain: GqlChain | SupportedChainId
+  chain: AppChain | SupportedChainId
 ) {
   return isWrappedNativeAsset(token, chain) || isNativeAsset(token, chain)
 }
 
-export function nativeAssetFilter(chain: GqlChain | SupportedChainId) {
+export function nativeAssetFilter(chain: AppChain | SupportedChainId) {
   return (token: TokenBase | string) => {
     const nativeAssetAddress = getNativeAssetAddress(chain)
 
@@ -45,7 +45,7 @@ export function nativeAssetFilter(chain: GqlChain | SupportedChainId) {
   }
 }
 
-export function wrappedNativeAssetFilter(chain: GqlChain | SupportedChainId) {
+export function wrappedNativeAssetFilter(chain: AppChain | SupportedChainId) {
   return (token: TokenBase | string) => {
     const wNativeAssetAddress = getWrappedNativeAssetAddress(chain)
 
@@ -57,7 +57,7 @@ export function wrappedNativeAssetFilter(chain: GqlChain | SupportedChainId) {
   }
 }
 
-export function exclNativeAssetFilter(chain: GqlChain | SupportedChainId) {
+export function exclNativeAssetFilter(chain: AppChain | SupportedChainId) {
   return (token: TokenBase | string) => {
     const nativeAssetAddress = getNativeAssetAddress(chain)
 
@@ -69,7 +69,7 @@ export function exclNativeAssetFilter(chain: GqlChain | SupportedChainId) {
   }
 }
 
-export function exclWrappedNativeAssetFilter(chain: GqlChain | SupportedChainId) {
+export function exclWrappedNativeAssetFilter(chain: AppChain | SupportedChainId) {
   return (token: TokenBase | string) => {
     const wNativeAssetAddress = getWrappedNativeAssetAddress(chain)
 
@@ -84,7 +84,7 @@ export function exclWrappedNativeAssetFilter(chain: GqlChain | SupportedChainId)
 /*
   If the given array contains the native asset, it is replaced with the wrapped native asset
 */
-export function swapNativeWithWrapped(inputAmounts: InputAmount[], chain: GqlChain) {
+export function swapNativeWithWrapped(inputAmounts: InputAmount[], chain: AppChain) {
   return inputAmounts.map(inputAmount => {
     if (isNativeAsset(inputAmount.address, chain)) {
       return {
@@ -100,7 +100,7 @@ export function swapNativeWithWrapped(inputAmounts: InputAmount[], chain: GqlCha
 /*
   If the given array contains the wrapped native asset, it is replaced with the native asset
 */
-export function swapWrappedWithNative(inputAmounts: HumanTokenAmountWithSymbol[], chain: GqlChain) {
+export function swapWrappedWithNative(inputAmounts: HumanTokenAmountWithSymbol[], chain: AppChain) {
   return inputAmounts.map(inputAmount => {
     if (isWrappedNativeAsset(inputAmount.tokenAddress, chain)) {
       return {
@@ -114,7 +114,7 @@ export function swapWrappedWithNative(inputAmounts: HumanTokenAmountWithSymbol[]
 }
 
 export function requiresDoubleApproval(
-  chainId: GqlChain | SupportedChainId,
+  chainId: AppChain | SupportedChainId,
   tokenAddress: Address
 ) {
   return includesAddress(
@@ -166,7 +166,7 @@ export function getSpenderForAddLiquidity(pool: Pool): Address {
   return vaultAddress
 }
 
-export function getSpenderForCreatePool(chain: GqlChain): Address {
+export function getSpenderForCreatePool(chain: AppChain): Address {
   const permit2Address = getNetworkConfig(chain).contracts.permit2
 
   if (!permit2Address) {

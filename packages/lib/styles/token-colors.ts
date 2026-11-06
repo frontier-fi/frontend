@@ -1,5 +1,5 @@
 import { Address } from 'viem'
-import type { GqlChain } from '../shared/services/api/generated/graphql'
+import type { AppChain } from '../shared/services/api/graphql-enums'
 import { GqlChainValues } from '../shared/services/api/graphql-enums'
 import { getGqlChain } from '../config/app.config'
 import { getRandomInt } from '../shared/utils/numbers'
@@ -9,7 +9,7 @@ export type TokenColorDef = {
   to: string
 }
 
-const tokenColors: Partial<Record<GqlChain, Record<Address, TokenColorDef>>> = {
+const tokenColors: Partial<Record<AppChain, Record<Address, TokenColorDef>>> = {
   [GqlChainValues.Mainnet]: {
     '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee': { from: '#627EEA', to: '#627EEA' }, // ETH
     '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2': { from: '#F2F3F7', to: '#CECDFE' }, // WETH
@@ -207,7 +207,7 @@ const DEFAULT_TOKEN_COLORS: TokenColorDef[] = [
 const defaultColor: TokenColorDef = { from: '#30CEF0', to: '#02A2FE' }
 
 export function getTokenColor(
-  chain: GqlChain | number,
+  chain: AppChain | number,
   address: Address,
   i?: number
 ): TokenColorDef {
@@ -222,7 +222,7 @@ export function getTokenColor(
   )
 }
 
-export function getCssTokenColor(chain: GqlChain | number, address: Address, i: number) {
+export function getCssTokenColor(chain: AppChain | number, address: Address, i: number) {
   const color = getTokenColor(chain, address, i)
   return `linear-gradient(180deg, ${color.from} 0%, ${color.to} 100%)`
 }

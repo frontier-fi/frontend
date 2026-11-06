@@ -1,7 +1,7 @@
 import { mins } from '@repo/lib/shared/utils/time'
 
 const POOL_MIGRATIONS_URL =
-  'https://raw.githubusercontent.com/balancer/metadata/main/pools/migration.json'
+  'https://raw.githubusercontent.com/frontier-fi/metadata/main/pools/migration.json'
 
 export type PoolInfo = {
   protocol: number

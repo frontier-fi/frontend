@@ -1,4 +1,7 @@
 import type { SentryBuildOptions } from '@sentry/nextjs/config'
+import { isSentryEnabled } from '@repo/lib/config/sentry'
+
+export { isSentryEnabled }
 
 const isProd = process.env.NEXT_PUBLIC_APP_ENV === 'prod'
 
@@ -9,7 +12,6 @@ const shouldEnableSourceMaps = isProd && process.env.VERCEL_GIT_COMMIT_REF === '
 export const sentryOptions: SentryBuildOptions = {
   // Suppresses source map uploading logs during build
   silent: true,
-  org: 'balancer-labs',
   project: isProd ? 'frontend-v3' : 'frontend-v3-develop',
 
   // For all available options, see:
@@ -32,10 +34,4 @@ export const sentryOptions: SentryBuildOptions = {
   },
 }
 
-const productionSentryDSN =
-  'https://53df88eafd8f9a546b0e926b65553379@o574636.ingest.sentry.io/4506382607712256'
-
-const developmentSentryDSN =
-  'https://28291a3b50d248e06f917aa5a98b8fea@o574636.ingest.us.sentry.io/4506944362053632'
-
-export const sentryDSN = isProd ? productionSentryDSN : developmentSentryDSN
+export const sentryDSN = process.env.NEXT_PUBLIC_SENTRY_DSN

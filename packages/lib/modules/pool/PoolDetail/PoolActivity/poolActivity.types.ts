@@ -1,6 +1,5 @@
 import type { GqlPoolType } from '@repo/lib/shared/services/api/generated/graphql'
-import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
-import { BaseVariant, PoolVariant } from '../../pool.types'
+import { PoolVariant } from '../../pool.types'
 import { ApiToken } from '@repo/lib/modules/tokens/token.types'
 
 export type PoolActivityTokens = {
@@ -32,14 +31,15 @@ export interface PoolActivityTypeTab {
   label: string
 }
 
-export function getPoolActivityTabsList({
-  variant,
-  poolType,
-}: {
+export function getPoolActivityTabsList(_args: {
   variant: PoolVariant
   poolType: GqlPoolType
 }): PoolActivityTypeTab[] {
-  const defaultTabs = [
+  return [
+    {
+      value: 'all',
+      label: 'All',
+    },
     {
       value: 'adds',
       label: 'Adds',
@@ -48,18 +48,6 @@ export function getPoolActivityTabsList({
       value: 'removes',
       label: 'Removes',
     },
-  ]
-
-  if (poolType === GqlPoolTypeValues.LiquidityBootstrapping && variant === BaseVariant.v2) {
-    return defaultTabs
-  }
-
-  return [
-    {
-      value: 'all',
-      label: 'All',
-    },
-    ...defaultTabs,
     {
       value: 'swaps',
       label: 'Swaps',

@@ -1,3 +1,4 @@
+import '@repo/lib/config/frontier/addresses'
 import { connectorsForWallets } from '@rainbow-me/rainbowkit'
 import {
   coinbaseWallet,

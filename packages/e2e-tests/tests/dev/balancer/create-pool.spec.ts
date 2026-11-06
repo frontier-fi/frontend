@@ -45,7 +45,7 @@ test.describe('Build popover', () => {
       await poolAtTokensStep.clickBuildPopoverToCowAmm()
       await clickButton(page, 'Delete and start over')
       await expect(page).toHaveURL(poolAtTokensStep.urls.type)
-      await expect(page.getByText('Choose protocol')).toBeVisible()
+      await expect(page.getByText('Choose network')).toBeVisible()
     })
   })
 })

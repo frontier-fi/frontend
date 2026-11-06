@@ -28,13 +28,6 @@ export const POOL_CREATION_CONFIGS: [PoolCreationConfig, ...PoolCreationConfig[]
     ],
   },
   {
-    type: PoolType.StableSurge,
-    tokens: [
-      { symbol: 'USDC', amount: '10' },
-      { symbol: 'GHO', amount: '10' },
-    ],
-  },
-  {
     type: PoolType.Weighted,
     tokens: [
       { symbol: 'AAVE', amount: '1' },
@@ -46,21 +39,6 @@ export const POOL_CREATION_CONFIGS: [PoolCreationConfig, ...PoolCreationConfig[]
     tokens: [
       { symbol: 'USDC', amount: '1' },
       { symbol: 'GHO', amount: undefined },
-    ],
-  },
-  // AutoRange pool creation has been temporarily disabled for audit investigations
-  // {
-  //   type: PoolType.ReClamm,
-  //   tokens: [
-  //     { symbol: 'WETH', amount: '1' },
-  //     { symbol: 'USDC', amount: undefined },
-  //   ],
-  // },
-  {
-    type: PoolType.CowAmm,
-    tokens: [
-      { symbol: 'AAVE', amount: '1' },
-      { symbol: 'BAL', amount: '333' },
     ],
   },
 ]
@@ -91,7 +69,7 @@ export class CreatePoolPage {
   }
 
   get isStableSurge() {
-    return this.config.type === PoolType.StableSurge
+    return (this.config.type as PoolType) === PoolType.StableSurge
   }
 
   get isWeighted() {
@@ -103,11 +81,11 @@ export class CreatePoolPage {
   }
 
   get isAutoRange() {
-    return this.config.type === PoolType.ReClamm
+    return (this.config.type as PoolType) === PoolType.ReClamm
   }
 
   get isCowAmm() {
-    return this.config.type === PoolType.CowAmm
+    return (this.config.type as PoolType) === PoolType.CowAmm
   }
 
   async goToPage() {
@@ -118,10 +96,6 @@ export class CreatePoolPage {
     await this.page.getByText('Build', { exact: true }).click()
     await this.page.getByText('CoW AMM', { exact: true }).click()
     await expect(this.page).toHaveURL(this.urls.buildCow)
-  }
-
-  async chooseProtocol(protocol: string) {
-    await this.page.getByText(protocol, { exact: true }).click()
   }
 
   async chooseNetwork(network: string) {
@@ -151,14 +125,12 @@ export class CreatePoolPage {
 
   async expectInitialFormState() {
     await expect(this.page).toHaveURL(this.urls.type)
-    await expect(this.page.getByText('Choose protocol')).toBeVisible()
     await expect(this.page.getByText('Choose network')).toBeVisible()
     await expect(this.page.getByText('Choose a pool type')).toBeVisible()
   }
 
   async typeStep(goToNextStep?: boolean) {
     await this.expectInitialFormState()
-    if (this.isCowAmm) await this.chooseProtocol('CoW')
     await this.choosePoolType(this.config.type)
     if (goToNextStep) await clickButton(this.page, 'Next')
   }

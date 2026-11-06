@@ -40,17 +40,17 @@ const videos = {
     src: createCustomAMMsSrc,
   },
   scaffoldBalancer: {
-    title: 'Prototype v3 on Scaffold Balancer',
+    title: 'Code & Contracts',
     url: 'https://youtu.be/m6q5M34ZdXw?si=FfZhc6fQRHht3JME',
     src: scaffoldBalancerSrc,
   },
   createHook: {
-    title: 'Create a Hook on Balancer v3',
+    title: 'Create a Hook on Frontier Finance',
     url: 'https://youtu.be/kaz6duliRPA?si=CMTRINvkDwrR-7s-',
     src: createHookSrc,
   },
   createRouter: {
-    title: 'Create a Router on Balancer v3',
+    title: 'Create a Router on Frontier Finance',
     url: 'https://youtu.be/pO1ChmSFTaY?si=6wRUk2Ff5yJyGrIn',
     src: createRouterSrc,
   },
@@ -163,16 +163,16 @@ export function Videos() {
               fontWeight="bold"
               letterSpacing="-0.04rem"
               lineHeight={1}
-              text="Balancer v3 video tutorials"
+              text="Frontier Finance video tutorials"
             />
             <Button
               as={Link}
-              href="https://github.com/balancer/scaffold-balancer-v3"
+              href="https://github.com/frontier-fi/"
               isExternal
               rightIcon={<ArrowUpRight size="14px" />}
               variant="secondary"
             >
-              Prototype on v3
+              Code & Contracts
             </Button>
           </Stack>
           <Card>

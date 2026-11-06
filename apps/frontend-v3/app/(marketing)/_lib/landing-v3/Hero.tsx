@@ -74,7 +74,7 @@ export function Hero() {
               transition={{ delay: 0.7, duration: 0.3, delayChildren: 0.5, ease: 'easeInOut' }}
               variant="eyebrow"
             >
-              Balancer v3 is live
+              Frontier Finance is live
             </MotionText>
 
             <WordsPullUp
@@ -108,8 +108,8 @@ export function Hero() {
               transition={{ duration: 1, delay: 0.9, ease: 'easeInOut' }}
               w="full"
             >
-              The ultimate platform for custom liquidity solutions. Balancer v3 perfectly balances
-              simplicity and flexibility to reshape the future of AMMs.
+              The ultimate platform for custom liquidity solutions. Frontier Finance perfectly
+              balances simplicity and flexibility to reshape the future of AMMs.
             </MotionHeading>
             <Stack alignItems={{ base: 'start', md: 'center' }} direction="row" mt="0" spacing="ms">
               <MotionButton
@@ -131,7 +131,7 @@ export function Hero() {
                 transition={{ duration: 2, delay: 1.2 }}
                 variant="primary"
               >
-                View v3 docs
+                View docs
               </MotionButton>
 
               <MotionButton
@@ -144,7 +144,7 @@ export function Hero() {
                     : {}
                 }
                 as={Link}
-                href="https://github.com/balancer/scaffold-balancer-v3"
+                href="https://github.com/frontier-fi/"
                 initial={{ opacity: 0 }}
                 rel="noopener"
                 rightIcon={<ArrowUpRight size="14px" />}
@@ -153,7 +153,7 @@ export function Hero() {
                 transition={{ duration: 2, delay: 1.2 }}
                 variant="secondary"
               >
-                Prototype v3
+                Code & Contracts
               </MotionButton>
             </Stack>
             <HStack alignItems="center" mt="xl" spacing="md">
@@ -183,7 +183,7 @@ export function Hero() {
                 initial={{ opacity: 0 }}
                 transition={{ duration: 2, delay: 1.4 }}
               >
-                Learn about Balancer v3
+                Learn about Frontier Finance
               </MotionText>
             </HStack>
           </VStack>

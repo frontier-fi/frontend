@@ -98,7 +98,7 @@ export function QuantAMMPromoBanner() {
                       lineHeight="1"
                       pb="sm"
                     >
-                      This is a &lsquo;BTF&rsquo; by QuantAMM on Balancer v3
+                      This is a &lsquo;BTF&rsquo; by QuantAMM on Frontier Finance
                     </Heading>
                   </Box>
                   <Box>

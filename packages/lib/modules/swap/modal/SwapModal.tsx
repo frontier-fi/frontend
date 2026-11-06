@@ -51,8 +51,6 @@ export function SwapPreviewModal({
     urlTxHash,
     hasQuoteContext,
     protocolVersion,
-    isLbpSwap,
-    isLbpProjectTokenBuy,
   } = useSwap()
 
   const swapReceipt = useSwapReceipt({
@@ -64,7 +62,7 @@ export function SwapPreviewModal({
   })
 
   useEffect(() => {
-    if (!isWrap && swapTxHash && !window.location.pathname.includes(swapTxHash) && !isLbpSwap) {
+    if (!isWrap && swapTxHash && !window.location.pathname.includes(swapTxHash)) {
       const url = isPoolSwapUrl
         ? `${window.location.pathname}/${swapTxHash}`
         : `/swap/${chainToSlugMap[selectedChain]}/${swapTxHash}`
@@ -108,7 +106,7 @@ export function SwapPreviewModal({
         <TransactionModalHeader
           chain={selectedChain}
           isReceiptLoading={swapReceipt.isLoading}
-          label={`Review ${isLbpSwap ? (isLbpProjectTokenBuy ? 'Buy' : 'Sell') : capitalize(swapAction)}`}
+          label={`Review ${capitalize(swapAction)}`}
           timeout={<SwapTimeout />}
           txHash={swapTxHash}
         />
@@ -121,9 +119,7 @@ export function SwapPreviewModal({
           currentStep={transactionSteps.currentStep}
           isSuccess={isSuccess}
           returnAction={onClose}
-          returnLabel={
-            isLbpSwap ? 'Return to lbp' : isPoolSwapUrl ? 'Return to pool' : 'Swap again'
-          }
+          returnLabel={isPoolSwapUrl ? 'Return to pool' : 'Swap again'}
           urlTxHash={urlTxHash}
         />
       </ModalContent>

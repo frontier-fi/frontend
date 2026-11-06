@@ -9,8 +9,9 @@ type Props = {
 }
 
 export function LbpPoolListInfo({ pool }: Props) {
-  const startTime = secondsToMilliseconds(pool.lbpParams?.startTime || 0)
-  const endTime = secondsToMilliseconds(pool.lbpParams?.endTime || 0)
+  const lbpParams = (pool as { lbpParams?: { startTime?: number; endTime?: number } }).lbpParams
+  const startTime = secondsToMilliseconds(lbpParams?.startTime || 0)
+  const endTime = secondsToMilliseconds(lbpParams?.endTime || 0)
   const hasStarted = startTime && isAfter(now(), startTime)
   const hasEnded = endTime && isAfter(now(), endTime)
 

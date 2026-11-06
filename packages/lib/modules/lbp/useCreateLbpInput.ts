@@ -110,6 +110,7 @@ export function useCreateLbpInput(): CreatePoolInput {
   }
 
   if (isFixedSale) {
+    // LBP pool types are outside Frontier's create-pool union; cast for leftover LBP create flow.
     return {
       ...basePoolProps,
       poolType: PoolType.LiquidityBootstrappingFixedPrice,
@@ -117,12 +118,12 @@ export function useCreateLbpInput(): CreatePoolInput {
         ...baseLbpProps,
         projectTokenRate: parseAmount(`${launchTokenRate}`, DEFAULT_DECIMALS),
       },
-    }
-  } else {
-    return {
-      ...basePoolProps,
-      poolType: PoolType.LiquidityBootstrapping,
-      lbpParams,
-    }
+    } as any
   }
+
+  return {
+    ...basePoolProps,
+    poolType: PoolType.LiquidityBootstrapping,
+    lbpParams,
+  } as any
 }

@@ -31,7 +31,7 @@ export const allFakeGqlTokens: GqlToken[] = [
     chainId: 1,
     chain: GqlChainValues.Mainnet,
     logoURI:
-      'https://raw.githubusercontent.com/balancer/tokenlists/main/src/assets/images/tokens/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png',
+      'https://raw.githubusercontent.com/frontier-fi/tokenlists/main/src/assets/images/tokens/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png',
     priority: 0,
     tradable: true,
     isErc4626: false,
@@ -48,7 +48,7 @@ export const allFakeGqlTokens: GqlToken[] = [
     chainId: 1,
     chain: GqlChainValues.Mainnet,
     logoURI:
-      'https://raw.githubusercontent.com/balancer/tokenlists/main/src/assets/images/tokens/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png',
+      'https://raw.githubusercontent.com/frontier-fi/tokenlists/main/src/assets/images/tokens/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png',
     priority: 0,
     tradable: true,
     isErc4626: false,
@@ -65,7 +65,7 @@ export const allFakeGqlTokens: GqlToken[] = [
     chainId: 1,
     chain: GqlChainValues.Sepolia,
     logoURI:
-      'https://raw.githubusercontent.com/balancer/tokenlists/main/src/assets/images/tokens/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png',
+      'https://raw.githubusercontent.com/frontier-fi/tokenlists/main/src/assets/images/tokens/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png',
     priority: 0,
     tradable: true,
     isErc4626: false,
@@ -82,7 +82,7 @@ export const allFakeGqlTokens: GqlToken[] = [
     chainId: 1,
     chain: GqlChainValues.Mainnet,
     logoURI:
-      'https://raw.githubusercontent.com/balancer/tokenlists/main/src/assets/images/tokens/0xba100000625a3754423978a60c9317c58a424e3d.png',
+      'https://raw.githubusercontent.com/frontier-fi/tokenlists/main/src/assets/images/tokens/0xba100000625a3754423978a60c9317c58a424e3d.png',
     priority: 0,
     tradable: true,
     isErc4626: false,
@@ -99,7 +99,7 @@ export const allFakeGqlTokens: GqlToken[] = [
     chainId: 11155111,
     chain: GqlChainValues.Sepolia,
     logoURI:
-      'https://raw.githubusercontent.com/balancer/tokenlists/main/src/assets/images/tokens/0xba100000625a3754423978a60c9317c58a424e3d.png',
+      'https://raw.githubusercontent.com/frontier-fi/tokenlists/main/src/assets/images/tokens/0xba100000625a3754423978a60c9317c58a424e3d.png',
     priority: 0,
     tradable: true,
     isErc4626: false,
@@ -212,7 +212,7 @@ export const allFakeGqlTokens: GqlToken[] = [
     chainId: 1,
     chain: GqlChainValues.Mainnet,
     logoURI:
-      'https://raw.githubusercontent.com/balancer/tokenlists/main/src/assets/images/tokens/0xd33526068d116ce69f19a9ee46f0bd304f21a51f.png',
+      'https://raw.githubusercontent.com/frontier-fi/tokenlists/main/src/assets/images/tokens/0xd33526068d116ce69f19a9ee46f0bd304f21a51f.png',
     priority: 0,
     tradable: true,
     isBufferAllowed: true,
@@ -261,7 +261,7 @@ export const allFakeGqlTokens: GqlToken[] = [
     symbol: 'DAI Polygon',
     decimals: 18,
     chainId: 137,
-    chain: GqlChainValues.Polygon,
+    chain: GqlChainValues.Polygon as GqlChain,
     logoURI:
       'https://assets-cdn.trustwallet.com/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png',
     priority: 0,
@@ -278,7 +278,7 @@ export const allFakeGqlTokens: GqlToken[] = [
     symbol: 'WPOL',
     decimals: 18,
     chainId: 137,
-    chain: GqlChainValues.Polygon,
+    chain: GqlChainValues.Polygon as GqlChain,
     logoURI: '',
     priority: 0,
     tradable: false,

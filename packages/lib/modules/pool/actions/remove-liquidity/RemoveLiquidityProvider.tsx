@@ -43,7 +43,6 @@ export const RemoveLiquidityContext = createContext<UseRemoveLiquidityResponse |
 
 export function useRemoveLiquidityLogic(
   urlTxHash?: Hash,
-  mute?: boolean,
   handlerSelector?: RemoveLiquidityHandlerSelector,
   maxHumanBptIn?: HumanAmount,
   useRemoveLiquiditySteps: RemoveLiquidityStepsHook = useRemoveLiquidityStepsBase,
@@ -185,7 +184,7 @@ export function useRemoveLiquidityLogic(
     singleTokenOutAddress,
   })
 
-  const transactionSteps = useTransactionSteps(steps, false, mute)
+  const transactionSteps = useTransactionSteps(steps, false)
 
   const removeLiquidityTxHash =
     urlTxHash || transactionSteps.lastTransaction?.result?.data?.transactionHash
@@ -320,7 +319,6 @@ export function useRemoveLiquidityLogic(
 
 type Props = PropsWithChildren<{
   urlTxHash?: Hash
-  mute?: boolean
   handlerSelector?: RemoveLiquidityHandlerSelector
   maxHumanBptIn?: HumanAmount
   useRemoveLiquiditySteps?: RemoveLiquidityStepsHook
@@ -329,7 +327,6 @@ type Props = PropsWithChildren<{
 
 export function RemoveLiquidityProvider({
   urlTxHash,
-  mute,
   handlerSelector,
   maxHumanBptIn,
   useRemoveLiquiditySteps,
@@ -338,7 +335,6 @@ export function RemoveLiquidityProvider({
 }: Props) {
   const hook = useRemoveLiquidityLogic(
     urlTxHash,
-    mute,
     handlerSelector,
     maxHumanBptIn,
     useRemoveLiquiditySteps,

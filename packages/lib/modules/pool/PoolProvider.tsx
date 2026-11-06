@@ -36,13 +36,13 @@ export function usePoolLogic({
   const myLiquiditySectionRef = useRef<HTMLDivElement | null>(null)
   const myLbpTransactionsSectionRef = useRef<HTMLDivElement | null>(null)
 
-  useInvalidVariantRedirect(initialData.pool)
+  useInvalidVariantRedirect(initialData.pool as Pool)
 
   const { data } = useQuery(GetPoolDocument, {
     variables: { id, chain, userAddress: userAddress.toLowerCase() },
   })
 
-  const poolData = removeHookDataFromPoolIfNecessary(data?.pool || initialData.pool)
+  const poolData = removeHookDataFromPoolIfNecessary((data?.pool || initialData.pool) as Pool)
 
   const {
     pool: poolWithOnChainData,

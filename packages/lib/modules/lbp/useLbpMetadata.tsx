@@ -1,59 +1,16 @@
-import { useMutation } from '@apollo/client/react'
-import { CreateLbpDocument } from '@repo/lib/shared/services/api/generated/graphql'
 import { useLocalStorage } from 'usehooks-ts'
 import { LS_KEYS } from '@repo/lib/modules/local-storage/local-storage.constants'
-import { useLbpForm } from './LbpFormProvider'
-import { normalizeUrl } from '@repo/lib/shared/utils/urls'
-import { normalizeHandle } from '@repo/lib/shared/utils/links'
 
+/** LBP creation is out of scope for Frontier; the createLBP API is not available. */
 export function useLbpMetadata() {
-  const [createLbp, { error, reset }] = useMutation(CreateLbpDocument)
-
-  const [poolAddress] = useLocalStorage<`0x${string}` | undefined>(
-    LS_KEYS.LbpConfig.PoolAddress,
-    undefined
-  )
-
-  const [isMetadataSaved, setIsMetadataSaved] = useLocalStorage<boolean>(
-    LS_KEYS.LbpConfig.IsMetadataSaved,
-    false
-  )
-
-  const { saleStructureForm, projectInfoForm } = useLbpForm()
-  const { selectedChain, saleType } = saleStructureForm.getValues()
-
-  const { name, description, websiteUrl, tokenIconUrl, telegramHandle, xHandle, discordUrl } =
-    projectInfoForm.getValues()
-
-  const saveMetadata = async () => {
-    const { data } = await createLbp({
-      variables: {
-        input: {
-          poolContract: {
-            address: poolAddress as `0x${string}`,
-            chain: selectedChain,
-          },
-          metadata: {
-            lbpName: name,
-            description,
-            website: normalizeUrl(websiteUrl, { useImageProxy: false }),
-            tokenLogo: normalizeUrl(tokenIconUrl),
-            telegram: telegramHandle ? normalizeHandle(telegramHandle) : undefined,
-            discord: discordUrl ? normalizeUrl(discordUrl, { useImageProxy: false }) : undefined,
-            x: xHandle ? normalizeHandle(xHandle) : undefined,
-          },
-        },
-        type: saleType,
-      },
-    })
-
-    if (data?.createLBP) setIsMetadataSaved(true)
-  }
+  const [isMetadataSaved] = useLocalStorage<boolean>(LS_KEYS.LbpConfig.IsMetadataSaved, false)
 
   return {
-    saveMetadata,
-    error,
+    saveMetadata: async () => {
+      throw new Error('LBP creation is not available')
+    },
+    error: undefined,
     isMetadataSaved,
-    reset,
+    reset: () => undefined,
   }
 }

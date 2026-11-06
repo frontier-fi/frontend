@@ -12,7 +12,7 @@ export default function Terms() {
         <FadeInOnView>
           <div className="subsection">
             <Box mt="3xl">
-              <h1>Balancer Terms of Use</h1>
+              <h1>Frontier Finance Terms of Use</h1>
               <p>
                 <em>Last updated: November 2025</em>
               </p>
@@ -36,22 +36,22 @@ export default function Terms() {
           <div className="subsection">
             <h2>1. Overview</h2>
             <p>
-              This Balancer Terms of Use document (“Terms” or “agreement”) (“Balancer ”, “we” and
-              “us” refers to the Balancer Foundation and its subsidiaries including without
-              limitation Balancer OpCo Limited) covers the website, Balancer Protocol user-interface
-              and free application (collectively “the Site”) we own and administer, at times in
-              conjunction with others, which provides the ability to access the decentralized
-              Balancer Protocol. Additionally, you can access the Balancer Protocol through
-              third-party web or mobile interfaces. These Terms apply to you (“You” or “you”) as a
-              user of our Site including all the products, services, tools and information, without
-              limitation, made available on the Site.
+              This Frontier Finance Terms of Use document (“Terms” or “agreement”) (“Frontier
+              Finance”, “we” and “us” refers to Frontier Finance and its subsidiaries) covers the
+              website, Frontier Finance Protocol user-interface and free application (collectively
+              “the Site”) we own and administer, at times in conjunction with others, which provides
+              the ability to access the decentralized Frontier Finance Protocol. Additionally, you
+              can access the Frontier Finance Protocol through third-party web or mobile interfaces.
+              These Terms apply to you (“You” or “you”) as a user of our Site including all the
+              products, services, tools and information, without limitation, made available on the
+              Site.
             </p>
             <p>
               To avoid any confusion, you agree a) you retain full control, at all times, over your
               cryptocurrency assets, b) there are no intermediaries involved when you interact with
-              the Balancer Protocol and c) the online interface (UI) is a mere graphical interface
-              for you to interact with the Balancer protocol, which can be accessed through other
-              means, including other interfaces.
+              the Frontier Finance Protocol and c) the online interface (UI) is a mere graphical
+              interface for you to interact with the Frontier Finance protocol, which can be
+              accessed through other means, including other interfaces.
             </p>
             <p>
               You must be able to form a legally binding contract online either as an individual or
@@ -64,13 +64,13 @@ export default function Terms() {
             </p>
             <p>
               You are advised to periodically review these Terms so you understand any changes to
-              the Terms. Balancer in its sole discretion, reserves the right to make changes to our
-              Terms. Changes are binding on users of the Site and will take effect immediately upon
-              posting. As a user, you agree to be bound by any changes, variations, or modifications
-              to our Terms and your continued use of the Site shall constitute acceptance of any
-              such changes, revisions, variations, or modifications. When we make changes, we will
-              make the updated Terms available on the interface and update the “Last Updated” date
-              at the beginning of the Terms accordingly.
+              the Terms. Frontier Finance in its sole discretion, reserves the right to make changes
+              to our Terms. Changes are binding on users of the Site and will take effect
+              immediately upon posting. As a user, you agree to be bound by any changes, variations,
+              or modifications to our Terms and your continued use of the Site shall constitute
+              acceptance of any such changes, revisions, variations, or modifications. When we make
+              changes, we will make the updated Terms available on the interface and update the
+              “Last Updated” date at the beginning of the Terms accordingly.
             </p>
             <p>
               You accept such changes, by continuing to use the Site and by doing so you agree that
@@ -87,38 +87,39 @@ export default function Terms() {
           <div className="subsection">
             <h2>2. Site</h2>
             <p>
-              As part of the Site, Balancer provides access to a decentralized finance application
-              (“Application” or “Balancer Protocol app”) on the Ethereum blockchain, that allows
-              swappers or liquidity providers of Ethereum assets (“Cryptocurrency Assets”) to
-              transact using smart contracts (“Smart Contracts”). Use of the Balancer Protocol may
-              require that you pay a fee, such as gas charges on the Ethereum network to perform a
-              transaction. You acknowledge and agree that Balancer has no control over any
-              activities, transactions, the method of payment of any transactions, or any actual
-              processing of payments of transactions. You must ensure that you have a sufficient
-              balance to complete any transaction on the Balancer Protocol before initiating such
-              transaction. You should not take or refrain from taking any action based on any
-              information contained on the Site or any other available information at any time.
-              Before you make any legal, technical, or financial decisions involving the Services,
-              you should seek independent professional advice from a licensed and qualified
-              individual in the area for which such advice would be appropriate.
+              As part of the Site, Frontier Finance provides access to a decentralized finance
+              application (“Application” or “Frontier Finance app”) on the Ethereum blockchain, that
+              allows swappers or liquidity providers of Ethereum assets (“Cryptocurrency Assets”) to
+              transact using smart contracts (“Smart Contracts”). Use of the Frontier Finance
+              Protocol may require that you pay a fee, such as gas charges on the Ethereum network
+              to perform a transaction. You acknowledge and agree that Frontier Finance has no
+              control over any activities, transactions, the method of payment of any transactions,
+              or any actual processing of payments of transactions. You must ensure that you have a
+              sufficient balance to complete any transaction on the Frontier Finance Protocol before
+              initiating such transaction. You should not take or refrain from taking any action
+              based on any information contained on the Site or any other available information at
+              any time. Before you make any legal, technical, or financial decisions involving the
+              Services, you should seek independent professional advice from a licensed and
+              qualified individual in the area for which such advice would be appropriate.
             </p>
             <p>
               <span className="italic font-semibold">
-                You acknowledge and agree that Balancer has no control over any transactions
-                conducted through the Balancer Protocol, the method of payment of any transactions
-                or any actual payments of transactions including use of any third-party services
-                such as Metamask, or other wallet services.
+                You acknowledge and agree that Frontier Finance has no control over any transactions
+                conducted through the Frontier Finance Protocol, the method of payment of any
+                transactions or any actual payments of transactions including use of any third-party
+                services such as Metamask, or other wallet services.
               </span>
               Likewise, you must ensure that you have a sufficient balance of the applicable
-              cryptocurrency tokens stored at your Balancer Protocol-compatible wallet address
-              (“Cryptocurrency Wallet”) to complete any transaction on the Balancer Protocol or the
-              Ethereum network before initiating such transaction.
+              cryptocurrency tokens stored at your Frontier Finance Protocol-compatible wallet
+              address (“Cryptocurrency Wallet”) to complete any transaction on the Frontier Finance
+              Protocol or the Ethereum network before initiating such transaction.
             </p>
             <p>
               You acknowledge and accept the material potential risks associated with using the
-              smart contracts that can be accessed via the Balancer user interface including,
-              without limitation, the smart contracts for Balancer Pools. For more information about
-              the risks, please carefully read <Link href="risks">risks</Link>.
+              smart contracts that can be accessed via the Frontier Finance user interface
+              including, without limitation, the smart contracts for Frontier Finance Pools. For
+              more information about the risks, please carefully read{' '}
+              <Link href="risks">risks</Link>.
             </p>
           </div>
         </FadeInOnView>
@@ -126,9 +127,9 @@ export default function Terms() {
           <div className="subsection">
             <h2>3. Access / Disclaimer of Warranties</h2>
             <p>
-              ACCESS TO THIS SITE AND THE PRODUCTS HEREIN ARE PROVIDED ON AN `&apos;`AS IS`&apos;`
-              AND `&apos;`AS AVAILABLE`&apos;` BASIS WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS
-              OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY,
+              ACCESS TO THIS SITE AND THE PRODUCTS HEREIN ARE PROVIDED ON AN &quot;AS IS&quot; AND
+              &quot;AS AVAILABLE&quot; BASIS WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR
+              IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY,
               FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. NO WARRANTY IS PROVIDED THAT
               THE SITE OR ANY PRODUCT WILL BE FREE FROM DEFECTS OR VIRUSES OR THAT OPERATION OF THE
               PRODUCT WILL BE UNINTERRUPTED. YOUR USE OF THE SITE AND ANY PRODUCT AND ANY MATERIAL
@@ -163,7 +164,7 @@ export default function Terms() {
               with all applicable domestic and international laws, statutes, ordinances, rules and
               regulations applicable to your use of the site (“Applicable Laws”). Likewise, we are
               not liable for any third-party services and are not responsible for the content or
-              services of these party’s.
+              services of these parties.
             </p>
             <p>
               As a condition to accessing or using the Site, you agree and represent that you will:
@@ -193,8 +194,8 @@ export default function Terms() {
                 Use the Site for any purpose or conduct that is directly or indirectly unlawful;
               </li>
               <li>
-                Export, reexport, or transfer, directly or indirectly, any Balancer technology in
-                violation of applicable export laws or regulations;
+                Export, reexport, or transfer, directly or indirectly, any Frontier Finance
+                technology in violation of applicable export laws or regulations;
               </li>
               <li>
                 Infringe on or misappropriate any contract, intellectual property or other
@@ -206,14 +207,14 @@ export default function Terms() {
               </li>
               <li>
                 Use the Site in any manner that could interfere with, disrupt, negatively affect,
-                redirect or inhibit other users from fully enjoying the Site or the Balancer
+                redirect or inhibit other users from fully enjoying the Site or the Frontier Finance
                 Protocol, or that could damage, disable, overburden, or impair the functioning of
-                the Site or the Balancer Protocol in any manner;
+                the Site or the Frontier Finance Protocol in any manner;
               </li>
               <li>
                 Attempt to circumvent or disable any content filtering techniques or security
-                measures that Balancer employs on the Site, or attempt to access any service or area
-                of the Site that you are not authorized to access;
+                measures that Frontier Finance employs on the Site, or attempt to access any service
+                or area of the Site that you are not authorized to access;
               </li>
               <li>
                 Use any robot, spider, crawler, scraper, or other automated means or interface not
@@ -250,10 +251,10 @@ export default function Terms() {
             </h3>
             <ul>
               <li>
-                Losses while digital assets are being supplied to the Balancer Protocol and losses
-                due to the fluctuation of prices of tokens in a swapping pair or liquidity pool.
-                Prices of digital currencies, tokens and/or other digital assets fluctuate day by
-                day or even minute by minute. The value of your available balance could surge or
+                Losses while digital assets are being supplied to the Frontier Finance Protocol and
+                losses due to the fluctuation of prices of tokens in a swapping pair or liquidity
+                pool. Prices of digital currencies, tokens and/or other digital assets fluctuate day
+                by day or even minute by minute. The value of your available balance could surge or
                 drop suddenly. Please note that there is a possibility that the price of tokens
                 could decrease to zero. Prices of tokens are prone to significant fluctuations, for
                 example, due to announced proposed legislative acts, governmental restrictions, news
@@ -262,20 +263,20 @@ export default function Terms() {
                 market.
               </li>
               <li>
-                Risks associated with accessing the Balancer Protocol through third party web or
-                mobile interfaces. You are responsible for doing your own diligence on those
+                Risks associated with accessing the Frontier Finance Protocol through third party
+                web or mobile interfaces. You are responsible for doing your own diligence on those
                 interfaces to understand and accept the risks that use entails. You are also
                 responsible for doing your own diligence on those interfaces to understand and
                 accept any fees that those interfaces may charge.
               </li>
               <li>Risks associated with any Smart Contracts with which you interact.</li>
               <li>
-                Although Balancer does not have access to your assets, you are reminded and
+                Although Frontier Finance does not have access to your assets, you are reminded and
                 acknowledge that at any time, your access to your Cryptocurrency Assets through
-                third party wallet services, unrelated to Balancer or the Balancer.Fi website, may
-                be suspended or terminated or there may be a delay in your access or use of your
-                Cryptocurrency Assets, which may result in the Cryptocurrency Assets diminishing in
-                value or you being unable to complete a Smart Contract.
+                third party wallet services, unrelated to Frontier Finance or the frontier.fi
+                website, may be suspended or terminated or there may be a delay in your access or
+                use of your Cryptocurrency Assets, which may result in the Cryptocurrency Assets
+                diminishing in value or you being unable to complete a Smart Contract.
               </li>
               <li>
                 <span className="italic font-semibold">
@@ -341,18 +342,18 @@ export default function Terms() {
                 Application and the Smart Contracts;
               </li>
               <li>
-                that you expressly waive and release Balancer from any and all liability, claims,
-                causes of action, responsibility or damages arising from or in any way related to
-                your use of the Site, the Application or the Smart Contracts.
+                that you expressly waive and release Frontier Finance from any and all liability,
+                claims, causes of action, responsibility or damages arising from or in any way
+                related to your use of the Site, the Application or the Smart Contracts.
               </li>
               <li>
                 upgrades and modifications to the protocol are managed in a community-driven way by
-                holders of the Balancer Protocol governance token. No developer or entity involved
-                in creating the Balancer Protocol will be liable for any claims or damages
+                holders of the Frontier Finance governance token. No developer or entity involved in
+                creating the Frontier Finance Protocol will be liable for any claims or damages
                 whatsoever associated with your use, inability to use, or your interaction with
-                other users of, the Balancer Protocol, including any direct, indirect, incidental,
-                special, exemplary, punitive or consequential damages, or loss of profits,
-                cryptocurrencies, tokens, or anything else of value.
+                other users of, the Frontier Finance Protocol, including any direct, indirect,
+                incidental, special, exemplary, punitive or consequential damages, or loss of
+                profits, cryptocurrencies, tokens, or anything else of value.
               </li>
             </ol>
           </div>
@@ -366,8 +367,8 @@ export default function Terms() {
               We have no control over third party websites and accept no legal responsibility for
               any content, material or information contained in them. The display of any hyperlink
               and reference to any third-party website does not mean that we endorse that third
-              party`&apos;`s website, products or services or opine on the accuracy or reliability
-              of such information. Your use of a third-party site may be governed by the terms and
+              party&apos;s website, products or services or opine on the accuracy or reliability of
+              such information. Your use of a third-party site may be governed by the terms and
               conditions of that third-party site.
             </p>
           </div>
@@ -391,15 +392,15 @@ export default function Terms() {
           <div className="subsection">
             <h2>6. Intellectual Property Rights</h2>
             <p>
-              Balancer is the owner of all intellectual property rights in the Site and the material
-              published on them. To the extent practical, these works are protected by copyright
-              laws and all such rights are reserved. www.Balancer.fi is the uniform resource locator
-              (`&apos;`URL`&apos;`) of Balancer. You will not make use of this URL (or any other URL
-              owned by us) on another website or digital platform without our prior written consent.
-              Any unauthorized use or reproduction may be prosecuted. You will retain ownership of
-              all copyright in data you upload or submit by, through or to the Site. You grant us a
-              worldwide, royalty-free, irrevocable license to use, copy, distribute or publish and
-              send this data in any manner.
+              Frontier Finance is the owner of all intellectual property rights in the Site and the
+              material published on them. To the extent practical, these works are protected by
+              copyright laws and all such rights are reserved. www.frontier.fi is the uniform
+              resource locator (&quot;URL&quot;) of Frontier Finance. You will not make use of this
+              URL (or any other URL owned by us) on another website or digital platform without our
+              prior written consent. Any unauthorized use or reproduction may be prosecuted. You
+              will retain ownership of all copyright in data you upload or submit by, through or to
+              the Site. You grant us a worldwide, royalty-free, irrevocable license to use, copy,
+              distribute or publish and send this data in any manner.
             </p>
           </div>
         </FadeInOnView>
@@ -442,9 +443,9 @@ export default function Terms() {
                 other basis, and even if we have been advised of the possibility of such liability.
                 Some jurisdictions do not allow the exclusion of certain warranties or the
                 limitation or exclusion of certain liabilities, but your acceptance of these Terms
-                constitutes an agreement to limit the liability of Balancer and our officers,
-                directors, employees, contractors, agents, affiliates, or subsidiaries to the
-                maximum extent possible under any applicable laws.
+                constitutes an agreement to limit the liability of Frontier Finance and our
+                officers, directors, employees, contractors, agents, affiliates, or subsidiaries to
+                the maximum extent possible under any applicable laws.
               </em>
             </p>
           </div>
@@ -488,10 +489,10 @@ export default function Terms() {
           <div className="subsection">
             <h2>9. Indemnification</h2>
             <p>
-              You agree to indemnify and hold Balancer and our officers, directors, employees,
-              contractors, agents, affiliates, or subsidiaries harmless from any claim or demand,
-              including attorneys’ fees and costs, made by any third-party due to or arising out of
-              1) your use of the site or 2) this agreement.
+              You agree to indemnify and hold Frontier Finance and our officers, directors,
+              employees, contractors, agents, affiliates, or subsidiaries harmless from any claim or
+              demand, including attorneys’ fees and costs, made by any third-party due to or arising
+              out of 1) your use of the site or 2) this agreement.
             </p>
           </div>
         </FadeInOnView>
@@ -524,9 +525,10 @@ export default function Terms() {
             </p>
             <p>
               These Terms and the documents referred to in them set out the entire agreement between
-              you and us with respect to your use of the site, Balancer and the services provided
-              via the site and supersede any and all prior or contemporaneous representations,
-              communications or agreements (written or oral) made between you or us.
+              you and us with respect to your use of the site, Frontier Finance and the services
+              provided via the site and supersede any and all prior or contemporaneous
+              representations, communications or agreements (written or oral) made between you or
+              us.
             </p>
             <p>
               <em className="font-semibold">
@@ -537,8 +539,8 @@ export default function Terms() {
                 be chosen by the parties or in the absence of such agreement, the court may
                 designate an appointing authority. The seat of the arbitration shall be the Cayman
                 Islands and the language of the arbitration shall be English. The applicable law
-                shall be Cayman Islands law or another choice of law determined in Balancer’s sole
-                discretion.
+                shall be Cayman Islands law or another choice of law determined in Frontier
+                Finance’s sole discretion.
               </em>
             </p>
             <p>
@@ -549,9 +551,9 @@ export default function Terms() {
                 as a plaintiff or class member in any purported class action, collective action or
                 other representative proceeding. This waiver applies to class arbitration, and,
                 unless we agree otherwise, the arbitrator may not consolidate more than one person’s
-                claims. You agree that, by entering into this agreement, you and Balancer are each
-                waiving the right to a trial by jury or to participate in a class action, collective
-                action, or other representative proceeding of any kind.
+                claims. You agree that, by entering into this agreement, you and Frontier Finance
+                are each waiving the right to a trial by jury or to participate in a class action,
+                collective action, or other representative proceeding of any kind.
               </em>
             </p>
             <p>
@@ -571,8 +573,8 @@ export default function Terms() {
               emergencies, as well as unforeseen significant changes in the external environment.
               With regards to opportunity loss (e.g., loss of opportunity to place a payment
               instruction, resulting in loss of profits which could have been obtained) due to
-              occurrences such as emergency situations and force majeure events, Balancer is under
-              no obligation to take any corrective action or measure and shall not under
+              occurrences such as emergency situations and force majeure events, Frontier Finance is
+              under no obligation to take any corrective action or measure and shall not under any
               circumstances be liable for any lost profits or other swapping losses.
             </p>
           </div>
@@ -581,11 +583,11 @@ export default function Terms() {
           <div>
             <h2>12. Contact Us</h2>
             <p>
-              Balancer is a foundation company organized in the Cayman Islands with an operating
-              company organized in the British Virgin Islands (BVI). Please contact us if you have
-              any questions about these Terms or other topics, by sending an email to{' '}
-              <a className="link" href="mailto:admin@balancer.finance">
-                admin@balancer.finance
+              Frontier Finance is a foundation company organized in the Cayman Islands with an
+              operating company organized in the British Virgin Islands (BVI). Please contact us if
+              you have any questions about these Terms or other topics, by sending an email to{' '}
+              <a className="link" href="mailto:admin@frontier.fi">
+                admin@frontier.fi
               </a>
               .
             </p>

@@ -1,4 +1,4 @@
-import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { Address } from 'viem'
 import { ProtocolVersion } from '../../pool.types'
 
@@ -8,7 +8,7 @@ export type PoolExample = {
   // Explicit pool prefix to make tests more readable
   poolId: Address
   poolAddress?: Address
-  poolChain: GqlChain
+  poolChain: AppChain
   version: ProtocolVersion
   isFrozen?: boolean // Explicitly skip mock update to avoid breaking tests using this frozen pools
   mockName?: string // Some sepolia pools do not have symbol so we define the mock name here

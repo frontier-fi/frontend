@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize]
 
 env:
-  NEXT_PUBLIC_BALANCER_API_URL: https://api-v3.balancer.fi/graphql
+  NEXT_PUBLIC_BALANCER_API_URL: https://api.frontier.fi/graphql
   NEXT_PUBLIC_WALLET_CONNECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_ID }}
   NEXT_PRIVATE_ALCHEMY_KEY: ${{ secrets.PRIVATE_ALCHEMY_KEY }}
   NEXT_PRIVATE_DRPC_KEY: ${{ secrets.PRIVATE_DRPC_KEY }}
@@ -79,7 +79,7 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright:v1.64.0-noble@sha256:06a9939e57531807f8d5fd76ce44b53165ffb7d7501d87ab10e285c20b1e971f
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
     env:
       NEXT_PUBLIC_PROJECT_ID: balancer
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
@@ -98,35 +98,11 @@ jobs:
             ./packages/e2e-tests/test-results/
           retention-days: 30
 
-  # E2E-Smoke-Test-Beets:
-  #   timeout-minutes: 15
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: mcr.microsoft.com/playwright:v1.64.0-noble@sha256:06a9939e57531807f8d5fd76ce44b53165ffb7d7501d87ab10e285c20b1e971f
-  #   env:
-  #     NEXT_PUBLIC_PROJECT_ID: beets
-  #     NEXT_PUBLIC_BALANCER_API_URL: https://backend-v3.beets-ftm-node.com/
-  #     PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
-  #   steps:
-  #     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-  #     - name: Setup
-  #       uses: ./.github/actions/setup
-  #     - name: Run Playwright smoke tests (Beets)
-  #       run: pnpm test:e2e:build:beets
-  #     - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-  #       if: ${{ !cancelled() }}
-  #       with:
-  #         name: playwright-smoke-report-beets
-  #         path: |
-  #           ./packages/e2e-tests/playwright-report/
-  #           ./packages/e2e-tests/test-results/
-  #         retention-days: 30
-
   E2E-Smoke-Test-Analytics:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright:v1.64.0-noble@sha256:06a9939e57531807f8d5fd76ce44b53165ffb7d7501d87ab10e285c20b1e971f
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
     env:
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     steps:
@@ -148,7 +124,7 @@ jobs:
     timeout-minutes: 25
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright:v1.64.0-noble@sha256:06a9939e57531807f8d5fd76ce44b53165ffb7d7501d87ab10e285c20b1e971f
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
     strategy:
       fail-fast: false
       matrix:
@@ -186,32 +162,3 @@ jobs:
             ./packages/e2e-tests/playwright-report/
             ./packages/e2e-tests/test-results/
           retention-days: 30
-
-  # E2E-Dev-Test-Beets:
-  #   timeout-minutes: 25
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: mcr.microsoft.com/playwright:v1.64.0-noble@sha256:06a9939e57531807f8d5fd76ce44b53165ffb7d7501d87ab10e285c20b1e971f
-  #   env:
-  #     NEXT_PUBLIC_PROJECT_ID: beets
-  #     NEXT_PUBLIC_BALANCER_API_URL: https://backend-v3.beets-ftm-node.com/
-  #     PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
-  #     E2E_FORK_BLOCK_NUMBER: 78800000
-  #   steps:
-  #     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-  #     - name: Setup
-  #       uses: ./.github/actions/setup
-  #     - name: Set up foundry (includes anvil)
-  #       uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1
-  #     - name: Start anvil fork in sonic
-  #       run: anvil --mnemonic "${{ env.TEST_ACCOUNT_MNEMONIC }}" --fork-url "https://lb.drpc.live/sonic/${{ env.NEXT_PRIVATE_DRPC_KEY }}" --fork-block-number ${{ env.E2E_FORK_BLOCK_NUMBER }} --fork-retry-backoff 1000 --no-rate-limit --port 8545 &
-  #     - name: Run Playwright dev tests (Beets)
-  #       run: pnpm test:e2e:dev:beets
-  #     - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-  #       if: ${{ !cancelled() }}
-  #       with:
-  #         name: playwright-dev-report-beets
-  #         path: |
-  #           ./packages/e2e-tests/playwright-report/
-  #           ./packages/e2e-tests/test-results/
-  #         retention-days: 30

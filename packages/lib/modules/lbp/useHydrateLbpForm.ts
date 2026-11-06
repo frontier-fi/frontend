@@ -168,8 +168,8 @@ export function useHydrateLbpForm() {
       xHandle: x,
       telegramHandle: telegram,
       discordUrl: discord,
-      owner: lbpOwner || pool.owner || '',
-      poolCreator: pool.poolCreator || '',
+      owner: lbpOwner || ('owner' in pool ? String(pool.owner ?? '') : ''),
+      poolCreator: 'poolCreator' in pool ? String(pool.poolCreator ?? '') : '',
       disclaimerAccepted: false,
     }
   }

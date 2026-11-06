@@ -20,8 +20,9 @@ export function HomeActivity() {
                 textWrap: 'balance',
               }}
             >
-              Balancer is a vibrant ecosystem. Explore the latest activity across all Balancer
-              deployments including Ethereum, Arbitrum, Avalanche, and other L2 deployments.
+              Frontier Finance is a vibrant ecosystem. Explore the latest activity across all
+              Frontier Finance deployments including Ethereum, Arbitrum, Avalanche, and other L2
+              deployments.
             </Text>
 
             <Box pb="lg" pt="md">

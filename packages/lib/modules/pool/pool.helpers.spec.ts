@@ -22,7 +22,7 @@ import {
   usdcUsdtAaveBoosted,
   v3SepoliaNestedBoosted,
 } from './__mocks__/pool-examples/boosted'
-import { GqlChainValues, GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
+import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { zeroAddress } from 'viem'
 
 describe('getPoolActionableTokens', () => {
@@ -118,59 +118,9 @@ describe('shouldBlockAddLiquidity', () => {
       expect(getPoolAddBlockedReason(pool)).toHaveLength(1)
     })
 
-    it('should block INVESTMENT / MANAGED pools', () => {
+    it('does not treat non-API pool types as managed (Frontier has no INVESTMENT)', () => {
       const pool = getApiPoolMock(sDAIWeighted)
-      pool.type = GqlPoolTypeValues.Investment
-
-      expect(shouldBlockAddLiquidity(pool)).toBe(true)
-      expect(getPoolAddBlockedReason(pool)).toHaveLength(1)
-    })
-
-    it('should block exploited V2 composable stable pools with rate providers', () => {
-      const pool = getApiPoolMock(sDAIWeighted)
-      pool.type = GqlPoolTypeValues.ComposableStable
-      getPoolToken(pool, 0).priceRateProvider = '0x1a8f81c256aee9c640e14bb0453ce247ea0dfe6f'
-
-      getPoolToken(pool, 0).priceRateProviderData = {
-        __typename: 'GqlPriceRateProviderData',
-        address: '0x1a8f81c256aee9c640e14bb0453ce247ea0dfe6f',
-        reviewed: true,
-        summary: 'safe',
-      } as any
-
-      expect(shouldBlockAddLiquidity(pool)).toBe(true)
-      expect(getPoolAddBlockedReason(pool)).toHaveLength(1)
-    })
-
-    it('should not block exploited V2 composable stable pools without rate providers', () => {
-      const pool = getApiPoolMock(sDAIWeighted)
-      pool.type = GqlPoolTypeValues.ComposableStable
-      getPoolToken(pool, 0).priceRateProvider = zeroAddress
-
-      expect(shouldBlockAddLiquidity(pool)).toBe(false)
-    })
-
-    it('should block exploited V2 metastable pools with rate providers', () => {
-      const pool = getApiPoolMock(sDAIWeighted)
-      pool.type = GqlPoolTypeValues.MetaStable
-      getPoolToken(pool, 0).priceRateProvider = '0x1a8f81c256aee9c640e14bb0453ce247ea0dfe6f'
-
-      getPoolToken(pool, 0).priceRateProviderData = {
-        __typename: 'GqlPriceRateProviderData',
-        address: '0x1a8f81c256aee9c640e14bb0453ce247ea0dfe6f',
-        reviewed: true,
-        summary: 'safe',
-      } as any
-
-      expect(shouldBlockAddLiquidity(pool)).toBe(true)
-      expect(getPoolAddBlockedReason(pool)).toHaveLength(1)
-    })
-
-    it('should not block exploited V2 metastable pools without rate providers', () => {
-      const pool = getApiPoolMock(sDAIWeighted)
-      pool.type = GqlPoolTypeValues.MetaStable
-      getPoolToken(pool, 0).priceRateProvider = zeroAddress
-
+      // Managed / Investment helpers always return false for Frontier
       expect(shouldBlockAddLiquidity(pool)).toBe(false)
     })
 
@@ -204,14 +154,6 @@ describe('shouldBlockAddLiquidity', () => {
       expect(getPoolAddBlockedReason(pool)).toHaveLength(1)
     })
 
-    it('should block if pool is LBP', () => {
-      const pool = getApiPoolMock(usdcUsdtAaveBoosted)
-      pool.type = GqlPoolTypeValues.LiquidityBootstrapping
-
-      expect(shouldBlockAddLiquidity(pool)).toBe(true)
-      expect(getPoolAddBlockedReason(pool)).toHaveLength(1)
-    })
-
     it('should block if pool is paused', () => {
       const pool = getApiPoolMock(usdcUsdtAaveBoosted)
       pool.dynamicData.isPaused = true
@@ -230,7 +172,8 @@ describe('shouldBlockAddLiquidity', () => {
 
     it('should block if pool has a hook that is not reviewed', () => {
       const pool = getApiPoolMock(stableSurgeBoosted)
-      pool.hook!.reviewData = null
+
+      ;(pool.hook as { reviewData?: null }).reviewData = null
 
       expect(shouldBlockAddLiquidity(pool)).toBe(true)
       expect(getPoolAddBlockedReason(pool)).toHaveLength(1)
@@ -238,7 +181,8 @@ describe('shouldBlockAddLiquidity', () => {
 
     it('should block if pool has a hook that is unsafe', () => {
       const pool = getApiPoolMock(stableSurgeBoosted)
-      pool.hook!.reviewData!.summary = 'unsafe'
+
+      ;(pool.hook as { reviewData?: { summary?: string } }).reviewData = { summary: 'unsafe' }
 
       expect(shouldBlockAddLiquidity(pool)).toBe(true)
       expect(getPoolAddBlockedReason(pool)).toHaveLength(1)
@@ -305,13 +249,23 @@ describe('shouldBlockAddLiquidity', () => {
     expect(shouldBlockAddLiquidity(pool, { allowAddLiquidity: true })).toBe(false)
   })
 
-  it('should not block for Sepolia pools', () => {
+  it('should not block Sepolia pools for unreviewed tokens or rate providers', () => {
     const pool = getApiPoolMock(usdcUsdtAaveBoosted)
-    pool.dynamicData.isPaused = true
+    getPoolToken(pool, 0).isAllowed = false
+    getPoolToken(pool, 0).erc4626ReviewData = null
     pool.chain = GqlChainValues.Sepolia
 
     expect(shouldBlockAddLiquidity(pool)).toBe(false)
     expect(getPoolAddBlockedReason(pool)).toHaveLength(0)
+  })
+
+  it('should still block Sepolia pools when paused', () => {
+    const pool = getApiPoolMock(usdcUsdtAaveBoosted)
+    pool.dynamicData.isPaused = true
+    pool.chain = GqlChainValues.Sepolia
+
+    expect(shouldBlockAddLiquidity(pool)).toBe(true)
+    expect(getPoolAddBlockedReason(pool)).toEqual(['Paused pool'])
   })
 })
 

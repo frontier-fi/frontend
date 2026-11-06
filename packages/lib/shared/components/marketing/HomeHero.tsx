@@ -64,7 +64,7 @@ export function HomeHero() {
               <Box py={{ base: 'xl', md: '2xl' }}>
                 <Box h="24px">
                   <Text pb="lg" variant="eyebrow">
-                    Balancer DEX App
+                    Frontier Finance DEX App
                   </Text>
                 </Box>
                 <Heading
@@ -108,7 +108,7 @@ export function HomeHero() {
                   <Link href="/build/v3">
                     <Flex>
                       <Text background="font.special" backgroundClip="text" variant="eyebrow">
-                        Balancer protocol: v3 Soon&nbsp;
+                        Frontier Finance protocol&nbsp;
                       </Text>
                       <Text display="none" opacity="0" variant="eyebrow" visibility="hidden">
                         Learn more
@@ -194,7 +194,7 @@ export function HomeHero() {
                                     transition="all 0.2s ease-out 0.1s"
                                     whiteSpace="nowrap"
                                   >
-                                    Balancer v3
+                                    Frontier Finance
                                   </Text>
                                   <Text
                                     _groupHover={{ color: 'font.maxContrast' }}
@@ -224,7 +224,7 @@ export function HomeHero() {
                                       transition="all 0.2s ease-out 0.1s"
                                       whiteSpace="nowrap"
                                     >
-                                      v3 Docs
+                                      Docs
                                     </Text>
                                     <ArrowUpRight display="inline" size={12} />
                                   </Flex>
@@ -245,7 +245,7 @@ export function HomeHero() {
                                   _groupHover={{
                                     textDecoration: 'none',
                                   }}
-                                  href="https://github.com/balancer/scaffold-balancer-v3"
+                                  href="https://github.com/frontier-fi/"
                                 >
                                   <Flex alignItems="center" gap="xxs">
                                     <Text
@@ -255,7 +255,7 @@ export function HomeHero() {
                                       transition="all 0.2s ease-out 0.1s"
                                       whiteSpace="nowrap"
                                     >
-                                      Scaffold Balancer v3
+                                      Code & Contracts
                                     </Text>
                                     <ArrowUpRight display="inline" size={12} />
                                   </Flex>
@@ -267,7 +267,7 @@ export function HomeHero() {
                                     variant="secondary"
                                     whiteSpace="nowrap"
                                   >
-                                    Prototyping tool for Balancer v3
+                                    Builder resources
                                   </Text>
                                 </Link>
                               </Box>

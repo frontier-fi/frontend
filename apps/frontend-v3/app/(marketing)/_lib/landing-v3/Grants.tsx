@@ -12,17 +12,17 @@ const grantIdeas = [
   {
     title: 'Pool hook',
     description:
-      'Hooks enable limitless pool customization possibilities in v3. We actively fund innovative products that solve real problems or create new value. Pool creators can earn additional revenue through customizable fees.',
+      'Hooks enable limitless pool customization possibilities  on Frontier Finance. We actively fund innovative products that solve real problems or create new value. Pool creators can earn additional revenue through customizable fees.',
   },
   {
     title: 'Custom AMM',
     description:
-      'Balancer is the home for AMM innovation and development is now easier than ever on v3. We are looking to fund innovative ideas to solve LVR, recapture MEV and other ways to bring more value to LPs.',
+      'Frontier Finance is the home for AMM innovation and development is now easier than ever. We are looking to fund innovative ideas to solve LVR, recapture MEV and other ways to bring more value to LPs.',
   },
   {
     title: 'Custom pool',
     description:
-      'Build your custom pool easily on Balancer v3 and follow in the footsteps of Gyroscope and Xave Finance. Get a grant to kickstart your project using custom invariants to create the next innovation in DeFi.',
+      'Build your custom pool easily on Frontier Finance and follow in the footsteps of Gyroscope and Xave Finance. Get a grant to kickstart your project using custom invariants to create the next innovation in DeFi.',
   },
 ]
 
@@ -49,10 +49,10 @@ export function Grants() {
             />
             <FadeIn delay={0.2} direction="up" duration={0.6} w="full">
               <Text color="font.secondary" fontSize="lg" maxW="full" w="3xl">
-                Balancer Community Grants aim to accelerate the development of the Balancer
-                ecosystem. Grants for innovation on Balancer v3 will be prioritized. This program is
-                managed by the Balancer Grants DAO, an independent community-owned grants program
-                for the Balancer ecosystem.
+                Frontier Finance Community Grants aim to accelerate the development of the Frontier
+                Finance ecosystem. Grants for innovation on Frontier Finance will be prioritized.
+                This program is managed by the Frontier Finance Grants DAO, an independent
+                community-owned grants program for the Frontier Finance ecosystem.
               </Text>
             </FadeIn>
           </VStack>

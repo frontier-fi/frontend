@@ -31,7 +31,7 @@ import { Address, zeroAddress } from 'viem'
 import { TokenIcon } from '@repo/lib/modules/tokens/TokenIcon'
 import Image from 'next/image'
 import { RateProviderInfoPopOver } from './RateProviderInfo'
-import { getWarnings, isBoosted, isV3LBP, isV3Pool } from '@repo/lib/modules/pool/pool.helpers'
+import { getWarnings, isBoosted, isV3Pool } from '@repo/lib/modules/pool/pool.helpers'
 import { HookInfoPopOver } from './HookInfo'
 import { Erc4626InfoPopOver } from './Erc4626Info'
 import { InfoPopoverToken } from '@repo/lib/modules/tokens/token.types'
@@ -39,7 +39,7 @@ import { getBlockExplorerAddressUrl } from '@repo/lib/shared/utils/blockExplorer
 import { useHook } from '@repo/lib/modules/hooks/useHook'
 import { getChainId } from '@repo/lib/config/app.config'
 import { HooksMetadata } from '@repo/lib/modules/hooks/getHooksMetadata'
-import { LbpV3, Pool } from '../../pool.types'
+import { Pool } from '../../pool.types'
 import { CopyAddressButton } from '@repo/lib/modules/tokens/CopyAddressButton'
 
 type RateProvider = {
@@ -151,16 +151,6 @@ export function PoolContracts({ ...props }: CardProps) {
         label: 'Incentives gauge',
         address: gaugeAddress,
         explorerLink: gaugeExplorerLink,
-      })
-    }
-
-    if (isV3LBP(pool)) {
-      const lbpPool = pool as LbpV3
-
-      contracts.push({
-        label: 'Sale token contract',
-        address: abbreviateAddress(lbpPool.projectToken as Address),
-        explorerLink: getBlockExplorerAddressUrl(lbpPool.projectToken as Address, pool.chain),
       })
     }
 
@@ -279,7 +269,9 @@ export function PoolContracts({ ...props }: CardProps) {
                           </HStack>
                         </Link>
                         {(index > 0 || !pool.hook) && <Text variant="secondary">(nested)</Text>}
-                        {getHookIcon(hook.reviewData)}
+                        {'reviewData' in hook
+                          ? getHookIcon((hook as { reviewData?: GqlHookReviewData }).reviewData)
+                          : null}
                       </HStack>
                     )
                   )

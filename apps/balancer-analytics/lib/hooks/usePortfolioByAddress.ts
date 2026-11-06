@@ -8,9 +8,10 @@ import {
   GetPoolsQuery,
   GetProtocolStatsDocument,
   GqlChain,
-  GqlPoolStakingType,
 } from '@repo/lib/shared/services/api/generated/graphql'
+import type { GqlPoolStakingType } from '@repo/lib/shared/services/api/graphql-enums'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import type { GqlUserStakedBalance } from '@repo/lib/shared/services/api/graphql-derived-types'
 
 export type PortfolioPool = GetPoolsQuery['pools'][number]
 
@@ -166,10 +167,15 @@ function readPosition(pool: PortfolioPool): {
 
   // Pick the staked balance with the largest USD value to surface a single
   // "primary" staking type for the row (gauge / aura / reliquary / vebal).
+  const stakedBalances = ((
+    ub as { stakedBalances?: GqlUserStakedBalance[] | null } | null | undefined
+  )?.stakedBalances ?? []) as GqlUserStakedBalance[]
+
   const stakingType =
-    (ub?.stakedBalances ?? [])
+    (stakedBalances
       .filter(b => Number(b.balanceUsd ?? 0) > 0)
-      .sort((a, b) => Number(b.balanceUsd ?? 0) - Number(a.balanceUsd ?? 0))[0]?.stakingType ?? null
+      .sort((a, b) => Number(b.balanceUsd ?? 0) - Number(a.balanceUsd ?? 0))[0]?.stakingType as
+      GqlPoolStakingType | undefined) ?? null
 
   return { positionUsd, walletUsd, stakedUsd, shareOfPool, stakingType }
 }

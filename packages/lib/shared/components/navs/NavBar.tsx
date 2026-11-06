@@ -19,8 +19,6 @@ import { ApiOutageAlert } from '../alerts/ApiOutageAlert'
 import { useApiHealth } from '../../hooks/useApiHealth'
 import { useLegacyV1Positions } from '@repo/lib/modules/pool/legacy/useLegacyV1Positions'
 import { LegacyV1PositionsAlert } from '../alerts/LegacyV1PositionsAlert'
-import { WinddownAlert } from '../alerts/WinddownAlert'
-import { isBalancer } from '@repo/lib/config/getProjectConfig'
 
 type Props = {
   mobileNav?: ReactNode
@@ -99,17 +97,6 @@ function NavLinks({
               variant="nav"
             >
               Create
-            </Link>
-          </Box>
-          <Box as={motion.div} variants={fadeIn}>
-            <Link
-              as={NextLink}
-              color={linkColorFor('/debug/pools')}
-              href="/debug/pools"
-              prefetch
-              variant="nav"
-            >
-              Test-Pools
             </Link>
           </Box>
           <Box as={motion.div} variants={fadeIn}>
@@ -245,7 +232,7 @@ export function NavBar({
   const opacity = useTransform(scrollYBoundedProgressDelayed, [0, 1], [1, 0])
 
   // Determine navbar height based on alerts — each alert adds 48px to the 72px nav row
-  const alertCount = [!apiOK, hasLegacyV1Positions, isBalancer].filter(Boolean).length
+  const alertCount = [!apiOK, hasLegacyV1Positions].filter(Boolean).length
   const navbarHeight = alertCount === 0 ? '72px' : `${72 + alertCount * 48}px`
 
   // Set CSS variable on document root
@@ -282,7 +269,6 @@ export function NavBar({
       zIndex={100}
       {...rest}
     >
-      {isBalancer && <WinddownAlert />}
       {hasLegacyV1Positions && <LegacyV1PositionsAlert />}
       {!apiOK && <ApiOutageAlert />}
 

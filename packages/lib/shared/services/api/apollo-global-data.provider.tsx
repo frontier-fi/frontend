@@ -5,7 +5,10 @@
  * application during the RSC render pass.
  */
 import { getApolloServerClient } from '@repo/lib/shared/services/api/apollo-server.client'
-import { GetProtocolStatsDocument } from '@repo/lib/shared/services/api/generated/graphql'
+import {
+  GetProtocolStatsDocument,
+  GetProtocolStatsQuery,
+} from '@repo/lib/shared/services/api/generated/graphql'
 import { TokensProvider } from '@repo/lib/modules/tokens/TokensProvider'
 import { FiatFxRatesProvider } from '../../hooks/FxRatesProvider'
 import { getFxRates } from '../../utils/currencies'
@@ -25,22 +28,36 @@ import { getFeeManagersMetadata } from '@repo/lib/modules/fee-managers/getFeeMan
 import { getPoolMigrations } from '@repo/lib/modules/pool/migrations/getPoolMigrations'
 import { PoolMigrationsProvider } from '@repo/lib/modules/pool/migrations/PoolMigrationsProvider'
 
-export const revalidate = 60
+const isProductionBuild = process.env.NEXT_PHASE === 'phase-production-build'
+
+async function fetchProtocolStats(): Promise<GetProtocolStatsQuery | undefined> {
+  // Skip during `next build` SSG — N workers × M pages stampede Frontier's Prisma pool.
+  if (isProductionBuild) return undefined
+
+  try {
+    const client = getApolloServerClient()
+
+    const { data } = await client.query({
+      query: GetProtocolStatsDocument,
+      variables: {
+        chains: PROJECT_CONFIG.networksForProtocolStats || PROJECT_CONFIG.supportedNetworks,
+      },
+      context: {
+        fetchOptions: {
+          next: { revalidate: mins(10).toSecs() },
+        },
+      },
+    })
+
+    return data
+  } catch (error) {
+    console.warn('GetProtocolStats failed; continuing without protocol stats', error)
+    return undefined
+  }
+}
 
 export async function ApolloGlobalDataProvider({ children }: PropsWithChildren) {
-  const client = getApolloServerClient()
-
-  const { data: protocolData } = await client.query({
-    query: GetProtocolStatsDocument,
-    variables: {
-      chains: PROJECT_CONFIG.networksForProtocolStats || PROJECT_CONFIG.supportedNetworks,
-    },
-    context: {
-      fetchOptions: {
-        next: { revalidate: mins(10).toSecs() },
-      },
-    },
-  })
+  const protocolData = await fetchProtocolStats()
 
   const [
     exchangeRates,

@@ -31,7 +31,7 @@ export function AcceptPoliciesModal() {
   const disconnect = useDisconnect()
 
   const { projectName } = PROJECT_CONFIG
-  const entityName = isBalancer ? 'Balancer Foundation' : 'BeethovenX DAO'
+  const entityName = isBalancer ? 'Frontier Finance Foundation' : 'BeethovenX DAO'
 
   const isAddressInAcceptedPolicies =
     acceptedPolicies.includes(userAddress.toLowerCase()) ||

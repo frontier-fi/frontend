@@ -38,101 +38,30 @@ query GetPool($id: String!, $chain: GqlChain!, $userAddress: String) {
       disableUnbalancedLiquidity
     }
     name
-    owner
     pauseManager
     poolCreator
     poolTokens {
       ...PoolTokens
     }
     protocolVersion
-    staking {
-      address
-      chain
-      gauge {
-        gaugeAddress
-        id
-        otherGauges {
-          gaugeAddress
-          id
-          rewards {
-            id
-            rewardPerSecond
-            tokenAddress
-          }
-          status
-          version
-        }
-        rewards {
-          id
-          rewardPerSecond
-          tokenAddress
-        }
-        status
-        version
-        workingSupply
-      }
-      reliquary {
-        levels {
-          level
-          balance
-          apr
-          allocationPoints
-        }
-        beetsPerSecond
-        totalBalance
-      }
-      id
-      type
-    }
     swapFeeManager
     symbol
     tags
     type
     userBalance {
-      stakedBalances {
-        balance
-        balanceUsd
-        stakingId
-        stakingType
-      }
       totalBalance
       totalBalanceUsd
       walletBalance
       walletBalanceUsd
     }
     version
-    ... on GqlPoolComposableStable {
-      amp
-      bptPriceRate
-    }
-    ... on GqlPoolElement {
-      baseToken
-      principalToken
-      unitSeconds
-    }
-    ... on GqlPoolFx {
-      alpha
-      beta
-      delta
-      epsilon
-      lambda
-    }
-    ... on GqlPoolLiquidityBootstrappingV3 {
-      ...LbpV3CommonMetadataFields
-    }
-    ... on GqlPoolFixedPriceLBP {
-      ...FixedPriceLbpCommonMetadataFields
-    }
-    ... on GqlPoolGyro {
+    ... on GqlPoolEclp {
       alpha
       beta
       c
       dSq
       lambda
-      root3Alpha
       s
-      sqrtAlpha
-      sqrtBeta
       tauAlphaX
       tauAlphaY
       tauBetaX
@@ -143,33 +72,9 @@ query GetPool($id: String!, $chain: GqlChain!, $userAddress: String) {
       w
       z
     }
-    ... on GqlPoolMetaStable {
-      amp
-    }
-    ... on GqlPoolQuantAmmWeighted {
-      hasAnyAllowedBuffer
-      weightSnapshots {
-        timestamp
-        weights
-      }
-      poolTokens {
-        ...PoolTokens
-      }
-    }
-    ... on GqlPoolReClamm {
-      centerednessMargin
-      currentFourthRootPriceRatio
-      dailyPriceShiftBase
-      endFourthRootPriceRatio
-      hasAnyAllowedBuffer
-      lastTimestamp
-      lastVirtualBalances
-      priceRatioUpdateEndTime
-      priceRatioUpdateStartTime
-      startFourthRootPriceRatio
-    }
     ... on GqlPoolStable {
       amp
+      bptPriceRate
     }
   }
 }
@@ -183,20 +88,6 @@ query GetPoolSnapshots($poolId: String!, $range: GqlPoolSnapshotDataRange!, $cha
     fees24h
     surplus24h
     sharePrice
-  }
-}
-
-query GetPoolTokensDynamicData($addresses: [String!]!, $chain: GqlChain!) {
-  staticData: tokenGetTokens(chains: [$chain], where: { tokensIn: $addresses }) {
-    address
-    description
-    discordUrl
-    telegramUrl
-    twitterUsername
-    websiteUrl
-  }
-  dynamicData: tokenGetTokensDynamicData(addresses: $addresses, chain: $chain) {
-    ...GqlTokenDynamicData
   }
 }
 
@@ -230,24 +121,6 @@ query GetPoolEvents(
       tokenOut {
         address
         amount
-      }
-    }
-    ... on GqlPoolSwapEventCowAmm {
-      sender
-      tokenIn {
-        address
-        amount
-        valueUSD
-      }
-      tokenOut {
-        address
-        amount
-        valueUSD
-      }
-      surplus {
-        address
-        amount
-        valueUSD
       }
     }
     ... on GqlPoolAddRemoveEventV3 {

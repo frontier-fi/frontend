@@ -34,7 +34,7 @@ import {
 } from '../pool.types'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { useState } from 'react'
-import { Filter, Info, Plus } from 'lucide-react'
+import { Filter, Info } from 'lucide-react'
 import { useBreakpoints } from '@repo/lib/shared/hooks/useBreakpoints'
 import { useCurrency } from '@repo/lib/shared/hooks/useCurrency'
 import { motion, AnimatePresence } from 'motion/react'
@@ -42,19 +42,18 @@ import { staggeredFadeInUp } from '@repo/lib/shared/utils/animations'
 import { getChainShortName } from '@repo/lib/config/app.config'
 import { usePoolList } from './PoolListProvider'
 import { MultiSelect } from '@repo/lib/shared/components/inputs/MultiSelect'
-import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import Image from 'next/image'
 import ButtonGroup, {
   ButtonGroupOption,
 } from '@repo/lib/shared/components/btns/button-group/ButtonGroup'
 import { useCow } from '../../cow/useCow'
-import { isBeets, PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { poolTypeLabel } from '../pool.helpers'
 import { hasMultipleNetworks } from '../pool.utils'
 import { AnimatedTag } from '@repo/lib/shared/components/other/AnimatedTag'
 import { PoolMinTvlFilter } from './PoolMinTvlFilter'
-import NextLink from 'next/link'
 import { TooltipWithTouch } from '@repo/lib/shared/components/tooltips/TooltipWithTouch'
 
 export function useFilterTagsVisible() {
@@ -209,9 +208,9 @@ export function PoolTypeFilters({
 }
 
 export interface PoolNetworkFiltersArgs {
-  toggledNetworks: GqlChain[]
-  toggleNetwork: (checked: boolean, value: GqlChain) => void
-  setNetworks: (value: GqlChain[] | null) => void
+  toggledNetworks: AppChain[]
+  toggleNetwork: (checked: boolean, value: AppChain) => void
+  setNetworks: (value: AppChain[] | null) => void
 }
 
 export function PoolNetworkFilters({
@@ -241,12 +240,12 @@ export function PoolNetworkFilters({
     ),
   }))
 
-  function isCheckedNetwork(network: GqlChain): boolean {
+  function isCheckedNetwork(network: AppChain): boolean {
     return !!toggledNetworks.includes(network)
   }
 
   return (
-    <MultiSelect<GqlChain>
+    <MultiSelect<AppChain>
       bg="background.level4"
       isChecked={isCheckedNetwork}
       label="All networks"
@@ -260,8 +259,8 @@ export function PoolNetworkFilters({
 }
 
 export interface FilterTagsPops {
-  networks: GqlChain[]
-  toggleNetwork: (checked: boolean, value: GqlChain) => void
+  networks: AppChain[]
+  toggleNetwork: (checked: boolean, value: AppChain) => void
   poolTypes: PoolFilterType[]
   togglePoolType: (checked: boolean, value: PoolFilterType) => void
   poolTypeLabel: (poolType: PoolFilterType) => string
@@ -501,7 +500,6 @@ export function PoolListFilters() {
   } = usePoolList()
 
   const { isCowPath } = useCow()
-  const { isMobile } = useBreakpoints()
 
   function _resetFilters() {
     resetFilters()
@@ -585,19 +583,24 @@ export function PoolListFilters() {
                           />
                         </Box>
                       )}
-                      {!isCowPath && (
-                        <Box as={motion.div} variants={staggeredFadeInUp}>
-                          <Heading as="h3" mb="sm" size="sm">
-                            Protocol version
-                          </Heading>
-                          <ProtocolVersionFilter
-                            hideProtocolVersion={PROJECT_CONFIG.options.hideProtocolVersion}
-                            poolTypes={poolTypes}
-                            protocolVersion={protocolVersion}
-                            setProtocolVersion={setProtocolVersion}
-                          />
-                        </Box>
-                      )}
+                      {!isCowPath &&
+                        PROTOCOL_VERSION_TABS.filter(
+                          tab =>
+                            tab.value !== 'all' &&
+                            !(PROJECT_CONFIG.options.hideProtocolVersion ?? []).includes(tab.value)
+                        ).length > 0 && (
+                          <Box as={motion.div} variants={staggeredFadeInUp}>
+                            <Heading as="h3" mb="sm" size="sm">
+                              Protocol version
+                            </Heading>
+                            <ProtocolVersionFilter
+                              hideProtocolVersion={PROJECT_CONFIG.options.hideProtocolVersion}
+                              poolTypes={poolTypes}
+                              protocolVersion={protocolVersion}
+                              setProtocolVersion={setProtocolVersion}
+                            />
+                          </Box>
+                        )}
                       {!isFixedPoolType && (
                         <Box as={motion.div} variants={staggeredFadeInUp}>
                           <Heading as="h3" mb="sm" size="sm">
@@ -620,12 +623,14 @@ export function PoolListFilters() {
                             <PoolCategoryFilters hidePoolTags={options.hidePoolTags} />
                           </Box>
 
-                          <Box as={motion.div} variants={staggeredFadeInUp}>
-                            <Heading as="h3" mb="sm" size="sm">
-                              Hooks
-                            </Heading>
-                            <PoolHookFilters />
-                          </Box>
+                          {!options.hideHooksFilters && (
+                            <Box as={motion.div} variants={staggeredFadeInUp}>
+                              <Heading as="h3" mb="sm" size="sm">
+                                Hooks
+                              </Heading>
+                              <PoolHookFilters />
+                            </Box>
+                          )}
                         </>
                       )}
                       <Box as={motion.div} mb="xs" variants={staggeredFadeInUp} w="full">
@@ -638,12 +643,6 @@ export function PoolListFilters() {
             </PopoverContent>
           </Box>
         </Popover>
-        {isBeets && (
-          <Button as={NextLink} display="flex" gap="2" href="/create" ml="ms" variant="tertiary">
-            <Icon as={Plus} boxSize={4} />
-            {!isMobile && 'Create a pool'}
-          </Button>
-        )}
       </HStack>
     </VStack>
   )

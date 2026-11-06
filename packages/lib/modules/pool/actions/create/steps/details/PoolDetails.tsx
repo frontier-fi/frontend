@@ -7,7 +7,6 @@ import { useEffect, useRef } from 'react'
 import { PoolCreationToken, SupportedPoolTypes } from '../../types'
 import { isWeightedPool } from '../../helpers'
 import { MAX_POOL_NAME_LENGTH, MAX_POOL_SYMBOL_LENGTH } from '../../constants'
-import { PoolType } from '@balancer/sdk'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 
 export function PoolDetails() {
@@ -80,13 +79,6 @@ export function PoolDetails() {
 }
 
 function getSuggestions(poolTokens: PoolCreationToken[], poolType: SupportedPoolTypes) {
-  const poolTypePrefixMap: Partial<Record<SupportedPoolTypes, string>> = {
-    [PoolType.StableSurge]: 'surge',
-    [PoolType.ReClamm]: 'AutoRange',
-  }
-
-  const poolTypePrefix = poolTypePrefixMap[poolType] ?? ''
-
   const tokenSymbols = poolTokens
     .map(({ data, weight }) => {
       if (!data?.symbol) return ''
@@ -95,22 +87,19 @@ function getSuggestions(poolTokens: PoolCreationToken[], poolType: SupportedPool
     })
     .join('-')
 
-  const poolSymbol = poolTypePrefix ? `${poolTypePrefix}-${tokenSymbols}` : tokenSymbols
-
   const suggestedPoolSymbol =
-    poolSymbol.length <= MAX_POOL_SYMBOL_LENGTH
-      ? poolSymbol
+    tokenSymbols.length <= MAX_POOL_SYMBOL_LENGTH
+      ? tokenSymbols
       : tokenSymbols.slice(0, MAX_POOL_SYMBOL_LENGTH)
 
   const { projectName } = PROJECT_CONFIG
 
-  const poolName = poolTypePrefix ? `${poolTypePrefix} ${tokenSymbols}` : tokenSymbols
-  const poolNameWithProject = `${projectName} ${poolName}`
+  const poolNameWithProject = `${projectName} ${tokenSymbols}`
 
   const suggestedPoolName =
     poolNameWithProject.length <= MAX_POOL_NAME_LENGTH
       ? poolNameWithProject
-      : poolName.slice(0, MAX_POOL_NAME_LENGTH)
+      : tokenSymbols.slice(0, MAX_POOL_NAME_LENGTH)
 
   return { suggestedPoolName, suggestedPoolSymbol }
 }

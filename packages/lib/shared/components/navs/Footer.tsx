@@ -42,8 +42,8 @@ function CardContent({ linkSections, logoType, title, subTitle }: CardContentPro
       <Stack
         align="start"
         direction={{ base: 'column', lg: 'row' }}
-        justify="space-between"
-        spacing={{ base: 'lg', lg: 'md' }}
+        justify={{ base: 'start', lg: 'end' }}
+        spacing={{ base: 'lg', lg: '3xl' }}
         w="full"
       >
         {linkSections.map(section => (
@@ -52,32 +52,38 @@ function CardContent({ linkSections, logoType, title, subTitle }: CardContentPro
               {section.title}
             </Text>
             <VStack align="start" spacing={{ base: 'xs', lg: 'sm' }}>
-              {section.links.map(link => (
-                <Link
-                  as={link.isExternal ? Link : NextLink}
-                  flex="auto"
-                  flexBasis="row"
-                  href={link.href}
-                  key={link.href}
-                  variant="nav"
-                  {...(link.isExternal ? { isExternal: true } : {})}
-                >
-                  <HStack gap="xxs">
-                    <Box
-                      fontSize={{ base: 'sm', md: 'md' }}
-                      fontWeight="medium"
-                      letterSpacing="-0.25px"
-                    >
-                      {link.label}
-                    </Box>
-                    {link.isExternal && (
-                      <Box color="grayText">
-                        <ArrowUpRight size={12} />
+              {section.links.map(link =>
+                link.href ? (
+                  <Link
+                    as={link.isExternal ? Link : NextLink}
+                    flex="auto"
+                    flexBasis="row"
+                    href={link.href}
+                    key={link.href}
+                    variant="nav"
+                    {...(link.isExternal ? { isExternal: true } : {})}
+                  >
+                    <HStack gap="xxs">
+                      <Box
+                        fontSize={{ base: 'sm', md: 'md' }}
+                        fontWeight="medium"
+                        letterSpacing="-0.25px"
+                      >
+                        {link.label}
                       </Box>
-                    )}
-                  </HStack>
-                </Link>
-              ))}
+                      {link.isExternal && (
+                        <Box color="grayText">
+                          <ArrowUpRight size={12} />
+                        </Box>
+                      )}
+                    </HStack>
+                  </Link>
+                ) : (
+                  <Text color="font.secondary" fontSize={{ base: 'sm', md: 'md' }} key={link.label}>
+                    {link.label}
+                  </Text>
+                )
+              )}
             </VStack>
           </VStack>
         ))}
@@ -119,17 +125,23 @@ function LegalLinks({ legalLinks }: { legalLinks: AppLink[] }) {
       w="full"
       wrap="wrap"
     >
-      {legalLinks.map(link => (
-        <Link
-          as={NextLink}
-          color="font.secondary"
-          fontSize={{ base: 'xs', md: 'sm' }}
-          href={link.href || '#'}
-          key={link.href || link.label}
-        >
-          {link.label}
-        </Link>
-      ))}
+      {legalLinks.map(link =>
+        link.href ? (
+          <Link
+            as={NextLink}
+            color="font.secondary"
+            fontSize={{ base: 'xs', md: 'sm' }}
+            href={link.href}
+            key={link.href}
+          >
+            {link.label}
+          </Link>
+        ) : (
+          <Link color="font.secondary" fontSize={{ base: 'xs', md: 'sm' }} key={link.label}>
+            {link.label}
+          </Link>
+        )
+      )}
     </HStack>
   )
 }

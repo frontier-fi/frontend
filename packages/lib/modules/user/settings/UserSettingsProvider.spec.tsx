@@ -9,7 +9,6 @@ const initialSettings = {
   initSlippage: '0.5',
   initEnableSignatures: 'yes' as const,
   initAcceptedPolicies: [],
-  initAllowSounds: 'yes' as const,
   initEnableTxBundling: 'yes' as const,
 }
 

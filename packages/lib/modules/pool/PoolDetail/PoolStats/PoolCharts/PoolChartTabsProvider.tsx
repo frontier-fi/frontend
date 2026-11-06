@@ -2,7 +2,7 @@ import type { GqlPoolType } from '@repo/lib/shared/services/api/generated/graphq
 import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { useParams } from 'next/navigation'
 import { createContext, PropsWithChildren, useMemo, useState } from 'react'
-import { PoolVariant, BaseVariant } from '../../../pool.types'
+import { PoolVariant } from '../../../pool.types'
 import { usePool } from '../../../PoolProvider'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
 import { PoolChartPeriod } from './PoolChartsProvider'
@@ -15,6 +15,7 @@ export enum PoolChartTab {
   SURPLUS = 'surplus',
   LIQUIDITY_PROFILE = 'liquidity_profile',
   AUTORANGE = 'autorange',
+  /** Legacy LBP chart tabs (pages redirected away on Frontier). */
   PRICE = 'price',
   FUNDS_RAISED = 'funds_raised',
 }
@@ -41,38 +42,19 @@ const TABS_WITH_FEES: NonEmptyPoolChartTabs = [
 ]
 
 const POOL_SPECIFIC_TABS: PoolTabsMap = {
-  [GqlPoolTypeValues.CowAmm]: [...BASE_TABS, { value: PoolChartTab.SURPLUS, label: 'Surplus' }],
-  [GqlPoolTypeValues.GyroE]: [
+  [GqlPoolTypeValues.Eclp]: [
     { value: PoolChartTab.LIQUIDITY_PROFILE, label: 'Liquidity profile' },
-    ...TABS_WITH_FEES,
-  ],
-  [GqlPoolTypeValues.Reclamm]: [
-    { value: PoolChartTab.AUTORANGE, label: 'AutoRange' },
-    ...TABS_WITH_FEES,
-  ],
-  [GqlPoolTypeValues.LiquidityBootstrapping]: [
-    { value: PoolChartTab.PRICE, label: 'Price' },
-    ...TABS_WITH_FEES,
-  ],
-  [GqlPoolTypeValues.FixedLbp]: [
-    { value: PoolChartTab.FUNDS_RAISED, label: 'Funds raised' },
     ...TABS_WITH_FEES,
   ],
   default: TABS_WITH_FEES,
 }
 
 export function getPoolTabsList({
-  variant,
   poolType,
 }: {
   variant: PoolVariant
   poolType: GqlPoolType
 }): NonEmptyPoolChartTabs {
-  // LBP pools in v2 only show base tabs
-  if (poolType === GqlPoolTypeValues.LiquidityBootstrapping && variant === BaseVariant.v2) {
-    return BASE_TABS
-  }
-
   // Return pool-specific tabs or default tabs
   return POOL_SPECIFIC_TABS[poolType] || POOL_SPECIFIC_TABS.default
 }
@@ -102,8 +84,6 @@ export function usePoolChartTabsLogic() {
         return 'Total value locked'
       case PoolChartTab.FEES:
         return `${activePeriod.label} fees`
-      case PoolChartTab.FUNDS_RAISED:
-        return `${activePeriod.label} funds raised`
       case PoolChartTab.VOLUME:
         return `${activePeriod.label} volume`
     }

@@ -13,19 +13,19 @@ export default function Privacy() {
           <FadeInOnView>
             <div className="subsection">
               <Box mt="3xl">
-                <h1>Balancer Foundation Privacy&nbsp;Policy</h1>
+                <h1>Frontier Finance Foundation Privacy&nbsp;Policy</h1>
                 <p>
                   <em>Last Updated: August 2026</em>
                 </p>
               </Box>
               <p>
                 <em className="font-medium">
-                  This Privacy Policy explains how the Balancer Foundation, its subsidiary, Balancer
-                  OpCo Limited (“Balancer Foundation,” “Balancer,” “we,” “our,” or “us”) collects,
-                  uses, and discloses information about you. This Privacy Policy applies when you
-                  use our website, Balancer Protocol user-interface or application and other online
-                  products (collectively, our “UI”), engage with us on social media, or otherwise
-                  interact with us.
+                  This Privacy Policy explains how the Frontier Finance Foundation, its subsidiary,
+                  Frontier Finance OpCo Limited (“Frontier Finance Foundation,” “Frontier Finance,”
+                  “we,” “our,” or “us”) collects, uses, and discloses information about you. This
+                  Privacy Policy applies when you use our website, Frontier Finance Protocol
+                  user-interface or application and other online products (collectively, our “UI”),
+                  engage with us on social media, or otherwise interact with us.
                 </em>
               </p>
               <p>
@@ -46,20 +46,20 @@ export default function Privacy() {
               <h2>Summary</h2>
               <ul>
                 <li>
-                  Balancer does not typically request, collect or use personal information. With the
-                  exception of your wallet address, there is no reason for you to provide personal
-                  information when you use the UI.
+                  Frontier Finance does not typically request, collect or use personal information.
+                  With the exception of your wallet address, there is no reason for you to provide
+                  personal information when you use the UI.
                 </li>
                 <li>
-                  Balancer does not and has not stored personal information from users of the UI.
-                  However, Balancer uses third party services including, without limitation,
-                  Cloudflare, Hypernative, Sentry, RainbowKit, OpenZeppelin, Amazon Web Services,
-                  Vercel, Coingecko and others who collect and store certain user information only
-                  for use in the provision of their services.
+                  Frontier Finance does not and has not stored personal information from users of
+                  the UI. However, Frontier Finance uses third party services including, without
+                  limitation, Cloudflare, Hypernative, Sentry, RainbowKit, OpenZeppelin, Amazon Web
+                  Services, Vercel, Coingecko and others who collect and store certain user
+                  information only for use in the provision of their services.
                 </li>
                 <li>
-                  Balancer does not set any cookies. However, we use third party service providers
-                  that set cookies.
+                  Frontier Finance does not set any cookies. However, we use third party service
+                  providers that set cookies.
                 </li>
               </ul>
             </div>
@@ -77,9 +77,9 @@ export default function Privacy() {
                 practice.
               </p>
               <p>
-                Balancer is not directed to children under the age of 16. If a parent or guardian
-                becomes aware that his or her child has provided us with personal information
-                without your consent, please contact us at&nbsp;
+                Frontier Finance is not directed to children under the age of 16. If a parent or
+                guardian becomes aware that his or her child has provided us with personal
+                information without your consent, please contact us at&nbsp;
                 <a className="link" href="mailto:admin@balancer.finance">
                   admin@balancer.finance
                 </a>
@@ -131,8 +131,8 @@ export default function Privacy() {
               <p>
                 We may derive limited information or draw inferences about you based on the
                 information we have access to or receive, most importantly, from our service
-                providers. Your wallet and IP address is accessible to Balancer and its vendor(s).
-                We may make inferences about you based on your wallet or IP address.
+                providers. Your wallet and IP address is accessible to Frontier Finance and its
+                vendor(s). We may make inferences about you based on your wallet or IP address.
               </p>
             </div>
           </FadeInOnView>
@@ -147,7 +147,7 @@ export default function Privacy() {
                 information we collect to:
               </p>
               <ul>
-                <li>Ensure proper functioning of Balancer and the UI;</li>
+                <li>Ensure proper functioning of Frontier Finance and the UI;</li>
                 <li>Provide services, content, material and other information on the UI;</li>
                 <li>Identify and/or diagnose problems on or related to the UI;</li>
                 <li>
@@ -162,7 +162,7 @@ export default function Privacy() {
                 <li>
                   Detect, investigate, and prevent security incidents and other malicious,
                   deceptive, fraudulent, or illegal activity and protect the rights and property of
-                  Balancer and others;
+                  Frontier Finance and others;
                 </li>
                 <li>Debug to identify and repair errors in the UI;</li>
                 <li>Comply with legal, regulatory and financial obligations;</li>
@@ -183,10 +183,10 @@ export default function Privacy() {
 
               <p>
                 We do not have access to or share personally identifiable information, other than as
-                described herein, in the normal course of Balancer business. However, when Balancer
-                has access to personal information, such as your wallet and certain IP addresses, it
-                may share that information in the following circumstances or as otherwise described
-                in this policy:
+                described herein, in the normal course of Frontier Finance business. However, when
+                Frontier Finance has access to personal information, such as your wallet and certain
+                IP addresses, it may share that information in the following circumstances or as
+                otherwise described in this policy:
               </p>
               <ul>
                 <li>
@@ -209,7 +209,7 @@ export default function Privacy() {
                   We may share personal information if we believe that your actions are inconsistent
                   with our user agreements or policies, if we believe that you have violated the
                   law, or if we believe it is necessary to protect the rights, property, and safety
-                  of Balancer, the Balancer ecosystem, the public, or others.
+                  of Frontier Finance, the Frontier Finance ecosystem, the public, or others.
                 </li>
                 <li>
                   We share personal information with our lawyers and other professional advisors
@@ -225,16 +225,16 @@ export default function Privacy() {
                   any choices you may have regarding the sharing of your personal information.
                 </li>
                 <li>
-                  Personal information may be shared between and among Balancer and our current and
-                  future parents, affiliates, and subsidiaries and other companies under common
-                  control and ownership (“corporate affiliates”). This information may be used to
-                  provide you with offers, services, or products that may be of interest to you and
-                  provide you with their products and services. Any such corporate affiliate may use
-                  your personal information only according to the terms of this Policy. If you are
-                  located in a jurisdiction where such sharing requires your permission, we will
-                  only share such information with your consent. If you decide you no longer wish to
-                  receive these promotional communications, please follow the instructions provided
-                  in Your Choices section below.
+                  Personal information may be shared between and among Frontier Finance and our
+                  current and future parents, affiliates, and subsidiaries and other companies under
+                  common control and ownership (“corporate affiliates”). This information may be
+                  used to provide you with offers, services, or products that may be of interest to
+                  you and provide you with their products and services. Any such corporate affiliate
+                  may use your personal information only according to the terms of this Policy. If
+                  you are located in a jurisdiction where such sharing requires your permission, we
+                  will only share such information with your consent. If you decide you no longer
+                  wish to receive these promotional communications, please follow the instructions
+                  provided in Your Choices section below.
                 </li>
                 <li>We share personal information with your consent or at your direction.</li>
                 <li>
@@ -259,10 +259,10 @@ export default function Privacy() {
               <h2>Transfer of information to the United States and Other&nbsp;Countries</h2>
 
               <p>
-                Balancer Foundation is headquartered in the Cayman Islands with a subsidiary in the
-                British Virgin Islands (BVI). Therefore, we and our service providers may transfer
-                your personal information to, or store or access it in, jurisdictions that may not
-                provide levels of data protection that are equivalent to those of your home
+                Frontier Finance Foundation is headquartered in the Cayman Islands with a subsidiary
+                in the British Virgin Islands (BVI). Therefore, we and our service providers may
+                transfer your personal information to, or store or access it in, jurisdictions that
+                may not provide levels of data protection that are equivalent to those of your home
                 jurisdiction. We will take steps to ensure that your personal information receives
                 an adequate level of protection in the jurisdictions in which we process it.
               </p>
@@ -273,9 +273,9 @@ export default function Privacy() {
               <h2>Your Choices</h2>
               <h3>Cookies</h3>
               <p>
-                Balancer and its third party vendors may use any cookies to affect the availability
-                and functionality of the UI. For more information about cookies and how to disable
-                them, see our <Link href="cookies-policy">Cookies policy</Link>.
+                Frontier Finance and its third party vendors may use any cookies to affect the
+                availability and functionality of the UI. For more information about cookies and how
+                to disable them, see our <Link href="cookies-policy">Cookies policy</Link>.
               </p>
             </div>
           </FadeInOnView>
@@ -324,8 +324,8 @@ export default function Privacy() {
               </table>
 
               <p>
-                Balancer does not “sell” personal information to advertise our products to you or
-                otherwise.
+                Frontier Finance does not “sell” personal information to advertise our products to
+                you or otherwise.
               </p>
 
               <p>
@@ -347,8 +347,8 @@ export default function Privacy() {
               <h3>Shine the Light</h3>
 
               <p>
-                Balancer does not share such information with third parties for direct marketing
-                purposes.
+                Frontier Finance does not share such information with third parties for direct
+                marketing purposes.
               </p>
 
               <h3>Do Not Track Signals</h3>
@@ -376,9 +376,9 @@ export default function Privacy() {
               <h3>Legal Basis for Processing</h3>
 
               <p>
-                Balancer does not typically process user personal data. If Balancer processes data,
-                such as a wallet address and certain IP addresses, it will do so in reliance on the
-                following lawful bases:
+                Frontier Finance does not typically process user personal data. If Frontier Finance
+                processes data, such as a wallet address and certain IP addresses, it will do so in
+                reliance on the following lawful bases:
               </p>
               <ul>
                 <li>
@@ -404,8 +404,8 @@ export default function Privacy() {
                 Subject to certain limitations, you have the right to request access to the personal
                 data we hold about you and to receive your data in a portable format, the right to
                 ask that your personal data be corrected or erased, and the right to object to, or
-                request that we restrict, certain processing. Balancer does not typically hold or
-                store such personal data.
+                request that we restrict, certain processing. Frontier Finance does not typically
+                hold or store such personal data.
               </p>
             </div>
           </FadeInOnView>

@@ -26,8 +26,6 @@ export type SwapStepParams = BuildSwapQueryParams & {
   swapAction: SwapAction
   tokenInInfo: ApiToken | undefined
   tokenOutInfo: ApiToken | undefined
-  isLbpSwap: boolean
-  isLbpProjectTokenBuy: boolean
 }
 
 export function useSwapStep({
@@ -38,8 +36,6 @@ export function useSwapStep({
   wethIsEth,
   tokenInInfo,
   tokenOutInfo,
-  isLbpSwap,
-  isLbpProjectTokenBuy,
 }: SwapStepParams): TransactionStep {
   const { isConnected } = useUserAccount()
   const [isBuildQueryEnabled, setIsBuildQueryEnabled] = useState(false)
@@ -63,30 +59,14 @@ export function useSwapStep({
   const tokenInSymbol = tokenInInfo?.symbol || 'Unknown'
   const tokenOutSymbol = tokenOutInfo?.symbol || 'Unknown'
 
-  const labels: TransactionLabels = isLbpSwap
-    ? isLbpProjectTokenBuy
-      ? {
-          init: 'Buy',
-          title: 'Buy',
-          confirming: 'Confirming buy...',
-          confirmed: 'Buy confirmed!',
-          tooltip: `Buy ${tokenOutSymbol}`,
-        }
-      : {
-          init: 'Sell',
-          title: 'Sell',
-          confirming: 'Confirming sell...',
-          confirmed: 'Sell confirmed!',
-          tooltip: `Sell ${tokenInSymbol}`,
-        }
-    : {
-        init: capitalize(swapAction),
-        title: capitalize(swapAction),
-        confirming: 'Confirming swap...',
-        confirmed: `${swapActionPastTense(swapAction)}!`,
-        tooltip: `${capitalize(swapAction)} ${tokenInSymbol} for ${tokenOutSymbol}`,
-        description: `${capitalize(swapAction)} ${tokenInSymbol} for ${tokenOutSymbol}`,
-      }
+  const labels: TransactionLabels = {
+    init: capitalize(swapAction),
+    title: capitalize(swapAction),
+    confirming: 'Confirming swap...',
+    confirmed: `${swapActionPastTense(swapAction)}!`,
+    tooltip: `${capitalize(swapAction)} ${tokenInSymbol} for ${tokenOutSymbol}`,
+    description: `${capitalize(swapAction)} ${tokenInSymbol} for ${tokenOutSymbol}`,
+  }
 
   useEffect(() => {
     // simulationQuery is refetched every 30 seconds by SwapTimeout

@@ -1,11 +1,6 @@
-import { bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { Pool } from '../pool.types'
 import { Address } from 'viem'
 import { HumanAmount } from '@balancer/sdk'
-import { isClaimableGauge } from '../pool.helpers'
-import type { GqlUserStakedBalance } from '@repo/lib/shared/services/api/graphql-derived-types'
-import { GqlPoolStakingTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
-import { getStakedBalance } from '../user-balance.helpers'
 
 export const migrateStakeTooltipLabel = `veBAL gauges are the mechanism to distribute BAL liquidity incentives following community voting.
 The gauge where you have staked your LP tokens has been deprecated.
@@ -17,50 +12,30 @@ export type UnstakeQuote = {
 }
 
 /*
-  If the user has non-preferential staked balance it returns the non preferential unstake data
-  If not, it returns the preferential unstake data
+  Frontier has no gauges — unstake quotes are always empty.
 */
-export function getUnstakeQuote(pool: Pool): UnstakeQuote {
-  if (hasNonPreferentialStakedBalance(pool)) {
-    const { nonPreferentialGaugeAddress, nonPreferentialStakedBalance } =
-      findFirstNonPreferentialStaking(pool)
-
-    return {
-      gaugeAddress: nonPreferentialGaugeAddress as Address,
-      amountOut: nonPreferentialStakedBalance as HumanAmount,
-    }
-  }
-
+export function getUnstakeQuote(_pool: Pool): UnstakeQuote {
   return {
-    gaugeAddress: pool.staking?.gauge?.id as Address,
-    amountOut: getStakedBalance(pool, GqlPoolStakingTypeValues.Gauge).balance,
+    gaugeAddress: '' as Address,
+    amountOut: '0',
   }
 }
 
-export function hasPreferentialGauge(pool: Pool): boolean {
-  return !!pool.staking?.gauge?.id
+export function hasPreferentialGauge(_pool: Pool): boolean {
+  return false
 }
 
-export function hasNonPreferentialStakedBalance(pool: Pool): boolean {
-  return filterNonPreferentialStakingWithBalance(pool).length > 0
+export function hasNonPreferentialStakedBalance(_pool: Pool): boolean {
+  return false
 }
 
-function hasActiveGaugeRewards(pool: Pool): boolean {
-  const rewards = pool.staking?.gauge?.rewards
-  if (!rewards || rewards.length === 0) return false
-  return rewards.some(r => bn(r.rewardPerSecond).gt(0))
+export function getCanStake(_pool: Pool): boolean {
+  // Gauges are not deployed, so staking BAL or BPTs is unavailable.
+  return false
 }
 
-export function getCanStake(pool: Pool): boolean {
-  return !!pool.staking && !hasNonPreferentialStakedBalance(pool) && hasActiveGaugeRewards(pool)
-}
-
-export function findFirstNonPreferentialStakedWithBalance(
-  pool: Pool
-): GqlUserStakedBalance | undefined {
-  const found = filterNonPreferentialStakingWithBalance(pool)
-  if (found.length === 0) return undefined
-  return found[0]
+export function findFirstNonPreferentialStakedWithBalance(_pool: Pool): undefined {
+  return undefined
 }
 
 type StakingData = {
@@ -69,52 +44,17 @@ type StakingData = {
   isClaimable: boolean
 }
 
-export function findFirstNonPreferentialStaking(pool: Pool): StakingData {
-  const nonPreferentialStaking = findFirstNonPreferentialStakedWithBalance(pool)
-
-  if (!nonPreferentialStaking) {
-    return {
-      nonPreferentialGaugeAddress: '' as Address,
-      nonPreferentialStakedBalance: '0',
-      isClaimable: false,
-    }
-  }
-
-  const nonPreferentialStakedBalance = (nonPreferentialStaking.balance as HumanAmount) || '0'
-  const nonPreferentialGaugeAddress = nonPreferentialStaking.stakingId as Address
-
-  const nonPreferentialGauge = pool.staking?.gauge?.otherGauges?.find(
-    otherGauge => otherGauge.id === nonPreferentialGaugeAddress
-  )
-
-  if (!nonPreferentialGauge) throw new Error('Non preferential gauge not found in other gauges')
-
-  const isClaimable = isClaimableGauge(nonPreferentialGauge, pool.chain)
-
+export function findFirstNonPreferentialStaking(_pool: Pool): StakingData {
   return {
-    nonPreferentialGaugeAddress,
-    nonPreferentialStakedBalance,
-    isClaimable,
+    nonPreferentialGaugeAddress: '' as Address,
+    nonPreferentialStakedBalance: '0',
+    isClaimable: false,
   }
 }
 
 /*
   This is a very rare edge case that should not happen to any user
 */
-export function hasMultipleNonPreferentialStakedBalance(pool: Pool): boolean {
-  return filterNonPreferentialStakingWithBalance(pool).length > 1
-}
-
-function filterNonPreferentialStakingWithBalance(pool: Pool): GqlUserStakedBalance[] {
-  if (!pool.userBalance) return []
-
-  const found = pool.userBalance.stakedBalances.filter(
-    stakedBalance =>
-      stakedBalance.stakingType === GqlPoolStakingTypeValues.Gauge &&
-      stakedBalance.stakingId !== pool.staking?.gauge?.id &&
-      isBnParseable(stakedBalance.balance) &&
-      bn(stakedBalance.balance).gt(0)
-  )
-
-  return found
+export function hasMultipleNonPreferentialStakedBalance(_pool: Pool): boolean {
+  return false
 }

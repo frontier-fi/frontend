@@ -1,10 +1,10 @@
 import { mins } from '@repo/lib/shared/utils/time'
 
 const ERC4626_METADATA_URL =
-  'https://raw.githubusercontent.com/balancer/metadata/main/erc4626/index.json'
+  'https://raw.githubusercontent.com/frontier-fi/metadata/main/erc4626/index.json'
 
 const ERC4626_METADATA_ICON_BASE_URL =
-  'https://raw.githubusercontent.com/balancer/metadata/main/erc4626/icons'
+  'https://raw.githubusercontent.com/frontier-fi/metadata/main/erc4626/icons'
 
 export type Erc4626Metadata = {
   id: string

@@ -22,7 +22,7 @@ import { bn, fNum, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { useLayoutEffect, useRef, useState, Fragment } from 'react'
 import { Address } from 'viem'
 import { usePoolsMetadata } from '../metadata/PoolsMetadataProvider'
-import { isBoosted, isDynamicLBP, isQuantAmmPool } from '../pool.helpers'
+import { isBoosted, isQuantAmmPool } from '../pool.helpers'
 import { PoolToken } from '../pool.types'
 import { usePool } from '../PoolProvider'
 import { Pool } from '../pool.types'
@@ -44,19 +44,6 @@ type CardContentProps = {
 function CardContent({ totalLiquidity, poolTokens, chain, pool }: CardContentProps) {
   const { toCurrency } = useCurrency()
   const { poolTokensWithActualWeights } = useGetPoolTokensWithActualWeights(pool)
-  const { priceFor } = useTokens()
-  const isSeedlessLBP = isDynamicLBP(pool) && pool.isSeedless
-  let virtualAmount = '0'
-
-  if (isSeedlessLBP) {
-    const virtualToken = pool.poolTokens[pool.reserveTokenIndex]!.address
-    const price = priceFor(virtualToken, chain)
-
-    virtualAmount =
-      isBnParseable(pool.reserveTokenVirtualBalance) && isBnParseable(price)
-        ? bn(pool.reserveTokenVirtualBalance).times(price).toString()
-        : '0'
-  }
 
   return (
     <VStack spacing="md" width="full">
@@ -70,7 +57,7 @@ function CardContent({ totalLiquidity, poolTokens, chain, pool }: CardContentPro
           {totalLiquidity ? (
             <PoolTotalLiquidityDisplay
               size="h5"
-              totalLiquidity={toCurrency(bn(totalLiquidity).plus(virtualAmount), {
+              totalLiquidity={toCurrency(totalLiquidity, {
                 abbreviated: false,
               })}
             />
@@ -84,16 +71,6 @@ function CardContent({ totalLiquidity, poolTokens, chain, pool }: CardContentPro
         {poolTokens.map(poolToken => {
           const actualWeight = poolTokensWithActualWeights[poolToken.address]
 
-          const isVirtualPairedToken =
-            isSeedlessLBP && pool.poolTokens[pool.reserveTokenIndex]!.address === poolToken.address
-
-          const tokenValue =
-            isSeedlessLBP && isVirtualPairedToken
-              ? isBnParseable(poolToken.balance) && isBnParseable(pool.reserveTokenVirtualBalance)
-                ? bn(poolToken.balance).plus(pool.reserveTokenVirtualBalance)
-                : poolToken.balance
-              : poolToken.balance
-
           return (
             <VStack key={`pool-${poolToken.address}`} w="full">
               <TokenRow
@@ -103,7 +80,7 @@ function CardContent({ totalLiquidity, poolTokens, chain, pool }: CardContentPro
                 pool={pool}
                 showZeroAmountAsDash={true}
                 targetWeight={poolToken.weight || undefined}
-                value={tokenValue}
+                value={poolToken.balance}
                 {...(poolToken.hasNestedPool && {
                   isNestedBpt: true,
                 })}
@@ -139,48 +116,6 @@ function CardContent({ totalLiquidity, poolTokens, chain, pool }: CardContentPro
                       />
                     )
                   })}
-                </VStack>
-              )}
-
-              {isVirtualPairedToken && (
-                <VStack pl="8" w="full">
-                  <TokenRow
-                    actualWeight={
-                      isBnParseable(poolToken.balance) &&
-                      isBnParseable(pool.reserveTokenVirtualBalance)
-                        ? bn(actualWeight ?? 0)
-                            .times(pool.reserveTokenVirtualBalance)
-                            .div(bn(poolToken.balance).plus(pool.reserveTokenVirtualBalance))
-                            .toString()
-                        : '0'
-                    }
-                    address={poolToken.address as Address}
-                    chain={chain}
-                    iconSize={28}
-                    isNestedToken
-                    isVirtual
-                    key="virtual-collateral-token"
-                    showInfoPopover={false}
-                    value={pool.reserveTokenVirtualBalance}
-                  />
-                  <TokenRow
-                    actualWeight={
-                      isBnParseable(poolToken.balance) &&
-                      isBnParseable(pool.reserveTokenVirtualBalance)
-                        ? bn(actualWeight ?? 0)
-                            .times(poolToken.balance)
-                            .div(bn(poolToken.balance).plus(pool.reserveTokenVirtualBalance))
-                            .toString()
-                        : '0'
-                    }
-                    address={poolToken.address as Address}
-                    chain={chain}
-                    iconSize={28}
-                    isNestedToken
-                    key="collateral-token"
-                    showInfoPopover={false}
-                    value={poolToken.balance}
-                  />
                 </VStack>
               )}
             </VStack>

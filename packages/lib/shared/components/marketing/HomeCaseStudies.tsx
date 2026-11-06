@@ -1,7 +1,6 @@
 import { MotionValue, motion, useMotionValue, useSpring, useTransform } from 'motion/react'
 import { ReactNode, useRef, useState } from 'react'
 import { Box, BoxProps, Flex, Text, useDisclosure, VStack } from '@chakra-ui/react'
-import { BeetsIcon } from '@repo/lib/shared/components/icons/logos/BeetsIcon'
 import { AaveIcon } from '@repo/lib/shared/components/icons/logos/AaveIcon'
 import { CowIcon } from '@repo/lib/shared/components/icons/logos/CowIcon'
 import { GyroIcon } from '@repo/lib/shared/components/icons/logos/GyroIcon'
@@ -18,7 +17,6 @@ export function HomeCaseStudies() {
 
   const logos = [
     { icon: CowIcon, name: 'Cow', partner: RedirectPartner.CoW },
-    { icon: BeetsIcon, name: 'Beets', partner: RedirectPartner.Beets },
     { icon: AaveIcon, name: 'Aave', partner: RedirectPartner.Aave },
     { icon: GyroIcon, name: 'Gyro', partner: RedirectPartner.Gyro },
     { icon: XaveIcon, name: 'Xave', partner: RedirectPartner.Xave },
@@ -39,7 +37,7 @@ export function HomeCaseStudies() {
         py={['xl', 'xl']}
         w="full"
       >
-        <Text>Top DeFi protocols build with Balancer</Text>
+        <Text>Top DeFi protocols build with Frontier Finance</Text>
         <Flex display={{ base: 'none', md: 'flex' }} justifyContent="center">
           <Box h="54px" position="relative" />
           <Box bottom="20px" position="absolute">

@@ -1,5 +1,4 @@
 import { PoolType, STABLE_POOL_CONSTRAINTS } from '@balancer/sdk'
-import { ProjectConfigBalancer } from '@repo/lib/config/projects/balancer'
 import { zeroAddress, Address } from 'viem'
 import {
   SupportedPoolTypes,
@@ -11,7 +10,7 @@ import {
 } from './types'
 import { getSwapFeePercentageOptions } from './helpers'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
-import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { parseUnits } from 'viem'
 import { FormStep } from '@repo/lib/shared/hooks/useFormSteps'
@@ -33,7 +32,7 @@ const GNOSIS_BLACKLIST: Address[] = [
   '0x420CA0f9B9b604cE0fd9C18EF134C705e5Fa3430', //Monerium EURe (EURe)
 ]
 
-export const TOKEN_BLACKLIST: Partial<Record<GqlChain, Set<string>>> = {
+export const TOKEN_BLACKLIST: Partial<Record<AppChain, Set<string>>> = {
   [GqlChainValues.Gnosis]: new Set(GNOSIS_BLACKLIST.map(addr => addr.toLowerCase())),
 }
 
@@ -58,12 +57,6 @@ export const POOL_TYPES: Record<SupportedPoolTypes, PoolTypeDetails> = {
     description:
       'Stable Pools are optimal for assets expected to consistently trade at near parity or with a known exchange rate. Stable Pools allows for swaps of significant size before encountering substantial price impact, vastly increasing capital efficiency for like-kind and correlated-kind swaps.',
   },
-  [PoolType.StableSurge]: {
-    label: 'Stable Surge',
-    maxTokens: 5,
-    description:
-      'A Stable Pool with a “Stable Surge” hook that applies a dynamic directional surge swap fee in times of volatility to help defend the peg. LPs get MEV protection and increased fees.',
-  },
   [PoolType.Weighted]: {
     label: 'Weighted',
     maxTokens: 8,
@@ -76,33 +69,10 @@ export const POOL_TYPES: Record<SupportedPoolTypes, PoolTypeDetails> = {
     description:
       'Concentrated liquidity pools that use an elliptical price curve to focus liquidity asymmetrically within customizable bounds. E-CLPs provide deeper liquidity and lower slippage for trades while maximizing LP capital efficiency within expected price ranges.',
   },
-  [PoolType.ReClamm]: {
-    label: 'AutoRange',
-    maxTokens: 2,
-    description:
-      'A concentrated liquidity pool with self-adjusting parameters. A "fire-and-forget" solution to maintenance-free concentrated liquidity provision.',
-  },
-  [PoolType.CowAmm]: {
-    label: 'CoW AMM',
-    maxTokens: 2,
-    description:
-      'CoW AMM protects LPs from LVR so they can provide liquidity with less risk and more return',
-  },
 }
 
-export const BALANCER_PROTOCOL_ID = 'Balancer v3'
+export const BALANCER_PROTOCOL_ID = PROJECT_CONFIG.projectName
 export const COW_PROTOCOL_ID = 'CoW'
-
-export const BALANCER_PROTOCOL_OPTIONS = [
-  {
-    name: BALANCER_PROTOCOL_ID,
-    imageSrc: ProjectConfigBalancer.projectLogo,
-  },
-  {
-    name: COW_PROTOCOL_ID,
-    imageSrc: '/images/protocols/cowamm.svg',
-  },
-] as const
 
 export enum WeightedPoolStructure {
   FiftyFifty = '50/50',
@@ -152,7 +122,7 @@ export const INITIAL_POOL_TOKENS: [PoolCreationToken, PoolCreationToken] = [
 ]
 
 export const INITIAL_POOL_CREATION_FORM: PoolCreationForm = {
-  protocol: BALANCER_PROTOCOL_OPTIONS[0].name,
+  protocol: BALANCER_PROTOCOL_ID,
   network: PROJECT_CONFIG.defaultNetwork,
   weightedPoolStructure: WeightedPoolStructure.FiftyFifty,
   poolType: PoolType.Stable,

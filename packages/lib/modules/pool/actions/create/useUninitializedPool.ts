@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { Address } from 'viem'
 import { erc20Abi } from 'viem'
-import { AddressProvider } from '@balancer/sdk'
 import { vaultExtensionAbi_V3 } from '@balancer/sdk'
 import { useReadContracts, useReadContract } from 'wagmi'
 import {
@@ -13,7 +12,7 @@ import {
 import { usePoolCreationForm } from './PoolCreationFormProvider'
 import { getCreatePathParams } from './getCreatePathParams'
 import { useParams } from 'next/navigation'
-import { getChainId } from '@repo/lib/config/app.config'
+import { getChainId, getVaultV3Address } from '@repo/lib/config/app.config'
 import { isStablePool, isWeightedPool, isAutoRangePool, isGyroEllipticPool } from './helpers'
 import { formatUnits } from 'viem'
 import { PERCENTAGE_DECIMALS, WeightedPoolStructure } from './constants'
@@ -86,7 +85,7 @@ export function useUninitializedPool() {
     }))
 
     const vaultContractReads = VAULT_FUNCTION_NAMES.map(functionName => ({
-      address: AddressProvider.Vault(chainId),
+      address: getVaultV3Address(chainId),
       chainId,
       abi: vaultExtensionAbi_V3,
       functionName,
@@ -278,7 +277,7 @@ export function useUninitializedPool() {
     }
 
     return {
-      protocol: 'Balancer v3' as const,
+      protocol: 'Frontier Finance' as const,
       network,
       poolType,
       name: nameResult,

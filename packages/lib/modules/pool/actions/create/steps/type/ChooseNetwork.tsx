@@ -3,7 +3,6 @@ import { PoolCreationForm } from '../../types'
 import { VStack, Text, HStack } from '@chakra-ui/react'
 import { Controller } from 'react-hook-form'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
-import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { usePoolCreationForm } from '../../PoolCreationFormProvider'
 import { getChainShortName } from '@repo/lib/config/app.config'
@@ -13,30 +12,18 @@ import {
   type RadioCardOption,
 } from '@repo/lib/shared/components/inputs/RadioCardGroup'
 import { INITIAL_POOL_CREATION_FORM } from '../../constants'
-import { isCowProtocol } from '../../helpers'
 import { useWatch } from 'react-hook-form'
 
 export function ChooseNetwork({ control }: { control: Control<PoolCreationForm> }) {
   const { poolCreationForm } = usePoolCreationForm()
 
   const [protocol, poolType] = useWatch({ control, name: ['protocol', 'poolType'] })
-  const { supportedNetworks, cowSupportedNetworks } = PROJECT_CONFIG
+  const { supportedNetworks } = PROJECT_CONFIG
 
-  const protocolNetworks = isCowProtocol(protocol) ? cowSupportedNetworks : supportedNetworks
-
-  const networkOptions: RadioCardOption<GqlChain>[] = [
-    protocolNetworks[0],
-    ...protocolNetworks.slice(1).sort(),
-  ]
-    .filter(
-      (network): network is GqlChain =>
-        // balancer v3 pool creation not yet supported on these networks
-        !!network && !([GqlChainValues.Polygon] as GqlChain[]).includes(network)
-    )
-    .map(network => ({
-      value: network,
-      label: getChainShortName(network),
-    }))
+  const networkOptions: RadioCardOption<GqlChain>[] = supportedNetworks.map(network => ({
+    value: network,
+    label: getChainShortName(network),
+  }))
 
   return (
     <VStack align="start" spacing="md" w="full">

@@ -4,13 +4,16 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from '@sentry/nextjs'
-import { sentryDSN } from './sentry.config'
+import { isSentryEnabled, sentryDSN } from './sentry.config'
 
-Sentry.init({
-  dsn: sentryDSN,
-  // Adjust this value in production, or use tracesSampler for greater control
-  tracesSampleRate: 0,
+if (isSentryEnabled && sentryDSN) {
+  Sentry.init({
+    enabled: isSentryEnabled,
+    dsn: sentryDSN,
+    // Adjust this value in production, or use tracesSampler for greater control
+    tracesSampleRate: 0,
 
-  // Setting this option to true will print useful information to the console while you're setting up Sentry.
-  debug: false,
-})
+    // Setting this option to true will print useful information to the console while you're setting up Sentry.
+    debug: false,
+  })
+}

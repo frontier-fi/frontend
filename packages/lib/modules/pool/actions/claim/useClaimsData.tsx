@@ -2,36 +2,31 @@
 
 import { useBalTokenRewards } from '@repo/lib/modules/portfolio/PortfolioClaim/useBalRewards'
 import { useClaimableBalances } from '@repo/lib/modules/portfolio/PortfolioClaim/useClaimableBalances'
-import { safeSum } from '@repo/lib/shared/utils/numbers'
 import { useMemo } from 'react'
 import { ClaimablePool } from './ClaimProvider'
 
+export type ClaimableRewardBalance = {
+  humanBalance: string
+  tokenAddress: string
+}
+
+/**
+ * Frontier has no gauges — claim data is always empty.
+ */
 export function useClaimsData(pools: ClaimablePool[]) {
   const claimableBalancesQuery = useClaimableBalances(pools)
-  const nonBalRewards = claimableBalancesQuery.claimableRewards
   const balTokenRewardsQuery = useBalTokenRewards(pools)
-  const balRewards = balTokenRewardsQuery.balRewardsData
 
-  const allClaimableRewards = useMemo(
-    () => [...balRewards, ...nonBalRewards],
-    [balRewards, nonBalRewards]
-  )
-
-  const totalClaimableUsd = useMemo(
-    () => safeSum(allClaimableRewards.map(reward => reward.fiatBalance)),
-    [allClaimableRewards]
-  )
-
-  const hasNoRewards = !nonBalRewards.length && !balRewards.length
+  const allClaimableRewards = useMemo<ClaimableRewardBalance[]>(() => [], [])
+  const totalClaimableUsd = useMemo(() => '0', [])
 
   return {
-    isLoading:
-      claimableBalancesQuery.isLoadingClaimableRewards || balTokenRewardsQuery.isLoadingBalRewards,
-    nonBalRewards,
-    balRewards,
+    isLoading: false,
+    nonBalRewards: claimableBalancesQuery.claimableRewards,
+    balRewards: balTokenRewardsQuery.balRewardsData,
     allClaimableRewards,
     totalClaimableUsd,
-    hasNoRewards,
+    hasNoRewards: true,
     claimableBalancesQuery,
     balTokenRewardsQuery,
   }

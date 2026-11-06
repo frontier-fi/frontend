@@ -1,4 +1,5 @@
 import type { GqlPoolElement } from '@repo/lib/shared/services/api/graphql-derived-types'
+import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { GqlChainValues, GqlHookTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import {
   isMetaStable,
@@ -11,7 +12,6 @@ import {
   hasHookType,
   isQuantAmmPool,
   isAutoRange,
-  isV3LBP,
   poolHasRateProviderExternalOracle,
 } from '../../../pool.helpers'
 import { zeroAddress } from 'viem'
@@ -55,7 +55,6 @@ export enum RiskKey {
   MEVCaptureHook = 'mevcapture-hook',
   QuantAmmWeighted = 'btf',
   AutoRange = 'autorange',
-  LiquidityBootstrappingPool = 'lbp',
 }
 
 export enum RiskCategory {
@@ -90,7 +89,6 @@ export const RISK_TITLES: Partial<Record<RiskKey, string>> = {
   [RiskKey.MEVCaptureHook]: 'MEV Capture hook',
   [RiskKey.QuantAmmWeighted]: 'BTF pool',
   [RiskKey.AutoRange]: 'AutoRange pool',
-  [RiskKey.LiquidityBootstrappingPool]: 'Liquidity Bootstrapping pool',
   [RiskKey.Oracle]: 'Oracle risk',
 }
 
@@ -164,13 +162,6 @@ const RISK_CONDITIONS: RiskDefinition[] = [
     category: RiskCategory.PoolSpecific,
     condition: pool => isAutoRange(pool.type),
   },
-  {
-    key: RiskKey.LiquidityBootstrappingPool,
-    title: RISK_TITLES[RiskKey.LiquidityBootstrappingPool],
-    path: `/risks#${RiskKey.LiquidityBootstrappingPool}`,
-    category: RiskCategory.PoolSpecific,
-    condition: pool => isV3LBP(pool),
-  },
 
   // General Network risks
   {
@@ -178,56 +169,56 @@ const RISK_CONDITIONS: RiskDefinition[] = [
     title: RISK_TITLES[RiskKey.Arbitrum],
     path: `/risks#${RiskKey.Arbitrum}`,
     category: RiskCategory.General,
-    condition: pool => pool.chain === GqlChainValues.Arbitrum,
+    condition: pool => (pool.chain as AppChain) === GqlChainValues.Arbitrum,
   },
   {
     key: RiskKey.Optimism,
     title: RISK_TITLES[RiskKey.Optimism],
     path: `/risks#${RiskKey.Optimism}`,
     category: RiskCategory.General,
-    condition: pool => pool.chain === GqlChainValues.Optimism,
+    condition: pool => (pool.chain as AppChain) === GqlChainValues.Optimism,
   },
   {
     key: RiskKey.Polygon,
     title: RISK_TITLES[RiskKey.Polygon],
     path: `/risks#${RiskKey.Polygon}`,
     category: RiskCategory.General,
-    condition: pool => pool.chain === GqlChainValues.Polygon,
+    condition: pool => (pool.chain as AppChain) === GqlChainValues.Polygon,
   },
   {
     key: RiskKey.Gnosis,
     title: RISK_TITLES[RiskKey.Gnosis],
     path: `/risks#${RiskKey.Gnosis}`,
     category: RiskCategory.General,
-    condition: pool => pool.chain === GqlChainValues.Gnosis,
+    condition: pool => (pool.chain as AppChain) === GqlChainValues.Gnosis,
   },
   {
     key: RiskKey.Base,
     title: RISK_TITLES[RiskKey.Base],
     path: `/risks#${RiskKey.Base}`,
     category: RiskCategory.General,
-    condition: pool => pool.chain === GqlChainValues.Base,
+    condition: pool => (pool.chain as AppChain) === GqlChainValues.Base,
   },
   {
     key: RiskKey.Avalanche,
     title: RISK_TITLES[RiskKey.Avalanche],
     path: `/risks#${RiskKey.Avalanche}`,
     category: RiskCategory.General,
-    condition: pool => pool.chain === GqlChainValues.Avalanche,
+    condition: pool => (pool.chain as AppChain) === GqlChainValues.Avalanche,
   },
   {
     key: RiskKey.HyperEVM,
     title: RISK_TITLES[RiskKey.HyperEVM],
     path: `/risks#${RiskKey.HyperEVM}`,
     category: RiskCategory.General,
-    condition: pool => pool.chain === GqlChainValues.Hyperevm,
+    condition: pool => (pool.chain as AppChain) === GqlChainValues.Hyperevm,
   },
   {
     key: RiskKey.Plasma,
     title: RISK_TITLES[RiskKey.Plasma],
     path: `/risks#${RiskKey.Plasma}`,
     category: RiskCategory.General,
-    condition: pool => pool.chain === GqlChainValues.Plasma,
+    condition: pool => (pool.chain as AppChain) === GqlChainValues.Plasma,
   },
 
   // Hook risks

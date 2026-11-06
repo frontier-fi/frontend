@@ -1,11 +1,10 @@
 import { BalAlertLink } from '@repo/lib/shared/components/alerts/BalAlertLink'
-import { getDiscordLink } from '@repo/lib/shared/utils/links'
 
+/** Support link used in error messages (Discord removed). */
 export function DiscordLink() {
-  const discordUrl = getDiscordLink()
   return (
-    <BalAlertLink href={discordUrl} isExternal>
-      our discord
+    <BalAlertLink href="https://github.com/frontier-fi/" isExternal>
+      GitHub
     </BalAlertLink>
   )
 }

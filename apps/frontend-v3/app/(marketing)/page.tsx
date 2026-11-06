@@ -1,5 +1,5 @@
-import { LandingV3Layout } from './_lib/landing-v3/LandingV3Layout'
+import { redirect } from 'next/navigation'
 
-export default async function Home() {
-  return <LandingV3Layout />
+export default function Home() {
+  redirect('/pools')
 }

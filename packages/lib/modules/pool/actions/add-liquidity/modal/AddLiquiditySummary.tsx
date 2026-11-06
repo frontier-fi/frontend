@@ -147,7 +147,7 @@ export function AddLiquiditySummary({
         <>
           <GasCostSummaryCard chain={pool.chain} transactionSteps={transactionSteps.steps} />
           <CardPopAnim key="staking-options">
-            {pool.staking && getCanStake(pool) && (
+            {Boolean((pool as { staking?: unknown }).staking) && getCanStake(pool) && (
               <Box pt="sm">
                 <Divider mb="md" />
                 <StakingOptions />

@@ -4,6 +4,7 @@ import { captureException } from '@sentry/nextjs'
   Context: https://github.com/getsentry/sentry-javascript/discussions/15042
 */
 import { Extras, ScopeContext } from '@sentry/core'
+import { isSentryEnabled } from '@repo/lib/config/sentry'
 import { SentryError, ensureError } from './errors'
 import {
   isInvariantRatioPIErrorMessage,
@@ -283,6 +284,8 @@ export function captureSentryError(
   e: unknown,
   { context, errorMessage, errorName }: SentryMetadata
 ) {
+  if (!isSentryEnabled) return
+
   const causeError = ensureError(e)
   if (isUserRejectedError(causeError)) return
 

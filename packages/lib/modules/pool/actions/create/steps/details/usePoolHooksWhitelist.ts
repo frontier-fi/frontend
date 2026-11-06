@@ -18,7 +18,7 @@ export function usePoolHooksWhitelist(network: GqlChain) {
     queryKey: ['poolHooksWhitelist'],
     queryFn: async () => {
       const response = await fetch(
-        'https://raw.githubusercontent.com/balancer/metadata/main/hooks/index.json'
+        'https://raw.githubusercontent.com/frontier-fi/metadata/main/hooks/index.json'
       )
 
       const data: PoolHookMetadata[] = await response.json()

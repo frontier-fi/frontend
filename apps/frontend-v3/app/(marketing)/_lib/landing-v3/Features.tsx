@@ -36,7 +36,7 @@ const keyFeatures = [
     title: 'Custom Pools',
     subTitle: 'Streamlined custom pool creation',
     description:
-      'Design pools tailored to your vision with Balancer’s Vault-first architecture. Build smarter, faster, and with less complexity.',
+      'Design pools tailored to your vision with Frontier Finance’s Vault-first architecture. Build smarter, faster, and with less complexity.',
     icon: <PieIcon size={40} />,
   },
   {
@@ -59,9 +59,9 @@ const features = [
   {
     title: 'LVR/MEV Mitigation',
     shortDescription:
-      'Balancer v3 focuses on minimizing MEV and maximizing LP profitability by collaborating with intent-centric projects like CowSwap.',
+      'Frontier Finance focuses on minimizing MEV and maximizing LP profitability by collaborating with intent-centric projects like CowSwap.',
     description:
-      'Balancer v3 focuses on minimizing MEV and maximizing LP profitability by collaborating with intent-centric projects like CowSwap.\n\nv3 leverages custom AMM logic and a hooks framework to enable third-party teams easily to develop MEV mitigation strategies.\n\nSupported by Balancer DAO, this approach aims to help bolster MEV innovation for LPs, enhancing fairness and profitability in on-chain interactions for the future to come.',
+      'Frontier Finance focuses on minimizing MEV and maximizing LP profitability by collaborating with intent-centric projects like CowSwap.\n\nv3 leverages custom AMM logic and a hooks framework to enable third-party teams easily to develop MEV mitigation strategies.\n\nSupported by Frontier Finance DAO, this approach aims to help bolster MEV innovation for LPs, enhancing fairness and profitability in on-chain interactions for the future to come.',
     imageSrc: '/images/graphics/stone-2.png',
   },
   {
@@ -73,7 +73,7 @@ const features = [
   {
     title: 'Rate Scaling',
     shortDescription:
-      'V3 abstracts the complexity of managing LSTs by moving all rate scaling into the Vault, providing pools with uniform rate-scaled balances and input values by default, ensuring that yield from yield-bearing tokens is not captured by arbitrage traders.',
+      'Frontier Finance abstracts the complexity of managing LSTs by moving all rate scaling into the Vault, providing pools with uniform rate-scaled balances and input values by default, ensuring that yield from yield-bearing tokens is not captured by arbitrage traders.',
     imageSrc: '/images/graphics/stone-2.png',
   },
   {
@@ -251,8 +251,8 @@ export function Features() {
             <chakra.span color="font.primary">Custom liquidity solutions.</chakra.span>
             <chakra.span color="font.primary" style={{ opacity: 0.6 }}>
               {' '}
-              With v3, developers harness a tech stack that automates low-level development tasks,
-              enabling them to focus exclusively on innovation.
+              Developers harness a tech stack that automates low-level development tasks, enabling
+              them to focus exclusively on innovation.
             </chakra.span>
           </Heading>
         </FadeIn>
@@ -293,9 +293,9 @@ export function Features() {
               />
               <FadeIn delay={0.2} direction="up" duration={0.6}>
                 <Text color="font.secondary" fontSize="lg" sx={{ textWrap: 'pretty' }}>
-                  Balancer v3 introduces a series of technical enhancements that streamline the
+                  Frontier Finance introduces a series of technical enhancements that streamline the
                   development and deployment of custom pools, while maintaining the flexibility and
-                  interoperability that have made Balancer a leader in the DeFi space.
+                  interoperability that have made Frontier Finance a leader in the DeFi space.
                 </Text>
               </FadeIn>
             </VStack>

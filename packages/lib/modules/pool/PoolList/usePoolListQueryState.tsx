@@ -1,15 +1,15 @@
 'use client'
 
+import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import {
-  GqlChain,
   GqlPoolOrderBy,
   GqlPoolOrderDirection,
 } from '@repo/lib/shared/services/api/generated/graphql'
 import {
+  AppChain,
   GqlChainValues,
   GqlPoolOrderByValues,
   GqlPoolOrderDirectionValues,
-  GqlPoolTypeValues,
 } from '@repo/lib/shared/services/api/graphql-enums'
 import { uniq } from 'lodash'
 import {
@@ -22,6 +22,7 @@ import {
   useQueryState,
 } from 'nuqs'
 import {
+  isApiGqlPoolType,
   POOL_TYPE_MAP,
   PoolFilterType,
   PoolHookTagType,
@@ -69,7 +70,7 @@ const poolListQueryStateParsers = {
   poolTypes: parseAsArrayOf(
     parseAsStringEnum<PoolFilterType>(poolTypeFilters as unknown as PoolFilterType[])
   ).withDefault([]),
-  networks: parseAsArrayOf(parseAsStringEnum<GqlChain>(Object.values(GqlChainValues))).withDefault(
+  networks: parseAsArrayOf(parseAsStringEnum<AppChain>(Object.values(GqlChainValues))).withDefault(
     []
   ),
   protocolVersion: parseAsInteger,
@@ -179,7 +180,7 @@ export function usePoolListQueryState() {
   }
 
   // Set internal checked state
-  function toggleNetwork(checked: boolean, network: GqlChain) {
+  function toggleNetwork(checked: boolean, network: AppChain) {
     if (skip) setSkip(0)
 
     if (checked) {
@@ -308,6 +309,7 @@ export function usePoolListQueryState() {
     (poolTypes.length > 0 ? poolTypes : Object.keys(POOL_TYPE_MAP))
       .map(poolType => POOL_TYPE_MAP[poolType as keyof typeof POOL_TYPE_MAP])
       .flat()
+      .filter(isApiGqlPoolType)
   )
 
   const mappedPoolTags = poolTags.length > 0 ? poolTags : []
@@ -318,11 +320,18 @@ export function usePoolListQueryState() {
     orderBy,
     orderDirection,
     where: {
-      poolTypeIn: mappedPoolTypes.filter(
-        poolType => poolType !== GqlPoolTypeValues.LiquidityBootstrapping
-      ),
-      poolTypeNotIn: [GqlPoolTypeValues.LiquidityBootstrapping],
-      chainIn: networks.length > 0 ? networks : PROJECT_CONFIG.supportedNetworks,
+      // Only emit poolTypeIn when the user narrowed filters; otherwise omit so
+      // we don't send Frontier Finance-era enum values Frontier's schema rejects.
+      ...(mappedPoolTypes.length > 0 && poolTypes.length > 0
+        ? { poolTypeIn: mappedPoolTypes }
+        : {}),
+      // Only send chains the active API accepts (Frontier is Sepolia-only).
+      chainIn: (() => {
+        const allowed = PROJECT_CONFIG.supportedNetworks
+        const allowedSet = new Set<string>(allowed)
+        const selected = networks.filter((network): network is GqlChain => allowedSet.has(network))
+        return selected.length > 0 ? selected : allowed
+      })(),
       userAddress,
       minTvl,
       tagIn:

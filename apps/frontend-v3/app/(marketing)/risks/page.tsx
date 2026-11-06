@@ -12,17 +12,17 @@ export default function Privacy() {
         <div>
           <FadeInOnView>
             <Box mt="3xl" pb="md">
-              <h1>Risks of using&nbsp;Balancer</h1>
+              <h1>Risks of using&nbsp;Frontier Finance</h1>
               <p>
                 <em>Last Updated: May 2025</em>
               </p>
               <p>
                 <em>
                   There are many inherent risks developers accept when working in DeFi and using the
-                  Balancer Protocol. This page aims to summarize the top risks to help you with your
-                  risk decisions. It is important to note that this list is not exhaustive, and
-                  there may be additional risks not explicitly mentioned here. As the risk
-                  environment is fluid, we expect to periodically update this summary.
+                  Frontier Finance Protocol. This page aims to summarize the top risks to help you
+                  with your risk decisions. It is important to note that this list is not
+                  exhaustive, and there may be additional risks not explicitly mentioned here. As
+                  the risk environment is fluid, we expect to periodically update this summary.
                 </em>
               </p>
             </Box>
@@ -161,10 +161,10 @@ export default function Privacy() {
                 Smart contract risk
               </h4>
               <p>
-                Smart contract risk is a general risk when using DeFi protocols, including Balancer.
-                Smart contracts are self-executing pieces of code that run on certain blockchains,
-                like Ethereum. Although they are designed to be secure, they can be vulnerable to
-                bugs and exploits.
+                Smart contract risk is a general risk when using DeFi protocols, including Frontier
+                Finance. Smart contracts are self-executing pieces of code that run on certain
+                blockchains, like Ethereum. Although they are designed to be secure, they can be
+                vulnerable to bugs and exploits.
               </p>
               <p>
                 If there is a flaw in the smart contract code, it can be exploited by attackers to
@@ -173,34 +173,35 @@ export default function Privacy() {
                 risk for all DeFi users, and it is important to carefully evaluate the security of
                 the protocols before using them.
               </p>
-              <h5>The Balancer Vault</h5>
+              <h5>The Frontier Finance Vault</h5>
               <p>
-                The main architectural change between Balancer V1 and Balancer V2 is the transition
-                to&nbsp;a single vault that holds and manages all the assets added by all Balancer
-                pools. This separates the AMM logic from the token management and accounting. Token
-                management/accounting is done by the vault while the AMM logic is individual to each
-                pool. This provides many advantages, including flexibility and gas efficiency.
+                The main architectural change between Frontier Finance V1 and Frontier Finance V2 is
+                the transition to&nbsp;a single vault that holds and manages all the assets added by
+                all Frontier Finance pools. This separates the AMM logic from the token management
+                and accounting. Token management/accounting is done by the vault while the AMM logic
+                is individual to each pool. This provides many advantages, including flexibility and
+                gas efficiency.
               </p>
               <p>
-                One critique of this approach is that the Balancer Vault could be a single point of
-                failure—i.e. hack the vault, get all the tokens of the protocol. This Balancer Vault
-                architecture was heavily audited prior to launch and has now been battle-tested
-                since May 2021, securing over $3b. It has also been forked by other teams across
-                different networks, including Beets on Sonic, without issue.
+                One critique of this approach is that the Frontier Finance Vault could be a single
+                point of failure—i.e. hack the vault, get all the tokens of the protocol. This
+                Frontier Finance Vault architecture was heavily audited prior to launch and has now
+                been battle-tested since May 2021, securing over $3b. It has also been forked by
+                other teams across different networks without issue.
               </p>
-              <h5>How Balancer aims to mitigate this risk:</h5>
+              <h5>How Frontier Finance aims to mitigate this risk:</h5>
               <ul>
                 <li>
                   Development teams have engaged with top tier smart contract auditing firms to
                   identify and fix bugs before deployment.
                 </li>
                 <li>
-                  The core of Balancer smart contracts are immutable and do not use proxies or other
-                  upgrade mechanisms. Note: Within DeFI, upgradable contracts are a major way
-                  exploits have been introduced.
+                  The core of Frontier Finance smart contracts are immutable and do not use proxies
+                  or other upgrade mechanisms. Note: Within DeFI, upgradable contracts are a major
+                  way exploits have been introduced.
                 </li>
                 <li>
-                  In addition, Balancer has a bug bounty program via{' '}
+                  In addition, Frontier Finance has a bug bounty program via{' '}
                   <a href="https://immunefi.com/bounty/balancer/">Immunefi</a> to attract white-hat
                   hackers to responsibly disclose any bugs. Rewards are distributed based on threat
                   level—for critical smart contract vulnerabilities, there is a minimum reward of
@@ -235,16 +236,16 @@ export default function Privacy() {
                 value, allowing them to buy or sell that asset at a profit.
               </p>
               <p>
-                In addition, the composable nature of DeFi means that a pool on Balancer may contain
-                tokens that may be manipulated by an attacker on a third party protocol, which
-                further increases risk.
+                In addition, the composable nature of DeFi means that a pool on Frontier Finance may
+                contain tokens that may be manipulated by an attacker on a third party protocol,
+                which further increases risk.
               </p>
               <p>These types of economic exploits are difficult to detect and prevent.</p>
-              <h5>How does Balancer work to mitigate this risk?</h5>
+              <h5>How does Frontier Finance work to mitigate this risk?</h5>
               <ul>
                 <li>
-                  Balancer strives to deliver careful economic modeling, rigorous mechanism design,
-                  testing and audits by top tier auditing firms.
+                  Frontier Finance strives to deliver careful economic modeling, rigorous mechanism
+                  design, testing and audits by top tier auditing firms.
                 </li>
               </ul>
               <h5>How can LPs mitigate this risk?</h5>
@@ -275,7 +276,7 @@ export default function Privacy() {
 
               <ul>
                 <li>
-                  Unsupported tokens on Balancer Protocol, including:
+                  Unsupported tokens on Frontier Finance Protocol, including:
                   <ul>
                     <li>
                       <Link href="risks#rebasing-tokens">
@@ -323,15 +324,16 @@ export default function Privacy() {
                 since LPs may suffer losses when rebasing occurs.
               </p>
 
-              <h5>How Balancer aims to mitigate this risk:</h5>
+              <h5>How Frontier Finance aims to mitigate this risk:</h5>
               <ul>
                 <li>
-                  Since the Balancer protocol is permissionless, anyone can create a liquidity pool
-                  composed of any ERC-20 token. This makes this type of risk difficult to mitigate.
+                  Since the Frontier Finance protocol is permissionless, anyone can create a
+                  liquidity pool composed of any ERC-20 token. This makes this type of risk
+                  difficult to mitigate.
                 </li>
                 <li>
-                  The Balancer App UI may be updated to exclude blacklisted tokens and pools but LPs
-                  should not rely on this.
+                  The Frontier Finance App UI may be updated to exclude blacklisted tokens and pools
+                  but LPs should not rely on this.
                 </li>
                 <li>
                   Instead of including tokens which rebase, new DeFi liquidity pool compatible
@@ -342,9 +344,9 @@ export default function Privacy() {
                   <code>stETH</code>.
                 </li>
                 <li>
-                  For Balancer Managed Pools, a novel feature called &lsquo;circuit breakers&rsquo;
-                  has been designed to halt swapping if there is a large, uncorrelated drop in a
-                  token&rsquo;s value.
+                  For Frontier Finance Managed Pools, a novel feature called &lsquo;circuit
+                  breakers&rsquo; has been designed to halt swapping if there is a large,
+                  uncorrelated drop in a token&rsquo;s value.
                 </li>
                 <li>
                   New pools have a &lsquo;recovery mode&rsquo; which can be enabled by the Emergency
@@ -362,8 +364,8 @@ export default function Privacy() {
                 </li>
                 <li>
                   LP&rsquo;s should review all pool tokens before providing liquidity to ensure no
-                  constituent pool tokens are unsupported by the Balancer Protocol (e.g. rebasing
-                  tokens).
+                  constituent pool tokens are unsupported by the Frontier Finance Protocol (e.g.
+                  rebasing tokens).
                 </li>
                 <li>
                   LPs should carefully check the pool creator address to verify it&rsquo;s from a
@@ -405,23 +407,27 @@ export default function Privacy() {
                 DAO Governance risk
               </h4>
               <p>
-                Balancer uses off-chain voting via <a href="https://snapshot.org/">Snapshot</a>
-                —originally developed in-house by Balancer Labs—to signal the will of BAL token
-                holders. Following{' '}
+                Frontier Finance uses off-chain voting via{' '}
+                <a href="https://snapshot.org/">Snapshot</a>
+                —originally developed in-house by Frontier Finance Labs—to signal the will of BAL
+                token holders. Following{' '}
                 <a href="https://forum.balancer.fi/t/bip-919-bal-tokenomics-revamp/7001">BIP-919</a>
                 , the veBAL system is winding down: protocol fee distributions to veBAL have ceased
                 and any BAL holder can participate in governance without locking. Existing veBAL
                 positions retain their voting power for the remainder of their lock.
               </p>
-              <p>A summary of the immutability of the Balancer Protocol&rsquo;s smart contracts:</p>
+              <p>
+                A summary of the immutability of the Frontier Finance Protocol&rsquo;s smart
+                contracts:
+              </p>
               <ul>
                 <li>
-                  Balancer V1 contracts are immutable, so there were no core protocol parameters
-                  that could be changed.
+                  Frontier Finance V1 contracts are immutable, so there were no core protocol
+                  parameters that could be changed.
                 </li>
                 <li>
-                  Balancer V2 contracts do allow for some tweaking of core protocol parameters,
-                  including the ability to:
+                  Frontier Finance V2 contracts do allow for some tweaking of core protocol
+                  parameters, including the ability to:
                   <ul>
                     <li>
                       Set a share of swap fees to be diverted to the protocol (hard capped at 50% of
@@ -442,17 +448,17 @@ export default function Privacy() {
                     <li>
                       Set dynamic-fee controllers: addresses (initially assigned to Gauntlet) that
                       may change the swap fee for pools created by the dynamic-fee pool factory that
-                      will be deployed by Balancer Labs
+                      will be deployed by Frontier Finance Labs
                     </li>
                     <li>Add and remove gauges</li>
                   </ul>
                 </li>
                 <li>
-                  Balancer V3 contracts are also immutable. As with V2, a limited set of parameters
-                  can be tweaked via the Authorizer under DAO governance—e.g. protocol fee
-                  parameters, registration of new pool factories, and approval of hook contracts.
-                  New factories, novel pool types and new chain deployments require a DAO Multisig
-                  vote per{' '}
+                  Frontier Finance contracts are also immutable. As with V2, a limited set of
+                  parameters can be tweaked via the Authorizer under DAO governance—e.g. protocol
+                  fee parameters, registration of new pool factories, and approval of hook
+                  contracts. New factories, novel pool types and new chain deployments require a DAO
+                  Multisig vote per{' '}
                   <a href="https://forum.balancer.fi/t/bip-918-operational-restructuring-for-balancer/7000">
                     BIP-918
                   </a>
@@ -499,18 +505,18 @@ export default function Privacy() {
                   interests of the majority of the community.
                 </li>
               </ul>
-              <h5>How Balancer aims to mitigate this risk:</h5>
+              <h5>How Frontier Finance aims to mitigate this risk:</h5>
               <ul>
                 <li>
-                  The core of Balancer smart contracts are immutable and do not use proxies or other
-                  upgrade mechanisms. Only parameters, which are considered to be less
+                  The core of Frontier Finance smart contracts are immutable and do not use proxies
+                  or other upgrade mechanisms. Only parameters, which are considered to be less
                   &lsquo;dangerous&rsquo; may be tweaked.
                 </li>
                 <li>
                   The Multisig does&nbsp;not&nbsp;have custody of, nor control over, funds from
-                  liquidity providers locked inside Balancer Protocol contracts. Balancer V2 and V3
-                  were designed so that even if a multisig goes rogue, all the liquidity is safe and
-                  can be withdrawn by their rightful owners.
+                  liquidity providers locked inside Frontier Finance Protocol contracts. Frontier
+                  Finance were designed so that even if a multisig goes rogue, all the liquidity is
+                  safe and can be withdrawn by their rightful owners.
                 </li>
                 <li>
                   The DAO Multisig{' '}
@@ -533,8 +539,8 @@ export default function Privacy() {
               <h5>How LPs can mitigate this risk:</h5>
               <ul>
                 <li>
-                  LPs should stay up to date with Balancer Governance by following discussions on
-                  the forum and participating in the off-chain voting.
+                  LPs should stay up to date with Frontier Finance Governance by following
+                  discussions on the forum and participating in the off-chain voting.
                 </li>
                 <li>
                   LPs may review past votes and verify that the DAO Multisig has executed outcomes
@@ -556,19 +562,24 @@ export default function Privacy() {
                 collateral swaps and to lower transaction fees, across potentially multiple
                 protocols. It&rsquo;s a powerful new financial primitive, native to DeFi.
               </p>
-              <p>Flash Loans may be used on Balancer and interact with the Balancer Vault.</p>
+              <p>
+                Flash Loans may be used on Frontier Finance and interact with the Frontier Finance
+                Vault.
+              </p>
               <p>
                 While Flash Loans offer many benefits, they also comes with certain risks. Flash
                 Loans have also been used for multiple DeFi exploits resulting in losses worth
                 millions of dollars. Flash Loan exploits are relatively new with the full range of
                 attack surfaces still being discovered.
               </p>
-              <h5>How Balancer aims to mitigate this risk:</h5>
+              <h5>How Frontier Finance aims to mitigate this risk:</h5>
               <ul>
-                <li>The Balancer Vault is non-reentrant, which blocks most Flash Loan attacks.</li>
                 <li>
-                  Balancer strives to deliver careful economic modeling, rigorous mechanism design,
-                  testing and audits by top tier auditing firms.
+                  The Frontier Finance Vault is non-reentrant, which blocks most Flash Loan attacks.
+                </li>
+                <li>
+                  Frontier Finance strives to deliver careful economic modeling, rigorous mechanism
+                  design, testing and audits by top tier auditing firms.
                 </li>
               </ul>
             </div>
@@ -579,8 +590,8 @@ export default function Privacy() {
                 Mutable pool attributes
               </h4>
               <p>
-                Balancer is a flexible AMM that allows people to create different types of liquidity
-                pools, including those with immutable and/or mutable pool attributes.
+                Frontier Finance is a flexible AMM that allows people to create different types of
+                liquidity pools, including those with immutable and/or mutable pool attributes.
               </p>
               <p>
                 For pools with immutable attributes, LPs can be assured that the rules are designed
@@ -604,23 +615,24 @@ export default function Privacy() {
                   Who can change each attribute
                   <ul>
                     <li>
-                      On Balancer pools, if an attribute is editable, the address that can make the
-                      edit is also specified. The two most common parties that are set to be able to
-                      change pool attributes are either the Pool Owner or Balancer Governance.
+                      On Frontier Finance pools, if an attribute is editable, the address that can
+                      make the edit is also specified. The two most common parties that are set to
+                      be able to change pool attributes are either the Pool Owner or Frontier
+                      Finance Governance.
                     </li>
                   </ul>
                 </li>
               </ul>
-              <h5>How Balancer aims to mitigate this risk:</h5>
+              <h5>How Frontier Finance aims to mitigate this risk:</h5>
               <ul>
                 <li>
-                  For known pool types, the Balancer App UI transparently displays pool attributes
-                  and specifies if it is editable and if so, by whom.
+                  For known pool types, the Frontier Finance App UI transparently displays pool
+                  attributes and specifies if it is editable and if so, by whom.
                 </li>
                 <li>
-                  Balancer Managed Pools are designed to have mutable attributes that can be changed
-                  by the Pool Owner. For certain &lsquo;dangerous operations&rsquo;, there are
-                  &lsquo;timelock delays&rsquo; which give LPs a period to review the proposed
+                  Frontier Finance Managed Pools are designed to have mutable attributes that can be
+                  changed by the Pool Owner. For certain &lsquo;dangerous operations&rsquo;, there
+                  are &lsquo;timelock delays&rsquo; which give LPs a period to review the proposed
                   changes and withdraw funds if they do not agree with the change. In addition, Pool
                   Controllers can set a guardian who has the ability to veto a proposed change from
                   the Pool Owner if they believe it to be a malicious change or a mistake.
@@ -657,8 +669,8 @@ export default function Privacy() {
               </p>
               <p>
                 Slippage tolerance is a setting in both the Add/Remove liquidity flows on the
-                Balancer App UI. Setting a low slippage tolerance protects you from front-running
-                bots and miner extractable value (MEV).
+                Frontier Finance App UI. Setting a low slippage tolerance protects you from
+                front-running bots and miner extractable value (MEV).
               </p>
               <h5>Due to high Gas fees</h5>
               <p>
@@ -675,17 +687,20 @@ export default function Privacy() {
                 higher than the returns they get from providing liquidity, LPs may end up with a net
                 loss.
               </p>
-              <h5>How Balancer aims to mitigate this risk:</h5>
+              <h5>How Frontier Finance aims to mitigate this risk:</h5>
               <ul>
                 <li>
-                  The Balancer Smart Order router is used to route liquidity efficiently via pools
-                  to minimize price impact.
+                  The Frontier Finance Smart Order router is used to route liquidity efficiently via
+                  pools to minimize price impact.
                 </li>
-                <li>The Balancer App UI gives LP&rsquo;s control over their slippage settings.</li>
                 <li>
-                  LP&rsquo;s are warned via the Balancer App UI when the price impact is excessive.
-                  Once price impact exceeds a certain threshold, the Balancer App UI prevents
-                  user&rsquo;s from executing a transaction where they would otherwise get rekt.
+                  The Frontier Finance App UI gives LP&rsquo;s control over their slippage settings.
+                </li>
+                <li>
+                  LP&rsquo;s are warned via the Frontier Finance App UI when the price impact is
+                  excessive. Once price impact exceeds a certain threshold, the Frontier Finance App
+                  UI prevents user&rsquo;s from executing a transaction where they would otherwise
+                  get rekt.
                 </li>
               </ul>
               <h5>How LP&rsquo;s can mitigate this risk:</h5>
@@ -708,9 +723,9 @@ export default function Privacy() {
               </h4>
               <p>
                 Impermanent loss is a risk that liquidity providers (LPs) face when providing
-                liquidity to an automated market maker (AMM) like Balancer. It is the difference
-                between the value of holding assets in a pool versus holding them outside of the
-                pool.
+                liquidity to an automated market maker (AMM) like Frontier Finance. It is the
+                difference between the value of holding assets in a pool versus holding them outside
+                of the pool.
               </p>
               <p>
                 If the price of the assets in the pool changes, LPs may experience a loss compared
@@ -725,30 +740,30 @@ export default function Privacy() {
                 This risk is particularly relevant for pools with volatile assets where token prices
                 are likely diverge over time.
               </p>
-              <h5>How Balancer aims to mitigate this risk:</h5>
+              <h5>How Frontier Finance aims to mitigate this risk:</h5>
               <ul>
                 <li>
-                  All AMMs either have impermanent loss or reduced yield to LPs. Balancer aims to
-                  make its pools as capital efficient as possible so that the yield LPs make is more
-                  likely to exceed any impermanent loss.
+                  All AMMs either have impermanent loss or reduced yield to LPs. Frontier Finance
+                  aims to make its pools as capital efficient as possible so that the yield LPs make
+                  is more likely to exceed any impermanent loss.
                 </li>
                 <li>
-                  The Balancer protocol supports unbalanced pools which LPs can use to reduce
-                  impermanent loss. For example, there is lower impermanent loss in an 80/20 pool
-                  (or any other unbalanced pools) versus a 50/50 pool with the same underlying
+                  The Frontier Finance protocol supports unbalanced pools which LPs can use to
+                  reduce impermanent loss. For example, there is lower impermanent loss in an 80/20
+                  pool (or any other unbalanced pools) versus a 50/50 pool with the same underlying
                   tokens.
                 </li>
                 <li>
-                  Note: Some ecosystem developers are building on top of Balancer to create novel
-                  pools, including Managed Pools, with rebalancing algorithms designed to minimize
-                  impermanent loss.
+                  Note: Some ecosystem developers are building on top of Frontier Finance to create
+                  novel pools, including Managed Pools, with rebalancing algorithms designed to
+                  minimize impermanent loss.
                 </li>
               </ul>
               <h5>How can LPs mitigate this risk?</h5>
               <ul>
                 <li>
                   LPs should consider the risk of impermanent risk carefully before providing
-                  liquidity to a Balancer pool.
+                  liquidity to a Frontier Finance pool.
                 </li>
                 <li>
                   The longer an LP holds their position, the more likely it is that their yield from
@@ -773,17 +788,17 @@ export default function Privacy() {
                 Hooks
               </h4>
               <p>
-                Hooks introduces complex logic into Balancer pools and changes in its parameters can
-                significantly impact the risk profile of a pool. This complexity increases the
-                potential for unforeseen errors or vulnerabilities in the hook&apos;s code, that may
-                i.e. amplify impermanent loss, introduce new sources of volatility or impose
-                restrictions on pool interactions like joins and exits.
+                Hooks introduces complex logic into Frontier Finance pools and changes in its
+                parameters can significantly impact the risk profile of a pool. This complexity
+                increases the potential for unforeseen errors or vulnerabilities in the hook&apos;s
+                code, that may i.e. amplify impermanent loss, introduce new sources of volatility or
+                impose restrictions on pool interactions like joins and exits.
               </p>
               <ul>
                 <li>
-                  Hook specific risk: Balancer hooks introduce unique functionalities to Balancer
-                  pools, and while they offer exciting possibilities, they also present specific
-                  risks that users should be aware of.
+                  Hook specific risk: Frontier Finance hooks introduce unique functionalities to
+                  Frontier Finance pools, and while they offer exciting possibilities, they also
+                  present specific risks that users should be aware of.
                 </li>
                 <li>
                   Hook Interactions: Hooks can interact with each other and with the pool contracts
@@ -806,8 +821,8 @@ export default function Privacy() {
               <p>
                 DeFi users, including liquidity providers and swappers, typically interact with
                 front-end user interfaces to interact with a protocol&rsquo;s smart contracts. An
-                example is the app.balancer.fi front-end UI instance which interacts with Balancer
-                Protocol smart contracts.
+                example is the app.balancer.fi front-end UI instance which interacts with Frontier
+                Finance Protocol smart contracts.
               </p>
 
               <p>A few risks of using front-ends to manage liquidity positions in DeFi:</p>
@@ -828,29 +843,30 @@ export default function Privacy() {
                 </li>
               </ul>
 
-              <h5>How Balancer aims to mitigate this risk:</h5>
+              <h5>How Frontier Finance aims to mitigate this risk:</h5>
               <ul>
                 <li>
-                  Since the Balancer smart contracts can be interacted with by any front-end UI,
-                  there is less reliance on any one single UI. The Balancer App UI code is open
-                  source with an MIT License which allow other third party developers to fork the
-                  code, make improvements and compete for users.
+                  Since the Frontier Finance smart contracts can be interacted with by any front-end
+                  UI, there is less reliance on any one single UI. The Frontier Finance App UI code
+                  is open source with an MIT License which allow other third party developers to
+                  fork the code, make improvements and compete for users.
                 </li>
                 <li>
                   Users or third party developers can keep track of changes and review the open
-                  source repository on the Balancer Github for potential malicious code.
+                  source repository on the Frontier Finance Github for potential malicious code.
                 </li>
                 <li>
-                  The developers of the Balancer App UI have provided instructions on how to clone
-                  and run local environments of the app. This allows people to have the ability to
-                  keep deprecated features or modify the code to add new features that they prefer.
+                  The developers of the Frontier Finance App UI have provided instructions on how to
+                  clone and run local environments of the app. This allows people to have the
+                  ability to keep deprecated features or modify the code to add new features that
+                  they prefer.
                 </li>
               </ul>
               <h5>How can LPs mitigate this risk?</h5>
               <ul>
                 <li>
-                  LP&rsquo;s can learn how to interact with Balancer smart contracts on third party
-                  websites, like <a href="https://etherscan.io/">Etherscan</a>.
+                  LP&rsquo;s can learn how to interact with Frontier Finance smart contracts on
+                  third party websites, like <a href="https://etherscan.io/">Etherscan</a>.
                 </li>
                 <li>
                   To mitigate the risks of downtime or lack of access, users can fork the open
@@ -875,12 +891,11 @@ export default function Privacy() {
                 DeFi ecosystem.
               </p>
               <p>
-                It&apos;s also possible that the Balancer App UI may be wholly or partially
+                It&apos;s also possible that the Frontier Finance App UI may be wholly or partially
                 suspended or terminated for any or no reason, which may limit your access to your
                 tokens via this website. In this scenario, you may be able to recover funds by
-                forking the open-source code on{' '}
-                <a href="https://github.com/balancer/frontend-v2/">Github</a> and running your own
-                local instance, or by using a third party website, like{' '}
+                forking the open-source code on <a href="https://github.com/frontier-fi/">Github</a>{' '}
+                and running your own local instance, or by using a third party website, like{' '}
                 <a href="https://etherscan.io/">Etherscan</a>.
               </p>
             </div>
@@ -893,9 +908,9 @@ export default function Privacy() {
                     Pool type risks
                   </h3>
                   <p>
-                    Balancer is designed to be infinitely extendible to allow for any conceivable
-                    pool type with custom curves, logic and parameters, and more. The general risks
-                    of the most popular pool types are listed below.
+                    Frontier Finance is designed to be infinitely extendible to allow for any
+                    conceivable pool type with custom curves, logic and parameters, and more. The
+                    general risks of the most popular pool types are listed below.
                   </p>
                 </div>
               </FadeInOnView>
@@ -911,9 +926,10 @@ export default function Privacy() {
                     </a>
                     , which makes them great for general cases, including tokens that don&apos;t
                     necessarily have any price correlation (ex. DAI/WETH). Unlike weighted pools in
-                    other AMMs that only provide 50/50 weightings, Balancer Weighted Pools enable
-                    users to build pools with more than two tokens and custom weightings, such as
-                    pools with 80/20 or 60/20/20 weightings. Some risks of weighted pools include:
+                    other AMMs that only provide 50/50 weightings, Frontier Finance Weighted Pools
+                    enable users to build pools with more than two tokens and custom weightings,
+                    such as pools with 80/20 or 60/20/20 weightings. Some risks of weighted pools
+                    include:
                   </p>
                   <ul>
                     <li>
@@ -926,8 +942,9 @@ export default function Privacy() {
                       Toxic token risk
                       <ul>
                         <li>
-                          Balancer weighted pools are not limited to just having two tokens. The
-                          more tokens in a pool, the more risk that one of these could become toxic.
+                          Frontier Finance weighted pools are not limited to just having two tokens.
+                          The more tokens in a pool, the more risk that one of these could become
+                          toxic.
                         </li>
                       </ul>
                     </li>
@@ -1019,7 +1036,7 @@ export default function Privacy() {
                     <p>
                       Oracles are data providers which supply external information to smart
                       contracts. Oracles, like Chainlink, may be used to source exchange rates
-                      between pool tokens for a rate provider in Balancer Stable Pools.
+                      between pool tokens for a rate provider in Frontier Finance Stable Pools.
                     </p>
                     <p>
                       Arbitrageurs can exploit oracle latency by frontrunning oracle updates at
@@ -1129,14 +1146,14 @@ export default function Privacy() {
                     Liquidity Bootstrapping Pools (LBPs) are pools that dynamically change token
                     weighting over time. LBPs utilize weighted math with time-dependent weights,
                     enabling fair market price discovery and promoting wider token distribution.
-                    Balancer users can create and join/exit LBPs, subject to applicable laws and
-                    regulations in their respective jurisdictions.
+                    Frontier Finance users can create and join/exit LBPs, subject to applicable laws
+                    and regulations in their respective jurisdictions.
                   </p>
                   <p>
-                    Balancer is not involved with the projects that create LBPs. Each LBP is
-                    independently created and managed by its owner. Balancer OpCo has developed a
-                    user interface to access LBP smart contracts deployed on each blockchain where
-                    the Balancer Protocol is live.
+                    Frontier Finance is not involved with the projects that create LBPs. Each LBP is
+                    independently created and managed by its owner. Frontier Finance OpCo has
+                    developed a user interface to access LBP smart contracts deployed on each
+                    blockchain where the Frontier Finance Protocol is live.
                   </p>
                   <p>The use of LBPs presents certain risks, including but not limited to:</p>
                   <p>For Creators (pool owners):</p>
@@ -1185,17 +1202,18 @@ export default function Privacy() {
                   </ul>
                 </div>
                 <div>
-                  <h5>How Balancer aims to mitigate this risk:</h5>
+                  <h5>How Frontier Finance aims to mitigate this risk:</h5>
                   <ul>
                     <li>
-                      Parameter Guidance: Balancer provides tools and guidance to help projects
-                      determine appropriate parameters for their LBPs, such as starting price,
-                      duration, and weight curve. This helps prevent drastic price fluctuations and
-                      ensures a smoother launch.
+                      Parameter Guidance: Frontier Finance provides tools and guidance to help
+                      projects determine appropriate parameters for their LBPs, such as starting
+                      price, duration, and weight curve. This helps prevent drastic price
+                      fluctuations and ensures a smoother launch.
                     </li>
                     <li>
-                      Education and Resources: Balancer provides comprehensive documentation and
-                      educational resources to help users understand the risks associated with LBPs.
+                      Education and Resources: Frontier Finance provides comprehensive documentation
+                      and educational resources to help users understand the risks associated with
+                      LBPs.
                     </li>
                   </ul>
                   <h5>How can LPs mitigate these risks?</h5>
@@ -1469,10 +1487,10 @@ export default function Privacy() {
                   <p>Other risks:</p>
                   <ul>
                     <li>
-                      The Balancer UI allows people to manage their liquidity in certain Gyroscope
-                      pools. This is not an endorsement of their products or of the the safety of
-                      their smart contracts. The Gyroscope GYD system and E-CLPs have been audited
-                      several times. You can review the{' '}
+                      The Frontier Finance UI allows people to manage their liquidity in certain
+                      Gyroscope pools. This is not an endorsement of their products or of the the
+                      safety of their smart contracts. The Gyroscope GYD system and E-CLPs have been
+                      audited several times. You can review the{' '}
                       <a href="https://docs.gyro.finance/audit-reports.html">audit reports here</a>.
                     </li>
                     <li>
@@ -1491,10 +1509,10 @@ export default function Privacy() {
                   </h4>
                   <p>
                     AutoRange (Readjusting Concentrated Liquidity AMM) is a novel pool type built on
-                    Balancer, designed to offer concentrated liquidity with self-readjusting price
-                    ranges and fungible liquidity. While they aim to reduce the active management
-                    burden for LPs, higher swap fees and better capital efficiency when in range,
-                    they introduce specific risk.
+                    Frontier Finance, designed to offer concentrated liquidity with self-readjusting
+                    price ranges and fungible liquidity. While they aim to reduce the active
+                    management burden for LPs, higher swap fees and better capital efficiency when
+                    in range, they introduce specific risk.
                   </p>
                   <ul>
                     <li>
@@ -1552,10 +1570,10 @@ export default function Privacy() {
                   </p>
 
                   <p>
-                    The Balancer UI allows users to manage liquidity in certain QuantAMM pools
-                    (TFMM). This is not an endorsement of their products or the safety of their
-                    smart contracts. Users interacting with TFMM pools should be aware of the risks
-                    below. Please also refer to the General risks section.
+                    The Frontier Finance UI allows users to manage liquidity in certain QuantAMM
+                    pools (TFMM). This is not an endorsement of their products or the safety of
+                    their smart contracts. Users interacting with TFMM pools should be aware of the
+                    risks below. Please also refer to the General risks section.
                   </p>
 
                   <ul>
@@ -1632,10 +1650,10 @@ export default function Privacy() {
                       <b>Sub-optimal arbitrage</b> - This is a relatively small risk given at any
                       one block arbitrageurs are faced with a standard balancer pool so they can
                       price and take the arbitrage opportunity without any additional new invariant
-                      prediction work. Balancer has also integrated BTFs in the smart order router
-                      also increasing the likelihood of being exposed to traders. Work has already
-                      begun on DEX aggregator integration and when there is a minimal amount of TVL
-                      in the pool aggregators will expose the pool for further volumes.
+                      prediction work. Frontier Finance has also integrated BTFs in the smart order
+                      router also increasing the likelihood of being exposed to traders. Work has
+                      already begun on DEX aggregator integration and when there is a minimal amount
+                      of TVL in the pool aggregators will expose the pool for further volumes.
                     </li>
                   </ul>
                   <p>
@@ -1700,9 +1718,9 @@ export default function Privacy() {
               <p>
                 <a href="https://www.optimism.io/">Optimism</a> is a Layer 2 scaling solution for
                 Ethereum that uses Optimistic Rollups to improve transaction throughput and reduce
-                fees. Although, the Balancer App UI doesn&rsquo;t support Optimism, the Balancer
-                Protocol smart contracts are deployed on Optimism and currently used by{' '}
-                <a href="https://op.beets.fi/">Beethoven X</a>.
+                fees. Although the Frontier Finance App UI doesn&rsquo;t currently support Optimism,
+                Frontier Finance Protocol smart contracts may be deployed on Optimism by third
+                parties.
               </p>
               <p>
                 View the risks of using Optimism on{' '}
@@ -1929,15 +1947,15 @@ export default function Privacy() {
                     </ul>
                   </li>
                 </ul>
-                <p>Users of Balancer on Plasma should understand that:</p>
+                <p>Users of Frontier Finance on Plasma should understand that:</p>
                 <ul>
                   <li>
-                    Balancer does not control Plasma&apos;s consensus, validators, bridge
+                    Frontier Finance does not control Plasma&apos;s consensus, validators, bridge
                     infrastructure, or governance.
                   </li>
                   <li>
                     A severe incident at the Plasma network or bridge level can result in partial or
-                    total loss of funds, even if Balancer smart contracts perform exactly as
+                    total loss of funds, even if Frontier Finance smart contracts perform exactly as
                     specified.
                   </li>
                   <li>
@@ -1956,11 +1974,7 @@ export default function Privacy() {
                 within the community. Sharing insights, feedback, or concerns can contribute to
                 building a safer and more inclusive environment for all. Please feel free to reach
                 out with any questions, suggestions or propose changes for this page directly via
-                the{' '}
-                <a href="https://github.com/balancer/frontend-monorepo/blob/main/apps/frontend-v3/app/(marketing)/risks/page.tsx">
-                  Balancer Github
-                </a>
-                .
+                the <a href="https://github.com/frontier-fi/">Frontier Finance Github</a>.
               </p>
             </div>
           </FadeInOnView>

@@ -52,14 +52,6 @@ function getPoolTypeLabel(pool: Pool | PoolListItem) {
   }
 
   switch (type) {
-    case GqlPoolTypeValues.CowAmm:
-      return (
-        <TagWrapper pl="6px">
-          <ProtocolIcon protocol={Protocol.CowAmm} />
-          <Text {...TEXT_PROPS}>Weighted</Text>
-        </TagWrapper>
-      )
-
     case GqlPoolTypeValues.Weighted:
       return (
         <TagWrapper pl="6px">
@@ -68,73 +60,17 @@ function getPoolTypeLabel(pool: Pool | PoolListItem) {
       )
 
     case GqlPoolTypeValues.Stable:
-    case GqlPoolTypeValues.PhantomStable:
-    case GqlPoolTypeValues.ComposableStable:
-    case GqlPoolTypeValues.MetaStable:
       return (
         <TagWrapper pl="8px">
           <Text {...TEXT_PROPS}>Stable</Text>
         </TagWrapper>
       )
 
-    case GqlPoolTypeValues.Fx:
-      return (
-        <TagWrapper>
-          <ProtocolIcon protocol={Protocol.Xave} />
-          <Text {...TEXT_PROPS}>FX</Text>
-        </TagWrapper>
-      )
-
-    case GqlPoolTypeValues.LiquidityBootstrapping:
-      return (
-        <TagWrapper pl="6px">
-          <Text {...TEXT_PROPS}>LBP</Text>
-        </TagWrapper>
-      )
-
-    case GqlPoolTypeValues.Gyro:
-      return (
-        <TagWrapper>
-          <ProtocolIcon protocol={Protocol.Gyro} />
-          <Text {...TEXT_PROPS}>2-CLP</Text>
-        </TagWrapper>
-      )
-
-    case GqlPoolTypeValues.Gyro3:
-      return (
-        <TagWrapper>
-          <ProtocolIcon protocol={Protocol.Gyro} />
-          <Text {...TEXT_PROPS}>3-CLP</Text>
-        </TagWrapper>
-      )
-
-    case GqlPoolTypeValues.GyroE:
+    case GqlPoolTypeValues.Eclp:
       return (
         <TagWrapper>
           <ProtocolIcon protocol={Protocol.Gyro} />
           <Text {...TEXT_PROPS}>E-CLP</Text>
-        </TagWrapper>
-      )
-
-    case GqlPoolTypeValues.QuantAmmWeighted:
-      return (
-        <CustomPopover
-          bodyText="BTFs by QuantAMM dynamically adjust pool weights to capitalize on price movements. For example, a BTF pool can automatically increase its WBTC allocation when the BTF strategy thinks the value will rise faster than ETH. This allows LPs to earn both trading fees and profits from underlying asset appreciation through continuous, responsive, fully on-chain TradFi-style strategies."
-          footerUrl="https://medium.com/@QuantAMM/quantamm-x-balancer-v3-046af77ddc81"
-          headerText="Blockchain Traded Funds (BTFs)"
-          trigger="hover"
-        >
-          <Box {...tagWrapperProps}>
-            <ProtocolIcon protocol={Protocol.QuantAmm} />
-            <Text {...TEXT_PROPS}>BTF</Text>
-          </Box>
-        </CustomPopover>
-      )
-
-    case GqlPoolTypeValues.Reclamm:
-      return (
-        <TagWrapper pl="8px">
-          <Text {...TEXT_PROPS}>AutoRange</Text>
         </TagWrapper>
       )
 

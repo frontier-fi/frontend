@@ -52,13 +52,13 @@ export function HeaderBanner() {
             <VStack alignItems="start" spacing="ms">
               <Box maxW="290px">
                 <Heading as="h1" size="lg" sx={{ textWrap: 'nowrap' }} variant="special">
-                  Create a pool on {PROJECT_CONFIG.projectName} v3
+                  Create a pool on {PROJECT_CONFIG.projectName}
                 </Heading>
               </Box>
 
               <Text color="font.secondary" maxW="48ch" sx={{ textWrap: 'balance' }}>
-                {PROJECT_CONFIG.projectName} v3 handles the low level tasks, like token accounting
-                and security, allowing you to focus on innovating with custom logic.
+                {PROJECT_CONFIG.projectName} handles the low level tasks, like token accounting and
+                security, allowing you to focus on innovating with custom logic.
               </Text>
               <Link
                 href="https://docs.balancer.fi/partner-onboarding/balancer-v3/v3-overview.html"

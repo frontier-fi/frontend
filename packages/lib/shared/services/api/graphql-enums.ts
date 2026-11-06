@@ -1,18 +1,17 @@
 /** Runtime constants for GraphQL enum-like union types.
  *  Codegen 6 emits these as `type` unions only (no runtime object),
- *  so we mirror each literal set as a const object for runtime use. */
+ *  so we mirror each literal set as a const object for runtime use.
+ *
+ *  Frontier's API currently exposes a subset of Balancer chains/types.
+ *  App-level enums keep the wider historical set for network configs and UI,
+ *  while PROJECT_CONFIG.supportedNetworks limits what we send to the API.
+ */
 
 import type {
-  GqlChain,
-  GqlHookType,
-  GqlPoolAprItemType,
   GqlPoolEventType,
   GqlPoolOrderBy,
   GqlPoolOrderDirection,
   GqlPoolSnapshotDataRange,
-  GqlPoolStakingGaugeStatus,
-  GqlPoolStakingType,
-  GqlPoolType,
   GqlSorSwapType,
 } from './generated/graphql.ts'
 
@@ -30,7 +29,10 @@ export const GqlChainValues = {
   Polygon: 'POLYGON',
   Sepolia: 'SEPOLIA',
   Sonic: 'SONIC',
-} as const satisfies Record<string, GqlChain>
+} as const
+
+/** App chain ids (network configs). Superset of the Frontier API `GqlChain` enum. */
+export type AppChain = (typeof GqlChainValues)[keyof typeof GqlChainValues]
 
 export const GqlHookTypeValues = {
   Akron: 'AKRON',
@@ -46,7 +48,7 @@ export const GqlHookTypeValues = {
   StableSurge: 'STABLE_SURGE',
   Unknown: 'UNKNOWN',
   VeBalDiscount: 'VEBAL_DISCOUNT',
-} as const satisfies Record<string, GqlHookType>
+} as const
 
 export const GqlPoolAprItemTypeValues = {
   Aura: 'AURA',
@@ -70,7 +72,7 @@ export const GqlPoolAprItemTypeValues = {
   SwapFee30d: 'SWAP_FEE_30D',
   VeBalEmissions: 'VEBAL_EMISSIONS',
   Voting: 'VOTING',
-} as const satisfies Record<string, GqlPoolAprItemType>
+} as const
 
 export const GqlPoolEventTypeValues = {
   Add: 'ADD',
@@ -104,7 +106,7 @@ export const GqlPoolStakingGaugeStatusValues = {
   Active: 'ACTIVE',
   Killed: 'KILLED',
   Preferred: 'PREFERRED',
-} as const satisfies Record<string, GqlPoolStakingGaugeStatus>
+} as const
 
 export const GqlPoolStakingTypeValues = {
   Aura: 'AURA',
@@ -113,11 +115,16 @@ export const GqlPoolStakingTypeValues = {
   MasterChef: 'MASTER_CHEF',
   Reliquary: 'RELIQUARY',
   VeBal: 'VEBAL',
-} as const satisfies Record<string, GqlPoolStakingType>
+} as const
+
+/** Frontier schema omits staking enums; keep app-level literals for legacy helpers. */
+export type GqlPoolStakingType =
+  (typeof GqlPoolStakingTypeValues)[keyof typeof GqlPoolStakingTypeValues]
 
 export const GqlPoolTypeValues = {
   ComposableStable: 'COMPOSABLE_STABLE',
   CowAmm: 'COW_AMM',
+  Eclp: 'ECLP',
   Element: 'ELEMENT',
   FixedLbp: 'FIXED_LBP',
   Fx: 'FX',
@@ -133,7 +140,7 @@ export const GqlPoolTypeValues = {
   Stable: 'STABLE',
   Unknown: 'UNKNOWN',
   Weighted: 'WEIGHTED',
-} as const satisfies Record<string, GqlPoolType>
+} as const
 
 export const GqlSorSwapTypeValues = {
   ExactIn: 'EXACT_IN',

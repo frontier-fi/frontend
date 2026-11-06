@@ -19,7 +19,6 @@ import {
   PopoverTrigger,
   PopoverContent,
   VStack,
-  Stack,
 } from '@chakra-ui/react'
 import { useEffect, useRef, useState } from 'react'
 import { RemoveLiquidityModal } from '../modal/RemoveLiquidityModal'
@@ -39,7 +38,7 @@ import { SafeAppAlert } from '@repo/lib/shared/components/alerts/SafeAppAlert'
 import { useTokens } from '@repo/lib/modules/tokens/TokensProvider'
 import { TooltipWithTouch } from '@repo/lib/shared/components/tooltips/TooltipWithTouch'
 import { useUserSettings } from '@repo/lib/modules/user/settings/UserSettingsProvider'
-import { isBoosted, isV3LBP } from '../../../pool.helpers'
+import { isBoosted } from '../../../pool.helpers'
 import { SettingsAlert } from '@repo/lib/modules/user/settings/SettingsAlert'
 import { useContractWallet } from '@repo/lib/modules/web3/wallets/useContractWallet'
 import { useIsSafeAccount } from '@repo/lib/modules/web3/safe.hooks'
@@ -51,7 +50,7 @@ import { useBufferBalanceWarning } from '@repo/lib/modules/pool/alerts/useBuffer
 export function RemoveLiquidityForm() {
   const { pool } = usePool()
 
-  const title = isV3LBP(pool) ? 'Get LBP funds' : 'Remove liquidity'
+  const title = 'Remove liquidity'
   const isDisabledSingleTokenTab = isBoosted(pool) || pool.dynamicData.isInRecoveryMode
 
   const tabTooltipLabel = isDisabledSingleTokenTab
@@ -179,7 +178,7 @@ export function RemoveLiquidityForm() {
               <ContractWalletAlert />
             )}
             <SettingsAlert />
-            {!requiresProportionalInput(pool) && !isV3LBP(pool) && (
+            {!requiresProportionalInput(pool) && (
               <HStack w="full">
                 <ButtonGroup
                   currentOption={activeTab}
@@ -227,21 +226,19 @@ export function RemoveLiquidityForm() {
               </HStack>
             )}
             <VStack align="start" spacing="md" w="full">
-              {!isV3LBP(pool) && (
-                <InputWithSlider
-                  isNumberInputDisabled
-                  isWarning={isWarning}
-                  onPercentChanged={setHumanBptInPercent}
-                  value={totalUSDValue}
-                >
-                  <Text fontSize="sm" fontWeight="bold">
-                    Amount
-                  </Text>
-                  <Text fontSize="sm" variant="secondary">
-                    {fNum('percentage', humanBptInPercent / 100)}
-                  </Text>
-                </InputWithSlider>
-              )}
+              <InputWithSlider
+                isNumberInputDisabled
+                isWarning={isWarning}
+                onPercentChanged={setHumanBptInPercent}
+                value={totalUSDValue}
+              >
+                <Text fontSize="sm" fontWeight="bold">
+                  Amount
+                </Text>
+                <Text fontSize="sm" variant="secondary">
+                  {fNum('percentage', humanBptInPercent / 100)}
+                </Text>
+              </InputWithSlider>
               {isWarning && (
                 <Text color="font.warning" fontSize="xs">
                   You can only remove up to 25% of a single asset from the pool in one transaction
@@ -255,7 +252,7 @@ export function RemoveLiquidityForm() {
               )}
             </VStack>
             <VStack align="start" spacing="sm" w="full">
-              {!simulationQuery.isError && !isV3LBP(pool) && (
+              {!simulationQuery.isError && (
                 <PriceImpactAccordion
                   accordionButtonComponent={
                     <HStack gap="xs">
@@ -282,15 +279,6 @@ export function RemoveLiquidityForm() {
                   action="remove"
                   isDisabled={priceImpactQuery.isLoading && !priceImpactQuery.isSuccess}
                 />
-              )}
-              {isV3LBP(pool) && (
-                <Card variant="modalSubSection">
-                  <Stack w="full">
-                    <Text color="font.secondary" fontSize="sm" variant="secondary">
-                      Potential losses: 0.00%
-                    </Text>
-                  </Stack>
-                </Card>
               )}
             </VStack>
             <RemoveSimulationError

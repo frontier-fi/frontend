@@ -35,7 +35,7 @@ export function BuildPromo() {
                 size="lg"
                 width="full"
               >
-                Ready to build on Balancer?
+                Ready to build on Frontier Finance?
               </Heading>
               <Text
                 color="font.secondary"
@@ -65,12 +65,12 @@ export function BuildPromo() {
               <Button
                 as={NextLink}
                 flex={1}
-                href="https://github.com/balancer/scaffold-balancer-v3"
+                href="https://github.com/frontier-fi/"
                 rightIcon={<ArrowUpRight size="14px" />}
                 size="lg"
                 variant="tertiary"
               >
-                Prototype on v3
+                Code & Contracts
               </Button>
             </Flex>
             <Link

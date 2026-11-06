@@ -38,9 +38,9 @@ export function HomeProtocols() {
                 textWrap: 'balance',
               }}
             >
-              Launch your token with confidence by plugging into the Balancer vault and ecosystem.
-              Find product market fit and generate revenue faster with liquidity and community from
-              day 1.
+              Launch your token with confidence by plugging into the Frontier Finance vault and
+              ecosystem. Find product market fit and generate revenue faster with liquidity and
+              community from day 1.
             </Text>
           </FadeInOnView>
         </Box>
@@ -50,7 +50,7 @@ export function HomeProtocols() {
         <FadeInOnView>
           <ParallaxImage>
             <Picture
-              altText="Pools plugged into Balancer vault"
+              altText="Pools plugged into Frontier Finance vault"
               defaultImgType="png"
               height="775"
               imgAvif
@@ -71,8 +71,8 @@ export function HomeProtocols() {
                 Get swaps on day 1
               </Heading>
               <Text>
-                Access to the Balancer vault for smart swap routing via your pools. Plus, fast track
-                inclusion to aggregator partners.
+                Access to the Frontier Finance vault for smart swap routing via your pools. Plus,
+                fast track inclusion to aggregator partners.
               </Text>
             </Box>
             <Box>
@@ -86,11 +86,11 @@ export function HomeProtocols() {
             </Box>
             <Box>
               <Heading as="h5" pb="sm" size="h5" variant="h5">
-                Access Balancer&lsquo;s community
+                Access Frontier Finance&lsquo;s community
               </Heading>
               <Text>
-                By building on Balancer, LPs and swappers can find and / or interact with your AMM /
-                pools via the ecosystem app.
+                By building on Frontier Finance, LPs and swappers can find and / or interact with
+                your AMM / pools via the ecosystem app.
               </Text>
             </Box>
             <Box>

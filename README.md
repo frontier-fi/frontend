@@ -17,8 +17,6 @@ This monorepo includes the following apps & packages:
 
 - [apps/frontend-v3](https://github.com/balancer/frontend-monorepo/tree/main/apps/frontend-v3): The
   official web app for the Balancer protocol, hosted at [https://balancer.fi](https://balancer.fi).
-- [apps/beets-frontend-v3](https://github.com/balancer/frontend-monorepo/tree/main/apps/beets-frontend-v3):
-  The (still in development) web app for the Beets protocol.
 
 ### Packages
 
@@ -34,7 +32,6 @@ This monorepo includes the following apps & packages:
 Click on the links below to see the README for each app:
 
 - [frontend-v3](https://github.com/balancer/frontend-monorepo/tree/main/apps/frontend-v3/README.md)
-- [beets-frontend-v3](https://github.com/balancer/frontend-monorepo/tree/main/apps/beets-frontend-v3/README.md)
 
 ### Build
 

@@ -1,10 +1,10 @@
 import { mins } from '@repo/lib/shared/utils/time'
 
 const POOL_TAGS_URL =
-  'https://raw.githubusercontent.com/balancer/metadata/main/pools/tags/index.json'
+  'https://raw.githubusercontent.com/frontier-fi/metadata/main/pools/tags/index.json'
 
 const POOL_TAGS_ICON_BASE_URL =
-  'https://raw.githubusercontent.com/balancer/metadata/main/pools/tags/icons'
+  'https://raw.githubusercontent.com/frontier-fi/metadata/main/pools/tags/icons'
 
 export type PoolTag = {
   id: string

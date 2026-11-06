@@ -28,18 +28,25 @@ export function usePoolStateWithBalancesQuery(pool: Pool) {
   const queryFn = async () => {
     const rpcUrl = getRpcUrl(chainId)
 
-    if (isV3Pool(pool)) {
-      return isBoosted(pool)
-        ? getBoostedPoolStateWithBalancesV3(helpers.boostedPoolState, chainId, rpcUrl)
-        : getPoolStateWithBalancesV3(helpers.poolState, chainId, rpcUrl)
-    }
+    try {
+      if (isV3Pool(pool)) {
+        return isBoosted(pool)
+          ? await getBoostedPoolStateWithBalancesV3(helpers.boostedPoolState, chainId, rpcUrl)
+          : await getPoolStateWithBalancesV3(helpers.poolState, chainId, rpcUrl)
+      }
 
-    if (isV2Pool(pool)) {
-      return getPoolStateWithBalancesV2(helpers.poolState, chainId, rpcUrl)
-    }
+      if (isV2Pool(pool)) {
+        return await getPoolStateWithBalancesV2(helpers.poolState, chainId, rpcUrl)
+      }
 
-    if (isCowAmmPool(pool.type)) {
-      return getPoolStateWithBalancesCowAmm(helpers.poolState, chainId, rpcUrl)
+      if (isCowAmmPool(pool.type)) {
+        return await getPoolStateWithBalancesCowAmm(helpers.poolState, chainId, rpcUrl)
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      throw new Error(`Pool state with balances failed for ${pool.id} via ${rpcUrl}: ${message}`, {
+        cause: error,
+      })
     }
 
     throw new Error(`Unsupported pool : ${pool.id} for pool state with balances query`)
