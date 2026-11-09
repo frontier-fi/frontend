@@ -1,10 +1,20 @@
 export type SemanticTokens = ReturnType<typeof getSemanticTokens>
 
+/** Chakra color-mode token: `default` is light, `_dark` is the dark palette. */
+function colorMode(light: string, dark: string) {
+  return { default: light, _dark: dark }
+}
+
 export function getSemanticTokens(tokens: any, colors: any) {
+  const light = tokens.colors.light
+  const dark = tokens.colors.dark
+  const lightShadow = tokens.shadows.light
+  const darkShadow = tokens.shadows.dark
+
   return {
     colors: {
       primary: 'primary.500',
-      grayText: tokens.colors.dark.text.secondary,
+      grayText: colorMode(light.text.secondary, dark.text.secondary),
       gradients: {
         text: {
           heading: {
@@ -22,99 +32,121 @@ export function getSemanticTokens(tokens: any, colors: any) {
 
       // Background colors
       background: {
-        level0: tokens.colors.dark.background.level0,
-        level1: tokens.colors.dark.background.level1,
-        level2: tokens.colors.dark.background.level2,
-        level3: tokens.colors.dark.background.level3,
-        level4: tokens.colors.dark.background.level4,
-        base: tokens.colors.dark.background.base,
-        baseWithOpacity: tokens.colors.dark.background.baseWithOpacity,
-        level0WithOpacity: tokens.colors.dark.background.level0WithOpacity,
-        special: tokens.colors.dark.background.special,
-        specialAlpha15: tokens.colors.dark.background.specialAlpha15,
-        specialSecondary: tokens.colors.dark.background.specialSecondary,
-        highlight: tokens.colors.dark.background.highlight,
-        gold: tokens.colors.dark.background.gold,
+        level0: colorMode(light.background.level0, dark.background.level0),
+        level1: colorMode(light.background.level1, dark.background.level1),
+        level2: colorMode(light.background.level2, dark.background.level2),
+        level3: colorMode(light.background.level3, dark.background.level3),
+        level4: colorMode(light.background.level4, dark.background.level4),
+        base: colorMode(light.background.base, dark.background.base),
+        baseWithOpacity: colorMode(
+          light.background.baseWithOpacity,
+          dark.background.baseWithOpacity
+        ),
+        level0WithOpacity: colorMode(
+          light.background.level0WithOpacity,
+          dark.background.level0WithOpacity
+        ),
+        special: colorMode(light.background.special, dark.background.special),
+        specialAlpha15: colorMode(light.background.specialAlpha15, dark.background.specialAlpha15),
+        specialSecondary: colorMode(
+          light.background.specialSecondary,
+          dark.background.specialSecondary
+        ),
+        highlight: colorMode(light.background.highlight, dark.background.highlight),
+        gold: colorMode(light.background.gold, dark.background.gold),
         button: {
-          primary: tokens.colors.dark.button.background.primary,
-          secondary: tokens.colors.dark.button.background.secondary,
+          primary: colorMode(light.button.background.primary, dark.button.background.primary),
+          secondary: colorMode(light.button.background.secondary, dark.button.background.secondary),
         },
-        warning: tokens.colors.dark.background.warning,
+        warning: colorMode(light.background.warning, dark.background.warning),
       },
       input: {
-        fontDefault: tokens.colors.dark.input.fontDefault,
-        fontPlaceholder: tokens.colors.dark.input.fontPlaceholder,
-        fontFocus: tokens.colors.dark.input.fontFocus,
-        fontError: tokens.colors.dark.input.fontError,
-        fontHint: tokens.colors.dark.input.fontHint,
-        fontHintError: tokens.colors.dark.input.fontHintError,
-        borderDefault: tokens.colors.dark.input.borderDefault,
-        borderHover: tokens.colors.dark.input.borderHover,
-        borderFocus: tokens.colors.dark.input.borderFocus,
-        borderError: tokens.colors.dark.input.borderError,
-        borderErrorFocus: tokens.colors.dark.input.borderErrorFocus,
-        borderDisabled: tokens.colors.dark.input.borderDisabled,
-        caret: tokens.colors.dark.input.caret,
-        bgDefault: tokens.colors.dark.input.bgDefault,
-        bgHover: tokens.colors.dark.input.bgHover,
-        bgHoverDisabled: tokens.colors.dark.input.bgHoverDisabled,
-        bgFocus: tokens.colors.dark.input.bgFocus,
-        bgError: tokens.colors.dark.input.bgError,
-        bgErrorFocus: tokens.colors.dark.input.bgErrorFocus,
-        clearIcon: tokens.colors.dark.input.clearIcon,
+        fontDefault: colorMode(light.input.fontDefault, dark.input.fontDefault),
+        fontPlaceholder: colorMode(light.input.fontPlaceholder, dark.input.fontPlaceholder),
+        fontFocus: colorMode(light.input.fontFocus, dark.input.fontFocus),
+        fontError: colorMode(light.input.fontError, dark.input.fontError),
+        fontHint: colorMode(light.input.fontHint, dark.input.fontHint),
+        fontHintError: colorMode(light.input.fontHintError, dark.input.fontHintError),
+        borderDefault: colorMode(light.input.borderDefault, dark.input.borderDefault),
+        borderHover: colorMode(light.input.borderHover, dark.input.borderHover),
+        borderFocus: colorMode(light.input.borderFocus, dark.input.borderFocus),
+        borderError: colorMode(light.input.borderError, dark.input.borderError),
+        borderErrorFocus: colorMode(light.input.borderErrorFocus, dark.input.borderErrorFocus),
+        borderDisabled: colorMode(light.input.borderDisabled, dark.input.borderDisabled),
+        caret: colorMode(light.input.caret, dark.input.caret),
+        bgDefault: colorMode(light.input.bgDefault, dark.input.bgDefault),
+        bgHover: colorMode(light.input.bgHover, dark.input.bgHover),
+        bgHoverDisabled: colorMode(light.input.bgHoverDisabled, dark.input.bgHoverDisabled),
+        bgFocus: colorMode(light.input.bgFocus, dark.input.bgFocus),
+        bgError: colorMode(light.input.bgError, dark.input.bgError),
+        bgErrorFocus: colorMode(light.input.bgErrorFocus, dark.input.bgErrorFocus),
+        clearIcon: colorMode(light.input.clearIcon, dark.input.clearIcon),
       },
       formLabel: {
-        focus: tokens.colors.dark.input.labelFocus,
-        error: tokens.colors.dark.input.labelError,
+        focus: colorMode(light.input.labelFocus, dark.input.labelFocus),
+        error: colorMode(light.input.labelError, dark.input.labelError),
       },
-      formErrorMessage: tokens.colors.dark.input.labelError,
+      formErrorMessage: colorMode(light.input.labelError, dark.input.labelError),
       backgroundImage: {
         card: {
-          gradient: `radial-gradient(
+          gradient: colorMode(
+            `radial-gradient(
                 farthest-corner at 80px 0px,
-                rgba(180, 189, 200, 0.3) 0%,
+                rgba(235, 220, 204, 0.3) 0%,
                 rgba(255, 255, 255, 0.0) 100%
               )`,
+            `radial-gradient(
+                farthest-corner at 80px 0px,
+                rgba(229, 211, 190, 0.12) 0%,
+                rgba(49, 55, 63, 0.0) 100%
+              )`
+          ),
         },
       },
 
       border: {
-        base: tokens.colors.dark.border.base,
-        divider: tokens.colors.dark.border.divider,
-        highlight: tokens.colors.dark.border.highlight,
+        base: colorMode(light.border.base, dark.border.base),
+        divider: colorMode(light.border.divider, dark.border.divider),
+        highlight: colorMode(light.border.highlight, dark.border.highlight),
         button: {
-          disabled: tokens.colors.dark.button.border.disabled,
+          disabled: colorMode(light.button.border.disabled, dark.button.border.disabled),
         },
-        zen: tokens.colors.dark.border.zen,
-        subduedZen: tokens.colors.dark.border.subduedZen,
+        zen: colorMode(light.border.zen, dark.border.zen),
+        subduedZen: colorMode(light.border.subduedZen, dark.border.subduedZen),
       },
 
       icon: {
-        base: tokens.colors.dark.icon.base,
+        base: colorMode(light.icon.base, dark.icon.base),
       },
 
       // Text colors
       font: {
-        primary: tokens.colors.dark.text.primary,
-        secondary: tokens.colors.dark.text.secondary,
-        secondaryAlpha50: tokens.colors.dark.text.secondaryAlpha50,
-        primaryGradient: tokens.colors.dark.text.primaryGradient,
-        secondaryGradient: tokens.colors.dark.text.secondaryGradient,
-        special: tokens.colors.dark.text.special,
-        specialSecondary: tokens.colors.dark.text.specialSecondary,
-        opposite: tokens.colors.light.text.primary,
-        link: tokens.colors.dark.text.link,
-        linkHover: tokens.colors.dark.text.linkHover,
-        maxContrast: tokens.colors.dark.text.maxContrast,
-        maxContrastOpposite: tokens.colors.dark.text.maxContrastOpposite,
-        highlight: tokens.colors.dark.text.highlight,
-        warning: tokens.colors.dark.text.warning,
-        error: tokens.colors.dark.text.error,
-        accordionHeading: tokens.colors.dark.button.background.primary,
+        primary: colorMode(light.text.primary, dark.text.primary),
+        secondary: colorMode(light.text.secondary, dark.text.secondary),
+        secondaryAlpha50: colorMode(light.text.secondaryAlpha50, dark.text.secondaryAlpha50),
+        primaryGradient: colorMode(light.text.primaryGradient, dark.text.primaryGradient),
+        secondaryGradient: colorMode(light.text.secondaryGradient, dark.text.secondaryGradient),
+        special: colorMode(light.text.special, dark.text.special),
+        specialSecondary: colorMode(light.text.specialSecondary, dark.text.specialSecondary),
+        opposite: colorMode(dark.text.primary, light.text.primary),
+        link: colorMode(light.text.link, dark.text.link),
+        linkHover: colorMode(light.text.linkHover, dark.text.linkHover),
+        maxContrast: colorMode(light.text.maxContrast, dark.text.maxContrast),
+        maxContrastOpposite: colorMode(
+          light.text.maxContrastOpposite,
+          dark.text.maxContrastOpposite
+        ),
+        highlight: colorMode(light.text.highlight, dark.text.highlight),
+        warning: colorMode(light.text.warning, dark.text.warning),
+        error: colorMode(light.text.error, dark.text.error),
+        accordionHeading: colorMode(
+          light.button.background.primary,
+          dark.button.background.primary
+        ),
         button: {
-          tertiary: tokens.colors.dark.button.text.tertiary,
-          disabled: tokens.colors.dark.button.text.disabled,
-          primary: '#414853',
+          tertiary: colorMode(light.button.text.tertiary, dark.button.text.tertiary),
+          disabled: colorMode(light.button.text.disabled, dark.button.text.disabled),
+          primary: '#F3F1EC',
         },
         dark: colors.gray['700'], // always dark
         light: '#E5D3BE', // always light
@@ -168,33 +200,33 @@ export function getSemanticTokens(tokens: any, colors: any) {
       '3xl': '6rem',
     },
     shadows: {
-      sm: tokens.shadows.dark.sm,
-      md: tokens.shadows.dark.md,
-      lg: tokens.shadows.dark.lg,
-      xl: tokens.shadows.dark.xl,
-      '2xl': tokens.shadows.dark['2xl'],
-      '3xl': tokens.shadows.dark['3xl'],
+      sm: colorMode(lightShadow.sm, darkShadow.sm),
+      md: colorMode(lightShadow.md, darkShadow.md),
+      lg: colorMode(lightShadow.lg, darkShadow.lg),
+      xl: colorMode(lightShadow.xl, darkShadow.xl),
+      '2xl': colorMode(lightShadow['2xl'], darkShadow['2xl']),
+      '3xl': colorMode(lightShadow['3xl'], darkShadow['3xl']),
       innerSm: 'inset 0 0 4px 0 rgba(0, 0, 0, 0.06)',
-      innerBase: tokens.shadows.dark['shadowInnerBase'],
+      innerBase: colorMode(lightShadow.shadowInnerBase, darkShadow.shadowInnerBase),
       innerMd: 'inset 0 0 6px 0 rgba(0, 0, 0, 0.1)',
-      innerLg: tokens.shadows.dark.innerLg,
-      innerXl: tokens.shadows.dark.innerXl,
-      innerRockShadow: tokens.shadows.dark.innerRockShadow,
-      innerRockShadowSm: tokens.shadows.dark.innerRockShadowSm,
-      chartIconInner: tokens.shadows.dark.chartIconInner,
-      chartIconOuter: tokens.shadows.dark.chartIconOuter,
-      chart: tokens.shadows.dark.chart,
-      zen: tokens.shadows.dark.zen,
-      btnDefault: tokens.shadows.dark.btnDefault,
-      btnDefaultActive: tokens.shadows.dark.btnDefaultActive,
-      btnTertiary: tokens.shadows.dark.btnTertiary,
-      fontDefault: tokens.shadows.dark.fontDefault,
-      fontLight: tokens.shadows.dark.fontLight,
-      fontDark: tokens.shadows.dark.fontDark,
+      innerLg: colorMode(lightShadow.innerLg, darkShadow.innerLg),
+      innerXl: colorMode(lightShadow.innerXl, darkShadow.innerXl),
+      innerRockShadow: colorMode(lightShadow.innerRockShadow, darkShadow.innerRockShadow),
+      innerRockShadowSm: colorMode(lightShadow.innerRockShadowSm, darkShadow.innerRockShadowSm),
+      chartIconInner: colorMode(lightShadow.chartIconInner, darkShadow.chartIconInner),
+      chartIconOuter: colorMode(lightShadow.chartIconOuter, darkShadow.chartIconOuter),
+      chart: colorMode(lightShadow.chart, darkShadow.chart),
+      zen: colorMode(lightShadow.zen, darkShadow.zen),
+      btnDefault: colorMode(lightShadow.btnDefault, darkShadow.btnDefault),
+      btnDefaultActive: colorMode(lightShadow.btnDefaultActive, darkShadow.btnDefaultActive),
+      btnTertiary: colorMode(lightShadow.btnTertiary, darkShadow.btnTertiary),
+      fontDefault: colorMode(lightShadow.fontDefault, darkShadow.fontDefault),
+      fontLight: colorMode(lightShadow.fontLight, darkShadow.fontLight),
+      fontDark: colorMode(lightShadow.fontDark, darkShadow.fontDark),
       input: {
-        innerBase: tokens.shadows.dark.input.innerBase,
-        innerFocus: tokens.shadows.dark.input.innerFocus,
-        innerError: tokens.shadows.dark.input.innerError,
+        innerBase: colorMode(lightShadow.input.innerBase, darkShadow.input.innerBase),
+        innerFocus: colorMode(lightShadow.input.innerFocus, darkShadow.input.innerFocus),
+        innerError: colorMode(lightShadow.input.innerError, darkShadow.input.innerError),
       },
     },
     sizes: {

@@ -14,7 +14,7 @@ export function getTokens(colors: any, primaryTextColor: string) {
           level4: '#FFFFFF',
           base: colors.base.light,
           baseWithOpacity: createBackgroundOpacity(colors.base.hslLight, 0.5),
-          level0WithOpacity: 'hsla(#EBE8E0, 0.5)',
+          level0WithOpacity: 'rgba(235, 232, 224, 0.96)',
           special: colors.gradient.dawnLight,
           specialAlpha15: colors.gradient.dawnLightAlpha15,
           specialSecondary: colors.gradient.sunsetLight,
@@ -26,13 +26,14 @@ export function getTokens(colors: any, primaryTextColor: string) {
           base: '#FFFFFF',
           divider: colors.brown['100'],
           highlight: colors.green['600'],
+          zen: 'brown.50',
           subduedZen: 'rgba(176, 126, 67, 0.08)',
           special: colors.gradient.special,
         },
         // Button colors
         button: {
           background: {
-            primary: colors.gradient.dawnDark,
+            primary: 'linear-gradient(135deg, #8DA0DC 0%, #56CCE3 50%, #7AD49B 100%)',
             secondary: colors.gradient.sandLight,
           },
           border: {
@@ -53,18 +54,18 @@ export function getTokens(colors: any, primaryTextColor: string) {
           special: colors.gradient.dawnLight,
           specialSecondary: colors.gradient.sunsetLight,
           gold: colors.gradient.goldLight,
-          link: colors.purple['500'],
-          linkHover: colors.purple['700'],
+          link: '#4F66B0',
+          linkHover: '#0B9BB6',
           maxContrast: '#000',
           maxContrastOpposite: '#fff',
-          highlight: colors.green['600'],
+          highlight: '#3EA865',
           warning: colors.orange['500'],
           error: colors.red['600'],
         },
         // Input colors
         input: {
-          labelFocus: colors.purple['500'], // Not implemented
-          labelError: colors.purple['600'], // Not implemented
+          labelFocus: '#0DB2D0', // Not implemented
+          labelError: colors.red['600'], // Not implemented
           fontDefault: 'gray.700',
           fontFocus: 'gray.900',
           fontPlaceholder: tinycolor(colors.brown['500']).setAlpha(0.5),
@@ -79,8 +80,8 @@ export function getTokens(colors: any, primaryTextColor: string) {
           bgError: 'rgba(254, 244, 242, 0.5)',
           bgErrorFocus: 'tinycolor(colors.base.light).lighten(8)',
           borderDefault: '#c9bb9a',
-          borderHover: colors.purple['500'],
-          borderFocus: colors.purple['500'],
+          borderHover: '#0DB2D0',
+          borderFocus: '#0DB2D0',
           borderError: colors.red['500'],
           borderErrorFocus: colors.red['600'],
           borderDisabled: 'blue',
@@ -214,11 +215,11 @@ export function getTokens(colors: any, primaryTextColor: string) {
         input: {
           innerBase:
             '0px 2px 4px 0px rgba(0, 0, 0, 0.05) inset, 0px 4px 8px 0px rgba(0, 0, 0, 0.05) inset, 0px 10px 20px 0px rgba(0, 0, 0, 0.05) inset, 0px -1px 0px 0px rgba(255, 255, 255, 0.8) inset',
-          innerFocus: `0px 2px 4px 0px ${tinycolor(colors.purple['500']).setAlpha(
+          innerFocus: `0px 2px 4px 0px ${tinycolor('#0DB2D0').setAlpha(
             0.1
-          )} inset, 0px 4px 8px 0px ${tinycolor(colors.purple['500']).setAlpha(
+          )} inset, 0px 4px 8px 0px ${tinycolor('#0DB2D0').setAlpha(
             0.2
-          )} inset, 0 0 0 1px ${colors.purple['500']}, 0px 0px 10px 0px rgba(255, 255, 255, 1) inset`,
+          )} inset, 0 0 0 1px #0DB2D0, 0px 0px 10px 0px rgba(255, 255, 255, 1) inset`,
           innerError: `0px 2px 4px 0px ${tinycolor(colors.red['500']).setAlpha(
             0.1
           )} inset, 0px 4px 8px 0px ${tinycolor(colors.red['500']).setAlpha(

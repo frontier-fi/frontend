@@ -41,47 +41,6 @@ const nextConfig: NextConfig = {
       destination: '/pools',
       permanent: false,
     },
-    {
-      source: '/pools/mode/:path*',
-      destination: 'https://legacy.balancer.fi',
-      permanent: true,
-    },
-    {
-      source: '/pools/fraxtal/:path*',
-      destination: 'https://legacy.balancer.fi',
-      permanent: true,
-    },
-    // LBP, veBAL, and Cow AMM are out of scope for Frontier.
-    {
-      source: '/lbp',
-      destination: '/pools',
-      permanent: false,
-    },
-    {
-      source: '/lbp/:path*',
-      destination: '/pools',
-      permanent: false,
-    },
-    {
-      source: '/vebal',
-      destination: '/pools',
-      permanent: false,
-    },
-    {
-      source: '/vebal/:path*',
-      destination: '/pools',
-      permanent: false,
-    },
-    {
-      source: '/pools/cow',
-      destination: '/pools',
-      permanent: false,
-    },
-    {
-      source: '/pools/cow/:path*',
-      destination: '/pools',
-      permanent: false,
-    },
     // Gauges are not deployed. Staking BAL or BPTs is unavailable.
     {
       source: '/pools/:chain/:variant/:id/stake',

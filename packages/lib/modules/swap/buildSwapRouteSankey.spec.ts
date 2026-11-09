@@ -89,7 +89,10 @@ describe('buildSwapRouteSankey', () => {
 
     const graph = buildSwapRouteSankey([path], GqlChainValues.Sepolia, getToken)
 
-    expect(graph.nodes.map(n => n.symbol)).toEqual(['DAI', '0xdead…'])
+    expect(graph.nodes.map(n => n.symbol)).toEqual(['DAI', '0xdea...001'])
+    expect(graph.nodes.every(n => /^#[0-9a-f]{6}$/.test(n.color))).toBe(true)
+    expect(graph.nodes.every(n => /^#[0-9a-f]{6}$/.test(n.colorEnd))).toBe(true)
+    expect(graph.nodes.every(n => n.colorEnd !== n.color)).toBe(true)
     expect(graph.links).toHaveLength(1)
     expect(graph.links[0]?.poolId).toBeUndefined()
     expect(graph.links[0]?.value).toBeCloseTo(0.5)

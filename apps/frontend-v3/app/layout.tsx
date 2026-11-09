@@ -46,7 +46,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
         className={satoshiFont.className}
         style={{ marginRight: '0px !important' }} // Required to prevent layout shift introduced by Rainbowkit
       >
-        <NextTopLoader color="#7f6ae8" showSpinner={false} />
+        <NextTopLoader color="#0DB2D0" showSpinner={false} />
         <ThemeProvider>
           <Providers>
             <NavBarContainer />

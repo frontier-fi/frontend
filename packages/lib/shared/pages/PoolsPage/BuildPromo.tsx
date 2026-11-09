@@ -4,23 +4,10 @@ import { Box, Button, Center, Flex, Heading, Link, Text, HStack, Stack } from '@
 import FadeInOnView from '@repo/lib/shared/components/containers/FadeInOnView'
 import NextLink from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
-import { RadialPattern } from '../../components/zen/RadialPattern'
 
 export function BuildPromo() {
   return (
     <Box overflow="hidden" pb="64px" position="relative" pt={{ base: '200px', md: '220px' }}>
-      <Box zIndex="-1">
-        <RadialPattern
-          bottom="-900px"
-          circleCount={14}
-          height={1400}
-          innerHeight={150}
-          innerWidth={150}
-          left="calc(50% - 700px)"
-          position="absolute"
-          width={1400}
-        />
-      </Box>
       <Center>
         <FadeInOnView animateOnce={false}>
           <Flex direction="column" gap="lg" textAlign="center">

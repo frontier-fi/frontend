@@ -6,7 +6,8 @@ import { fNum } from '@repo/lib/shared/utils/numbers'
 import { LabelFormatterParams } from '@repo/lib/shared/utils/chart.helper'
 import { LbpPrice } from '../../pool/usePriceInfo'
 import { useCurrency } from '@repo/lib/shared/hooks/useCurrency'
-import { Skeleton, Stack, Text, useTheme as useChakraTheme } from '@chakra-ui/react'
+import { Skeleton, Stack, Text, useColorMode, useTheme as useChakraTheme } from '@chakra-ui/react'
+import { readThemeToken } from '@repo/lib/shared/services/chakra/read-theme-token'
 import { useBreakpoints } from '@repo/lib/shared/hooks/useBreakpoints'
 import { dividePrices, range } from '@repo/lib/modules/pool/LbpDetail/LbpPoolCharts/chart.helper'
 
@@ -31,6 +32,7 @@ export function ProjectedPriceChart({
 }: Props) {
   const { toCurrency } = useCurrency()
   const theme = useChakraTheme()
+  useColorMode()
   const { isMobile } = useBreakpoints()
 
   const priceData = dividePrices(prices, cutTime)
@@ -103,7 +105,7 @@ export function ProjectedPriceChart({
         rotate: isMobile ? 45 : 0, // Rotate labels on mobile
         fontSize: isMobile ? 10 : 12,
         margin: 8,
-        color: theme.semanticTokens.colors.font.primary,
+        color: readThemeToken(theme.semanticTokens.colors.font.primary),
         opacity: 0.5,
       },
       splitNumber: (() => {
@@ -126,7 +128,7 @@ export function ProjectedPriceChart({
         formatter: (value: number) => {
           return toCurrency(value)
         },
-        color: theme.semanticTokens.colors.font.primary,
+        color: readThemeToken(theme.semanticTokens.colors.font.primary),
         opacity: 0.5,
       },
     },

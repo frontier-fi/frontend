@@ -102,8 +102,8 @@ export function RadialPattern({
   const heightDifference = totalHeightDifference / (circleCount - 1)
   const opacityStep = (maxOpacity - minOpacity) / (circleCount - 1)
 
-  const shadowBlackOpacity = intensity * 0.3
-  const shadowWhiteOpacity = intensity * 0.1
+  const shadowBlackOpacity = intensity * 0.1
+  const shadowWhiteOpacity = intensity * 0.3
 
   const circles = useMemo(() => {
     const circles = []

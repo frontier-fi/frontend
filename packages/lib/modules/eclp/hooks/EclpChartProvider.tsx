@@ -154,7 +154,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
               offset: [0, 1],
             },
             lineStyle: {
-              color: 'rgba(179, 174, 245, 0.5)',
+              color: 'rgba(102, 123, 190, 0.5)',
               padding: [2, 0, 0, 0],
             },
             data: [
@@ -165,7 +165,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
                     formatter: () => fNum('tokenRatio', xMin || '0'),
                     position: 'start',
                     distance: 5,
-                    backgroundColor: 'rgb(179, 174, 245)',
+                    backgroundColor: 'rgb(102, 123, 190)',
                   },
                 },
                 {
@@ -196,7 +196,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
               offset: [0, 1],
             },
             lineStyle: {
-              color: 'rgba(234, 168, 121, 0.5)',
+              color: 'rgba(80, 187, 119, 0.5)',
             },
             data: [
               [
@@ -206,7 +206,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
                     formatter: () => fNum('tokenRatio', xMax || '0'),
                     position: 'start',
                     distance: 5,
-                    backgroundColor: 'rgb(234, 168, 121)',
+                    backgroundColor: 'rgb(80, 187, 119)',
                   },
                 },
                 {
@@ -248,7 +248,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
                 label: {
                   show: !isSpotPriceNearUpperBound || !poolIsInRange,
                   fontSize: 12,
-                  color: 'secondaryFontColor',
+                  color: secondaryFontColor,
                   padding: 4,
                   borderRadius: 4,
                 },
@@ -320,27 +320,23 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
               colorStops: [
                 {
                   offset: 0,
-                  color: 'rgb(179, 174, 245)',
+                  color: 'rgb(102, 123, 190)',
                 },
                 {
-                  offset: 0.2,
-                  color: 'rgb(197, 189, 238)',
+                  offset: 0.25,
+                  color: 'rgb(58, 151, 199)',
                 },
                 {
-                  offset: 0.4,
-                  color: 'rgb(215, 203, 231)',
+                  offset: 0.5,
+                  color: 'rgb(13, 178, 208)',
                 },
                 {
-                  offset: 0.6,
-                  color: 'rgb(222, 202, 216)',
-                },
-                {
-                  offset: 0.8,
-                  color: 'rgb(229, 185, 169)',
+                  offset: 0.75,
+                  color: 'rgb(47, 183, 164)',
                 },
                 {
                   offset: 1,
-                  color: 'rgb(234, 168, 121)',
+                  color: 'rgb(80, 187, 119)',
                 },
               ],
             },
@@ -356,27 +352,23 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
               colorStops: [
                 {
                   offset: 0,
-                  color: 'rgba(179, 174, 245, 0.8)',
+                  color: 'rgba(102, 123, 190, 0.75)',
                 },
                 {
-                  offset: 0.2,
-                  color: 'rgba(197, 189, 238, 0.6)',
+                  offset: 0.25,
+                  color: 'rgba(58, 151, 199, 0.55)',
                 },
                 {
-                  offset: 0.4,
-                  color: 'rgba(215, 203, 231, 0.4)',
+                  offset: 0.5,
+                  color: 'rgba(13, 178, 208, 0.38)',
                 },
                 {
-                  offset: 0.6,
-                  color: 'rgba(222, 202, 216, 0.25)',
-                },
-                {
-                  offset: 0.8,
-                  color: 'rgba(229, 185, 169, 0.15)',
+                  offset: 0.75,
+                  color: 'rgba(47, 183, 164, 0.2)',
                 },
                 {
                   offset: 1,
-                  color: 'rgba(234, 168, 121, 0)',
+                  color: 'rgba(80, 187, 119, 0)',
                 },
               ],
             },
@@ -391,7 +383,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
                 {
                   coord: [xMin, 0],
                   lineStyle: {
-                    color: 'rgb(179, 174, 245)',
+                    color: 'rgb(102, 123, 190)',
                     width: 2,
                     type: 'solid',
                   },
@@ -403,7 +395,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
                 {
                   coord: [xMax, 0],
                   lineStyle: {
-                    color: 'rgb(234, 168, 121)',
+                    color: 'rgb(80, 187, 119)',
                     width: 2,
                     type: 'solid',
                   },

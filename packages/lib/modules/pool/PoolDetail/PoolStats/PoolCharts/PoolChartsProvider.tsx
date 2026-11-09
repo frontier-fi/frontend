@@ -1,4 +1,5 @@
-import { theme as defaultTheme, useTheme as useChakraTheme } from '@chakra-ui/react'
+import { theme as defaultTheme, useColorMode, useTheme as useChakraTheme } from '@chakra-ui/react'
+import { readThemeToken } from '@repo/lib/shared/services/chakra/read-theme-token'
 import { addHours, differenceInDays, format } from 'date-fns'
 import {
   GetPoolSnapshotsDocument,
@@ -111,7 +112,7 @@ export const getDefaultPoolChartOptions = (
         formatter: (value: number) => {
           return format(new Date(value * 1000), 'MMM d')
         },
-        color: theme.semanticTokens.colors.font.primary,
+        color: readThemeToken(theme.semanticTokens.colors.font.primary),
         opacity: 0.5,
         interval: 0,
         showMaxLabel: false,
@@ -144,7 +145,7 @@ export const getDefaultPoolChartOptions = (
         formatter: (value: number) => {
           return currencyFormatter(value)
         },
-        color: theme.semanticTokens.colors.font.primary,
+        color: readThemeToken(theme.semanticTokens.colors.font.primary),
         opacity: 0.5,
         interval: 'auto',
         showMaxLabel: false,
@@ -212,6 +213,7 @@ export function usePoolChartsLogic() {
   const { id: poolId } = useParams()
   const { toCurrency } = useCurrency()
   const theme = useChakraTheme()
+  useColorMode()
   const [chartValue, setChartValue] = useState(0)
   const [chartDate, setChartDate] = useState('')
   const [activePeriod, setActivePeriod] = useState(poolChartPeriods[0])

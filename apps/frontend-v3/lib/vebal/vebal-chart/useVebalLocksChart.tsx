@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useTheme as useChakraTheme } from '@chakra-ui/react'
+import { useColorMode, useTheme as useChakraTheme } from '@chakra-ui/react'
+import { readThemeToken } from '@repo/lib/shared/services/chakra/read-theme-token'
 import * as echarts from 'echarts/core'
 import { EChartsOption, ECharts } from 'echarts'
 import {
@@ -122,6 +123,7 @@ export interface UseVebalLocksChartParams {
 
 export function useVebalLocksChart({ lockSnapshots, mainnetLockedInfo }: UseVebalLocksChartParams) {
   const theme = useChakraTheme()
+  const { colorMode } = useColorMode()
   const instanceRef = useRef<ECharts | undefined>(undefined)
   const [currentTimestampMs, setCurrentTimestampMs] = useState(() => Date.now())
 
@@ -207,9 +209,9 @@ export function useVebalLocksChart({ lockSnapshots, mainnetLockedInfo }: UseVeba
   const options = useMemo((): EChartsOption => {
     const toolTipTheme = {
       heading: 'font-weight: bold; color: #E5D3BE',
-      container: `background: ${theme.semanticTokens.colors.background.level3};`,
-      text: theme.semanticTokens.colors.font.primary,
-      secondaryText: theme.semanticTokens.colors.font.secondary,
+      container: `background: ${readThemeToken(theme.semanticTokens.colors.background.level3)};`,
+      text: readThemeToken(theme.semanticTokens.colors.font.primary),
+      secondaryText: readThemeToken(theme.semanticTokens.colors.font.secondary),
     }
 
     const badgeStyle =
@@ -220,7 +222,7 @@ export function useVebalLocksChart({ lockSnapshots, mainnetLockedInfo }: UseVeba
         text: 'My veBAL over time',
         left: 'left',
         textStyle: {
-          color: theme.semanticTokens.colors.font.primary,
+          color: readThemeToken(theme.semanticTokens.colors.font.primary),
           fontWeight: 'bold',
           fontSize: 13,
         },
@@ -300,7 +302,7 @@ export function useVebalLocksChart({ lockSnapshots, mainnetLockedInfo }: UseVeba
           formatter: (value: number) => {
             return format(new Date(value), 'd MMM yy')
           },
-          color: theme.semanticTokens.colors.font.secondary,
+          color: readThemeToken(theme.semanticTokens.colors.font.secondary),
           opacity: 1,
         },
         axisPointer: {
@@ -326,7 +328,7 @@ export function useVebalLocksChart({ lockSnapshots, mainnetLockedInfo }: UseVeba
         minorSplitLine: { show: false },
         splitLine: { show: false },
         axisLabel: {
-          color: theme.semanticTokens.colors.font.secondary,
+          color: readThemeToken(theme.semanticTokens.colors.font.secondary),
           opacity: 1,
         },
       },
@@ -358,7 +360,7 @@ export function useVebalLocksChart({ lockSnapshots, mainnetLockedInfo }: UseVeba
         futureLockChartData,
       ],
     }
-  }, [chartValues, futureLockChartData, theme])
+  }, [chartValues, colorMode, futureLockChartData, theme])
 
   return {
     lockedUntil,

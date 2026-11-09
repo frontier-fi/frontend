@@ -51,10 +51,10 @@ export function PreviewPoolCreationCard({
       borderGradient = 'linear-gradient(180deg, #FDBA74 0%, rgba(151, 111, 69, 0.5) 100%)'
     } else {
       backgroundGradient =
-        'linear-gradient(45deg, hsla(245, 97%, 76%,0.08) 0%, hsla(266, 85%, 69%,0.12) 40%, hsla(9, 85%, 71%,0.25) 100%)'
+        'linear-gradient(45deg, rgba(102, 123, 190, 0.08) 0%, rgba(13, 178, 208, 0.12) 40%, rgba(80, 187, 119, 0.25) 100%)'
 
       borderGradient =
-        'linear-gradient(266.76deg, rgba(234, 168, 121, 0.75) -20.29%, rgba(179, 174, 245, 0.75) 45.08%, rgba(234, 168, 121, 0.05) 110.45%)'
+        'linear-gradient(266.76deg, rgba(80, 187, 119, 0.75) -20.29%, rgba(13, 178, 208, 0.75) 45.08%, rgba(102, 123, 190, 0.05) 110.45%)'
     }
   }
 

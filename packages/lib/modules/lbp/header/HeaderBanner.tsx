@@ -1,7 +1,6 @@
 import { Box, Heading, HStack, Stack, Text, VStack } from '@chakra-ui/react'
 import { NoisyCard } from '@repo/lib/shared/components/containers/NoisyCard'
 import { FeatureLink } from './FeatureLink'
-import { RadialPattern } from '@repo/lib/shared/components/zen/RadialPattern'
 import { LbpBenefitsScalesIcon } from '@repo/lib/shared/components/icons/lbp/LbpBenefitsScalesIcon'
 import { LbpBenefitsChartIcon } from '@repo/lib/shared/components/icons/lbp/LbpBenefitsChartIcon'
 import { LbpBenefitsLightningIcon } from '@repo/lib/shared/components/icons/lbp/LbpBenefitsLightningIcon'
@@ -75,31 +74,6 @@ export function HeaderBanner() {
           spacing={{ base: 4, md: 2, lg: 4, xl: 8 }}
           w="full"
         >
-          <RadialPattern
-            circleCount={8}
-            height={600}
-            innerHeight={120}
-            innerWidth={1000}
-            left="350px"
-            padding="15px"
-            position="absolute"
-            right={{ base: -500, lg: -700, xl: -600, '2xl': -400 }}
-            top="-195px"
-            width={1500}
-          />
-
-          <RadialPattern
-            bottom="-500px"
-            circleCount={10}
-            height={800}
-            innerHeight={150}
-            innerWidth={150}
-            left="-400px"
-            position="absolute"
-            width={800}
-            zIndex={0}
-          />
-
           <FeatureLink
             description={fairPriceDescription}
             icon={<LbpBenefitsScalesIcon />}

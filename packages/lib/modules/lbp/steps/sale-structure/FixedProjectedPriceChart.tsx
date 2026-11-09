@@ -3,7 +3,8 @@ import ReactECharts, { EChartsOption } from 'echarts-for-react'
 import { formatDateAxisLabel } from './helpers'
 import { LbpPrice } from '../../pool/usePriceInfo'
 import { useCurrency } from '@repo/lib/shared/hooks/useCurrency'
-import { Skeleton, Stack, Text, useTheme as useChakraTheme } from '@chakra-ui/react'
+import { Skeleton, Stack, Text, useColorMode, useTheme as useChakraTheme } from '@chakra-ui/react'
+import { readThemeToken } from '@repo/lib/shared/services/chakra/read-theme-token'
 import { useBreakpoints } from '@repo/lib/shared/hooks/useBreakpoints'
 import * as echarts from 'echarts/core'
 
@@ -24,6 +25,7 @@ export function FixedProjectedPriceChart({
 }: Props) {
   const { toCurrency } = useCurrency()
   const theme = useChakraTheme()
+  useColorMode()
   const { isMobile } = useBreakpoints()
 
   const priceValue = prices[0]?.projectTokenPrice ?? 0
@@ -93,7 +95,7 @@ export function FixedProjectedPriceChart({
         rotate: isMobile ? 45 : 0,
         fontSize: isMobile ? 10 : 12,
         margin: 8,
-        color: theme.semanticTokens.colors.font.primary,
+        color: readThemeToken(theme.semanticTokens.colors.font.primary),
         opacity: 0.5,
       },
       splitNumber: (() => {
@@ -129,7 +131,7 @@ export function FixedProjectedPriceChart({
 
           return toCurrency(value)
         },
-        color: theme.semanticTokens.colors.font.primary,
+        color: readThemeToken(theme.semanticTokens.colors.font.primary),
         opacity: 0.5,
       },
     },

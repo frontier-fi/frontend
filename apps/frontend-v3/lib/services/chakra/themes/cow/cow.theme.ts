@@ -11,6 +11,10 @@ const components = getComponents(tokens, primaryTextColor)
 const semanticTokens = getSemanticTokens(tokens, colors)
 
 export const cowTheme = {
+  config: {
+    initialColorMode: 'light',
+    useSystemColorMode: false,
+  },
   fonts,
   styles,
   colors,

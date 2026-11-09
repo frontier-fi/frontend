@@ -6,7 +6,8 @@ import { secondsToMilliseconds, differenceInDays, format } from 'date-fns'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import EChartsReactCore from 'echarts-for-react/lib/core'
 import { ChainSlug, getChainSlug } from '../../pool.utils'
-import { useTheme as useChakraTheme } from '@chakra-ui/react'
+import { useColorMode, useTheme as useChakraTheme } from '@chakra-ui/react'
+import { readThemeToken } from '@repo/lib/shared/services/chakra/read-theme-token'
 import { abbreviateAddress } from '@repo/lib/shared/utils/addresses'
 import { useBreakpoints } from '@repo/lib/shared/hooks/useBreakpoints'
 import { useCurrency } from '@repo/lib/shared/hooks/useCurrency'
@@ -37,8 +38,8 @@ const getDefaultPoolActivityChartOptions = (
 ): echarts.EChartsCoreOption => {
   const toolTipTheme = {
     heading: 'font-weight: bold; color: #E5D3BE',
-    container: `background: ${theme.semanticTokens.colors.background.level3};`,
-    text: theme.semanticTokens.colors.font.secondary,
+    container: `background: ${readThemeToken(theme.semanticTokens.colors.background.level3)};`,
+    text: readThemeToken(theme.semanticTokens.colors.font.secondary),
   }
 
   return {
@@ -65,7 +66,7 @@ const getDefaultPoolActivityChartOptions = (
                 : ''
             }`
           ),
-        color: theme.semanticTokens.colors.font.primary,
+        color: readThemeToken(theme.semanticTokens.colors.font.primary),
         opacity: 0.5,
         interval: 'auto',
         showMaxLabel: false,
@@ -94,7 +95,7 @@ const getDefaultPoolActivityChartOptions = (
         formatter: (value: number) => {
           return currencyFormatter(value)
         },
-        color: theme.semanticTokens.colors.font.primary,
+        color: readThemeToken(theme.semanticTokens.colors.font.primary),
         opacity: 0.5,
         interval: 'auto',
         showMaxLabel: true,
@@ -248,6 +249,7 @@ export function usePoolActivityChart() {
   const { toCurrency } = useCurrency()
   const { chain } = useParams()
   const theme = useChakraTheme()
+  useColorMode()
 
   const { sortedPoolEvents, minDate, maxDate, maxYAxisValue, isExpanded, isLoading } =
     usePoolActivity()

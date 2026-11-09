@@ -14,6 +14,11 @@ import {
   getAcceptedPoliciesStorage,
   shouldResetAcceptedPolicies,
 } from './accepted-policies-storage'
+import {
+  ColorModePreference,
+  DEFAULT_COLOR_MODE_PREFERENCE,
+  isColorModePreference,
+} from './color-mode'
 
 export type YesNo = 'yes' | 'no'
 
@@ -119,6 +124,17 @@ export function useUserSettingsLogic({
   const enableTxBundling = isMounted ? _enableTxBundling : initEnableTxBundling
   const shouldUseTxBundling = enableTxBundling === 'yes'
 
+  const [_colorModePreference, setColorModePreference] = useLocalStorage<ColorModePreference>(
+    LS_KEYS.UserSettings.ColorMode,
+    DEFAULT_COLOR_MODE_PREFERENCE
+  )
+
+  const storedColorModePreference = isMounted ? _colorModePreference : DEFAULT_COLOR_MODE_PREFERENCE
+
+  const colorModePreference = isColorModePreference(storedColorModePreference)
+    ? storedColorModePreference
+    : DEFAULT_COLOR_MODE_PREFERENCE
+
   return {
     currency,
     slippage,
@@ -129,11 +145,13 @@ export function useUserSettingsLogic({
     acceptedPolicies,
     enableTxBundling,
     shouldUseTxBundling,
+    colorModePreference,
     setCurrency,
     setSlippage,
     setEnableSignatures,
     setAcceptedPolicies,
     setEnableTxBundling,
+    setColorModePreference,
   }
 }
 

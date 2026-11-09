@@ -6,7 +6,8 @@ import type { GqlPoolEventType } from '@repo/lib/shared/services/api/generated/g
 import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { GqlChainValues, GqlPoolEventTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import EChartsReactCore from 'echarts-for-react/lib/core'
-import { useTheme as useChakraTheme } from '@chakra-ui/react'
+import { useColorMode, useTheme as useChakraTheme } from '@chakra-ui/react'
+import { readThemeToken } from '@repo/lib/shared/services/chakra/read-theme-token'
 import { abbreviateAddress } from '@repo/lib/shared/utils/addresses'
 import { useTokens } from '@repo/lib/modules/tokens/TokensProvider'
 import { useBreakpoints } from '@repo/lib/shared/hooks/useBreakpoints'
@@ -112,8 +113,8 @@ const getDefaultPoolActivityChartOptions = (
 ): echarts.EChartsCoreOption => {
   const toolTipTheme = {
     heading: 'font-weight: bold; color: #E5D3BE',
-    container: `background: ${theme.semanticTokens.colors.background.level3};`,
-    text: theme.semanticTokens.colors.font.primary,
+    container: `background: ${readThemeToken(theme.semanticTokens.colors.background.level3)};`,
+    text: readThemeToken(theme.semanticTokens.colors.font.primary),
   }
 
   return {
@@ -303,6 +304,7 @@ export function useEcosystemPoolActivityChart() {
   const [activeTab, setActiveTab] = useState<PoolActivityChartTypeTab>(tabsList[0]!)
   const [activeNetwork, setActiveNetwork] = useState<AppChain | 'all'>('all')
   const theme = useChakraTheme()
+  useColorMode()
   const now = useCurrentDate()
 
   const { supportedNetworks } = PROJECT_CONFIG

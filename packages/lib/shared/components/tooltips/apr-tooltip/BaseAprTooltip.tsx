@@ -44,7 +44,7 @@ interface Props {
 }
 
 const balRewardGradient =
-  'linear-gradient(90deg, rgba(179, 174, 245, 0.5) 0%, rgba(215, 203, 231, 0.5) 25%, rgba(229, 200, 200, 0.5) 50%, rgba(234, 168, 121, 0.5) 100%)'
+  'linear-gradient(90deg, rgba(102, 123, 190, 0.5) 0%, rgba(13, 178, 208, 0.5) 50%, rgba(80, 187, 119, 0.5) 100%)'
 
 const basePopoverAprItemProps = {
   pl: 4,

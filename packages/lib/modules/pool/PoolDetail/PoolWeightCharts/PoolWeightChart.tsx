@@ -1,6 +1,7 @@
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { NoisyCard } from '@repo/lib/shared/components/containers/NoisyCard'
-import { Box, VStack, useTheme } from '@chakra-ui/react'
+import { Box, VStack, useColorMode, useTheme } from '@chakra-ui/react'
+import { readThemeToken } from '@repo/lib/shared/services/chakra/read-theme-token'
 import EChartsReactCore from 'echarts-for-react/lib/core'
 import { motion } from 'motion/react'
 import { useRef, useMemo } from 'react'
@@ -54,7 +55,8 @@ const normalSize: ChartSizeValues = {
 
 function OuterSymbolCircle({ opacity, isSmall }: { opacity: string; isSmall: boolean }) {
   const theme = useTheme()
-  const chartOuter = isSmall ? '' : theme.semanticTokens.shadows.chartIconOuter
+  useColorMode()
+  const chartOuter = isSmall ? '' : readThemeToken(theme.semanticTokens.shadows.chartIconOuter)
   return (
     <Box
       alignItems="center"
