@@ -24,8 +24,6 @@ import { useTxHash } from '../safe.hooks'
 import { getWaitForReceiptTimeout } from './wagmi-helpers'
 import { onlyExplicitRefetch } from '@repo/lib/shared/utils/queries'
 import { useMockedTxHash } from '@repo/lib/modules/web3/contracts/useMockedTxHash'
-import { useTenderlyGasEstimate } from '@repo/lib/modules/web3/useTenderlyGasEstimate'
-import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { useEffect, useRef } from 'react'
 
 /**
@@ -64,7 +62,6 @@ export function useManagedTransaction({
 }: ManagedTransactionInput) {
   const { minConfirmations } = useNetworkConfig()
   const { shouldChangeNetwork } = useChainSwitch(chainId)
-  const { userAddress } = useUserAccount()
 
   const txConfig = {
     abi: AbiMap[contractId] as Abi,
@@ -86,21 +83,15 @@ export function useManagedTransaction({
     value,
   })
 
-  // use tenderly gas estimate only on ethereum mainnet
-  const useEstimateGasHook = chainId === 1 ? useTenderlyGasEstimate : useEstimateGas
-
-  const useEstimateGasProps = {
+  const estimateGasQuery = useEstimateGas({
     ...txConfig,
     chainId,
-    from: userAddress,
     query: {
       enabled: !!txConfig && !shouldChangeNetwork,
       // In chains like polygon, we don't want background refetches while waiting for min block confirmations
       ...onlyExplicitRefetch,
     },
-  }
-
-  const estimateGasQuery = useEstimateGasHook(useEstimateGasProps)
+  })
 
   const { mockedTxHash, setMockedTxHash } = useMockedTxHash()
 
