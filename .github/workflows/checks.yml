@@ -8,7 +8,6 @@ env:
   NEXT_PUBLIC_API_URL: https://api.frontier.fi/graphql
   NEXT_PUBLIC_WALLET_CONNECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_ID }}
   DRPC_API_KEY: ${{ secrets.DRPC_API_KEY }}
-  TEST_ACCOUNT_MNEMONIC: ${{ secrets.TEST_ACCOUNT_MNEMONIC }}
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
@@ -125,7 +124,7 @@ jobs:
       - name: Set up foundry (includes anvil)
         uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1
       - name: Start anvil fork in mainnet
-        run: anvil --mnemonic "${{ env.TEST_ACCOUNT_MNEMONIC }}" --fork-url "https://lb.drpc.live/ethereum/${{ env.DRPC_API_KEY }}" --fork-block-number ${{ env.E2E_FORK_BLOCK_NUMBER }} --fork-retry-backoff 1000 --no-rate-limit --port 8545 &
+        run: anvil --mnemonic "have doctor foam invite bottom elevator cream bulb pigeon holiday razor castle" --fork-url "https://lb.drpc.live/ethereum/${{ env.DRPC_API_KEY }}" --fork-block-number ${{ env.E2E_FORK_BLOCK_NUMBER }} --fork-retry-backoff 1000 --no-rate-limit --port 8545 &
       - name: Run Playwright dev tests (shard ${{ matrix.shard }})
         run: pnpm test:e2e:dev
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7

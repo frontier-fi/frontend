@@ -72,9 +72,7 @@ export async function setup() {
         chainId: chain.id,
         forkUrl,
         forkBlockNumber: ANVIL_NETWORKS[chain.id].forkBlockNumber,
-        mnemonic:
-          process.env.TEST_ACCOUNT_MNEMONIC ||
-          'have doctor foam invite bottom elevator cream bulb pigeon holiday razor castle',
+        mnemonic: 'have doctor foam invite bottom elevator cream bulb pigeon holiday razor castle',
       }),
     })
 

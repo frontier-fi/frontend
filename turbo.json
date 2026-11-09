@@ -17,8 +17,7 @@
     "NEXT_PUBLIC_E2E_DEV",
     "CI",
     "ALLOWED_ORIGINS",
-    "TZ",
-    "TEST_ACCOUNT_MNEMONIC"
+    "TZ"
   ],
   "globalPassThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"],
   "tasks": {
