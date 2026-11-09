@@ -5,7 +5,6 @@ import { Toast } from '@repo/lib/shared/components/toasts/Toast'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
 import { ensureError } from '@repo/lib/shared/utils/errors'
-import { captureFatalError } from '@repo/lib/shared/utils/query-errors'
 import { secs } from '@repo/lib/shared/utils/time'
 import { AlertStatus, ToastId, useToast } from '@chakra-ui/react'
 import { milliseconds } from 'date-fns'
@@ -123,18 +122,6 @@ export function useRecentTransactionsLogic() {
         setTransactions(updatePayload)
       } catch (error) {
         console.error('Error in RecentTransactionsProvider: ', error)
-
-        /* This is an edge-case that we found randomly happening in polygon.
-          Debug tip:
-          Enforce a timeout in waitForTransactionReceipt inside node_modules/viem waitForTransactionReceipt
-          to reproduce the issue
-          */
-        captureFatalError(
-          error,
-          'waitForTransactionReceiptError',
-          'Error in waitForTransactionReceipt inside RecentTransactionsProvider',
-          { txHash: tx.hash }
-        )
 
         const isTimeoutError = ensureError(error).name === 'WaitForTransactionReceiptTimeoutError'
 

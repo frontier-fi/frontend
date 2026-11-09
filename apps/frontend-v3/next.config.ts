@@ -63,7 +63,6 @@ const nextConfig: NextConfig = {
   ],
 }
 
-// Sentry build wrapper disabled (see isSentryEnabled in sentry.config.ts).
 export default nextConfig
 
 /**

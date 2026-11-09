@@ -1,7 +1,5 @@
 import { type TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
-import { useTenderly } from '@repo/lib/modules/web3/useTenderly'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { useMemo } from 'react'
 import {
   ManagedResult,
@@ -44,7 +42,6 @@ export function useBindTokenStep({
   const chainId = getChainId(network)
 
   const { userAddress, isConnected } = useUserAccount()
-  const { buildTenderlyUrl } = useTenderly({ chainId })
 
   const labels: TransactionLabels = {
     init: `Add ${token?.symbol}`,
@@ -80,14 +77,6 @@ export function useBindTokenStep({
     }
   }
 
-  const gasEstimationMeta = sentryMetaForWagmiSimulation(
-    `Error in bind token gas estimation for ${token?.symbol}`,
-    {
-      buildCallQueryData: txConfig,
-      tenderlyUrl: buildTenderlyUrl(txConfig),
-    }
-  )
-
   const id = `bind-token-${token?.symbol}`
 
   const step = useMemo(
@@ -101,7 +90,6 @@ export function useBindTokenStep({
         if (!txConfig) return <DisabledTransactionButton />
         return (
           <ManagedSendTransactionButton
-            gasEstimationMeta={gasEstimationMeta}
             id={id}
             labels={labels}
             onTransactionChange={setTransaction}
@@ -110,7 +98,7 @@ export function useBindTokenStep({
         )
       },
     }),
-    [transaction, txConfig, gasEstimationMeta, labels, id, isTokenBound]
+    [transaction, txConfig, labels, id, isTokenBound]
   )
 
   return { step, isLoading: isLoadingIsTokenBound }

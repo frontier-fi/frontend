@@ -1,7 +1,5 @@
 import { type TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
-import { useTenderly } from '@repo/lib/modules/web3/useTenderly'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { useMemo } from 'react'
 import {
   ManagedResult,
@@ -42,7 +40,6 @@ export function useSetSwapFeeStep({ poolAddress, network, poolType }: UseSetSwap
   const chainId = getChainId(network)
 
   const { userAddress, isConnected } = useUserAccount()
-  const { buildTenderlyUrl } = useTenderly({ chainId })
 
   const enabled = !!poolAddress && isCowPool(poolType)
 
@@ -81,11 +78,6 @@ export function useSetSwapFeeStep({ poolAddress, network, poolType }: UseSetSwap
     }
   }
 
-  const gasEstimationMeta = sentryMetaForWagmiSimulation('Error in set swap fee gas estimation', {
-    buildCallQueryData: txConfig,
-    tenderlyUrl: buildTenderlyUrl(txConfig),
-  })
-
   const setSwapFeeStep = useMemo(
     () => ({
       id,
@@ -97,7 +89,6 @@ export function useSetSwapFeeStep({ poolAddress, network, poolType }: UseSetSwap
         if (!txConfig) return <DisabledTransactionButton />
         return (
           <ManagedSendTransactionButton
-            gasEstimationMeta={gasEstimationMeta}
             id={id}
             labels={labels}
             onTransactionChange={setTransaction}
@@ -106,7 +97,7 @@ export function useSetSwapFeeStep({ poolAddress, network, poolType }: UseSetSwap
         )
       },
     }),
-    [transaction, txConfig, gasEstimationMeta, labels, id, isSwapFeeSetToMax]
+    [transaction, txConfig, labels, id, isSwapFeeSetToMax]
   )
 
   return { setSwapFeeStep, isLoadingSetSwapFeeStep: isLoadingSwapFee || isLoadingMaxSwapFee }

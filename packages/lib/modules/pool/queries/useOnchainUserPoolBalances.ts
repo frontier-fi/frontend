@@ -1,7 +1,6 @@
 import type { GqlPoolUserBalance } from '@repo/lib/shared/services/api/graphql-derived-types'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
-import { captureNonFatalError } from '@repo/lib/shared/utils/query-errors'
 import { HumanAmount } from '@balancer/sdk'
 import type BigNumber from 'bignumber.js'
 import { useEffect, useMemo, useCallback } from 'react'
@@ -62,12 +61,6 @@ function captureUnstakedMulticallError(unstakedPoolBalancesError: ReadContractsE
     'Error in  unstake pool balances multicall in useOnchainUserPoolBalances',
     unstakedPoolBalancesError
   )
-
-  captureNonFatalError({
-    error: unstakedPoolBalancesError,
-    errorName: 'UseOnchainUserPoolBalancesError',
-    errorMessage: 'Error in unstaked pool balances multicall',
-  })
 }
 
 /**

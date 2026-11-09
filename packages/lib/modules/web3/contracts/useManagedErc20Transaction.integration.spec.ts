@@ -26,7 +26,6 @@ test(
         functionName: 'approve',
         args: [vault2, parseUnits('100', 18)],
         enabled: true,
-        simulationMeta: {},
         labels: {} as TransactionLabels,
         onTransactionChange: () => {},
       })

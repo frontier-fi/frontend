@@ -1,7 +1,5 @@
 import { type TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
-import { useTenderly } from '@repo/lib/modules/web3/useTenderly'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { useMemo } from 'react'
 import {
   ManagedResult,
@@ -42,7 +40,6 @@ export function useFinalizeStep({ poolAddress, network, poolType }: UseFinalizeS
   const chainId = getChainId(network)
 
   const { userAddress, isConnected } = useUserAccount()
-  const { buildTenderlyUrl } = useTenderly({ chainId })
 
   const { isPoolInitialized, isLoadingPoolInitialized, refetchIsPoolInitialized } =
     useIsPoolInitialized({ chainId, poolAddress, poolType })
@@ -61,11 +58,6 @@ export function useFinalizeStep({ poolAddress, network, poolType }: UseFinalizeS
     }
   }
 
-  const gasEstimationMeta = sentryMetaForWagmiSimulation('Error in finalize pool gas estimation', {
-    buildCallQueryData: txConfig,
-    tenderlyUrl: buildTenderlyUrl(txConfig),
-  })
-
   const finalizeStep = useMemo(
     () => ({
       id,
@@ -78,7 +70,6 @@ export function useFinalizeStep({ poolAddress, network, poolType }: UseFinalizeS
         if (!txConfig) return <DisabledTransactionButton />
         return (
           <ManagedSendTransactionButton
-            gasEstimationMeta={gasEstimationMeta}
             id={id}
             labels={labels}
             onTransactionChange={setTransaction}
@@ -87,15 +78,7 @@ export function useFinalizeStep({ poolAddress, network, poolType }: UseFinalizeS
         )
       },
     }),
-    [
-      transaction,
-      txConfig,
-      gasEstimationMeta,
-      labels,
-      id,
-      isPoolInitialized,
-      refetchIsPoolInitialized,
-    ]
+    [transaction, txConfig, labels, id, isPoolInitialized, refetchIsPoolInitialized]
   )
 
   return { finalizeStep, isLoadingFinalizeStep: isLoadingPoolInitialized }

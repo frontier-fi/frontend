@@ -1,5 +1,4 @@
 import { getRpcUrl } from '@repo/lib/modules/web3/transports'
-import { SentryError } from '@repo/lib/shared/utils/errors'
 import {
   HumanAmount,
   InputAmount,
@@ -47,7 +46,7 @@ export abstract class BaseSingleTokenRemoveLiquidityHandler implements RemoveLiq
     tokenOut,
   }: QueryRemoveLiquidityInput): Promise<number> {
     if (!tokenOut) {
-      throw new SentryError('TokenOut should never be undefined in Single Token remove liquidity')
+      throw new Error('TokenOut should never be undefined in Single Token remove liquidity')
     }
 
     if (isEmptyHumanAmount(humanBptIn) || !tokenOut) {

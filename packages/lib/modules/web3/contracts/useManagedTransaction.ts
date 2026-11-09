@@ -19,7 +19,6 @@ import { AbiMap } from './AbiMap'
 import { TransactionExecution, TransactionSimulation, WriteAbiMutability } from './contract.types'
 import { useOnTransactionConfirmation } from './useOnTransactionConfirmation'
 import { useOnTransactionSubmission } from './useOnTransactionSubmission'
-import { captureWagmiExecutionError } from '@repo/lib/shared/utils/query-errors'
 import { useTxHash } from '../safe.hooks'
 import { getWaitForReceiptTimeout } from './wagmi-helpers'
 import { onlyExplicitRefetch } from '@repo/lib/shared/utils/queries'
@@ -42,7 +41,6 @@ export interface ManagedTransactionInput {
   labels: TransactionLabels
   chainId: SupportedChainId
   args?: ContractFunctionArgs<IAbiMap[AbiMapKey], WriteAbiMutability> | null
-  txSimulationMeta?: Record<string, unknown>
   enabled: boolean
   value?: bigint
   onTransactionChange: (transaction: ManagedResult) => void
@@ -55,7 +53,6 @@ export function useManagedTransaction({
   labels,
   chainId,
   args,
-  txSimulationMeta,
   enabled = true,
   value,
   onTransactionChange,
@@ -76,7 +73,6 @@ export function useManagedTransaction({
     chainId,
     query: {
       enabled: enabled && !shouldChangeNetwork,
-      meta: txSimulationMeta,
       // In chains like polygon, we don't want background refetches while waiting for min block confirmations
       ...onlyExplicitRefetch,
     },
@@ -148,19 +144,10 @@ export function useManagedTransaction({
       if (txHash) return
     }
 
-    try {
-      return await writeQuery.writeContractAsync({
-        ...simulateQuery.data.request,
-        chainId: chainId,
-      })
-    } catch (e: unknown) {
-      captureWagmiExecutionError(e, 'Error in managed transaction execution', {
-        chainId,
-        request: simulateQuery.data.request,
-      })
-
-      throw e
-    }
+    return await writeQuery.writeContractAsync({
+      ...simulateQuery.data.request,
+      chainId: chainId,
+    })
   }
 
   return {

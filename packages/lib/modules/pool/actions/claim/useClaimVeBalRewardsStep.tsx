@@ -8,7 +8,6 @@ import {
 } from '@repo/lib/modules/transactions/transaction-steps/lib'
 import { ManagedTransactionInput } from '@repo/lib/modules/web3/contracts/useManagedTransaction'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { useMemo, useState } from 'react'
 import { Address } from 'viem'
 import { isTransactionSuccess } from '@repo/lib/modules/transactions/transaction-steps/transaction.helper'
@@ -32,14 +31,6 @@ export function useClaimVeBalRewardsStep({
   const { userAddress } = useUserAccount()
   const [transaction, setTransaction] = useState<ManagedResult | undefined>()
 
-  const txSimulationMeta = sentryMetaForWagmiSimulation(
-    'Error in wagmi tx simulation (Claim veBal rewards transaction)',
-    {
-      userAddress,
-      feeDistributor: networkConfig.contracts.feeDistributor,
-    }
-  )
-
   const props: ManagedTransactionInput = {
     labels,
     chainId: 1, // only on mainnet
@@ -48,7 +39,6 @@ export function useClaimVeBalRewardsStep({
     functionName: 'claimTokens',
     args: [userAddress, claimableVeBalRewardsTokens as Address[]],
     enabled: !!userAddress,
-    txSimulationMeta,
     onTransactionChange: setTransaction,
   }
 

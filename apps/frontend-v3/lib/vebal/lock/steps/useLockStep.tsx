@@ -6,7 +6,6 @@ import {
   TransactionLabels,
   TransactionStep,
 } from '@repo/lib/modules/transactions/transaction-steps/lib'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { Address } from 'viem'
 import {
   getDescription,
@@ -18,7 +17,6 @@ import {
 } from './lock-steps.utils'
 import { useTokenBalances } from '@repo/lib/modules/tokens/TokenBalancesProvider'
 import { LockActionType } from '@repo/lib/modules/vebal/vote/vote.types'
-import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { ManagedTransactionInput } from '@repo/lib/modules/web3/contracts/useManagedTransaction'
 import { isTransactionSuccess } from '@repo/lib/modules/transactions/transaction-steps/transaction.helper'
 
@@ -30,7 +28,6 @@ type UseLockStepArgs = {
 
 export function useLockStep({ lockAmount, lockEndDate, lockActionType }: UseLockStepArgs) {
   const [transaction, setTransaction] = useState<ManagedResult | undefined>()
-  const { userAddress } = useUserAccount()
   const { refetchBalances } = useTokenBalances()
 
   const labels: TransactionLabels = useMemo(
@@ -45,16 +42,6 @@ export function useLockStep({ lockAmount, lockEndDate, lockActionType }: UseLock
     [lockActionType, lockAmount, lockEndDate]
   )
 
-  const txSimulationMeta = sentryMetaForWagmiSimulation(
-    `Error in wagmi tx simulation (Lock transaction of type ${lockActionType})`,
-    {
-      userAddress,
-      lockAmount: lockAmount.toString(),
-      lockEndDate,
-      lockActionType,
-    }
-  )
-
   const props: ManagedTransactionInput = useMemo(() => {
     return {
       enabled: !!lockEndDate,
@@ -64,10 +51,9 @@ export function useLockStep({ lockAmount, lockEndDate, lockActionType }: UseLock
       contractId: 'balancer.veBAL',
       functionName: getLockContractFunctionName(lockActionType),
       args: [],
-      txSimulationMeta,
       onTransactionChange: setTransaction,
     }
-  }, [lockAmount, lockEndDate, lockActionType, labels, txSimulationMeta])
+  }, [lockAmount, lockEndDate, lockActionType, labels])
 
   const onSuccess = useCallback(async () => {
     // Refetches veBAL BPT balance which also affects veBal balance queries

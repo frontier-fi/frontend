@@ -4,9 +4,8 @@ import {
 } from '@repo/lib/modules/transactions/transaction-steps/lib'
 import { CHAINS, RecoveredTokenClaim, useRecoveredFunds } from './useRecoveredFunds'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
-import { getGqlChain, getNetworkConfig } from '@repo/lib/config/app.config'
+import { getNetworkConfig } from '@repo/lib/config/app.config'
 import { ManagedTransactionInput } from '@repo/lib/modules/web3/contracts/useManagedTransaction'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { Address } from 'viem'
 import { isTransactionSuccess } from '@repo/lib/modules/transactions/transaction-steps/transaction.helper'
 import { ManagedTransactionButton } from '@repo/lib/modules/transactions/transaction-steps/TransactionButton'
@@ -24,14 +23,6 @@ export function useClaimSteps(claims: RecoveredTokenClaim[]) {
 
     const labels = getLabels(chainId)
 
-    const txSimulationMeta = sentryMetaForWagmiSimulation(
-      'Error in wagmi tx simulation (Claim recovered funds transaction)',
-      {
-        chain: getGqlChain(chainId),
-        claimData,
-      }
-    )
-
     const stepId = `recovered-funds-claim-${chainId}`
 
     const props: ManagedTransactionInput = {
@@ -42,7 +33,6 @@ export function useClaimSteps(claims: RecoveredTokenClaim[]) {
       functionName: 'claim',
       args: [claimData.users, claimData.tokens, claimData.amounts, claimData.proofs],
       enabled: !!userAddress,
-      txSimulationMeta,
       onTransactionChange: setTransactionFn(stepId),
     }
 

@@ -28,7 +28,6 @@ export function createVitestConfig(monorepoRoot: string): ViteUserConfig {
         '**/*.script.{test,spec}.*',
       ],
       setupFiles: [
-        resolveFromRoot('./packages/lib/test/vitest/setup-sentry.ts'),
         resolveFromRoot('./packages/lib/test/vitest/setup-vitest.tsx'),
         resolveFromRoot('./packages/lib/test/vitest/setup-msw.ts'),
       ],

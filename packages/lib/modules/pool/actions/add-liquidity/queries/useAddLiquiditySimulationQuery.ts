@@ -9,12 +9,9 @@ import { AddLiquidityHandler } from '../handlers/AddLiquidity.handler'
 import { AddLiquidityParams, addLiquidityKeys } from './add-liquidity-keys'
 import { useQuery } from '@tanstack/react-query'
 import { usePool } from '../../../PoolProvider'
-import { sentryMetaForAddLiquidityHandler } from '@repo/lib/shared/utils/query-errors'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
-import { useBlockNumber } from 'wagmi'
 import { isInvariantRatioSimulationErrorMessage } from '@repo/lib/shared/utils/error-filters'
 import { Address } from 'viem'
-import { hasSurgeHook } from '../../../pool.helpers'
 
 export type AddLiquiditySimulationQueryResult = ReturnType<typeof useAddLiquiditySimulationQuery>
 
@@ -32,8 +29,7 @@ export function useAddLiquiditySimulationQuery({
   referenceAmountAddress,
 }: Params) {
   const { userAddress } = useUserAccount()
-  const { pool, chainId } = usePool()
-  const { data: blockNumber } = useBlockNumber({ chainId })
+  const { pool } = usePool()
   const { slippage } = useUserSettings()
   const debouncedHumanAmountsIn = useDebounce(humanAmountsIn, defaultDebounceMs)[0]
 
@@ -65,12 +61,6 @@ export function useAddLiquiditySimulationQuery({
       // 2 retries by default
       return failureCount < 2
     },
-    meta: sentryMetaForAddLiquidityHandler('Error in add liquidity simulation query', {
-      ...params,
-      chainId,
-      blockNumber,
-      hasSurgeHook: hasSurgeHook(pool),
-    }),
     ...onlyExplicitRefetch,
   })
 }

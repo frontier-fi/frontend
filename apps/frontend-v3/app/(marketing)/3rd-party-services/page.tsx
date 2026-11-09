@@ -23,11 +23,6 @@ export default function Cookies() {
       iconUrl: '/images/services/hypernative.svg',
     },
     {
-      name: 'Sentry',
-      description: 'Used for error tracking and performance monitoring.',
-      iconUrl: '/images/services/sentry.svg',
-    },
-    {
       name: 'Amazon Web Services',
       description:
         'Used for a variety of infrastructure services, but primarily to fetch and cache blockchain data.',
@@ -37,11 +32,6 @@ export default function Cookies() {
       name: 'OpenZeppelin',
       description: 'Used for security and compliance monitoring.',
       iconUrl: '/images/services/open-zeppelin.svg',
-    },
-    {
-      name: 'Vercel',
-      description: 'Used for deployment and hosting.',
-      iconUrl: '/images/services/vercel.svg',
     },
     {
       name: 'Coingecko',

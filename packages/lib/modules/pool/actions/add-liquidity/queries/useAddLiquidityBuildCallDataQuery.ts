@@ -5,12 +5,10 @@ import { usePool } from '../../../PoolProvider'
 import { ensureLastQueryResponse } from '../../LiquidityActionHelpers'
 import { AddLiquidityParams, addLiquidityKeys } from './add-liquidity-keys'
 import { useRelayerSignature } from '@repo/lib/modules/relayer/RelayerSignatureProvider'
-import { sentryMetaForAddLiquidityHandler } from '@repo/lib/shared/utils/query-errors'
 import { AddLiquidityHandler } from '../handlers/AddLiquidity.handler'
 import { AddLiquiditySimulationQueryResult } from './useAddLiquiditySimulationQuery'
 import { useDebounce } from 'use-debounce'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
-import { useBlockNumber } from 'wagmi'
 import { usePermit2Signature } from '@repo/lib/modules/tokens/approvals/permit2/Permit2SignatureProvider'
 import { isV3Pool } from '../../../pool.helpers'
 
@@ -34,8 +32,7 @@ export function useAddLiquidityBuildCallDataQuery({
   enabled: boolean
 }) {
   const { userAddress, isConnected } = useUserAccount()
-  const { pool, chainId } = usePool()
-  const { data: blockNumber } = useBlockNumber({ chainId })
+  const { pool } = usePool()
   const { relayerApprovalSignature } = useRelayerSignature()
   const { permit2Signature: permit2 } = usePermit2Signature()
   const debouncedHumanAmountsIn = useDebounce(humanAmountsIn, defaultDebounceMs)[0]
@@ -75,11 +72,6 @@ export function useAddLiquidityBuildCallDataQuery({
     queryFn,
     enabled: enabled && isConnected && !!simulationQuery.data,
     gcTime: 0,
-    meta: sentryMetaForAddLiquidityHandler('Error in add liquidity buildCallData query', {
-      ...params,
-      chainId,
-      blockNumber,
-    }),
     ...onlyExplicitRefetch,
   })
 }

@@ -9,7 +9,6 @@ import { useHasMinterApproval } from './useHasMinterApproval'
 import { useState } from 'react'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { ManagedTransactionButton } from '../../transactions/transaction-steps/TransactionButton'
 import { buildBatchableTxCall } from '../../transactions/transaction-steps/tx-batch.helpers'
 
@@ -38,13 +37,6 @@ export function useApproveMinterStep(
     tooltip: 'Approval relayer as minter',
   }
 
-  const txSimulationMeta = sentryMetaForWagmiSimulation(
-    'Error in wagmi tx simulation (Minter approval transaction)',
-    {
-      minter: contracts.balancer.minter,
-    }
-  )
-
   const props: ManagedTransactionInput = {
     contractAddress: contracts.balancer.minter,
     contractId: 'balancer.minter',
@@ -53,7 +45,6 @@ export function useApproveMinterStep(
     chainId,
     args: [contracts.balancer.relayerV6, true],
     enabled: !isLoading && isConnected && !hasMinterApproval,
-    txSimulationMeta,
     onTransactionChange: setTransaction,
   }
 

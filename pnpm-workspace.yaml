@@ -7,7 +7,6 @@ allowBuilds:
   "@balancer/sdk": true
   "@balancer/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/4356e40fb42edf6a795df67035aa2db74cad45fb": true
   "@parcel/watcher": true
-  "@sentry/cli": true
   "@reown/appkit": true
   bufferutil: true
   esbuild: true
