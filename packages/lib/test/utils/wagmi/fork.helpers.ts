@@ -72,10 +72,10 @@ export async function setTokenBalances({
 }
 
 export function resetFork(chainId: number = mainnet.id) {
-  const privateKey = process.env['NEXT_PRIVATE_DRPC_KEY']
+  const privateKey = process.env['DRPC_API_KEY']
 
   if (!privateKey) {
-    throw new Error('NEXT_PRIVATE_DRPC_KEY is missing')
+    throw new Error('DRPC_API_KEY is missing')
   }
 
   return forkClient.reset({

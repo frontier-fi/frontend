@@ -2,11 +2,11 @@ import { NextRequest } from 'next/server'
 import type { GqlChain } from '../../services/api/generated/graphql'
 import { drpcUrl } from '../rpc'
 
-const DRPC_KEY = process.env.NEXT_PRIVATE_DRPC_KEY || ''
+const DRPC_KEY = process.env.DRPC_API_KEY || ''
 
 export async function postRpcCall(request: NextRequest, chain: GqlChain) {
   if (!DRPC_KEY) {
-    return new Response(JSON.stringify({ error: 'NEXT_PRIVATE_DRPC_KEY is missing' }), {
+    return new Response(JSON.stringify({ error: 'DRPC_API_KEY is missing' }), {
       status: 500,
     })
   }

@@ -114,16 +114,13 @@ export function getTestRpcSetup(networkName: ChainIdWithFork) {
 
 /*
  *  We currently use Drpc for all integration tests (Ethereum, Polygon and Sepolia networks)
- *  In case you want to use a different RPC, you can set something like this (i.e. ALCHEMY)
- *     const privateAlchemyKey = process.env['NEXT_PRIVATE_ALCHEMY_KEY']
- *     return `https://polygon-mainnet.g.alchemy.com/v2/${privateAlchemyKey}`
  */
 export function getForkUrl(chainId: ChainIdWithFork, verbose = false): string {
   const network = ANVIL_NETWORKS[chainId]
-  const privateKey = process.env['NEXT_PRIVATE_DRPC_KEY']
+  const privateKey = process.env['DRPC_API_KEY']
 
   if (!privateKey) {
-    throw Error(`Please set the NEXT_PRIVATE_DRPC_KEY environment variable.`)
+    throw Error(`Please set the DRPC_API_KEY environment variable.`)
   }
 
   if (privateKey) {
