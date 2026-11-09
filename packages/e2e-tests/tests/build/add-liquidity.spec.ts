@@ -1,17 +1,11 @@
 import { test, expect } from '@playwright/test'
-import { balWeth8020 } from '@repo/lib/modules/pool/__mocks__/pool-examples/flat'
 
-test('Balancer: add liquidity page renders', async ({ page }) => {
-  await page.goto(`http://localhost:3000/pools/ethereum/v2/${balWeth8020.poolId}`)
+const SEPOLIA_V3_POOL_ID = '0x4898409f170de235844822a9545a54dbe637c049'
+
+test('Frontier: add liquidity page renders', async ({ page }) => {
+  await page.goto(`http://localhost:3000/pools/sepolia/v3/${SEPOLIA_V3_POOL_ID}`)
 
   await page.getByRole('button', { name: 'Add liquidity' }).click()
-
-  // Proportional tab is disabled
-  await page.locator('#button-group-1').hover() //TODO: add id to the button to improve locator
-  await expect(
-    page.getByText('does not support liquidity to be added proportionally'),
-  ).toBeVisible()
-  await page.locator('#button-group-0').hover() //TODO: add id to the button to improve locator
 
   // Form works for flexible tab
   await expect(page.getByText('Flexible', { exact: true })).toBeVisible()

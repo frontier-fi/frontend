@@ -1,17 +1,34 @@
-import { base, gnosis, mainnet, polygon, sepolia, sonic } from 'viem/chains'
+import { base, mainnet, monad, sepolia } from 'viem/chains'
 import { Address, Hex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { drpcUrlByChainId } from '@repo/lib/shared/utils/rpc'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
+import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 
-type NetworksWithFork = readonly [
-  typeof mainnet,
-  typeof polygon,
-  typeof sepolia,
-  typeof gnosis,
-  typeof base,
-  typeof sonic,
-]
+type NetworksWithFork = readonly [typeof mainnet, typeof sepolia, typeof base, typeof monad]
 export type ChainIdWithFork = NetworksWithFork[number]['id']
+
+const gqlChainToForkChainId: Partial<Record<GqlChain, ChainIdWithFork>> = {
+  [GqlChainValues.Mainnet]: mainnet.id,
+  [GqlChainValues.Sepolia]: sepolia.id,
+  [GqlChainValues.Base]: base.id,
+  [GqlChainValues.Monad]: monad.id,
+}
+
+export function getForkChainId(chain: GqlChain): ChainIdWithFork {
+  return gqlChainToForkChainId[chain] ?? sepolia.id
+}
+
+export function isChainSupported(chain: GqlChain): boolean {
+  return (PROJECT_CONFIG.supportedNetworks as readonly GqlChain[]).includes(chain)
+}
+
+export function getSupportedForkChainIds(): ChainIdWithFork[] {
+  return PROJECT_CONFIG.supportedNetworks
+    .map(chain => gqlChainToForkChainId[chain])
+    .filter((chainId): chainId is ChainIdWithFork => chainId !== undefined)
+}
 
 export type NetworkSetup = {
   chainId: ChainIdWithFork
@@ -48,11 +65,9 @@ export function testAccountIndex(account: Address) {
 const ANVIL_PORTS: Record<ChainIdWithFork, number> = {
   //Ports separated by 100 to avoid port collision when running tests in parallel
   [mainnet.id]: 8645,
-  [polygon.id]: 8745,
   [sepolia.id]: 8845,
   [base.id]: 8945,
-  [gnosis.id]: 9045,
-  [sonic.id]: 9145,
+  [monad.id]: 9245,
 }
 
 /*
@@ -66,17 +81,11 @@ export const ANVIL_NETWORKS: Record<ChainIdWithFork, NetworkSetup> = {
     port: ANVIL_PORTS[mainnet.id],
     forkBlockNumber: 24521900n,
   },
-  [polygon.id]: {
-    chainId: polygon.id,
-    fallBackRpc: 'https://polygon-rpc.com',
-    port: ANVIL_PORTS[polygon.id],
-    forkBlockNumber: 67867894n,
-  },
   [sepolia.id]: {
     chainId: sepolia.id,
     fallBackRpc: 'https://gateway.tenderly.co/public/sepolia',
     port: ANVIL_PORTS[sepolia.id],
-    forkBlockNumber: 10295680n,
+    forkBlockNumber: 12099000n,
   },
   [base.id]: {
     chainId: base.id,
@@ -84,17 +93,10 @@ export const ANVIL_NETWORKS: Record<ChainIdWithFork, NetworkSetup> = {
     port: ANVIL_PORTS[base.id],
     forkBlockNumber: 42375000n,
   },
-  [sonic.id]: {
-    chainId: sonic.id,
-    fallBackRpc: 'https://gateway.tenderly.co/public/sonic',
-    port: ANVIL_PORTS[sonic.id],
-    forkBlockNumber: 2687659n,
-  },
-  [gnosis.id]: {
-    chainId: gnosis.id,
-    fallBackRpc: 'https://gnosis.drpc.org',
-    port: ANVIL_PORTS[gnosis.id],
-    forkBlockNumber: 37902207n,
+  [monad.id]: {
+    chainId: monad.id,
+    fallBackRpc: 'https://rpc.monad.xyz',
+    port: ANVIL_PORTS[monad.id],
   },
 }
 
@@ -113,7 +115,7 @@ export function getTestRpcSetup(networkName: ChainIdWithFork) {
 }
 
 /*
- *  We currently use Drpc for all integration tests (Ethereum, Polygon and Sepolia networks)
+ *  We currently use Drpc for all integration tests
  */
 export function getForkUrl(chainId: ChainIdWithFork, verbose = false): string {
   const network = ANVIL_NETWORKS[chainId]

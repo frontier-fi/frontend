@@ -1,8 +1,9 @@
 import type { GqlPoolElement } from '@repo/lib/shared/services/api/graphql-derived-types'
+import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { buildDefaultPoolTestProvider, testHook } from '@repo/lib/test/utils/custom-renderers'
+import { isChainSupported } from '@repo/test/anvil/anvil-setup'
 import { waitFor } from '@testing-library/react'
-import { getApiPoolMock } from '../../../__mocks__/api-mocks/api-mocks'
-import { partialBoostedSepolia } from '../../../__mocks__/pool-examples/boosted'
+import { fetchPoolMock, minimalPoolQuery } from '../../../__mocks__/fetchPoolMock'
 import { Pool } from '../../../pool.types'
 import { usePoolStateWithBalancesQuery } from './usePoolStateWithBalancesQuery'
 
@@ -14,9 +15,13 @@ async function testQuery(pool: Pool) {
   return result
 }
 
-describe('usePoolStateWithBalances', () => {
-  it('for a partial boosted pool', async () => {
-    const pool = getApiPoolMock(partialBoostedSepolia)
+describe.runIf(isChainSupported(GqlChainValues.Sepolia))('usePoolStateWithBalances', () => {
+  it('for a Sepolia v3 boosted pool', async () => {
+    const pool = await fetchPoolMock({
+      poolId: '0x8e06ef1a2e854feaee0a83510acd05f8e443fa4f',
+      chain: GqlChainValues.Sepolia,
+      query: minimalPoolQuery,
+    })
 
     const result = await testQuery(pool)
 

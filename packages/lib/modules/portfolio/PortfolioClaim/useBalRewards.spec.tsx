@@ -3,9 +3,7 @@ import { testHook } from '@repo/lib/test/utils/custom-renderers'
 import { waitFor } from '@testing-library/react'
 import { useBalTokenRewards } from './useBalRewards'
 import { ClaimablePool } from '@repo/lib/modules/pool/actions/claim/ClaimProvider'
-import { getNetworkConfig } from '@repo/lib/config/networks'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
-import { bn } from '@repo/lib/shared/utils/numbers'
 
 const { useUserAccountMock, useReadContractsMock } = vi.hoisted(() => ({
   useUserAccountMock: vi.fn(),
@@ -30,7 +28,6 @@ vi.mock('@repo/lib/modules/web3/UserAccountProvider', async importOriginal => {
 
 const USER_ADDRESS = '0x1234567890123456789012345678901234567890'
 const GAUGE_ADDRESS = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'
-const mainnetBalAddress = getNetworkConfig(GqlChainValues.Mainnet).tokens.addresses.bal
 
 function claimablePool(): ClaimablePool {
   return {
@@ -63,7 +60,7 @@ describe('useBalTokenRewards', () => {
     expect(result.current.balRewardsData).toEqual([])
   })
 
-  it('maps a claimable balance to a BAL reward with human and fiat value', async () => {
+  it('always returns empty BAL rewards in Frontier (no gauges)', async () => {
     useReadContractsMock.mockReturnValue({
       data: [{ status: 'success', result: 1000000000000000000n }], // 1 BAL (18 decimals)
       refetch: vi.fn(),
@@ -73,14 +70,8 @@ describe('useBalTokenRewards', () => {
 
     const { result } = testHook(() => useBalTokenRewards([claimablePool()]))
 
-    await waitFor(() => expect(result.current.balRewardsData).toHaveLength(1))
-
-    const reward = result.current.balRewardsData[0]!
-    expect(reward.gaugeAddress).toBe(GAUGE_ADDRESS)
-    expect(reward.humanBalance).toBe('1')
-    expect(reward.tokenAddress).toBe(mainnetBalAddress)
-    expect(reward.pool.chain).toBe(GqlChainValues.Mainnet)
-    expect(bn(reward.fiatBalance).isGreaterThanOrEqualTo(0)).toBe(true)
+    await waitFor(() => expect(result.current.isLoadedBalRewards).toBe(true))
+    expect(result.current.balRewardsData).toEqual([])
   })
 
   it('drops failed gauge reads', async () => {

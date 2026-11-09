@@ -11,7 +11,7 @@ export const gyroPoolMock: GqlPoolElement = {
   factory: '0x5d8545a7330245150be0ce88f8afb0edc41dfc34',
   symbol: '2CLP-USDC-DAI',
   createTime: 1674129549,
-  type: 'GYRO',
+  type: 'ECLP',
   chain: 'POLYGON',
   dynamicData: {
     poolId: '0xdac42eeb17758daa38caf9a3540c808247527ae3000200000000000000000a2b',

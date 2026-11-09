@@ -1,16 +1,30 @@
-import { vaultV2Address, wETHAddress, wjAuraAddress } from '@repo/lib/debug-helpers'
+import {
+  getChainId,
+  getNetworkConfig,
+  getVaultV3Address,
+  getWrappedNativeAssetAddress,
+} from '@repo/lib/config/app.config'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { testHook } from '@repo/lib/test/utils/custom-renderers'
 import { defaultTestUserAccount } from '@repo/test/anvil/anvil-setup'
 import { act, waitFor } from '@testing-library/react'
 import { Address } from 'viem'
 import { useTokenAllowances } from './useTokenAllowances'
 
+const defaultChain = PROJECT_CONFIG.defaultNetwork
+const defaultChainId = getChainId(defaultChain)
+const spenderAddress = getVaultV3Address(defaultChain)
+const wNativeAddress = getWrappedNativeAssetAddress(defaultChain).toLowerCase() as Address
+
+const secondTokenAddress = (getNetworkConfig(defaultChain).tokens.addresses.bal ??
+  wNativeAddress) as Address
+
 function testTokenAllowances(tokenAddresses: Address[]) {
   const { result } = testHook(() =>
     useTokenAllowances({
-      chainId: 1,
+      chainId: defaultChainId,
       userAddress: defaultTestUserAccount,
-      spenderAddress: vaultV2Address,
+      spenderAddress,
       tokenAddresses,
     })
   )
@@ -18,7 +32,7 @@ function testTokenAllowances(tokenAddresses: Address[]) {
   return result
 }
 
-const tokenAddresses = [wETHAddress, wjAuraAddress]
+const tokenAddresses = [wNativeAddress, secondTokenAddress]
 
 test('fetches token allowances', async () => {
   const result = testTokenAllowances(tokenAddresses)
@@ -26,8 +40,8 @@ test('fetches token allowances', async () => {
 
   expect(result.current.allowances).toEqual(
     expect.objectContaining({
-      [wjAuraAddress]: expect.any(BigInt),
-      [wETHAddress]: expect.any(BigInt),
+      [secondTokenAddress]: expect.any(BigInt),
+      [wNativeAddress]: expect.any(BigInt),
     })
   )
 })

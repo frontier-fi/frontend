@@ -1,28 +1,29 @@
-import { DefaultPoolTestProvider, testHook } from '@repo/lib/test/utils/custom-renderers'
+import type { GqlPoolElement } from '@repo/lib/shared/services/api/graphql-derived-types'
+import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
+import { buildDefaultPoolTestProvider, testHook } from '@repo/lib/test/utils/custom-renderers'
+import { isChainSupported } from '@repo/test/anvil/anvil-setup'
 import { waitFor } from '@testing-library/react'
-
-import { aWjAuraWethPoolElementMock } from '@repo/lib/test/msw/builders/gqlPoolElement.builders'
+import { fetchPoolMock, minimalPoolQuery } from '../../../__mocks__/fetchPoolMock'
+import { Pool } from '../../../pool.types'
 import { HumanAmount, TokenAmount } from '@balancer/sdk'
 import { toHumanAmount } from '../../LiquidityActionHelpers'
 import { selectRemoveLiquidityHandler } from '../handlers/selectRemoveLiquidityHandler'
 import { RemoveLiquidityType } from '../remove-liquidity.types'
 import { useRemoveLiquiditySimulationQuery } from './useRemoveLiquiditySimulationQuery'
 import { Address } from 'viem'
+import { sepolia } from 'viem/chains'
 import { connectWithDefaultUser } from '@repo/test/utils/wagmi/wagmi-connections'
 import { AMOUNT_LOWER_THRESHOLD } from '@repo/lib/shared/utils/numbers'
 
-async function testQuery(humanBptIn: HumanAmount) {
-  const handler = selectRemoveLiquidityHandler(
-    aWjAuraWethPoolElementMock(),
-    RemoveLiquidityType.Proportional
-  )
+async function testQuery(pool: Pool, humanBptIn: HumanAmount) {
+  const handler = selectRemoveLiquidityHandler(pool, RemoveLiquidityType.Proportional)
 
-  const emptyTokenOut = '' as Address // We don't use it but it is required to simplify TS checks
+  const emptyTokenOut = '' as Address
 
   const { result } = testHook(
     () =>
       useRemoveLiquiditySimulationQuery({
-        chainId: 1,
+        chainId: sepolia.id,
         handler,
         humanBptIn,
         tokenOut: emptyTokenOut,
@@ -30,27 +31,38 @@ async function testQuery(humanBptIn: HumanAmount) {
         enabled: true,
       }),
     {
-      wrapper: DefaultPoolTestProvider,
+      wrapper: buildDefaultPoolTestProvider(pool as GqlPoolElement),
     }
   )
 
   return result
 }
 
-test('runs preview query for proportional remove liquidity', async () => {
-  await connectWithDefaultUser()
+describe.runIf(isChainSupported(GqlChainValues.Sepolia))(
+  'useRemoveLiquiditySimulationQuery',
+  () => {
+    test('runs preview query for proportional remove liquidity', async () => {
+      await connectWithDefaultUser()
 
-  const humanBptIn: HumanAmount = '642.164532327890776754'
+      const pool = await fetchPoolMock({
+        poolId: '0x4898409f170de235844822a9545a54dbe637c049',
+        chain: GqlChainValues.Sepolia,
+        query: minimalPoolQuery,
+      })
 
-  const result = await testQuery(humanBptIn)
+      const humanBptIn: HumanAmount = '10'
 
-  await waitFor(() => expect(result.current.data?.amountsOut).toBeDefined())
+      const result = await testQuery(pool, humanBptIn)
 
-  const wjAmountOut = result.current.data?.amountsOut?.[0] as TokenAmount
-  const wjOutUnits = toHumanAmount(wjAmountOut)
-  const wethAmountOut = result.current.data?.amountsOut?.[1] as TokenAmount
-  const wethOutUnits = toHumanAmount(wethAmountOut)
+      await waitFor(() => expect(result.current.data?.amountsOut).toBeDefined())
 
-  expect(Number(wjOutUnits)).toBeGreaterThan(1800)
-  expect(Number(wethOutUnits)).toBeGreaterThan(AMOUNT_LOWER_THRESHOLD)
-})
+      const firstAmountOut = result.current.data?.amountsOut?.[0] as TokenAmount
+      const firstOutUnits = toHumanAmount(firstAmountOut)
+      const secondAmountOut = result.current.data?.amountsOut?.[1] as TokenAmount
+      const secondOutUnits = toHumanAmount(secondAmountOut)
+
+      expect(Number(firstOutUnits)).toBeGreaterThan(AMOUNT_LOWER_THRESHOLD)
+      expect(Number(secondOutUnits)).toBeGreaterThan(AMOUNT_LOWER_THRESHOLD)
+    })
+  }
+)

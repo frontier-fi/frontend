@@ -1,47 +1,59 @@
-import { DefaultPoolTestProvider, testHook } from '@repo/lib/test/utils/custom-renderers'
+import type { GqlPoolElement } from '@repo/lib/shared/services/api/graphql-derived-types'
+import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
+import { buildDefaultPoolTestProvider, testHook } from '@repo/lib/test/utils/custom-renderers'
+import { isChainSupported } from '@repo/test/anvil/anvil-setup'
 import { waitFor } from '@testing-library/react'
-
-import { aWjAuraWethPoolElementMock } from '@repo/lib/test/msw/builders/gqlPoolElement.builders'
+import { fetchPoolMock, minimalPoolQuery } from '../../../__mocks__/fetchPoolMock'
+import { Pool } from '../../../pool.types'
 import { selectRemoveLiquidityHandler } from '../handlers/selectRemoveLiquidityHandler'
 import { RemoveLiquidityType } from '../remove-liquidity.types'
 import { useRemoveLiquidityPriceImpactQuery } from './useRemoveLiquidityPriceImpactQuery'
 import { HumanAmount } from '@balancer/sdk'
 import { Address } from 'viem'
+import { sepolia } from 'viem/chains'
 import { connectWithDefaultUser } from '@repo/test/utils/wagmi/wagmi-connections'
 
-const emptyTokenOut = '' as Address // We don't use it but it is required to simplify TS checks
+const emptyTokenOut = '' as Address
 
-async function testQuery(humanBptIn: HumanAmount) {
-  const handler = selectRemoveLiquidityHandler(
-    aWjAuraWethPoolElementMock(),
-    RemoveLiquidityType.Proportional
-  )
+async function testQuery(pool: Pool, humanBptIn: HumanAmount) {
+  const handler = selectRemoveLiquidityHandler(pool, RemoveLiquidityType.Proportional)
 
   const { result } = testHook(
     () =>
       useRemoveLiquidityPriceImpactQuery({
-        chainId: 1,
+        chainId: sepolia.id,
         handler,
         humanBptIn,
         tokenOut: emptyTokenOut,
         enabled: true,
       }),
     {
-      wrapper: DefaultPoolTestProvider,
+      wrapper: buildDefaultPoolTestProvider(pool as GqlPoolElement),
     }
   )
 
   return result
 }
 
-test('queries price impact for add liquidity', async () => {
-  await connectWithDefaultUser()
-  const humanBptIn: HumanAmount = '1'
+describe.runIf(isChainSupported(GqlChainValues.Sepolia))(
+  'useRemoveLiquidityPriceImpactQuery',
+  () => {
+    test('queries price impact for remove liquidity', async () => {
+      await connectWithDefaultUser()
 
-  const result = await testQuery(humanBptIn)
+      const pool = await fetchPoolMock({
+        poolId: '0x4898409f170de235844822a9545a54dbe637c049',
+        chain: GqlChainValues.Sepolia,
+        query: minimalPoolQuery,
+      })
 
-  await waitFor(() => expect(result.current.data).toBeDefined())
+      const humanBptIn: HumanAmount = '1'
+      const result = await testQuery(pool, humanBptIn)
 
-  expect(result.current.data).toBeCloseTo(0.002368782867485742)
-  expect(result.current.isLoading).toBeFalsy()
-})
+      await waitFor(() => expect(result.current.data).toBeDefined())
+
+      expect(result.current.data).toBe(0)
+      expect(result.current.isLoading).toBeFalsy()
+    })
+  }
+)

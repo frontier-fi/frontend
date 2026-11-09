@@ -64,6 +64,7 @@ it('supportsNestedActions', () => {
 function fakeNestedPool(poolId: string): Pool {
   return {
     id: poolId, // Balancer 80 BAL 20 WETH auraBAL',
+    chain: GqlChainValues.Mainnet,
     poolTokens: [
       {
         hasNestedPool: true,
