@@ -1,0 +1,98 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - production
+
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/frontier-fi/frontend
+
+jobs:
+  # Every component of the app runs this one image, pinned by digest in .do/prod.yaml.
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      digest: ${{ steps.image.outputs.digest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push image
+        id: image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.IMAGE }}:${{ github.sha }}
+          build-args: |
+            NEXT_PUBLIC_APP_ENV=prod
+            NEXT_PUBLIC_API_URL=https://api.frontier.fi/graphql
+            NEXT_PUBLIC_WALLET_CONNECT_ID=${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_ID }}
+          # The digest then names the image itself, not an index that wraps it with attestations.
+          provenance: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: production
+    # Filled into the placeholders of .do/prod.yaml by the deploy action.
+    env:
+      IMAGE_DIGEST: ${{ needs.build.outputs.digest }}
+      DRPC_API_KEY: ${{ secrets.DRPC_API_KEY }}
+      LOGTAIL_TOKEN: ${{ secrets.LOGTAIL_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The action pastes values into the spec as text, and fills an unset one with an empty
+      # string, which replaces the live secret.
+      - name: Check secrets
+        id: secrets
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+        run: |
+          if [ -z "$DIGITALOCEAN_ACCESS_TOKEN" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "DIGITALOCEAN_ACCESS_TOKEN is unset. Skipping the DigitalOcean deploy."
+            exit 0
+          fi
+          names=$(grep -v '^ *#' .do/prod.yaml | grep -oP '\$\{\K[A-Z][A-Z0-9_]*(?=\})' | sort -u || true)
+          for name in $names; do
+            value="${!name:-}"
+            if [ -z "$value" ]; then
+              echo "::error::.do/prod.yaml uses $name, which is empty in this job. Secrets also need a line in the env of this job."
+              exit 1
+            fi
+            if [[ "$value" == *"'"* || "$value" == *$'\n'* || "$value" == *$'\r'* ]]; then
+              echo "::error::$name contains a single quote or a line break, which breaks .do/prod.yaml."
+              exit 1
+            fi
+          done
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy app
+        if: steps.secrets.outputs.ready == 'true'
+        uses: digitalocean/app_action/deploy@cc55bc9b848d25f9c1c9f831cf843fbab3fbfb15 # v2.0.11
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          app_spec_location: .do/prod.yaml
+          print_deploy_logs: true
