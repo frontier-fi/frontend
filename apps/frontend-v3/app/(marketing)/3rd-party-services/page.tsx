@@ -17,12 +17,6 @@ export default function Cookies() {
       iconUrl: '/images/services/the-graph.svg',
     },
     {
-      name: 'Hypernative',
-      description:
-        'Used to securely check wallet addresses and shares it with Hypernative Inc. for risk and compliance reasons.',
-      iconUrl: '/images/services/hypernative.svg',
-    },
-    {
       name: 'Amazon Web Services',
       description:
         'Used for a variety of infrastructure services, but primarily to fetch and cache blockchain data.',

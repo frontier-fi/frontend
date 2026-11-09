@@ -33,7 +33,7 @@ export function BlockedAddressModal() {
           </Text>
           <Text color="grayText" mb="md">
             Your wallet address cannot use this site because it has been flagged as high risk by our
-            compliance partner, Hypernative.
+            compliance checks.
           </Text>
           <Text color="grayText" mb="md">
             This website is open source and permissionless. Anyone can fork and run their own front

@@ -53,9 +53,9 @@ export default function Privacy() {
                 <li>
                   Frontier Finance does not and has not stored personal information from users of
                   the UI. However, Frontier Finance uses third party services including, without
-                  limitation, Cloudflare, Hypernative, RainbowKit, OpenZeppelin, Amazon Web
-                  Services, Coingecko and others who collect and store certain user information only
-                  for use in the provision of their services.
+                  limitation, Cloudflare, RainbowKit, OpenZeppelin, Amazon Web Services, Coingecko
+                  and others who collect and store certain user information only for use in the
+                  provision of their services.
                 </li>
                 <li>
                   Frontier Finance does not set any cookies. However, we use third party service
@@ -308,13 +308,6 @@ export default function Privacy() {
                       <p>
                         We share with vendors, such CloudFlare: certain IP addresses, device
                         identifiers or other similar identifiers.
-                      </p>
-
-                      <p>
-                        With our compliance partner, Hypernative, we only share wallet addresses
-                        used to connect a wallet to our UI (all other user information like IP
-                        addresses, device identifiers and location are not shared). The code for the
-                        UI is open source, and can be reviewed by anyone at any time.
                       </p>
                     </td>
                   </tr>
