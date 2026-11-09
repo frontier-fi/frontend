@@ -56,7 +56,16 @@ export async function checkAddressReputation({
     const isAuthorized = recommendation !== 'Deny'
 
     return NextResponse.json({ isAuthorized })
-  } catch {
+  } catch (error) {
+    console.error(
+      JSON.stringify({
+        level: 'error',
+        source: 'hypernative',
+        address,
+        message: error instanceof Error ? error.message : String(error),
+      })
+    )
+
     return NextResponse.json({ isAuthorized: true })
   }
 }

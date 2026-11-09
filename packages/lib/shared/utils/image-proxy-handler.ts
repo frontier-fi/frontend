@@ -50,6 +50,15 @@ export async function handleImageProxy(request: NextRequest) {
     clearTimeout(timeoutId)
 
     if (!response.ok) {
+      console.error(
+        JSON.stringify({
+          level: 'error',
+          source: 'image-proxy',
+          status: response.status,
+          imageUrl,
+        })
+      )
+
       return NextResponse.json({ error: 'Failed to fetch image' }, { status: 502 })
     }
 
@@ -82,7 +91,15 @@ export async function handleImageProxy(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Image proxy failed:', error)
+    console.error(
+      JSON.stringify({
+        level: 'error',
+        source: 'image-proxy',
+        imageUrl,
+        message: error instanceof Error ? error.message : String(error),
+      })
+    )
+
     clearTimeout(timeoutId)
 
     if (error instanceof Error && error.name === 'AbortError') {

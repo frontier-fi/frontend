@@ -10,6 +10,7 @@ import { useIsMounted } from '@repo/lib/shared/hooks/useIsMounted'
 import { useSafeAppConnectionGuard } from './useSafeAppConnectionGuard'
 import { useWCConnectionLocalStorage } from './wallet-connect/useWCConnectionLocalStorage'
 import { clearImpersonatedAddressLS } from '@repo/lib/test/utils/wagmi/fork.helpers'
+import { setClientErrorContext } from '@repo/lib/shared/utils/error-logger'
 
 async function isAuthorizedAddress(address: Address): Promise<boolean> {
   try {
@@ -93,6 +94,14 @@ export function useUserAccountLogic() {
       onEmptyUserAddress()
     }
   }, [result.userAddress])
+
+  useEffect(() => {
+    setClientErrorContext({
+      userAddress: result.isConnected ? result.userAddress : undefined,
+      wallet: result.connector?.id,
+      walletNetwork: result.chain?.name,
+    })
+  }, [result.isConnected, result.userAddress, result.connector?.id, result.chain?.name])
 
   useConnectionEffect({
     onDisconnect: () => {

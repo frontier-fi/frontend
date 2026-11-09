@@ -4,6 +4,7 @@ import { getChainId } from '@repo/lib/config/app.config'
 import { Toast } from '@repo/lib/shared/components/toasts/Toast'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
+import { reportClientError } from '@repo/lib/shared/utils/error-logger'
 import { ensureError } from '@repo/lib/shared/utils/errors'
 import { secs } from '@repo/lib/shared/utils/time'
 import { AlertStatus, ToastId, useToast } from '@chakra-ui/react'
@@ -123,7 +124,21 @@ export function useRecentTransactionsLogic() {
       } catch (error) {
         console.error('Error in RecentTransactionsProvider: ', error)
 
-        const isTimeoutError = ensureError(error).name === 'WaitForTransactionReceiptTimeoutError'
+        const err = ensureError(error)
+        const isTimeoutError = err.name === 'WaitForTransactionReceiptTimeoutError'
+
+        reportClientError({
+          category: 'tx-receipt-timeout',
+          severity: 'fatal',
+          errorName: 'waitForTransactionReceiptError',
+          message: err.message,
+          stack: err.stack,
+          extra: {
+            txHash: tx.hash,
+            chain: tx.chain,
+            isTimeoutError,
+          },
+        })
 
         updatePayload[tx.hash] = {
           ...tx,

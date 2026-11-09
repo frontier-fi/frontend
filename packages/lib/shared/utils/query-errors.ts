@@ -122,12 +122,11 @@ export function shouldIgnore(message: string, stackTrace = ''): boolean {
     return true
   }
 
-  if (
-    message.includes('The source https://balancer.fi') &&
-    message.includes('has not been authorized yet')
-  ) {
+  if (message.includes('The source https://') && message.includes('has not been authorized yet')) {
     return true
   }
+
+  if (stackTrace.includes('extensionServiceWorker.js')) return true
 
   if (isPausedErrorMessage(message)) return true
 
