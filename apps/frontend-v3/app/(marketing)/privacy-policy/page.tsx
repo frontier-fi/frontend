@@ -295,32 +295,36 @@ export default function Privacy() {
               </p>
 
               <table>
-                <tr>
-                  <th>Category of Personal Information</th>
-                  <th>Type of Information &amp; Categories of Recipients</th>
-                </tr>
-                <tr>
-                  <td>Identifiers</td>
-                  <td>
-                    <p>
-                      We share with vendors, such CloudFlare: certain IP addresses, device
-                      identifiers or other similar identifiers.
-                    </p>
+                <thead>
+                  <tr>
+                    <th>Category of Personal Information</th>
+                    <th>Type of Information &amp; Categories of Recipients</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Identifiers</td>
+                    <td>
+                      <p>
+                        We share with vendors, such CloudFlare: certain IP addresses, device
+                        identifiers or other similar identifiers.
+                      </p>
 
-                    <p>
-                      With our compliance partner, Hypernative, we only share wallet addresses used
-                      to connect a wallet to our UI (all other user information like IP addresses,
-                      device identifiers and location are not shared). The code for the UI is open
-                      source, and can be reviewed by anyone at any time.
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Internet or other electronic network activity information</td>
-                  <td>
-                    We share with vendors: information regarding an interaction with an UI/website
-                  </td>
-                </tr>
+                      <p>
+                        With our compliance partner, Hypernative, we only share wallet addresses
+                        used to connect a wallet to our UI (all other user information like IP
+                        addresses, device identifiers and location are not shared). The code for the
+                        UI is open source, and can be reviewed by anyone at any time.
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Internet or other electronic network activity information</td>
+                    <td>
+                      We share with vendors: information regarding an interaction with an UI/website
+                    </td>
+                  </tr>
+                </tbody>
               </table>
 
               <p>
