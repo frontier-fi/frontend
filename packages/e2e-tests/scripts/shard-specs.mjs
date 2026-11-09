@@ -13,7 +13,7 @@
 */
 import { execFileSync } from 'node:child_process'
 
-const dir = process.argv[2] ?? 'tests/dev/balancer'
+const dir = process.argv[2] ?? 'tests/dev'
 const shard = process.env.E2E_SHARD
 const isCi = !!process.env.CI
 

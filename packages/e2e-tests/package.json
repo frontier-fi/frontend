@@ -7,10 +7,10 @@
     "playwright:install": "playwright install --with-deps",
     "typecheck": "tsc --project tsconfig.json --noEmit --incremental",
     "playwright:install:chromium": "playwright install --with-deps chromium",
-    "test:e2e:build:bal": "NEXT_PUBLIC_PROJECT_ID=balancer start-server-and-test 'cd ../../ && pnpm start --filter frontend-v3' 'http://localhost:3000' 'pnpm exec playwright test tests/build/balancer'",
-    "test:e2e:build:ui:bal": "NEXT_PUBLIC_PROJECT_ID=balancer pnpm exec playwright test tests/build/balancer --ui",
-    "test:e2e:dev:bal": "NEXT_PUBLIC_E2E_DEV=1 start-server-and-test 'cd ../../ &&  pnpm start --filter frontend-v3' 'http://localhost:3000' 'pnpm exec playwright test $(node scripts/shard-specs.mjs)'",
-    "test:e2e:dev:ui:bal": "NEXT_PUBLIC_E2E_DEV=1 pnpm exec playwright test tests/dev/balancer --ui",
+    "test:e2e:build": "start-server-and-test 'cd ../../ && pnpm start' 'http://localhost:3000' 'pnpm exec playwright test tests/build'",
+    "test:e2e:build:ui": "pnpm exec playwright test tests/build --ui",
+    "test:e2e:dev": "NEXT_PUBLIC_E2E_DEV=1 start-server-and-test 'cd ../../ && pnpm start' 'http://localhost:3000' 'pnpm exec playwright test $(node scripts/shard-specs.mjs)'",
+    "test:e2e:dev:ui": "NEXT_PUBLIC_E2E_DEV=1 pnpm exec playwright test tests/dev --ui",
     "test:e2e:local": "pnpm exec playwright test tests"
   },
   "keywords": [],
@@ -18,11 +18,11 @@
   "license": "ISC",
   "devDependencies": {
     "@balancer/sdk": "github:frontier-fi/sdk#4356e40fb42edf6a795df67035aa2db74cad45fb",
-    "@playwright/test": "1.64.1",
+    "@playwright/test": "1.65.0",
     "@repo/lib": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "24.19.2",
-    "dotenv": "18.0.8",
+    "dotenv": "18.0.9",
     "frontend-v3": "workspace:*",
     "start-server-and-test": "3.0.13"
   }

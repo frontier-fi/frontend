@@ -11,9 +11,6 @@ import { ActionModalFooter } from '@repo/lib/shared/components/modals/ActionModa
 import { getChainName } from '@repo/lib/config/app.config'
 import { useShouldBatchTransactions } from '@repo/lib/modules/transactions/transaction-steps/tx-batch.hooks'
 import { PoolSummary } from './PoolSummary'
-import { ToggleHyperBlockSize } from './ToggleHyperBlockSize'
-import { useHyperEvm } from '@repo/lib/modules/chains/hyperevm/useHyperEvm'
-import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { getChainId } from '@repo/lib/config/app.config'
 import { getPoolPath } from '@repo/lib/modules/pool/pool.utils'
 import { getGqlPoolType } from '../helpers'
@@ -79,17 +76,6 @@ export function PoolCreationModal({
   const shouldBatchTransactions = useShouldBatchTransactions()
 
   const { redirectToPage: redirectToPoolPage } = useRedirect(poolPath)
-
-  const {
-    shouldUseBigBlocks,
-    shouldToggleBlockSize,
-    setUsingBigBlocks,
-    isSetUsingBigBlocksPending,
-    setUsingBigBlocksError,
-  } = useHyperEvm({
-    isContractDeploymentStep: transactionSteps.currentStepIndex === 0,
-    isHyperEvmTx: network === GqlChainValues.Hyperevm,
-  })
 
   return (
     <Modal
@@ -172,14 +158,7 @@ export function PoolCreationModal({
           )}
         </ModalBody>
 
-        {shouldToggleBlockSize ? (
-          <ToggleHyperBlockSize
-            isSetUsingBigBlocksPending={isSetUsingBigBlocksPending}
-            setUsingBigBlocks={setUsingBigBlocks}
-            setUsingBigBlocksError={setUsingBigBlocksError}
-            shouldUseBigBlocks={shouldUseBigBlocks}
-          />
-        ) : transactionSteps.currentStep ? (
+        {transactionSteps.currentStep ? (
           <ActionModalFooter
             currentStep={transactionSteps.currentStep}
             isSuccess={isPoolInitialized}

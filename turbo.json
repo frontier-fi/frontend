@@ -33,6 +33,8 @@
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "start": {
+      "cache": false,
+      "persistent": true,
       "dependsOn": ["^start"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
@@ -83,21 +85,21 @@
       "dependsOn": ["^graphql:gen"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
-    "test:e2e:build:bal": {
+    "test:e2e:build": {
       "dependsOn": ["frontend-v3#build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
-    "test:e2e:build:ui:bal": {
+    "test:e2e:build:ui": {
       "cache": false,
       "persistent": true,
       "dependsOn": ["^transit"]
     },
-    "test:e2e:dev:bal": {
+    "test:e2e:dev": {
       "dependsOn": ["frontend-v3#build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*", "NEXT_E2E_DEV"],
       "env": ["E2E_SHARD"]
     },
-    "test:e2e:dev:ui:bal": {
+    "test:e2e:dev:ui": {
       "cache": false,
       "persistent": true,
       "dependsOn": ["^transit"]
