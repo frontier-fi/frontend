@@ -1,7 +1,10 @@
+import path from 'node:path'
 import type { NextConfig } from 'next'
 
 /** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
+  output: 'standalone',
+  outputFileTracingRoot: path.join(import.meta.dirname, '../../'),
   serverExternalPackages: ['thread-stream', 'real-require', 'encoding'],
   experimental: {
     // Frontier API has a small Prisma pool; avoid SSG workers opening too many connections.
