@@ -11,7 +11,7 @@ import { resolve } from 'path'
 const requireFromHere = createRequire(resolve(__dirname, '__fake.js'))
 const pluginLoader = async (name: string) => import(requireFromHere.resolve(name))
 
-const schemaUrl = process.env.NEXT_PUBLIC_BALANCER_API_URL || 'https://api.frontier.fi/graphql'
+const schemaUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.frontier.fi/graphql'
 
 const config: CodegenConfig = {
   schema: {

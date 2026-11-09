@@ -157,7 +157,7 @@ type FetchPoolMockParams = {
 export async function fetchPoolMock({
   poolId = nested50WETH_50_3poolId,
   chain = GqlChainValues.Mainnet,
-  apiUrl = process.env.NEXT_PUBLIC_BALANCER_API_URL as string,
+  apiUrl = process.env.NEXT_PUBLIC_API_URL as string,
   userAddress,
   query,
 }: FetchPoolMockParams): Promise<GqlPoolElement> {

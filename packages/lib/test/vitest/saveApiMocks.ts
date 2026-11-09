@@ -10,7 +10,6 @@ import {
   saveAllPoolApiMocksFile,
   savePoolMock,
 } from '@repo/lib/modules/pool/__mocks__/savePoolMock'
-import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { isSameAddress } from '@repo/lib/shared/utils/addresses'
 
 const allPoolExamples = [...flatPoolExamples, ...boostedPoolExamples, ...nestedPoolExamples]
@@ -48,14 +47,9 @@ export default async function saveApiMocks({ apiUrl, poolId }: ApiMockOptions) {
   console.log(`✅ Updated mocks using api: ${apiUrl} \n`)
 }
 
-function shouldSkipMock(apiUrl: string, example: PoolExample) {
+function shouldSkipMock(_apiUrl: string, _example: PoolExample) {
   // Avoid saving mock in CI runs
   if (process.env.CI) return true
-
-  // Skip Sepolia mock for non test-api
-  if (!apiUrl?.includes('test-api') && example.poolChain === GqlChainValues.Sepolia) {
-    return true
-  }
 
   return false
 }
