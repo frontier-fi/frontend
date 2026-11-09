@@ -15,9 +15,9 @@ export function SettlementTerms() {
         </ListItem>
         <ListItem>
           This waiver incl. claims and any right to participate in any class or collective action
-          against the Frontier Finance Foundation & all affiliated entities, as well as their
-          respective officers, directors, contributors, service providers, employees, contractors,
-          advisors, agents, successors, & assigns.
+          against Frontier Finance & all affiliated entities, as well as their respective officers,
+          directors, contributors, service providers, employees, contractors, advisors, agents,
+          successors, & assigns.
         </ListItem>
         <ListItem>
           I acknowledge & agree to the Safe Harbor Agreement in all its terms (as approved by

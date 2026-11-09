@@ -13,19 +13,19 @@ export default function Privacy() {
           <FadeInOnView>
             <div className="subsection">
               <Box mt="3xl">
-                <h1>Frontier Finance Foundation Privacy&nbsp;Policy</h1>
+                <h1>Frontier Finance Privacy&nbsp;Policy</h1>
                 <p>
                   <em>Last Updated: August 2026</em>
                 </p>
               </Box>
               <p>
                 <em className="font-medium">
-                  This Privacy Policy explains how the Frontier Finance Foundation, its subsidiary,
-                  Frontier Finance OpCo Limited (“Frontier Finance Foundation,” “Frontier Finance,”
-                  “we,” “our,” or “us”) collects, uses, and discloses information about you. This
-                  Privacy Policy applies when you use our website, Frontier Finance Protocol
-                  user-interface or application and other online products (collectively, our “UI”),
-                  engage with us on social media, or otherwise interact with us.
+                  This Privacy Policy explains how Frontier Finance, its subsidiary, Frontier
+                  Finance OpCo Limited (“Frontier Finance,” “we,” “our,” or “us”) collects, uses,
+                  and discloses information about you. This Privacy Policy applies when you use our
+                  website, Frontier Finance Protocol user-interface or application and other online
+                  products (collectively, our “UI”), engage with us on social media, or otherwise
+                  interact with us.
                 </em>
               </p>
               <p>
@@ -259,10 +259,10 @@ export default function Privacy() {
               <h2>Transfer of information to the United States and Other&nbsp;Countries</h2>
 
               <p>
-                Frontier Finance Foundation is headquartered in the Cayman Islands with a subsidiary
-                in the British Virgin Islands (BVI). Therefore, we and our service providers may
-                transfer your personal information to, or store or access it in, jurisdictions that
-                may not provide levels of data protection that are equivalent to those of your home
+                Frontier Finance is headquartered in the Cayman Islands with a subsidiary in the
+                British Virgin Islands (BVI). Therefore, we and our service providers may transfer
+                your personal information to, or store or access it in, jurisdictions that may not
+                provide levels of data protection that are equivalent to those of your home
                 jurisdiction. We will take steps to ensure that your personal information receives
                 an adequate level of protection in the jurisdictions in which we process it.
               </p>

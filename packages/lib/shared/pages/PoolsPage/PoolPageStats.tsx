@@ -13,7 +13,6 @@ import Stat from '../../components/other/Stat'
 import { bn, safeToNumber } from '../../utils/numbers'
 import { useProtocolStats } from '@repo/lib/modules/protocol/ProtocolStatsProvider'
 import { AnimatedNumber } from '../../components/other/AnimatedNumber'
-import { isBalancer } from '@repo/lib/config/getProjectConfig'
 import { TooltipWithTouch } from '../../components/tooltips/TooltipWithTouch'
 
 type Fee = {
@@ -29,7 +28,7 @@ export function PoolPageStats({ rewardsClaimed24h }: PoolPageStatsProps) {
   const { protocolData } = useProtocolStats()
 
   const surplus24h = protocolData?.protocolMetricsAggregated.surplus24h
-  const feeLabel = isBalancer ? 'Yield (24h)' : 'Fees (24h)'
+  const feeLabel = 'Yield (24h)'
 
   const fees: Fee[] = [
     {

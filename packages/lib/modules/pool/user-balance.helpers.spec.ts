@@ -47,7 +47,7 @@ test('User balance helpers — Frontier has no stakedBalances', () => {
   expect(calcNonOnChainFetchedStakedBalance(pool)).toBe('0')
 
   expect(hasBalancerStakedBalance(pool)).toBeFalsy()
-  expect(hasStakedBalanceFor(pool, GqlPoolStakingTypeValues.FreshBeets)).toBeFalsy()
+  expect(hasStakedBalanceFor(pool, GqlPoolStakingTypeValues.Gauge)).toBeFalsy()
   expect(hasTinyBalance(pool)).toBeFalsy()
 })
 

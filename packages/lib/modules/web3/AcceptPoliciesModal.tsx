@@ -20,7 +20,7 @@ import { useUserSettings } from '../user/settings/UserSettingsProvider'
 import { useUserAccount } from './UserAccountProvider'
 import { useDisconnect } from 'wagmi'
 import NextLink from 'next/link'
-import { isBalancer, PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { shouldUseAnvilFork } from '@repo/lib/config/app.config'
 
 export function AcceptPoliciesModal() {
@@ -31,7 +31,6 @@ export function AcceptPoliciesModal() {
   const disconnect = useDisconnect()
 
   const { projectName } = PROJECT_CONFIG
-  const entityName = isBalancer ? 'Frontier Finance Foundation' : 'BeethovenX DAO'
 
   const isAddressInAcceptedPolicies =
     acceptedPolicies.includes(userAddress.toLowerCase()) ||
@@ -80,7 +79,7 @@ export function AcceptPoliciesModal() {
               size="lg"
             >
               <Box aria-label="Accept policies" color="font.primary" fontSize="md" mt="-3px">
-                By connecting my wallet, I agree to {entityName}&apos;s{' '}
+                By connecting my wallet, I agree to {projectName}&apos;s{' '}
                 <Link as={NextLink} href="/terms-of-use">
                   Terms of Use
                 </Link>

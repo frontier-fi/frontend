@@ -6,11 +6,9 @@ import avalanche from './avalanche'
 import gnosis from './gnosis'
 import mainnet from './mainnet'
 import polygon from './polygon'
-import fantom from './fantom'
 import optimism from './optimism'
 import base from './base'
 import sepolia from './sepolia'
-import sonic from './sonic'
 import hyperevm from './hyperevm'
 import plasma from './plasma'
 import monad from './monad'
@@ -26,8 +24,6 @@ const networkConfigs: NetworkConfigs = {
   [GqlChainValues.Polygon]: polygon,
   [GqlChainValues.Optimism]: optimism,
   [GqlChainValues.Sepolia]: sepolia,
-  [GqlChainValues.Fantom]: fantom,
-  [GqlChainValues.Sonic]: sonic,
   [GqlChainValues.Hyperevm]: hyperevm,
   [GqlChainValues.Plasma]: plasma,
   [GqlChainValues.Monad]: monad,

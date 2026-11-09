@@ -355,7 +355,6 @@ export const CSP_ISSUE_POOL_IDS: Partial<Record<AppChain, PoolId[]>> = {
   ],
   [GqlChainValues.Base]: [],
   [GqlChainValues.Sepolia]: ['0x027a946ac5a861b66a50cca0e8fb8766718b485100000000000000000000002c'],
-  [GqlChainValues.Fantom]: [],
   [GqlChainValues.Optimism]: [
     '0x1f131ec1175f023ee1534b16fa8ab237c00e238100000000000000000000004a',
     '0x479a7d1fcdd71ce0c2ed3184bfbe9d23b92e8337000000000000000000000049',
@@ -393,7 +392,6 @@ export const CSP_ISSUE_POOL_IDS: Partial<Record<AppChain, PoolId[]>> = {
     '0x593acbfb1eaf3b6ec86fa60325d816996fdcbc0d000000000000000000000038',
     '0xd1af4974fcc995cf36ba40b189caa92964a9126d0000000000000000000000f1',
   ],
-  [GqlChainValues.Sonic]: [],
   [GqlChainValues.Hyperevm]: [],
   [GqlChainValues.Plasma]: [],
   [GqlChainValues.Monad]: [],

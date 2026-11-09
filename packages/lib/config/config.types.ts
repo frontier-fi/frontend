@@ -21,7 +21,6 @@ export interface TokensConfig {
     wNativeAsset: Address
     auraBal?: Address
     veBalBpt?: Address
-    beets?: Address
   }
   nativeAsset: TokenInfo
   stakedAsset?: TokenInfo
@@ -60,17 +59,6 @@ export interface ContractsConfig {
     WeightedPool2TokensFactory?: Address
     bCoWFactory?: Address
     unbalancedAddViaSwapRouter?: Address
-  }
-  beets?: {
-    lstStaking: Address
-    lstStakingProxy: Address
-    // TODO: make it required when fantom is removed
-    sfcProxy?: Address
-    sfc?: Address
-    lstWithdrawRequestHelper?: Address
-    reliquary?: Address
-    magpieLoopedSonicRouter?: Address
-    loopedSonicVault?: Address
   }
   merkl?: {
     claims: Address
@@ -121,15 +109,6 @@ export interface NetworkConfig {
     delegateAddress: Address
     id: `0x${string}`
   }
-  reliquary?: {
-    address: Address
-    fbeets: {
-      poolId: string
-      poolAddress: Address
-      farmId: number
-      maxLevel: number
-    }
-  }
 }
 
 export interface Config {
@@ -157,7 +136,6 @@ type OptionsConfig = {
   /** When true, omit the Hooks filter section from the pools Filters popover. */
   hideHooksFilters?: boolean
   showPoolName: boolean
-  showMaBeets: boolean
   allowCreateWallet: boolean
   isOnSafeAppList: boolean
 }
@@ -202,7 +180,7 @@ export type PromoItem = {
 }
 
 export interface ProjectConfig {
-  projectId: 'balancer'
+  projectId: 'frontier'
   projectUrl: string
   projectName: string
   projectLogo: string

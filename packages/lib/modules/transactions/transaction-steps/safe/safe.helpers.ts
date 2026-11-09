@@ -3,17 +3,7 @@ import {
   GatewayTransactionDetails,
   TransactionStatus as SafeTransactionStatus,
 } from '@safe-global/safe-apps-sdk'
-import {
-  arbitrum,
-  avalanche,
-  base,
-  gnosis,
-  mainnet,
-  optimism,
-  polygon,
-  sepolia,
-  sonic,
-} from 'viem/chains'
+import { arbitrum, avalanche, base, gnosis, mainnet, optimism, polygon, sepolia } from 'viem/chains'
 import { SafeAppTx, TransactionState, TxCall } from '../lib'
 import { Address } from 'viem'
 import { TransactionStatus as BalancerTransactionStatus } from '@repo/lib/modules/transactions/RecentTransactionsProvider'
@@ -26,7 +16,6 @@ const SAFE_CHAIN_PREFIX: Record<SupportedChainId, string> = {
   [polygon.id]: 'matic',
   [optimism.id]: 'oeth',
   [base.id]: 'base',
-  [sonic.id]: 'sonic',
   [avalanche.id]: 'avax',
 }
 

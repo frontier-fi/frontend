@@ -24,10 +24,9 @@ export default function Cookies() {
             <div className="subsection">
               <h2>I. Introduction and Scope of Policy</h2>
               <p>
-                This Cookies Policy (“Policy”) applies to your interaction with the Frontier Finance
-                Foundation, its subsidiary, Frontier Finance OpCo Limited, and material service
-                providers operating under a legal agreement (“Frontier Finance Foundation,”
-                “Frontier Finance,” “we,” “our,” or “us”).
+                This Cookies Policy (“Policy”) applies to your interaction with Frontier Finance,
+                its subsidiary, Frontier Finance OpCo Limited, and material service providers
+                operating under a legal agreement (“Frontier Finance,” “we,” “our,” or “us”).
               </p>
             </div>
           </FadeInOnView>

@@ -105,7 +105,7 @@
     },
     "graphql:gen": {
       "dependsOn": ["^graphql:gen"],
-      "inputs": ["**/*.graphql"],
+      "inputs": ["**/*.graphql", "shared/services/api/codegen.ts"],
       "outputs": ["shared/services/api/generated/**"]
     },
     "prettier": {

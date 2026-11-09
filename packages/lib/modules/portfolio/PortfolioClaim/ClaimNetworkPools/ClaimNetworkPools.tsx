@@ -20,7 +20,7 @@ import FadeInOnView from '@repo/lib/shared/components/containers/FadeInOnView'
 import { useHasMerklRewards } from '../../merkl/useHasMerklRewards'
 import { MerklAlert } from '../../merkl/MerklAlert'
 import { motion } from 'motion/react'
-import { isBalancer, PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { getChainId } from '@repo/lib/config/app.config'
 import { useBreakpoints } from '@repo/lib/shared/hooks/useBreakpoints'
 import { NetworkIcon } from '@repo/lib/shared/components/icons/NetworkIcon'
@@ -96,7 +96,7 @@ export function ClaimNetworkPools() {
       icon?: string
     }[] = []
 
-    if (isBalancer && hasRecoveredFunds) {
+    if (hasRecoveredFunds) {
       items.push({
         type: 'recovered-funds',
         chain: PROJECT_CONFIG.defaultNetwork,
@@ -108,8 +108,7 @@ export function ClaimNetworkPools() {
     return items.sort((a, b) => b.amount - a.amount)
   }, [hasRecoveredFunds, recoveredFundsClaims])
 
-  const hasClaimableContent =
-    claimableItems.length > 0 || hasMerklRewards || (isBalancer && hasRecoveredFunds)
+  const hasClaimableContent = claimableItems.length > 0 || hasMerklRewards || hasRecoveredFunds
 
   // Empty network placeholders (Eth / Arb / Base "Nothing to claim") are intentional
   // on Balancer when gauges exist elsewhere; Frontier has no gauges, so hide the
@@ -124,7 +123,7 @@ export function ClaimNetworkPools() {
         <Heading size="h4" variant="special">
           Claimable incentives
         </Heading>
-        {isBalancer && hasRecoveredFunds && (
+        {hasRecoveredFunds && (
           <AnimatedAlert>
             <BalAlert
               content={

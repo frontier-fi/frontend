@@ -9,8 +9,8 @@ const hiddenPoolTypes: PoolFilterType[] = [
   'AUTORANGE',
 ]
 
-export const ProjectConfigBalancer: ProjectConfig = {
-  projectId: 'balancer',
+export const ProjectConfigFrontier: ProjectConfig = {
+  projectId: 'frontier',
   projectName: 'Frontier Finance',
   projectUrl: 'https://frontier.fi',
   projectLogo: '/images/icons/0xff.png',
@@ -38,7 +38,6 @@ export const ProjectConfigBalancer: ProjectConfig = {
     hideProtocolVersion: ['v2', 'v3', 'cow'],
     hideHooksFilters: true,
     showPoolName: false,
-    showMaBeets: false,
     allowCreateWallet: true,
     isOnSafeAppList: true,
   },

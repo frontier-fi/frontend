@@ -15,7 +15,7 @@ import { useProtocolStats } from '@repo/lib/modules/protocol/ProtocolStatsProvid
 import { useQuery } from '@apollo/client/react'
 import { GetFeaturedPoolsDocument } from '@repo/lib/shared/services/api/generated/graphql'
 import { FeaturedPools } from '@repo/lib/modules/featured-pools/FeaturedPools'
-import { isBalancer } from '@repo/lib/config/getProjectConfig'
+
 type PoolsPageProps = PropsWithChildren & {
   rewardsClaimed24h?: string
 }
@@ -113,10 +113,7 @@ export function PoolsPage({ children, rewardsClaimed24h }: PoolsPageProps) {
               </Flex>
             </FadeInOnView>
             <FadeInOnView animateOnce={false}>
-              <Box pb={{ base: '0', md: '3' }}>
-                {/* <BeetsPromoBanner /> */}
-                {children}
-              </Box>
+              <Box pb={{ base: '0', md: '3' }}>{children}</Box>
             </FadeInOnView>
           </DefaultPageContainer>
         </Noise>
@@ -133,7 +130,7 @@ export function PoolsPage({ children, rewardsClaimed24h }: PoolsPageProps) {
           </Suspense>
         </FadeInOnView>
       </DefaultPageContainer>
-      {isBalancer && (featuredPools.length > 0 || featuredPoolsLoading) && (
+      {(featuredPools.length > 0 || featuredPoolsLoading) && (
         <DefaultPageContainer mb="lg" py="0" rounded="2xl">
           <Box>
             {!featuredPoolsLoading && featuredPools.length > 0 && (
