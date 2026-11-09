@@ -27,7 +27,6 @@ import {
 } from '../__mocks__/pool-examples/boosted'
 import {
   balWeth8020,
-  cowAmmPoolWethGno,
   gyroV3,
   osETHPhantom,
   sDAIWeighted,
@@ -962,13 +961,6 @@ describe('requiresProportionalInput', () => {
   it('should require for gyro V2 pools', () => {
     const pool = getApiPoolMock(gyroV3)
     pool.protocolVersion = 2
-
-    expect(requiresProportionalInput(pool)).toBe(true)
-    expect(requiresProportionalInputReason(pool)).not.toBeUndefined()
-  })
-
-  it('should require for Cow pools', () => {
-    const pool = getApiPoolMock(cowAmmPoolWethGno)
 
     expect(requiresProportionalInput(pool)).toBe(true)
     expect(requiresProportionalInputReason(pool)).not.toBeUndefined()

@@ -6,44 +6,47 @@ import { mock } from 'wagmi/connectors'
 
 const TEST_RPC_TIMEOUT_MS = 60_000
 
-export const mainnetTest = {
+type TestChain<TId extends ChainIdWithFork = ChainIdWithFork> = Chain &
+  ReturnType<typeof getTestRpcUrls> & { id: TId }
+
+export const mainnetTest: TestChain<typeof mainnet.id> = {
   ...mainnet,
   ...getTestRpcUrls(mainnet.id),
-} as const satisfies Chain
+}
 
-export const polygonTest = {
+export const polygonTest: TestChain<typeof polygon.id> = {
   ...polygon,
   ...getTestRpcUrls(polygon.id),
-} as const satisfies Chain
+}
 
-export const sepoliaTest = {
+export const sepoliaTest: TestChain<typeof sepolia.id> = {
   ...sepolia,
   ...getTestRpcUrls(sepolia.id),
-} as const satisfies Chain
+}
 
-export const baseTest = {
+export const baseTest: TestChain<typeof base.id> = {
   ...base,
   ...getTestRpcUrls(base.id),
-} as const satisfies Chain
+}
 
-export const gnosisTest = {
+export const gnosisTest: TestChain<typeof gnosis.id> = {
   ...gnosis,
   ...getTestRpcUrls(gnosis.id),
-} as const satisfies Chain
+}
 
-export const sonicTest = {
+export const sonicTest: TestChain<typeof sonic.id> = {
   ...sonic,
   ...getTestRpcUrls(sonic.id),
-} as const satisfies Chain
+}
 
-export const testChains = [
+export const testChains: readonly [TestChain, ...TestChain[]] = [
   mainnetTest,
   polygonTest,
   sepoliaTest,
   gnosisTest,
   baseTest,
   sonicTest,
-] as const
+]
 
 function getTestRpcUrls(chainId: ChainIdWithFork) {
   const { port, rpcUrl } = getTestRpcSetup(chainId)

@@ -48,7 +48,6 @@ import Image from 'next/image'
 import ButtonGroup, {
   ButtonGroupOption,
 } from '@repo/lib/shared/components/btns/button-group/ButtonGroup'
-import { useCow } from '../../cow/useCow'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { poolTypeLabel } from '../pool.helpers'
 import { hasMultipleNetworks } from '../pool.utils'
@@ -499,8 +498,6 @@ export function PoolListFilters() {
     },
   } = usePoolList()
 
-  const { isCowPath } = useCow()
-
   function _resetFilters() {
     resetFilters()
   }
@@ -570,7 +567,6 @@ export function PoolListFilters() {
                           <UserLiquidityFilters />
                         </Box>
                       ) : null}
-                      {/* TODO: filter for cow networks when 'isCowPath' is true */}
                       {showNetworkFilters && (
                         <Box as={motion.div} variants={staggeredFadeInUp} w="full">
                           <Heading as="h3" mb="sm" size="sm">
@@ -583,24 +579,23 @@ export function PoolListFilters() {
                           />
                         </Box>
                       )}
-                      {!isCowPath &&
-                        PROTOCOL_VERSION_TABS.filter(
-                          tab =>
-                            tab.value !== 'all' &&
-                            !(PROJECT_CONFIG.options.hideProtocolVersion ?? []).includes(tab.value)
-                        ).length > 0 && (
-                          <Box as={motion.div} variants={staggeredFadeInUp}>
-                            <Heading as="h3" mb="sm" size="sm">
-                              Protocol version
-                            </Heading>
-                            <ProtocolVersionFilter
-                              hideProtocolVersion={PROJECT_CONFIG.options.hideProtocolVersion}
-                              poolTypes={poolTypes}
-                              protocolVersion={protocolVersion}
-                              setProtocolVersion={setProtocolVersion}
-                            />
-                          </Box>
-                        )}
+                      {PROTOCOL_VERSION_TABS.filter(
+                        tab =>
+                          tab.value !== 'all' &&
+                          !(PROJECT_CONFIG.options.hideProtocolVersion ?? []).includes(tab.value)
+                      ).length > 0 && (
+                        <Box as={motion.div} variants={staggeredFadeInUp}>
+                          <Heading as="h3" mb="sm" size="sm">
+                            Protocol version
+                          </Heading>
+                          <ProtocolVersionFilter
+                            hideProtocolVersion={PROJECT_CONFIG.options.hideProtocolVersion}
+                            poolTypes={poolTypes}
+                            protocolVersion={protocolVersion}
+                            setProtocolVersion={setProtocolVersion}
+                          />
+                        </Box>
+                      )}
                       {!isFixedPoolType && (
                         <Box as={motion.div} variants={staggeredFadeInUp}>
                           <Heading as="h3" mb="sm" size="sm">
@@ -614,24 +609,20 @@ export function PoolListFilters() {
                           />
                         </Box>
                       )}
-                      {!isCowPath && (
-                        <>
-                          <Box as={motion.div} variants={staggeredFadeInUp}>
-                            <Heading as="h3" mb="sm" size="sm">
-                              Pool categories
-                            </Heading>
-                            <PoolCategoryFilters hidePoolTags={options.hidePoolTags} />
-                          </Box>
+                      <Box as={motion.div} variants={staggeredFadeInUp}>
+                        <Heading as="h3" mb="sm" size="sm">
+                          Pool categories
+                        </Heading>
+                        <PoolCategoryFilters hidePoolTags={options.hidePoolTags} />
+                      </Box>
 
-                          {!options.hideHooksFilters && (
-                            <Box as={motion.div} variants={staggeredFadeInUp}>
-                              <Heading as="h3" mb="sm" size="sm">
-                                Hooks
-                              </Heading>
-                              <PoolHookFilters />
-                            </Box>
-                          )}
-                        </>
+                      {!options.hideHooksFilters && (
+                        <Box as={motion.div} variants={staggeredFadeInUp}>
+                          <Heading as="h3" mb="sm" size="sm">
+                            Hooks
+                          </Heading>
+                          <PoolHookFilters />
+                        </Box>
                       )}
                       <Box as={motion.div} mb="xs" variants={staggeredFadeInUp} w="full">
                         <PoolMinTvlFilter />

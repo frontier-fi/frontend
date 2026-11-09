@@ -1,4 +1,12 @@
-import { Address, createPublicClient, createTestClient, http, isAddress, PublicClient } from 'viem'
+import {
+  Address,
+  Chain,
+  createPublicClient,
+  createTestClient,
+  http,
+  isAddress,
+  PublicClient,
+} from 'viem'
 import { SetBalanceMutation } from '../../anvil/useSetErc20Balance'
 import { TokenBalance, TokenBalancesByChain } from './fork-options'
 import { createConfig } from 'wagmi'
@@ -13,7 +21,7 @@ import { drpcUrlByChainId } from '@repo/lib/shared/utils/rpc'
 export const defaultAnvilAccount = '0x3B7D260597A3e3f90274563a9e481618C6B951Eb'
 export const defaultAnvilForkRpcUrl = 'http://127.0.0.1:8545'
 
-const chain = {
+const chain: Chain = {
   ...mainnet,
   rpcUrls: {
     default: {

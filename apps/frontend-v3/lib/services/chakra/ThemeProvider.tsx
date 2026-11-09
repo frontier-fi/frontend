@@ -8,11 +8,9 @@ import {
   resolveColorMode,
 } from '@repo/lib/modules/user/settings/color-mode'
 import { LS_KEYS } from '@repo/lib/modules/local-storage/local-storage.constants'
-import { useCow } from '@repo/lib/modules/cow/useCow'
 import { useIsMounted } from '@repo/lib/shared/hooks/useIsMounted'
 import { ReactNode } from 'react'
 import { theme as balTheme } from './themes/bal/bal.theme'
-import { theme as cowTheme } from './themes/cow/cow.theme'
 
 function readColorModePreference() {
   try {
@@ -33,10 +31,7 @@ const colorModeManager = {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const { isCowPath, isCowVariant } = useCow()
   const isMounted = useIsMounted()
-
-  const theme = isCowPath || isCowVariant ? cowTheme : balTheme
 
   // Avoid hydration error in turbopack mode
   if (!isMounted) return null
@@ -44,7 +39,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
     <ChakraProvider
       colorModeManager={colorModeManager}
-      theme={theme}
+      theme={balTheme}
       toastOptions={{ defaultOptions: { position: 'bottom-left' } }}
     >
       <ColorModeSync />

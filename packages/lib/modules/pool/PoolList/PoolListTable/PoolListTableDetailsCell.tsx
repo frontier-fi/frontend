@@ -1,13 +1,7 @@
-import { PoolCore, PoolListItem } from '@repo/lib/modules/pool/pool.types'
+import { PoolCore } from '@repo/lib/modules/pool/pool.types'
 import { Box, HStack, Text } from '@chakra-ui/react'
 import { PoolVersionTag } from '@repo/lib/modules/pool/PoolList/PoolListTable/PoolVersionTag'
-import {
-  isBoosted,
-  isGyro,
-  isLiquidityBootstrapping,
-  isQuantAmmPool,
-  isV3Pool,
-} from '@repo/lib/modules/pool/pool.helpers'
+import { isBoosted, isGyro } from '@repo/lib/modules/pool/pool.helpers'
 import { getPoolTypeLabel } from '@repo/lib/modules/pool/pool.utils'
 import Image from 'next/image'
 import { PoolHookTag } from '@repo/lib/modules/pool/PoolDetail/PoolHookTag'
@@ -16,14 +10,12 @@ import { usePoolsMetadata } from '../../metadata/PoolsMetadataProvider'
 import { Erc4626Metadata } from '../../metadata/getErc4626Metadata'
 import { Protocol } from '@repo/lib/modules/protocols/useProtocols'
 import { ProtocolIcon } from '@repo/lib/shared/components/icons/ProtocolIcon'
-import { LbpPoolListInfo } from '../../LbpDetail/LbpPoolListInfo'
-import { isDev, isStaging } from '@repo/lib/config/app.config'
 import { BoostedIcon } from '@repo/lib/shared/components/icons/BoostedIcon'
 import { TooltipWithTouch } from '@repo/lib/shared/components/tooltips/TooltipWithTouch'
 
 function getPoolDisplayTypeLabel(pool: PoolCore, erc4626Metadata: Erc4626Metadata[]) {
   const boostedTooltipLabel = [...erc4626Metadata.map(m => m.name)].join(' & ')
-  const hasIconTags = isGyro(pool.type) || isQuantAmmPool(pool.type) || isBoosted(pool)
+  const hasIconTags = isGyro(pool.type) || isBoosted(pool)
 
   return (
     <HStack>
@@ -44,21 +36,10 @@ function getPoolDisplayTypeLabel(pool: PoolCore, erc4626Metadata: Erc4626Metadat
               </Box>
             </TooltipWithTouch>
           )}
-          {isQuantAmmPool(pool.type) && (
-            <TooltipWithTouch label="Built by QuantAMM">
-              <Box rounded="full" shadow="md">
-                <ProtocolIcon
-                  protocol={Protocol.QuantAmm}
-                  size={18}
-                  sx={{ rounded: 'full', shadow: 'md' }}
-                />
-              </Box>
-            </TooltipWithTouch>
-          )}
 
           {isBoosted(pool) && (
             <>
-              {(isGyro(pool.type) || isQuantAmmPool(pool.type)) && (
+              {isGyro(pool.type) && (
                 <Text color="border.base" fontSize="0.5rem">
                   •
                 </Text>
@@ -111,11 +92,6 @@ export function PoolListTableDetailsCell({ pool }: Props) {
           </Text>
           <PoolHookTag onlyShowIcon pool={pool} />
         </HStack>
-      )}
-      {isV3Pool(pool) && isLiquidityBootstrapping(pool.type) && (isDev || isStaging) && (
-        <Box pl="0.1875rem">
-          <LbpPoolListInfo pool={pool as PoolListItem} />
-        </Box>
       )}
     </HStack>
   )
