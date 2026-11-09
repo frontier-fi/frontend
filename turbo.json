@@ -33,7 +33,6 @@
     "start": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^start"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
     "transit": {

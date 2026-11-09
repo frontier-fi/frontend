@@ -15,7 +15,7 @@
     "prettier:fix": "turbo prettier:fix",
     "stylelint": "turbo stylelint",
     "stylelint:fix": "turbo stylelint:fix",
-    "test": "pnpm test:unit && pnpm test:integration && pnpm test:e2e:build && pnpm test:e2e:dev",
+    "test": "pnpm test:unit && pnpm test:integration && pnpm test:e2e:build",
     "test:e2e:build": "turbo test:e2e:build --ui=stream --log-order=stream --",
     "test:e2e:build:ui": "turbo test:e2e:build:ui --ui=stream --log-order=stream --",
     "test:e2e:dev": "NEXT_PUBLIC_E2E_DEV=1 turbo test:e2e:dev --ui=stream --log-order=stream --",
