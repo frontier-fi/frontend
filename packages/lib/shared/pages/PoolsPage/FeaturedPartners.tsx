@@ -2,7 +2,6 @@
 
 import { Box, Flex, Card, Center, Text } from '@chakra-ui/react'
 import Noise from '@repo/lib/shared/components/layout/Noise'
-import { RadialPattern } from '@repo/lib/shared/components/zen/RadialPattern'
 import { PartnerCard } from '@repo/lib/shared/components/other/PartnerCard'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import FadeInOnView from '@repo/lib/shared/components/containers/FadeInOnView'
@@ -31,18 +30,6 @@ export function FeaturedPartners() {
         position="relative"
         shadow="innerBase"
       >
-        <Box opacity="0.5">
-          <RadialPattern
-            circleCount={20}
-            height={1500}
-            innerHeight={150}
-            innerWidth={150}
-            left="calc(50% - 750px)"
-            position="absolute"
-            top="calc(50% - 750px)"
-            width={1500}
-          />
-        </Box>
         <FadeInOnView animateOnce={false}>
           <Box p={{ base: 'md', sm: 'lg', md: 'xl', lg: '2xl' }}>
             <Box maxW="7xl" mx="auto">
