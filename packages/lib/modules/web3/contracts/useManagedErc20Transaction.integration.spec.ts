@@ -1,3 +1,9 @@
+import {
+  getChainId,
+  getVaultV3Address,
+  getWrappedNativeAssetAddress,
+} from '@repo/lib/config/app.config'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { TransactionLabels } from '@repo/lib/modules/transactions/transaction-steps/lib'
 import { testHook } from '@repo/lib/test/utils/custom-renderers'
 import { connectWithDefaultUser } from '@repo/test/utils/wagmi/wagmi-connections'
@@ -12,21 +18,20 @@ const TRANSACTION_TEST_TIMEOUT_MS = 120_000
 await connectWithDefaultUser()
 
 test(
-  'token approval transaction (wETH)',
+  'token approval transaction (wNative)',
   async () => {
-    const wEthAddress = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-
-    const vault2 = '0xBA12222222228d8Ba445958a75a0704d566BF2C8' as Address
-    const chainId = 1
+    const defaultChain = PROJECT_CONFIG.defaultNetwork
+    const chainId = getChainId(defaultChain)
+    const wNativeAddress = getWrappedNativeAssetAddress(defaultChain) as Address
+    const vaultV3 = getVaultV3Address(defaultChain)
 
     const { result } = testHook(() =>
       useManagedErc20Transaction({
         chainId,
-        tokenAddress: wEthAddress as Address,
+        tokenAddress: wNativeAddress,
         functionName: 'approve',
-        args: [vault2, parseUnits('100', 18)],
+        args: [vaultV3, parseUnits('100', 18)],
         enabled: true,
-        simulationMeta: {},
         labels: {} as TransactionLabels,
         onTransactionChange: () => {},
       })

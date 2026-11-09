@@ -6,7 +6,6 @@ import { formatUnits } from 'viem'
 import { useTokens } from '../../tokens/TokensProvider'
 import { bn } from '@repo/lib/shared/utils/numbers'
 import { BPT_DECIMALS } from '../../pool/pool.constants'
-import { isBalancer } from '@repo/lib/config/getProjectConfig'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 
 export const claimableVeBalRewardsTokens: string[] = [
@@ -33,7 +32,7 @@ export function useProtocolRewards() {
     functionName: 'claimTokens',
     args: [userAddress, claimableVeBalRewardsTokens],
     query: {
-      enabled: isConnected && !isLoadingTokens && isBalancer, // protocol rewards are only available for balancer
+      enabled: isConnected && !isLoadingTokens,
       select: data => {
         return (data as bigint[]).map((clBalance, index) => {
           const tokenAddress = claimableVeBalRewardsTokens[index]

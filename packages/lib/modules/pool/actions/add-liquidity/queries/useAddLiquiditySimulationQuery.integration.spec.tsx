@@ -1,8 +1,10 @@
-import { wETHAddress, wjAuraAddress } from '@repo/lib/debug-helpers'
-import { DefaultPoolTestProvider, testHook } from '@repo/lib/test/utils/custom-renderers'
+import type { GqlPoolElement } from '@repo/lib/shared/services/api/graphql-derived-types'
+import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
+import { buildDefaultPoolTestProvider, testHook } from '@repo/lib/test/utils/custom-renderers'
+import { isChainSupported } from '@repo/test/anvil/anvil-setup'
 import { waitFor } from '@testing-library/react'
-
-import { aWjAuraWethPoolElementMock } from '@repo/lib/test/msw/builders/gqlPoolElement.builders'
+import { fetchPoolMock, minimalPoolQuery } from '../../../__mocks__/fetchPoolMock'
+import { Pool } from '../../../pool.types'
 import { selectAddLiquidityHandler } from '../handlers/selectAddLiquidityHandler'
 import { useAddLiquiditySimulationQuery } from './useAddLiquiditySimulationQuery'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
@@ -10,35 +12,46 @@ import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types
 const SIMULATION_WAIT_TIMEOUT_MS = 60_000
 const SIMULATION_TEST_TIMEOUT_MS = 120_000
 
-async function testQuery(humanAmountsIn: HumanTokenAmountWithSymbol[]) {
-  const handler = selectAddLiquidityHandler(aWjAuraWethPoolElementMock())
+async function testQuery(pool: Pool, humanAmountsIn: HumanTokenAmountWithSymbol[]) {
+  const handler = selectAddLiquidityHandler(pool)
 
   const { result } = testHook(
     () => useAddLiquiditySimulationQuery({ handler, humanAmountsIn, enabled: true }),
     {
-      wrapper: DefaultPoolTestProvider,
+      wrapper: buildDefaultPoolTestProvider(pool as GqlPoolElement),
     }
   )
 
   return result
 }
 
-test(
-  'queries btp out for add liquidity',
-  async () => {
-    const humanAmountsIn: HumanTokenAmountWithSymbol[] = [
-      { tokenAddress: wETHAddress, humanAmount: '100', symbol: 'WETH' },
-      { tokenAddress: wjAuraAddress, humanAmount: '1', symbol: 'wjAura' },
-    ]
+describe.runIf(isChainSupported(GqlChainValues.Sepolia))('useAddLiquiditySimulationQuery', () => {
+  test(
+    'queries bpt out for add liquidity',
+    async () => {
+      const pool = await fetchPoolMock({
+        poolId: '0x4898409f170de235844822a9545a54dbe637c049',
+        chain: GqlChainValues.Sepolia,
+        query: minimalPoolQuery,
+      })
 
-    const result = await testQuery(humanAmountsIn)
+      const humanAmountsIn: HumanTokenAmountWithSymbol[] = [
+        {
+          tokenAddress: '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8',
+          humanAmount: '1',
+          symbol: 'usdc-aave',
+        },
+      ]
 
-    await waitFor(() => expect(result.current.data?.bptOut).toBeDefined(), {
-      timeout: SIMULATION_WAIT_TIMEOUT_MS,
-    })
+      const result = await testQuery(pool, humanAmountsIn)
 
-    expect(result.current.data?.bptOut?.amount).toBeDefined()
-    expect(result.current.isLoading).toBeFalsy()
-  },
-  SIMULATION_TEST_TIMEOUT_MS
-)
+      await waitFor(() => expect(result.current.data?.bptOut).toBeDefined(), {
+        timeout: SIMULATION_WAIT_TIMEOUT_MS,
+      })
+
+      expect(result.current.data?.bptOut?.amount).toBeDefined()
+      expect(result.current.isLoading).toBeFalsy()
+    },
+    SIMULATION_TEST_TIMEOUT_MS
+  )
+})

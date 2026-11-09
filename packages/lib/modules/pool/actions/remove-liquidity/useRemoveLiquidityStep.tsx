@@ -4,14 +4,12 @@ import {
   TransactionLabels,
   TransactionStep,
 } from '@repo/lib/modules/transactions/transaction-steps/lib'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { useEffect, useMemo, useState } from 'react'
 import { usePool } from '../../PoolProvider'
 import {
   RemoveLiquidityBuildQueryParams,
   useRemoveLiquidityBuildCallDataQuery,
 } from './queries/useRemoveLiquidityBuildCallDataQuery'
-import { useTenderly } from '@repo/lib/modules/web3/useTenderly'
 import { DisabledTransactionButton } from '@repo/lib/modules/transactions/transaction-steps/TransactionStepButton'
 import { TransactionBatchButton } from '@repo/lib/modules/transactions/transaction-steps/TransactionBatchButton'
 import { isTransactionSuccess } from '@repo/lib/modules/transactions/transaction-steps/transaction.helper'
@@ -23,7 +21,6 @@ export type RemoveLiquidityStepParams = RemoveLiquidityBuildQueryParams
 export function useRemoveLiquidityStep(params: RemoveLiquidityStepParams): TransactionStep {
   const [isStepActivated, setIsStepActivated] = useState(false)
   const { pool, refetch: refetchPoolUserBalances, chainId } = usePool()
-  const { buildTenderlyUrl } = useTenderly({ chainId })
   const [transaction, setTransaction] = useState<ManagedResult | undefined>()
 
   const { simulationQuery } = params
@@ -42,15 +39,6 @@ export function useRemoveLiquidityStep(params: RemoveLiquidityStepParams): Trans
     tooltip: `Remove liquidity from ${pool.name || 'pool'}.`,
     poolId: pool.id,
   }
-
-  const gasEstimationMeta = sentryMetaForWagmiSimulation(
-    'Error in RemoveLiquidity gas estimation',
-    {
-      simulationQueryData: simulationQuery.data,
-      buildCallQueryData: buildCallDataQuery.data,
-      tenderlyUrl: buildTenderlyUrl(buildCallDataQuery.data),
-    }
-  )
 
   useEffect(() => {
     // simulationQuery is refetched every 30 seconds by RemoveLiquidityTimeout
@@ -74,7 +62,6 @@ export function useRemoveLiquidityStep(params: RemoveLiquidityStepParams): Trans
         if (!buildCallDataQuery.data) return <DisabledTransactionButton />
         return (
           <ManagedSendTransactionButton
-            gasEstimationMeta={gasEstimationMeta}
             id={removeLiquidityStepId}
             labels={labels}
             onTransactionChange={setTransaction}
@@ -106,7 +93,6 @@ export function useRemoveLiquidityStep(params: RemoveLiquidityStepParams): Trans
       transaction,
       simulationQuery.data,
       buildCallDataQuery.data,
-      gasEstimationMeta,
       labels,
       refetchPoolUserBalances,
       chainId,

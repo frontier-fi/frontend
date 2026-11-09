@@ -108,13 +108,6 @@ function BaseAprTooltip({
     isVotingPresent,
     isLockingAprPresent,
     totalCombinedDisplayed,
-    isMaBeetsPresent,
-    maBeetsRewardsDisplayed,
-    maxMaBeetsRewardDisplayed,
-    maxMaBeetsVotingRewardDisplayed,
-    maBeetsVotingRewardsTooltipText,
-    maBeetsTotalAprDisplayed,
-    maBeetsRewardTooltipText,
     dynamicSwapFeesDisplayed,
     fuulIncentivesDisplayed,
     fuulTooltipText,
@@ -160,14 +153,6 @@ function BaseAprTooltip({
           </>
         ) : null}
       </TooltipAprItem>
-      {isMaBeetsPresent && !maBeetsRewardsDisplayed.isZero() && (
-        <TooltipAprItem
-          {...basePopoverAprItemProps}
-          apr={maBeetsRewardsDisplayed}
-          displayValueFormatter={usedDisplayValueFormatter}
-          title="Min maBEETS APR"
-        />
-      )}
       <TooltipAprItem
         {...basePopoverAprItemProps}
         apr={stakingIncentivesAprDisplayed}
@@ -301,53 +286,6 @@ function BaseAprTooltip({
           </Stack>
         </>
       ) : null}
-
-      {isMaBeetsPresent && (
-        <>
-          <Divider />
-          <Stack gap={0} roundedBottom="md">
-            {!maxMaBeetsRewardDisplayed.isZero() && (
-              <TooltipAprItem
-                {...basePopoverAprItemProps}
-                apr={maxMaBeetsRewardDisplayed}
-                displayValueFormatter={usedDisplayValueFormatter}
-                fontColor="gray.400"
-                fontWeight={500}
-                pl={6}
-                pt={3}
-                title="Extra BEETS (maturity boost)"
-                tooltipText={maBeetsRewardTooltipText}
-              />
-            )}
-            <TooltipAprItem
-              {...basePopoverAprItemProps}
-              apr={maxMaBeetsVotingRewardDisplayed}
-              displayValueFormatter={usedDisplayValueFormatter}
-              fontColor="gray.400"
-              fontWeight={500}
-              pl={6}
-              pt={maxMaBeetsRewardDisplayed.isZero() ? 3 : 0}
-              title="Extra Voting APR"
-              tooltipText={maBeetsVotingRewardsTooltipText}
-            />
-            <Divider />
-            <TooltipAprItem
-              {...basePopoverAprItemProps}
-              apr={maBeetsTotalAprDisplayed}
-              backgroundColor="background.level3"
-              boxBackground={balRewardGradient}
-              displayValueFormatter={usedDisplayValueFormatter}
-              fontColor="font.special"
-              pl={2}
-              pt={3}
-              roundedBottom="md"
-              textBackground="background.special"
-              textBackgroundClip="text"
-              title="Max total APR"
-            />
-          </Stack>
-        </>
-      )}
     </PopoverContent>
   )
 

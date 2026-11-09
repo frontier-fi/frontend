@@ -14,7 +14,6 @@ import { capitalize } from 'lodash'
 import { useParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import { getUserReferenceTokens } from '@repo/lib/modules/pool/pool-tokens.utils'
-import { isMaBeetsPool } from '@repo/lib/modules/pool/pool.helpers'
 import { RelayerSignatureProvider } from '@repo/lib/modules/relayer/RelayerSignatureProvider'
 
 export default function ClaimNetworkPoolsLayoutWrapper() {
@@ -45,12 +44,7 @@ export default function ClaimNetworkPoolsLayoutWrapper() {
     if (!pools) return []
 
     return pools
-      .filter(
-        pool =>
-          // filter out mabeets pool so it doesn't count and also filter out pools with no claims
-          !isMaBeetsPool(pool.id) &&
-          poolRewardsMap[pool.id]?.totalFiatClaimBalance?.isGreaterThan(0)
-      )
+      .filter(pool => poolRewardsMap[pool.id]?.totalFiatClaimBalance?.isGreaterThan(0))
       .sort(
         (a, b) =>
           // sort the pools according to pending fiat claim amount

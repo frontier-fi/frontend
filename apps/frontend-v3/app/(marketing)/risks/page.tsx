@@ -1151,7 +1151,7 @@ export default function Privacy() {
                   </p>
                   <p>
                     Frontier Finance is not involved with the projects that create LBPs. Each LBP is
-                    independently created and managed by its owner. Frontier Finance OpCo has
+                    independently created and managed by its owner. Frontier Finance Foundation has
                     developed a user interface to access LBP smart contracts deployed on each
                     blockchain where the Frontier Finance Protocol is live.
                   </p>

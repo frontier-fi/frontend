@@ -5,7 +5,7 @@ import { BatchRelayerService } from '@repo/lib/shared/services/batch-relayer/bat
 import mainnetNetworkConfig from '@repo/lib/config/networks/mainnet'
 import { defaultTestUserAccount } from '@repo/test/anvil/anvil-setup'
 import { Address } from 'viem'
-import { aGqlPoolElementMock } from '@repo/lib/test/msw/builders/gqlPoolElement.builders'
+import { defaultTestGaugeAddress } from '@repo/lib/test/msw/builders/gqlStaking.builders'
 import { act } from '@testing-library/react'
 
 function testBuildUnstakeCallData(amount: bigint, userAddress: Address = defaultTestUserAccount) {
@@ -14,7 +14,7 @@ function testBuildUnstakeCallData(amount: bigint, userAddress: Address = default
   )
 
   const gaugeService = new GaugeService(batchRelayerService)
-  const gauges = [aGqlPoolElementMock().staking?.id || ''] as Address[]
+  const gauges = [defaultTestGaugeAddress] as Address[]
 
   const { result } = testHook(() =>
     useBuildUnstakeCallData({

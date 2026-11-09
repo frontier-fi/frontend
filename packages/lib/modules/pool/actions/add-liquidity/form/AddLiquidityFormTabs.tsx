@@ -25,7 +25,7 @@ import {
 import { useAddLiquidity } from '../AddLiquidityProvider'
 import { TokenInputsMaybeProportional } from './TokenInputsMaybeProportional'
 import { useCurrency } from '@repo/lib/shared/hooks/useCurrency'
-import { isV3Pool, isGyroEPool, isAutoRange } from '../../../pool.helpers'
+import { isV3Pool, isGyroEPool } from '../../../pool.helpers'
 import { useGetPoolTokensWithActualWeights } from '../../../useGetPoolTokensWithActualWeights'
 import { BalAlert } from '@repo/lib/shared/components/alerts/BalAlert'
 import { BalAlertContent } from '@repo/lib/shared/components/alerts/BalAlertContent'
@@ -34,7 +34,6 @@ import { usePoolTokenPriceWarnings } from '../../../usePoolTokenPriceWarnings'
 import { InfoIcon } from '@repo/lib/shared/components/icons/InfoIcon'
 import { MinimumDepositErrorsAlert } from '../MinimumDepositErrorsAlert'
 import { useStableSurgeMetrics } from '@repo/lib/modules/hooks/stable-surge/useStableSurgeMetrics'
-import { useAutoRangeData } from '@repo/lib/modules/autorange/useAutoRangeData'
 
 const MIN_LIQUIDITY_FOR_BALANCED_ADD = 50000
 
@@ -119,7 +118,6 @@ export function AddLiquidityFormTabs({
   tabIndex,
   setFlexibleTab,
   setProportionalTab,
-  setUnbalancedTab,
   wantsUnbalanced,
 }: {
   totalUSDValue: string
@@ -146,16 +144,7 @@ export function AddLiquidityFormTabs({
 
   const isOutOfRange = isGyroEPool(pool) && !poolIsInRange
 
-  const isReclamm = isAutoRange(pool.type)
-  const autoRangeData = useAutoRangeData()
-  const isUnbalancedDisabled = isReclamm && !autoRangeData?.isPoolWithinTargetRange
-
-  const isDisabledFlexibleTab =
-    requiresProportionalInput(pool) || isBelowMinTvlThreshold || surging || isReclamm
-
-  const supportsUnbalancedAdd = isV3Pool(pool) && isReclamm
-
-  const isDisabledUnbalancedTab = !supportsUnbalancedAdd
+  const isDisabledFlexibleTab = requiresProportionalInput(pool) || isBelowMinTvlThreshold || surging
 
   function getFlexibleTabTooltipLabel(): string | undefined {
     if (requiresProportionalInput(pool)) {
@@ -170,10 +159,6 @@ export function AddLiquidityFormTabs({
       return 'Flexible adds are disabled when a pool with stable surge hook is surging'
     }
 
-    if (isReclamm) {
-      return 'Flexible adds are not available for RECLAMM pools. Use Unbalanced instead.'
-    }
-
     return
   }
 
@@ -182,36 +167,20 @@ export function AddLiquidityFormTabs({
     clearAmountsIn()
 
     if (option.value === '0') {
-      if (isReclamm && setUnbalancedTab) {
-        setUnbalancedTab()
-      } else {
-        setFlexibleTab()
-      }
+      setFlexibleTab()
     } else if (option.value === '1') {
       setProportionalTab()
     }
   }
 
-  const firstTab: ButtonGroupOption = isReclamm
-    ? {
-        value: '0',
-        label: 'Unbalanced',
-        dataId: 'add-liquidity-tab-unbalanced',
-        disabled: isUnbalancedDisabled,
-        tabTooltipLabel: isUnbalancedDisabled
-          ? 'Unbalanced adds are disabled while the pool is not within its target range'
-          : undefined,
-      }
-    : {
-        value: '0',
-        label: 'Flexible',
-        dataId: 'add-liquidity-tab-flexible',
-        disabled: isDisabledFlexibleTab,
-        tabTooltipLabel: getFlexibleTabTooltipLabel(),
-      }
-
   const options: ButtonGroupOption[] = [
-    firstTab,
+    {
+      value: '0',
+      label: 'Flexible',
+      dataId: 'add-liquidity-tab-flexible',
+      disabled: isDisabledFlexibleTab,
+      tabTooltipLabel: getFlexibleTabTooltipLabel(),
+    },
     {
       value: '1',
       label: 'Proportional',
@@ -226,25 +195,15 @@ export function AddLiquidityFormTabs({
 
   useEffect(() => {
     if (!isLoading && isDisabledFlexibleTab) {
-      if (isReclamm && setUnbalancedTab) {
-        setUnbalancedTab()
-      } else {
-        setProportionalTab()
-      }
-    }
-  }, [isDisabledFlexibleTab, isLoading, isReclamm, setUnbalancedTab, setProportionalTab])
-
-  useEffect(() => {
-    if (!isLoading && !isReclamm && tabIndex === 2 && isDisabledUnbalancedTab) {
-      setFlexibleTab()
-    }
-  }, [isDisabledUnbalancedTab, isLoading, isReclamm, tabIndex, setFlexibleTab])
-
-  useEffect(() => {
-    if (!isLoading && isReclamm && tabIndex === 0 && isUnbalancedDisabled) {
       setProportionalTab()
     }
-  }, [isUnbalancedDisabled, isLoading, isReclamm, tabIndex, setProportionalTab])
+  }, [isDisabledFlexibleTab, isLoading, setProportionalTab])
+
+  useEffect(() => {
+    if (!isLoading && tabIndex === 2) {
+      setFlexibleTab()
+    }
+  }, [isLoading, tabIndex, setFlexibleTab])
 
   const isProportional = tabIndex === 1
 
@@ -273,27 +232,15 @@ export function AddLiquidityFormTabs({
           </PopoverTrigger>
           <PopoverContent maxW="300px" p="sm" w="auto">
             <VStack align="start" spacing="sm">
-              {isReclamm ? (
-                <Box>
-                  <Text fontSize="sm" fontWeight="bold" mb="xxs">
-                    Unbalanced Adds
-                  </Text>
-                  <Text fontSize="sm" variant="secondary">
-                    Select any token pool token and enter an amount. The router will calculate the
-                    optimal BPT output for your provided pool token amount.
-                  </Text>
-                </Box>
-              ) : (
-                <Box>
-                  <Text fontSize="sm" fontWeight="bold" mb="xxs">
-                    Flexible Adds
-                  </Text>
-                  <Text fontSize="sm" variant="secondary">
-                    Enter any amount for each token manually. Balances are independent, and no
-                    automatic adjustments will be made.
-                  </Text>
-                </Box>
-              )}
+              <Box>
+                <Text fontSize="sm" fontWeight="bold" mb="xxs">
+                  Flexible Adds
+                </Text>
+                <Text fontSize="sm" variant="secondary">
+                  Enter any amount for each token manually. Balances are independent, and no
+                  automatic adjustments will be made.
+                </Text>
+              </Box>
               <Box>
                 <Text fontSize="sm" fontWeight="bold" mb="xxs">
                   Proportional Adds (No price impact)

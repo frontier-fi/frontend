@@ -7,7 +7,6 @@ import {
   ManagedErc20TransactionInput,
   useManagedErc20Transaction,
 } from '@repo/lib/modules/web3/contracts/useManagedErc20Transaction'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { Center, Input, Text, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
 import { Address } from 'viem'
@@ -29,9 +28,6 @@ export default function Page() {
     chainId,
     args: [networkConfig.contracts.balancer.vaultV2, 0n],
     enabled: !!userAddress,
-    simulationMeta: sentryMetaForWagmiSimulation('Error in wagmi tx simulation: Approving token', {
-      tokenAmountToApprove: 0n,
-    }),
     onTransactionChange: () => {},
   }
 

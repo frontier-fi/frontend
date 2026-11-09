@@ -7,7 +7,6 @@ allowBuilds:
   "@balancer/sdk": true
   "@balancer/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/4356e40fb42edf6a795df67035aa2db74cad45fb": true
   "@parcel/watcher": true
-  "@sentry/cli": true
   "@reown/appkit": true
   bufferutil: true
   esbuild: true
@@ -17,7 +16,7 @@ allowBuilds:
   utf-8-validate: true
 
 catalog:
-  "@apollo/client": "4.3.4"
+  "@apollo/client": "4.3.7"
 
 packageExtensions:
   # debug declares only optional peer metadata. Declare the peer explicitly so
@@ -44,11 +43,8 @@ overrides:
   "debug>supports-color": "-"
   "@types/react": "19.3"
   "@types/react-dom": "19.3"
-  # @reown/appkit-wallet pins zod@3.22.4 (no v4/ subpath), but @hookform/resolvers
-  # imports zod/v4/core as a phantom dep. Force 3.25.76 so both resolve correctly.
-  "zod": "3.25.76"
   # Keep @vitest/mocker on the same MSW version as the test handlers.
-  "@vitest/mocker>msw": "3.0.3"
+  "@vitest/mocker>msw": "3.0.4"
 
 publicHoistPattern:
   - "*graphql*" # https://github.com/vercel/next.js/issues/68805

@@ -13,19 +13,19 @@ export default function Privacy() {
           <FadeInOnView>
             <div className="subsection">
               <Box mt="3xl">
-                <h1>Frontier Finance Foundation Privacy&nbsp;Policy</h1>
+                <h1>Frontier Finance Privacy&nbsp;Policy</h1>
                 <p>
                   <em>Last Updated: August 2026</em>
                 </p>
               </Box>
               <p>
                 <em className="font-medium">
-                  This Privacy Policy explains how the Frontier Finance Foundation, its subsidiary,
-                  Frontier Finance OpCo Limited (“Frontier Finance Foundation,” “Frontier Finance,”
-                  “we,” “our,” or “us”) collects, uses, and discloses information about you. This
-                  Privacy Policy applies when you use our website, Frontier Finance Protocol
-                  user-interface or application and other online products (collectively, our “UI”),
-                  engage with us on social media, or otherwise interact with us.
+                  This Privacy Policy explains how Frontier Finance Foundation (“Frontier Finance
+                  Foundation,” “Frontier Finance,” “we,” “our,” or “us”) collects, uses, and
+                  discloses information about you. This Privacy Policy applies when you use our
+                  website, Frontier Finance Protocol user-interface or application and other online
+                  products (collectively, our “UI”), engage with us on social media, or otherwise
+                  interact with us.
                 </em>
               </p>
               <p>
@@ -53,9 +53,9 @@ export default function Privacy() {
                 <li>
                   Frontier Finance does not and has not stored personal information from users of
                   the UI. However, Frontier Finance uses third party services including, without
-                  limitation, Cloudflare, Hypernative, Sentry, RainbowKit, OpenZeppelin, Amazon Web
-                  Services, Vercel, Coingecko and others who collect and store certain user
-                  information only for use in the provision of their services.
+                  limitation, Cloudflare, RainbowKit, OpenZeppelin, Amazon Web Services, Coingecko
+                  and others who collect and store certain user information only for use in the
+                  provision of their services.
                 </li>
                 <li>
                   Frontier Finance does not set any cookies. However, we use third party service
@@ -259,12 +259,12 @@ export default function Privacy() {
               <h2>Transfer of information to the United States and Other&nbsp;Countries</h2>
 
               <p>
-                Frontier Finance Foundation is headquartered in the Cayman Islands with a subsidiary
-                in the British Virgin Islands (BVI). Therefore, we and our service providers may
-                transfer your personal information to, or store or access it in, jurisdictions that
-                may not provide levels of data protection that are equivalent to those of your home
-                jurisdiction. We will take steps to ensure that your personal information receives
-                an adequate level of protection in the jurisdictions in which we process it.
+                Frontier Finance is headquartered in the Cayman Islands. Therefore, we and our
+                service providers may transfer your personal information to, or store or access it
+                in, jurisdictions that may not provide levels of data protection that are equivalent
+                to those of your home jurisdiction. We will take steps to ensure that your personal
+                information receives an adequate level of protection in the jurisdictions in which
+                we process it.
               </p>
             </div>
           </FadeInOnView>
@@ -295,32 +295,29 @@ export default function Privacy() {
               </p>
 
               <table>
-                <tr>
-                  <th>Category of Personal Information</th>
-                  <th>Type of Information &amp; Categories of Recipients</th>
-                </tr>
-                <tr>
-                  <td>Identifiers</td>
-                  <td>
-                    <p>
-                      We share with vendors, such CloudFlare: certain IP addresses, device
-                      identifiers or other similar identifiers.
-                    </p>
-
-                    <p>
-                      With our compliance partner, Hypernative, we only share wallet addresses used
-                      to connect a wallet to our UI (all other user information like IP addresses,
-                      device identifiers and location are not shared). The code for the UI is open
-                      source, and can be reviewed by anyone at any time.
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Internet or other electronic network activity information</td>
-                  <td>
-                    We share with vendors: information regarding an interaction with an UI/website
-                  </td>
-                </tr>
+                <thead>
+                  <tr>
+                    <th>Category of Personal Information</th>
+                    <th>Type of Information &amp; Categories of Recipients</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Identifiers</td>
+                    <td>
+                      <p>
+                        We share with vendors, such CloudFlare: certain IP addresses, device
+                        identifiers or other similar identifiers.
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Internet or other electronic network activity information</td>
+                    <td>
+                      We share with vendors: information regarding an interaction with an UI/website
+                    </td>
+                  </tr>
+                </tbody>
               </table>
 
               <p>

@@ -35,7 +35,6 @@ export default function Page() {
     chainId,
     args: [userAddress, relayerAddress, false],
     enabled: !!userAddress,
-    txSimulationMeta: {},
     onTransactionChange: () => {},
   }
 

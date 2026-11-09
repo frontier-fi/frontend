@@ -223,7 +223,6 @@ export type QuantAmmWeightSnapshot = {
 }
 
 export type GqlVeBalLockSnapshot = never
-export type GqlStakedSonicData = never
 export type GqlLBPTopTrade = {
   value: string
   address: string

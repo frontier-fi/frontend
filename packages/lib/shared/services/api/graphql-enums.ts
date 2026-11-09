@@ -19,7 +19,6 @@ export const GqlChainValues = {
   Arbitrum: 'ARBITRUM',
   Avalanche: 'AVALANCHE',
   Base: 'BASE',
-  Fantom: 'FANTOM',
   Gnosis: 'GNOSIS',
   Hyperevm: 'HYPEREVM',
   Mainnet: 'MAINNET',
@@ -28,7 +27,6 @@ export const GqlChainValues = {
   Plasma: 'PLASMA',
   Polygon: 'POLYGON',
   Sepolia: 'SEPOLIA',
-  Sonic: 'SONIC',
 } as const
 
 /** App chain ids (network configs). Superset of the Frontier API `GqlChain` enum. */
@@ -56,7 +54,6 @@ export const GqlPoolAprItemTypeValues = {
   Fuul: 'FUUL',
   IbYield: 'IB_YIELD',
   Locking: 'LOCKING',
-  MaBeetsEmissions: 'MABEETS_EMISSIONS',
   Merkl: 'MERKL',
   Nested: 'NESTED',
   QuantAmmUplift: 'QUANT_AMM_UPLIFT',
@@ -110,7 +107,6 @@ export const GqlPoolStakingGaugeStatusValues = {
 
 export const GqlPoolStakingTypeValues = {
   Aura: 'AURA',
-  FreshBeets: 'FRESH_BEETS',
   Gauge: 'GAUGE',
   MasterChef: 'MASTER_CHEF',
   Reliquary: 'RELIQUARY',

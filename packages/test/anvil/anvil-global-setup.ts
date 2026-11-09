@@ -4,8 +4,7 @@ import { Instance, Server } from 'prool'
 import { fileURLToPath } from 'url'
 
 import { ANVIL_NETWORKS, getForkUrl } from './anvil-setup'
-import { testChains } from './testWagmiConfig'
-import { polygon } from 'viem/chains'
+import { activeTestChains } from './testWagmiConfig'
 
 const currentDir = dirname(fileURLToPath(import.meta.url))
 
@@ -18,6 +17,8 @@ function loadEnvFileIfExists(path: string) {
 }
 
 loadEnvFileIfExists(resolve(currentDir, '../../../.env.local'))
+loadEnvFileIfExists(resolve(currentDir, '../../lib/.env.local'))
+loadEnvFileIfExists(resolve(currentDir, '../../../apps/frontend-v3/.env.local'))
 
 async function sleep(time: number) {
   return new Promise(resolve => {
@@ -55,7 +56,7 @@ async function waitForAnvilReady(port: number, chainName: string, maxAttempts = 
 export async function setup() {
   const promises = []
 
-  for (const chain of Object.values(testChains)) {
+  for (const chain of activeTestChains) {
     const forkUrl = getForkUrl(chain.id, false)
 
     console.log('Starting proxy ', {
@@ -71,12 +72,7 @@ export async function setup() {
         chainId: chain.id,
         forkUrl,
         forkBlockNumber: ANVIL_NETWORKS[chain.id].forkBlockNumber,
-        mnemonic: process.env.TEST_ACCOUNT_MNEMONIC,
-        // anvil >= 1.8.0 fails every eth_call on Polygon forks with
-        // "Excess blob gas not set" (Polygon headers have no excessBlobGas
-        // field). Pinning the EVM spec below Cancun avoids the blob-gas
-        // code path. See https://github.com/balancer/frontend-monorepo/issues/2717
-        ...(chain.id === polygon.id ? { hardfork: 'Shanghai' as const } : {}),
+        mnemonic: 'have doctor foam invite bottom elevator cream bulb pigeon holiday razor castle',
       }),
     })
 
@@ -86,9 +82,7 @@ export async function setup() {
   const results = await Promise.all(promises)
 
   // Warm up each anvil instance so the first test using a chain doesn't hit a cold fork
-  await Promise.all(
-    Object.values(testChains).map(chain => waitForAnvilReady(chain.port, chain.name))
-  )
+  await Promise.all(activeTestChains.map(chain => waitForAnvilReady(chain.port, chain.name)))
 
   return async () => {
     await Promise.all(results.map(shutdown => shutdown()))

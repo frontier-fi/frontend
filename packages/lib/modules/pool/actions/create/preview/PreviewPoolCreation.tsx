@@ -8,14 +8,11 @@ import { usePoolCreationForm } from '../PoolCreationFormProvider'
 import { RestartPoolCreationModal } from '../modal/RestartPoolCreationModal'
 import { getGqlPoolType } from '../helpers'
 import { LearnMoreModal } from '@repo/lib/shared/components/modals/LearnMoreModal'
-import { PreviewAutoRangeConfig } from './PreviewAutoRangeConfig'
-import { AutoRangeChartProvider } from '@repo/lib/modules/autorange/AutoRangeChartProvider'
 import { EclpChartProvider } from '@repo/lib/modules/eclp/hooks/EclpChartProvider'
-import { usePreviewAutoRangeChartData } from './usePreviewAutoRangeChartData'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { PreviewGyroEclpConfig } from './PreviewGyroEclpConfig'
 import { usePreviewEclpLiquidityProfile } from './usePreviewEclpLiquidityProfile'
-import { isGyroEllipticPool, isAutoRangePool } from '../helpers'
+import { isGyroEllipticPool } from '../helpers'
 import { useWatch } from 'react-hook-form'
 import { useProtocolSearchParams } from '../modal/useProtocolSearchParams'
 
@@ -87,31 +84,16 @@ function PreviewPoolHeader() {
 }
 
 function PreviewPoolChart() {
-  const { poolCreationForm, isBeforeStep } = usePoolCreationForm()
+  const { poolCreationForm } = usePoolCreationForm()
   const [poolType] = useWatch({ control: poolCreationForm.control, name: ['poolType'] })
 
   const eclpLiquidityProfile = usePreviewEclpLiquidityProfile()
-
-  const autoRangeChartData = usePreviewAutoRangeChartData()
-  const { lowerMarginValue, upperMarginValue } = autoRangeChartData || {}
 
   if (isGyroEllipticPool(poolType)) {
     return (
       <EclpChartProvider eclpLiquidityProfile={eclpLiquidityProfile}>
         <PreviewGyroEclpConfig />
       </EclpChartProvider>
-    )
-  }
-
-  if (isAutoRangePool(poolType)) {
-    return (
-      <AutoRangeChartProvider chartData={autoRangeChartData}>
-        <PreviewAutoRangeConfig
-          isBeforeStep={isBeforeStep('Details')}
-          lowerMarginValue={lowerMarginValue}
-          upperMarginValue={upperMarginValue}
-        />
-      </AutoRangeChartProvider>
     )
   }
 

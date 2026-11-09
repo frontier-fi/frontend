@@ -6,8 +6,6 @@ import {
 } from '@repo/lib/modules/transactions/transaction-steps/lib'
 import { TransactionBatchButton } from '@repo/lib/modules/transactions/transaction-steps/TransactionBatchButton'
 import { isTransactionSuccess } from '@repo/lib/modules/transactions/transaction-steps/transaction.helper'
-import { useTenderly } from '@repo/lib/modules/web3/useTenderly'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { useEffect, useMemo, useState } from 'react'
 import { usePool } from '../../PoolProvider'
 import {
@@ -23,7 +21,6 @@ export type AddLiquidityStepParams = AddLiquidityBuildQueryParams
 export function useAddLiquidityStep(params: AddLiquidityStepParams): TransactionStep {
   const { pool, refetch: refetchPoolBalances, chainId } = usePool()
   const [isStepActivated, setIsStepActivated] = useState(false)
-  const { buildTenderlyUrl } = useTenderly({ chainId })
   const [transaction, setTransaction] = useState<ManagedResult | undefined>()
 
   const { simulationQuery } = params
@@ -42,12 +39,6 @@ export function useAddLiquidityStep(params: AddLiquidityStepParams): Transaction
     tooltip: `Add liquidity to ${pool.name || 'pool'}.`,
     poolId: pool.id,
   }
-
-  const gasEstimationMeta = sentryMetaForWagmiSimulation('Error in AddLiquidity gas estimation', {
-    simulationQueryData: simulationQuery.data,
-    buildCallQueryData: buildCallDataQuery.data,
-    tenderlyUrl: buildTenderlyUrl(buildCallDataQuery.data),
-  })
 
   useEffect(() => {
     // simulationQuery is refetched every 30 seconds by AddLiquidityTimeout
@@ -74,7 +65,6 @@ export function useAddLiquidityStep(params: AddLiquidityStepParams): Transaction
         if (!buildCallDataQuery.data) return <DisabledTransactionButton />
         return (
           <ManagedSendTransactionButton
-            gasEstimationMeta={gasEstimationMeta}
             id={addLiquidityStepId}
             labels={labels}
             onTransactionChange={setTransaction}
@@ -103,6 +93,6 @@ export function useAddLiquidityStep(params: AddLiquidityStepParams): Transaction
           }
         : undefined,
     }),
-    [transaction, gasEstimationMeta, buildCallDataQuery.data, labels, chainId, refetchPoolBalances]
+    [transaction, buildCallDataQuery.data, labels, chainId, refetchPoolBalances]
   )
 }

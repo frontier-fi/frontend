@@ -18,9 +18,6 @@ export default function Debug() {
         <Link as={NextLink} href="/debug/token-input">
           Token input
         </Link>
-        <Link as={NextLink} href="/debug/sentry">
-          Sentry
-        </Link>
         <Link as={NextLink} href="/debug/wallet-check">
           Wallet check
         </Link>

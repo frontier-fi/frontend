@@ -14,7 +14,7 @@ const defaultHeaders = {
 }
 
 const link = new HttpLink({
-  uri: process.env.NEXT_PUBLIC_BALANCER_API_URL,
+  uri: process.env.NEXT_PUBLIC_API_URL,
   headers: defaultHeaders,
 })
 

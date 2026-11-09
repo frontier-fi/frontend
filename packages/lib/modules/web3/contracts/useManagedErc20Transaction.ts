@@ -8,7 +8,6 @@ import {
   TransactionLabels,
 } from '@repo/lib/modules/transactions/transaction-steps/lib'
 import { isSameAddress } from '@repo/lib/shared/utils/addresses'
-import { captureWagmiExecutionError } from '@repo/lib/shared/utils/query-errors'
 import { Address, ContractFunctionArgs, ContractFunctionName } from 'viem'
 import {
   useEstimateGas,
@@ -38,7 +37,6 @@ export interface ManagedErc20TransactionInput {
   chainId: SupportedChainId
   args?: ContractFunctionArgs<Erc20AbiWithIncreaseApproval, WriteAbiMutability> | null
   enabled: boolean
-  simulationMeta: Record<string, unknown>
 }
 
 export function useManagedErc20Transaction({
@@ -48,7 +46,6 @@ export function useManagedErc20Transaction({
   chainId,
   args,
   enabled = true,
-  simulationMeta,
 }: ManagedErc20TransactionInput) {
   const { minConfirmations } = useNetworkConfig()
   const { shouldChangeNetwork } = useChainSwitch(chainId)
@@ -73,7 +70,6 @@ export function useManagedErc20Transaction({
     chainId,
     query: {
       enabled: enabled && !shouldChangeNetwork,
-      meta: simulationMeta,
       // In chains like polygon, we don't want background refetches while waiting for min block confirmations
       ...onlyExplicitRefetch,
     },
@@ -131,21 +127,12 @@ export function useManagedErc20Transaction({
 
     const finalArgs = overrideArgs ?? args
 
-    try {
-      const request = {
-        ...simulateQuery.data.request,
-        args: finalArgs as any,
-      }
-
-      return await writeQuery.writeContractAsync(request)
-    } catch (e: unknown) {
-      captureWagmiExecutionError(e, 'Error in ERC20 transaction execution', {
-        chainId,
-        request: simulateQuery.data.request,
-      })
-
-      throw e
+    const request = {
+      ...simulateQuery.data.request,
+      args: finalArgs as any,
     }
+
+    return await writeQuery.writeContractAsync(request)
   }
 
   return {

@@ -1,10 +1,7 @@
 import { NextRequest } from 'next/server'
 
 export function getAllowedOrigins(): string[] {
-  return [
-    ...(process.env.NEXT_PRIVATE_ALLOWED_ORIGINS || '').split(','),
-    process.env.VERCEL_BRANCH_URL ? `https://${process.env.VERCEL_BRANCH_URL}` : '',
-  ].filter(Boolean)
+  return (process.env.ALLOWED_ORIGINS || '').split(',').filter(Boolean)
 }
 
 export function isAllowedOrigin(request: NextRequest, allowedOrigins: string[]): boolean {

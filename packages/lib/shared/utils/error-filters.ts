@@ -51,7 +51,11 @@ export function isPausedError(error?: Error | null): boolean {
 }
 
 export function isPausedErrorMessage(errorMessage: string): boolean {
-  return errorMessage.includes('reverted with the following reason:\nBAL#402\n')
+  return (
+    errorMessage.includes('PoolPaused') ||
+    errorMessage.includes('VaultPaused') ||
+    errorMessage.includes('VaultBuffersArePaused')
+  )
 }
 
 export function isUnbalancedAddError(error: Error | null, pool: Pool): boolean {
@@ -70,11 +74,7 @@ export function isUnbalancedAddError(error: Error | null, pool: Pool): boolean {
 }
 
 export function isUnbalancedAddErrorMessage(error: Error | null): boolean {
-  const errorStrings = [
-    'BAL#304',
-    'queryAddLiquidityUnbalanced',
-    'Exact BPT out calculation failed',
-  ] // [v2 error, v3 error, unbalanced via swap error]
+  const errorStrings = ['queryAddLiquidityUnbalanced', 'Exact BPT out calculation failed']
 
   const hasErrors = (errorString: string) => error?.message.includes(errorString)
 

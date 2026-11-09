@@ -1,7 +1,6 @@
 import { Metadata } from 'next'
 import { satoshiFont } from '@repo/lib/assets/fonts/satoshi/satoshi'
 import NextTopLoader from 'nextjs-toploader'
-import { SpeedInsights } from '@vercel/speed-insights/next'
 import '@repo/lib/assets/css/global.css'
 import { PropsWithChildren } from 'react'
 import { Providers } from '@repo/lib/shared/components/site/providers'
@@ -56,7 +55,6 @@ export default function RootLayout({ children }: PropsWithChildren) {
               subTitle="Frontier Finance is a battle-tested toolkit for true AMM experimentation and innovation."
               title="AMMs made easy"
             />
-            <SpeedInsights />
           </Providers>
         </ThemeProvider>
       </body>

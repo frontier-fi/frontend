@@ -1,9 +1,12 @@
+import { getVaultV3Address } from '@repo/lib/config/app.config'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { testHook } from '@repo/lib/test/utils/custom-renderers'
 import { useContractWallet } from './useContractWallet'
 import { waitFor } from '@testing-library/react'
 import { connectWith, disconnectDefaultUser } from '@repo/test/utils/wagmi/wagmi-connections'
 
 const TEST_EOA_ADDRESS = '0x71e3aae9588c928ed01590bcac4d3d6a8c70550c'
+const TEST_CONTRACT_ADDRESS = getVaultV3Address(PROJECT_CONFIG.defaultNetwork)
 
 describe('Smart contract wallets', () => {
   it('should return false when no wallet is connected', async () => {
@@ -25,8 +28,7 @@ describe('Smart contract wallets', () => {
   })
 
   it('should return true when contract wallet', async () => {
-    // Default test user for Anvil has an underlying contract
-    await connectWith('0x90F79bf6EB2c4f870365E785982E1f101E93b906')
+    await connectWith(TEST_CONTRACT_ADDRESS)
 
     const { result } = testHook(() => useContractWallet())
     await waitFor(() => expect(result.current.isLoading).toBeFalsy())

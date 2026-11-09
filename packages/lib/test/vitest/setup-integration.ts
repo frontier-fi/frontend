@@ -1,9 +1,8 @@
-import { chainsByKey } from '@repo/lib/modules/web3/ChainConfig'
 import * as transportsModule from '@repo/lib/modules/web3/transports'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { ChainIdWithFork, getTestRpcSetup } from '@repo/test/anvil/anvil-setup'
-import { mainnetTest, polygonTest } from '@repo/test/anvil/testWagmiConfig'
+import { baseTest, mainnetTest, monadTest, sepoliaTest } from '@repo/test/anvil/testWagmiConfig'
 import {
   connectWithDefaultUser,
   disconnectDefaultUser,
@@ -18,8 +17,6 @@ configure({ asyncUtilTimeout: 30_000 })
   Specific setup for integration tests (that it is not needed in unit tests)
 */
 beforeAll(async () => {
-  // By default all the integration tests use MAINNET
-  // If not, they must explicitly call startFork(<networkName>)
   await connectWithDefaultUser()
 })
 
@@ -36,11 +33,18 @@ vi.mock('@repo/lib/modules/web3/transports', async importOriginal => {
   return {
     ...originalModule,
     getRpcUrl: (chainId: number) => {
-      const { rpcUrl } = getTestRpcSetup(chainsByKey[chainId]!.id as ChainIdWithFork)
+      const { rpcUrl } = getTestRpcSetup(chainId as ChainIdWithFork)
       return rpcUrl
     },
   }
 })
+
+const testChainByGqlChain: Partial<Record<GqlChain, typeof sepoliaTest | any>> = {
+  [GqlChainValues.Sepolia]: sepoliaTest,
+  [GqlChainValues.Mainnet]: mainnetTest,
+  [GqlChainValues.Base]: baseTest,
+  [GqlChainValues.Monad]: monadTest,
+}
 
 /*
   Mocks getViemClient to use the test chain definitions,
@@ -49,8 +53,9 @@ vi.mock('@repo/lib/modules/web3/transports', async importOriginal => {
 vi.mock('@repo/lib/shared/services/viem/viem.client', () => {
   return {
     getViemClient: (chain: GqlChain) => {
+      const testChain = testChainByGqlChain[chain] ?? sepoliaTest
       return createPublicClient({
-        chain: chain === GqlChainValues.Mainnet ? mainnetTest : polygonTest,
+        chain: testChain,
         transport: http(),
       })
     },

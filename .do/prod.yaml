@@ -1,0 +1,86 @@
+# Production Frontier Frontend. On every push to `production`, the Deploy workflow builds one image,
+# then applies this file and creates the app if it does not exist. Edits made in the dashboard are
+# lost on the next deploy. The workflow fills in the placeholders: IMAGE_DIGEST with the image it
+# built, the others with the GitHub secrets of the same name.
+
+name: frontier-frontend
+region: fra
+
+domains:
+  - domain: app.frontier.fi
+    type: PRIMARY
+    zone: frontier.fi
+
+ingress:
+  rules:
+    - match:
+        path:
+          prefix: /
+      component:
+        name: web
+
+# Alerts email the team's contact address.
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
+
+envs:
+  - key: NODE_ENV
+    scope: RUN_TIME
+    value: production
+  - key: NEXT_PUBLIC_APP_ENV
+    scope: RUN_TIME
+    value: prod
+  - key: NEXT_PUBLIC_API_URL
+    scope: RUN_TIME
+    value: https://api.frontier.fi/graphql
+  - key: ALLOWED_ORIGINS
+    scope: RUN_TIME
+    value: https://app.frontier.fi
+  - key: DRPC_API_KEY
+    scope: RUN_TIME
+    type: SECRET
+    value: "${DRPC_API_KEY}"
+
+services:
+  - name: web
+    image:
+      registry_type: GHCR
+      registry: frontier-fi
+      repository: frontend
+      digest: "${IMAGE_DIGEST}"
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-2gb
+    health_check:
+      initial_delay_seconds: 30
+      period_seconds: 10
+      timeout_seconds: 5
+      http_path: /api/health
+    alerts:
+      - rule: CPU_UTILIZATION
+        operator: GREATER_THAN
+        value: 80
+        window: TEN_MINUTES
+      - rule: MEM_UTILIZATION
+        operator: GREATER_THAN
+        value: 85
+        window: TEN_MINUTES
+      - rule: RESTART_COUNT
+        operator: GREATER_THAN
+        value: 1
+        window: FIVE_MINUTES
+    envs:
+      - key: PORT
+        scope: RUN_TIME
+        value: "8080"
+      - key: HOSTNAME
+        scope: RUN_TIME
+        value: "0.0.0.0"
+      - key: NODE_OPTIONS
+        scope: RUN_TIME
+        value: "--max-old-space-size=1536"
+    log_destinations:
+      - name: better-stack
+        logtail:
+          token: "${LOGTAIL_TOKEN}"

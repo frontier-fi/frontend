@@ -1,5 +1,5 @@
 import { sepoliaRouter } from '@repo/lib/debug-helpers'
-import { defaultTestUserAccount } from '@repo/test/anvil/anvil-setup'
+import { defaultTestUserAccount, isChainSupported } from '@repo/test/anvil/anvil-setup'
 import { Pool } from '../../../pool.types'
 import { QueryRemoveLiquidityInput, RemoveLiquidityType } from '../remove-liquidity.types'
 import { SingleTokenRemoveLiquidityV3Handler } from './SingleTokenRemoveLiquidityV3.handler'
@@ -16,50 +16,52 @@ function selectSingleTokenHandler(pool: Pool): SingleTokenRemoveLiquidityV3Handl
 
 const defaultBuildInput = { account: defaultTestUserAccount, slippagePercent: '0.2' }
 
-// Unskip when Sepolia V3 pools are available in the production API.
-describe.skip('When removing unbalanced liquidity for a weighted V3 pool', () => {
-  const balAddress = '0xb19382073c7a0addbb56ac6af1808fa49e377b75'
-  const wethAddress = '0x7b79995e5f793a07bc00c21412e50ecae098e7f9'
-  const poolId = '0xb790fa0ba5d563b814b0ca1716c414f6b99937b2' // Sepolia B-50BAL-50WETH
+describe.runIf(isChainSupported(GqlChainValues.Sepolia))(
+  'When removing unbalanced liquidity for a V3 pool',
+  () => {
+    const usdcAaveAddress = '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8'
+    const usdtAaveAddress = '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0'
+    const poolId = '0x4898409f170de235844822a9545a54dbe637c049' // Sepolia w5s3 Stable v3 pool
 
-  let v3Pool: Pool
+    let v3Pool: Pool
 
-  beforeAll(async () => {
-    v3Pool = await fetchPoolMock({
-      poolId,
-      chain: GqlChainValues.Sepolia,
-      query: minimalPoolQuery,
+    beforeAll(async () => {
+      v3Pool = await fetchPoolMock({
+        poolId,
+        chain: GqlChainValues.Sepolia,
+        query: minimalPoolQuery,
+      })
     })
-  })
 
-  const defaultQueryInput: QueryRemoveLiquidityInput = {
-    humanBptIn: '0.001',
-    tokenOut: balAddress,
-    userAddress: defaultTestUserAccount,
+    const defaultQueryInput: QueryRemoveLiquidityInput = {
+      humanBptIn: '0.001',
+      tokenOut: usdtAaveAddress,
+      userAddress: defaultTestUserAccount,
+    }
+
+    test('queries amounts out', async () => {
+      const handler = selectSingleTokenHandler(v3Pool)
+
+      const result = await handler.simulate(defaultQueryInput)
+
+      const [usdcTokenAmountOut, usdtTokenAmountOut] = result.amountsOut
+
+      expect(usdcTokenAmountOut!.token.address).toBe(usdcAaveAddress)
+      expect(usdcTokenAmountOut!.amount).toBe(0n)
+
+      expect(usdtTokenAmountOut!.token.address).toBe(usdtAaveAddress)
+      expect(usdtTokenAmountOut!.amount).toBeGreaterThan(0n)
+    })
+
+    test('builds Tx Config', async () => {
+      const handler = selectSingleTokenHandler(v3Pool)
+
+      const queryOutput = await handler.simulate(defaultQueryInput)
+
+      const result = await handler.buildCallData({ ...defaultBuildInput, queryOutput })
+
+      expect(result.to).toBe(sepoliaRouter)
+      expect(result.data).toBeDefined()
+    })
   }
-
-  test('queries amounts out', async () => {
-    const handler = selectSingleTokenHandler(v3Pool)
-
-    const result = await handler.simulate(defaultQueryInput)
-
-    const [wEthTokenAmountOut, balTokenAmountOut] = result.amountsOut
-
-    expect(wEthTokenAmountOut!.token.address).toBe(wethAddress)
-    expect(wEthTokenAmountOut!.amount).toBe(0n)
-
-    expect(balTokenAmountOut!.token.address).toBe(balAddress)
-    expect(balTokenAmountOut!.amount).toBeGreaterThan(50000000000000000n)
-  })
-
-  test('builds Tx Config', async () => {
-    const handler = selectSingleTokenHandler(v3Pool)
-
-    const queryOutput = await handler.simulate(defaultQueryInput)
-
-    const result = await handler.buildCallData({ ...defaultBuildInput, queryOutput })
-
-    expect(result.to).toBe(sepoliaRouter)
-    expect(result.data).toBeDefined()
-  })
-})
+)

@@ -14,8 +14,9 @@ import { isAddress } from 'viem'
 import { includesAddress } from '@repo/lib/shared/utils/addresses'
 import { bn } from '@repo/lib/shared/utils/numbers'
 import { useMemo, useCallback } from 'react'
-import { captureNonFatalError } from '@repo/lib/shared/utils/query-errors'
 import { chunkArray } from '@repo/lib/shared/utils/array'
+import { reportClientError } from '@repo/lib/shared/utils/error-logger'
+import { ensureError } from '@repo/lib/shared/utils/errors'
 
 const MIN_TOKEN_VALUE_USD = 1
 const BALANCE_STALE_TIME = 30_000
@@ -68,10 +69,17 @@ export function useWalletTokenBalances(chains: GqlChain[], enabled: boolean) {
 
         return { nativeBalance, tokenBalances, erc20Tokens, chain, success: true as const }
       } catch (error) {
-        captureNonFatalError({
-          error,
+        const err = ensureError(error)
+
+        reportClientError({
+          category: 'wallet-balances',
           errorName: 'WalletTokenBalancesError',
-          errorMessage: `Error fetching wallet balances for chain ${chain}`,
+          message: `Error fetching wallet balances for chain ${chain}: ${err.message}`,
+          stack: err.stack,
+          extra: {
+            chain,
+            chainId: networkConfig.chainId,
+          },
         })
 
         return { chain, success: false as const, error }

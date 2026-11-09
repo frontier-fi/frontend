@@ -19,13 +19,10 @@ import { AbiMap } from './AbiMap'
 import { TransactionExecution, TransactionSimulation, WriteAbiMutability } from './contract.types'
 import { useOnTransactionConfirmation } from './useOnTransactionConfirmation'
 import { useOnTransactionSubmission } from './useOnTransactionSubmission'
-import { captureWagmiExecutionError } from '@repo/lib/shared/utils/query-errors'
 import { useTxHash } from '../safe.hooks'
 import { getWaitForReceiptTimeout } from './wagmi-helpers'
 import { onlyExplicitRefetch } from '@repo/lib/shared/utils/queries'
 import { useMockedTxHash } from '@repo/lib/modules/web3/contracts/useMockedTxHash'
-import { useTenderlyGasEstimate } from '@repo/lib/modules/web3/useTenderlyGasEstimate'
-import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { useEffect, useRef } from 'react'
 
 /**
@@ -44,7 +41,6 @@ export interface ManagedTransactionInput {
   labels: TransactionLabels
   chainId: SupportedChainId
   args?: ContractFunctionArgs<IAbiMap[AbiMapKey], WriteAbiMutability> | null
-  txSimulationMeta?: Record<string, unknown>
   enabled: boolean
   value?: bigint
   onTransactionChange: (transaction: ManagedResult) => void
@@ -57,14 +53,12 @@ export function useManagedTransaction({
   labels,
   chainId,
   args,
-  txSimulationMeta,
   enabled = true,
   value,
   onTransactionChange,
 }: ManagedTransactionInput) {
   const { minConfirmations } = useNetworkConfig()
   const { shouldChangeNetwork } = useChainSwitch(chainId)
-  const { userAddress } = useUserAccount()
 
   const txConfig = {
     abi: AbiMap[contractId] as Abi,
@@ -79,28 +73,21 @@ export function useManagedTransaction({
     chainId,
     query: {
       enabled: enabled && !shouldChangeNetwork,
-      meta: txSimulationMeta,
       // In chains like polygon, we don't want background refetches while waiting for min block confirmations
       ...onlyExplicitRefetch,
     },
     value,
   })
 
-  // use tenderly gas estimate only on ethereum mainnet
-  const useEstimateGasHook = chainId === 1 ? useTenderlyGasEstimate : useEstimateGas
-
-  const useEstimateGasProps = {
+  const estimateGasQuery = useEstimateGas({
     ...txConfig,
     chainId,
-    from: userAddress,
     query: {
       enabled: !!txConfig && !shouldChangeNetwork,
       // In chains like polygon, we don't want background refetches while waiting for min block confirmations
       ...onlyExplicitRefetch,
     },
-  }
-
-  const estimateGasQuery = useEstimateGasHook(useEstimateGasProps)
+  })
 
   const { mockedTxHash, setMockedTxHash } = useMockedTxHash()
 
@@ -157,19 +144,10 @@ export function useManagedTransaction({
       if (txHash) return
     }
 
-    try {
-      return await writeQuery.writeContractAsync({
-        ...simulateQuery.data.request,
-        chainId: chainId,
-      })
-    } catch (e: unknown) {
-      captureWagmiExecutionError(e, 'Error in managed transaction execution', {
-        chainId,
-        request: simulateQuery.data.request,
-      })
-
-      throw e
-    }
+    return await writeQuery.writeContractAsync({
+      ...simulateQuery.data.request,
+      chainId: chainId,
+    })
   }
 
   return {

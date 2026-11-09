@@ -19,9 +19,6 @@ coverage
 # turbo
 .turbo
 
-# vercel
-.vercel
-
 # build outputs
 .next/
 out/
@@ -45,10 +42,6 @@ next-env.d.ts
 .idea
 .aider*
 
-# entry config file
-.sentryclirc
-.env.sentry-build-plugin
-
 # for packages/lib
 generated/
 .eslintcache
@@ -56,6 +49,3 @@ generated/
 
 # V8 compilation cache
 v8-compile-cache-0/
-
-# unignore some paths
-!apps/balancer-analytics/docs

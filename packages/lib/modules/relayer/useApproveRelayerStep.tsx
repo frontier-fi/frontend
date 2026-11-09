@@ -9,7 +9,6 @@ import { ManagedTransactionInput } from '../web3/contracts/useManagedTransaction
 import { useUserAccount } from '../web3/UserAccountProvider'
 import { getNetworkConfig } from '@repo/lib/config/app.config'
 import { useHasApprovedRelayer } from './useHasApprovedRelayer'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { useState } from 'react'
 import { RelayerMode } from './useRelayerMode'
 import { buildBatchableTxCall } from '../transactions/transaction-steps/tx-batch.helpers'
@@ -46,16 +45,6 @@ export function useApproveRelayerStep(
     tooltip: 'Approve the Frontier Finance relayer.',
   }
 
-  const txSimulationMeta = sentryMetaForWagmiSimulation(
-    'Error in wagmi tx simulation: Approving Relayer',
-    {
-      vaultAddress,
-      userAddress,
-      relayerAddress,
-      chainId,
-    }
-  )
-
   const props: ManagedTransactionInput = {
     contractAddress: vaultAddress,
     contractId: 'balancer.vaultV2',
@@ -64,7 +53,6 @@ export function useApproveRelayerStep(
     chainId,
     args: [userAddress, relayerAddress, true],
     enabled: !!userAddress && !isLoading,
-    txSimulationMeta,
     onTransactionChange: setTransaction,
   }
 

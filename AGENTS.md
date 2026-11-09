@@ -10,7 +10,7 @@ Before any Next.js work, find and read the relevant doc in `apps/frontend-v3/nod
 
 ### Never hardcode project-specific values in `packages/lib`
 
-Project identity comes from `NEXT_PUBLIC_PROJECT_ID` via `config/getProjectConfig.ts` (`PROJECT_CONFIG`, `isBalancer`). Prefer `PROJECT_CONFIG.projectName`, `projectUrl`, and `projectLogo` over hardcoded brand strings. New config fields go in `config.types.ts` and `projects/balancer.ts`.
+Project identity comes from `config/getProjectConfig.ts` (`PROJECT_CONFIG`). Prefer `PROJECT_CONFIG.projectName`, `projectUrl`, and `projectLogo` over hardcoded brand strings. New config fields go in `config.types.ts` and `projects/frontier.ts`.
 
 ## Architecture
 

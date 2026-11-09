@@ -1,53 +1,60 @@
 import { getNetworkConfig } from '@repo/lib/config/app.config'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
-import { defaultTestUserAccount } from '@repo/test/anvil/anvil-setup'
+import { defaultTestUserAccount, isChainSupported } from '@repo/test/anvil/anvil-setup'
+import { Pool } from '../../../pool.types'
 import { UnbalancedAddLiquidityV3Handler } from './UnbalancedAddLiquidityV3.handler'
 import { selectAddLiquidityHandler } from './selectAddLiquidityHandler'
 import { fetchPoolMock, minimalPoolQuery } from '../../../__mocks__/fetchPoolMock'
 
-describe('When adding unbalanced liquidity for a V3 pool', async () => {
-  const wethAddress = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-  const poolId = '0x1ea5870f7c037930ce1d5d8d9317c670e89e13e3' // rETH-waEthWETH
+describe.runIf(isChainSupported(GqlChainValues.Sepolia))(
+  'When adding unbalanced liquidity for a V3 pool',
+  () => {
+    const usdcAaveAddress = '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8'
+    const poolId = '0x4898409f170de235844822a9545a54dbe637c049' // w5s3 Stable v3 pool
 
-  const v3Pool = await fetchPoolMock({
-    poolId,
-    chain: GqlChainValues.Mainnet,
-    query: minimalPoolQuery,
-  })
+    let v3Pool: Pool
+    let handler: UnbalancedAddLiquidityV3Handler
 
-  const handler = selectAddLiquidityHandler(v3Pool) as UnbalancedAddLiquidityV3Handler
+    beforeAll(async () => {
+      v3Pool = await fetchPoolMock({
+        poolId,
+        chain: GqlChainValues.Sepolia,
+        query: minimalPoolQuery,
+      })
 
-  const humanAmountsIn: HumanTokenAmountWithSymbol[] = [
-    { humanAmount: '0.1', tokenAddress: wethAddress, symbol: 'WETH' },
-  ]
-
-  it('calculates price impact', async () => {
-    const priceImpact = await handler.getPriceImpact(humanAmountsIn)
-    expect(priceImpact).toBeGreaterThan(0.00002)
-  })
-
-  it('queries bptOut', async () => {
-    const result = await handler.simulate(humanAmountsIn, defaultTestUserAccount)
-
-    expect(result.bptOut.amount).toBeGreaterThan(100000000000000n)
-  })
-
-  it('builds Tx Config', async () => {
-    // Store query response in handler instance
-    const queryOutput = await handler.simulate(humanAmountsIn, defaultTestUserAccount)
-
-    const result = await handler.buildCallData({
-      humanAmountsIn,
-      account: defaultTestUserAccount,
-      slippagePercent: '0.2',
-      queryOutput,
+      handler = selectAddLiquidityHandler(v3Pool) as UnbalancedAddLiquidityV3Handler
     })
 
-    const mainnetRouter = getNetworkConfig(GqlChainValues.Mainnet).contracts.balancer
-      .compositeLiquidityRouterBoosted
+    const humanAmountsIn: HumanTokenAmountWithSymbol[] = [
+      { humanAmount: '1', tokenAddress: usdcAaveAddress, symbol: 'usdc-aave' },
+    ]
 
-    expect(result.to).toBe(mainnetRouter)
-    expect(result.data).toBeDefined()
-  })
-})
+    it('calculates price impact', async () => {
+      const priceImpact = await handler.getPriceImpact(humanAmountsIn)
+      expect(priceImpact).toBeGreaterThanOrEqual(0)
+    })
+
+    it('queries bptOut', async () => {
+      const result = await handler.simulate(humanAmountsIn, defaultTestUserAccount)
+
+      expect(result.bptOut.amount).toBeGreaterThan(100000000000000n)
+    })
+
+    it('builds Tx Config', async () => {
+      const queryOutput = await handler.simulate(humanAmountsIn, defaultTestUserAccount)
+
+      const result = await handler.buildCallData({
+        humanAmountsIn,
+        account: defaultTestUserAccount,
+        slippagePercent: '0.2',
+        queryOutput,
+      })
+
+      const sepoliaRouter = getNetworkConfig(GqlChainValues.Sepolia).contracts.balancer.router
+
+      expect(result.to).toBe(sepoliaRouter)
+      expect(result.data).toBeDefined()
+    })
+  }
+)

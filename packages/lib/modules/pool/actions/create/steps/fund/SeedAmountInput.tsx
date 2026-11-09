@@ -1,9 +1,7 @@
-import { useAutoRangeInitAmounts } from './useAutoRangeInitAmounts'
 import { PoolCreationToken, SupportedPoolTypes } from '../../types'
-import { useEffect, useRef } from 'react'
-import { formatUnits } from 'viem'
+import { useEffect } from 'react'
 import { useGyroEclpInitAmountsRatio } from './useGyroEclpInitAmountsRatio'
-import { isAutoRangePool, isGyroEllipticPool } from '../../helpers'
+import { isGyroEllipticPool } from '../../helpers'
 import { TokenInput } from '@repo/lib/modules/tokens/TokenInput/TokenInput'
 import { usePoolCreationForm } from '../../PoolCreationFormProvider'
 import { useWatch } from 'react-hook-form'
@@ -19,23 +17,14 @@ interface TokenAmountInputProps {
 }
 
 export function SeedAmountInput({ token, idx, poolType, poolTokens }: TokenAmountInputProps) {
-  const { updatePoolToken, poolAddress, poolCreationForm } = usePoolCreationForm()
+  const { updatePoolToken, poolCreationForm } = usePoolCreationForm()
   const [network] = useWatch({ control: poolCreationForm.control, name: ['network'] })
-
-  const { autoRangeInitAmounts } = useAutoRangeInitAmounts(
-    isAutoRangePool(poolType),
-    poolAddress,
-    token
-  )
 
   const eclpInitAmountsRatio = useGyroEclpInitAmountsRatio()
 
   const { setValidationError, removeValidationErrors } = useTokenInputsValidation()
 
-  const lastUserUpdatedAmountIdx = useRef<number | null>(null)
-
   const otherTokenInputIdx = idx === 0 ? 1 : 0
-  const otherToken = poolTokens[otherTokenInputIdx]
 
   useEffect(() => {
     if (!token.address) return
@@ -46,8 +35,6 @@ export function SeedAmountInput({ token, idx, poolType, poolTokens }: TokenAmoun
   }, [token, poolType, setValidationError])
 
   const handleAmountChange = (idx: number, amount: string) => {
-    lastUserUpdatedAmountIdx.current = idx
-
     if (isGyroEllipticPool(poolType) && eclpInitAmountsRatio) {
       const referenceAmount = Number(amount)
 
@@ -69,30 +56,6 @@ export function SeedAmountInput({ token, idx, poolType, poolTokens }: TokenAmoun
 
     updatePoolToken(idx, { amount })
   }
-
-  // autofill other token amount for AutoRange using response from contract
-  useEffect(() => {
-    if (!autoRangeInitAmounts || lastUserUpdatedAmountIdx.current !== idx) return
-
-    if (!otherToken?.address || !otherToken?.data?.decimals) return
-
-    // Use sorted token addresses to find the index of the other tokenAmount in the sorted array
-    const sortedAddresses = poolTokens
-      .map(t => t.address?.toLowerCase())
-      .filter(Boolean)
-      .sort((a, b) => a!.localeCompare(b!))
-
-    const otherTokenAmountIdx = sortedAddresses.indexOf(otherToken.address.toLowerCase())
-
-    const initAmount = autoRangeInitAmounts[otherTokenAmountIdx]
-    if (initAmount === undefined) return
-
-    // Update the other token's amount using the corresponding value from initAmounts
-    const otherTokenAmount = formatUnits(initAmount, otherToken.data.decimals)
-
-    updatePoolToken(otherTokenInputIdx, { amount: otherTokenAmount })
-    lastUserUpdatedAmountIdx.current = null
-  }, [idx, updatePoolToken, autoRangeInitAmounts, poolTokens])
 
   return (
     <VStack align="start" key={idx} spacing="sm" w="full">

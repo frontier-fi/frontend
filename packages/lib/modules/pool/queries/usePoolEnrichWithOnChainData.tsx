@@ -6,14 +6,13 @@ import { Pool } from '../pool.types'
 import { BPT_DECIMALS } from '../pool.constants'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { bn, safeSum } from '@repo/lib/shared/utils/numbers'
-import { getVaultConfig, isCowAmmPool, isV1Pool, isV2Pool, isV3Pool } from '../pool.helpers'
+import { getVaultConfig, isV2Pool, isV3Pool } from '../pool.helpers'
 import { getChainId } from '@repo/lib/config/app.config'
 import {
   balancerV2ComposableStablePoolV5Abi,
   balancerV2VaultAbi,
 } from '../../web3/contracts/abi/generated'
 import { isComposableStablePool } from '../pool.utils'
-import { cowAmmPoolAbi } from '../../web3/contracts/abi/cowAmmAbi'
 import { vaultExtensionAbi_V3 } from '@balancer/sdk'
 import { getCompositionTokens } from '../pool-tokens.utils'
 
@@ -49,11 +48,9 @@ export function usePoolEnrichWithOnChainData(pool: Pool) {
   but only one query will be executed (the one with enabled: true)
 */
 function usePoolOnchainData(pool: Pool) {
-  const cowAmmResult = useCowPoolOnchainData(pool)
   const v2Result = useV2PoolOnchainData(pool)
   const v3Result = useV3PoolOnchainData(pool)
 
-  if (isCowAmmPool(pool.type)) return cowAmmResult
   if (isV2Pool(pool)) return v2Result
   if (isV3Pool(pool)) return v3Result
 
@@ -164,48 +161,6 @@ function useV2PoolOnchainData(pool: Pool) {
     isPoolInRecoveryMode: undefined,
     totalSupply: v2Query.data?.[1],
     nestedPoolData: undefined, // v2 pools w/ nested pools will not be supported
-  }
-}
-
-/*
-  We need a custom useReadContracts for cow AMM pools because they are v1 pools
-  There's no vault in V1 so we get the balances from the pool contract)
-*/
-function useCowPoolOnchainData(pool: Pool) {
-  const chainId = getChainId(pool.chain)
-
-  const balanceContracts = pool.poolTokens.map(token => {
-    return {
-      chainId,
-      address: pool.address as Address,
-      abi: cowAmmPoolAbi,
-      functionName: 'getBalance',
-      args: [token.address as Address],
-    } as const
-  })
-
-  const cowQuery = useReadContracts({
-    query: {
-      enabled: isV1Pool(pool),
-    },
-    allowFailure: false,
-    contracts: [
-      ...balanceContracts,
-      {
-        chainId,
-        abi: cowAmmPoolAbi,
-        address: pool.address as Address,
-        functionName: 'totalSupply',
-      } as const,
-    ],
-  })
-
-  return {
-    ...cowQuery,
-    totalSupply: cowQuery.data?.at(-1),
-    poolTokenBalances: cowQuery.data?.slice(0, -1),
-    isPoolInRecoveryMode: undefined,
-    nestedPoolData: undefined, // TODO: add support for v1 pools w/ nested pools when needed
   }
 }
 
