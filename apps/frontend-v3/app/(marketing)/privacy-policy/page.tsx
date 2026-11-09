@@ -20,9 +20,9 @@ export default function Privacy() {
               </Box>
               <p>
                 <em className="font-medium">
-                  This Privacy Policy explains how Frontier Finance, its subsidiary, Frontier
-                  Finance OpCo Limited (“Frontier Finance,” “we,” “our,” or “us”) collects, uses,
-                  and discloses information about you. This Privacy Policy applies when you use our
+                  This Privacy Policy explains how Frontier Finance Foundation (“Frontier Finance
+                  Foundation,” “Frontier Finance,” “we,” “our,” or “us”) collects, uses, and
+                  discloses information about you. This Privacy Policy applies when you use our
                   website, Frontier Finance Protocol user-interface or application and other online
                   products (collectively, our “UI”), engage with us on social media, or otherwise
                   interact with us.
@@ -259,12 +259,12 @@ export default function Privacy() {
               <h2>Transfer of information to the United States and Other&nbsp;Countries</h2>
 
               <p>
-                Frontier Finance is headquartered in the Cayman Islands with a subsidiary in the
-                British Virgin Islands (BVI). Therefore, we and our service providers may transfer
-                your personal information to, or store or access it in, jurisdictions that may not
-                provide levels of data protection that are equivalent to those of your home
-                jurisdiction. We will take steps to ensure that your personal information receives
-                an adequate level of protection in the jurisdictions in which we process it.
+                Frontier Finance is headquartered in the Cayman Islands. Therefore, we and our
+                service providers may transfer your personal information to, or store or access it
+                in, jurisdictions that may not provide levels of data protection that are equivalent
+                to those of your home jurisdiction. We will take steps to ensure that your personal
+                information receives an adequate level of protection in the jurisdictions in which
+                we process it.
               </p>
             </div>
           </FadeInOnView>

@@ -30,7 +30,7 @@ export function AcceptPoliciesModal() {
   const [isChecked, setIsChecked] = useState(false)
   const disconnect = useDisconnect()
 
-  const { projectName } = PROJECT_CONFIG
+  const { projectName, legalEntityName } = PROJECT_CONFIG
 
   const isAddressInAcceptedPolicies =
     acceptedPolicies.includes(userAddress.toLowerCase()) ||
@@ -79,7 +79,7 @@ export function AcceptPoliciesModal() {
               size="lg"
             >
               <Box aria-label="Accept policies" color="font.primary" fontSize="md" mt="-3px">
-                By connecting my wallet, I agree to {projectName}&apos;s{' '}
+                By connecting my wallet, I agree to {legalEntityName}&apos;s{' '}
                 <Link as={NextLink} href="/terms-of-use">
                   Terms of Use
                 </Link>

@@ -182,6 +182,8 @@ export interface ProjectConfig {
   projectId: 'frontier'
   projectUrl: string
   projectName: string
+  /** Registered legal entity users contract with (Terms of Use, Privacy Policy). */
+  legalEntityName: string
   projectLogo: string
   acceptedPoliciesVersion: number | undefined
   supportedNetworks: GqlChain[]

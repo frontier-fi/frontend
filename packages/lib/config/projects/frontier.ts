@@ -12,6 +12,7 @@ const hiddenPoolTypes: PoolFilterType[] = [
 export const ProjectConfigFrontier: ProjectConfig = {
   projectId: 'frontier',
   projectName: 'Frontier Finance',
+  legalEntityName: 'Frontier Finance Foundation',
   projectUrl: 'https://frontier.fi',
   projectLogo: '/images/icons/0xff.png',
   acceptedPoliciesVersion: undefined,
