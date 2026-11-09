@@ -70,7 +70,6 @@ export interface ContractsConfig {
   omniVotingEscrow?: Address
   gaugeWorkingBalanceHelper?: Address
   gaugeController?: Address
-  signatureRegistry?: Address
 }
 
 export interface PoolsConfig {
