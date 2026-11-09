@@ -5,8 +5,7 @@ export { isSentryEnabled }
 
 const isProd = process.env.NEXT_PUBLIC_APP_ENV === 'prod'
 
-// Source map generation and upload makes the build much slower so we only enable it for vercel production builds from main branch
-const shouldEnableSourceMaps = isProd && process.env.VERCEL_GIT_COMMIT_REF === 'main'
+const shouldEnableSourceMaps = false
 
 /** @type {import('@sentry/nextjs/config').SentryBuildOptions} */
 export const sentryOptions: SentryBuildOptions = {

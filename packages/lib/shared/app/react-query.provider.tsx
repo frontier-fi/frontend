@@ -20,15 +20,6 @@ import {
   balancerCompositeLiquidityRouterNestedAbiExtended,
   balancerRouterAbiExtended,
 } from '@balancer/sdk'
-import { SimulateSwapInputs } from '@repo/lib/modules/swap/swap.types'
-import { sendMessage } from '../services/slack/api'
-
-type SwapParams = {
-  chainId: number
-  swapInputs: SimulateSwapInputs
-}
-
-const SLACK_CHANNEL_ID = 'C0ADASX2SSH'
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -37,21 +28,7 @@ export const queryClient = new QueryClient({
       const sentryMeta = query?.meta as SentryMetadata
       if (shouldIgnore(error.message, error.stack)) return
       if (shouldIgnoreEdgeCaseError(error, sentryMeta)) return
-
-      if (isSwapWithNoPathsError(error.message) && sentryMeta.context?.extra) {
-        const params = sentryMeta.context?.extra['params'] as SwapParams
-
-        sendMessage(
-          SLACK_CHANNEL_ID,
-          `chain: ${params.chainId}\n` +
-            `tokenIn: ${params.swapInputs.tokenIn}\n` +
-            `tokenOut: ${params.swapInputs.tokenOut}\n` +
-            `swapKind: ${params.swapInputs.swapType}\n` +
-            `swapAmount: ${params.swapInputs.swapAmount}`
-        )
-
-        return
-      }
+      if (isSwapWithNoPathsError(error.message)) return
 
       console.log('Sentry capturing query error', {
         meta: sentryMeta,
