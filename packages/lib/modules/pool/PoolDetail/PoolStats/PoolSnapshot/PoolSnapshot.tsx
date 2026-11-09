@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Box, BoxProps, Card, CardProps, VStack } from '@chakra-ui/react'
+import { BoxProps, Card, CardProps, VStack } from '@chakra-ui/react'
 import { usePool } from '../../../PoolProvider'
 import { NoisyCard } from '@repo/lib/shared/components/containers/NoisyCard'
 import ButtonGroup, {
@@ -10,7 +10,6 @@ import ButtonGroup, {
 import { UserSnapshotValues } from './UserSnapshotValues'
 import { PoolSnapshotValues } from './PoolSnapshotValues'
 import { hasTotalBalance } from '../../../user-balance.helpers'
-import { RadialPattern } from '@repo/lib/shared/components/zen/RadialPattern'
 
 const COMMON_NOISY_CARD_PROPS: { contentProps: BoxProps; cardProps: BoxProps } = {
   contentProps: {
@@ -54,21 +53,6 @@ export function PoolSnapshot({ ...props }: CardProps) {
         cardProps={COMMON_NOISY_CARD_PROPS.cardProps}
         contentProps={COMMON_NOISY_CARD_PROPS.contentProps}
       >
-        <Box bottom={0} left={0} overflow="hidden" position="absolute" right={0} top={0}>
-          <RadialPattern
-            circleCount={8}
-            height={800}
-            innerHeight={150}
-            innerWidth={150}
-            left="calc(50% - 400px)"
-            opacity={0.35}
-            pointerEvents="none"
-            position="absolute"
-            top="-180px"
-            width={800}
-            zIndex={0}
-          />
-        </Box>
         <VStack
           align="flex-start"
           gap="20px"

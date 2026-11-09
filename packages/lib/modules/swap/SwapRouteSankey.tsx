@@ -21,8 +21,8 @@ type Props = {
   height?: number
 }
 
-const LINK_OPACITY = 0.45
-const LINK_OPACITY_FOCUS = 0.85
+const LINK_OPACITY = 0.32
+const LINK_OPACITY_FOCUS = 0.7
 const ICON_SIZE = 14
 
 function escapeHtml(s: string) {
@@ -117,8 +117,17 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
         name: n.name,
         depth: n.depth,
         itemStyle: {
-          color: n.color,
-          borderColor: n.color,
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: n.color },
+              { offset: 1, color: n.colorEnd },
+            ],
+          },
           borderWidth: 0,
         },
         label,

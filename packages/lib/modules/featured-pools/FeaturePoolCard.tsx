@@ -12,7 +12,6 @@ import { motion } from 'motion/react'
 import MainAprTooltip from '@repo/lib/shared/components/tooltips/apr-tooltip/MainAprTooltip'
 import { memo, ReactNode } from 'react'
 import FadeInOnView from '@repo/lib/shared/components/containers/FadeInOnView'
-import { RadialPattern } from '@repo/lib/shared/components/zen/RadialPattern'
 import { usePoolTextures } from '@repo/lib/shared/components/imgs/FeaturedPoolSvgs'
 
 interface Props {
@@ -187,25 +186,6 @@ export function FeaturePoolCard({
             </VStack>
           </VStack>
         </VStack>
-
-        <Box
-          _groupHover={{ transformOrigin: '50%', transform: 'scale(1.03)' }}
-          opacity={{ base: '0.5', md: '0.5' }}
-          position="relative"
-          top="-50%"
-          transition="transform 0.2s var(--ease-out-cubic)"
-        >
-          <RadialPattern
-            circleCount={9}
-            height={800}
-            innerHeight={200}
-            innerWidth={200}
-            left="calc(50% - 400px)"
-            position="absolute"
-            top="calc(50% - 408px)"
-            width={800}
-          />
-        </Box>
       </Box>
     </NoisyCard>
   )
