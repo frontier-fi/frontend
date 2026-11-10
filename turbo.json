@@ -15,7 +15,6 @@
     "NEXT_RUNTIME",
     "NEXT_PHASE",
     "NEXT_PUBLIC_E2E_DEV",
-    "CI",
     "ALLOWED_ORIGINS",
     "TZ"
   ],
@@ -60,7 +59,8 @@
       "outputs": ["node_modules/.cache/tsbuildinfo.json"]
     },
     "test:unit": {
-      "dependsOn": ["^graphql:gen", "^test:unit"]
+      "dependsOn": ["^graphql:gen", "^test:unit"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
     "test:unit:watch": {
       "cache": false,
@@ -68,7 +68,8 @@
       "dependsOn": ["^graphql:gen"]
     },
     "test:integration": {
-      "dependsOn": ["^graphql:gen", "^test:integration"]
+      "dependsOn": ["^graphql:gen", "^test:integration"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
     "test:integration:watch": {
       "cache": false,
@@ -92,6 +93,7 @@
       "dependsOn": ["^transit"]
     },
     "test:e2e:dev": {
+      "cache": false,
       "dependsOn": ["frontend-v3#build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*", "NEXT_E2E_DEV"],
       "env": ["E2E_SHARD"]

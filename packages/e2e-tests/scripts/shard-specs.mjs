@@ -15,15 +15,13 @@ import { execFileSync } from 'node:child_process'
 
 const dir = process.argv[2] ?? 'tests/dev'
 const shard = process.env.E2E_SHARD
-const isCi = !!process.env.CI
 
 // Pool + LBP creation is disabled in the app (routes redirect to "/"), so its
-// specs must not gate CI. The files stay runnable locally, where the creator is
-// still reachable through the dev/staging nav.
-const disabledOnCi = ['create-pool.spec.ts']
+// specs are excluded from dev E2E runs.
+const disabledSpecs = ['create-pool.spec.ts']
 
 function isDisabled(file) {
-  return isCi && disabledOnCi.some(name => file.endsWith(name))
+  return disabledSpecs.some(name => file.endsWith(name))
 }
 
 // One "<path>:<line>:<col> › title" line per test: gives the file list plus a
@@ -51,13 +49,6 @@ function listTestsPerFile() {
   return testsPerFile
 }
 
-// Local runs without a shard hand the whole dir to playwright. On CI the
-// disabled specs still have to be dropped, so resolve the list explicitly.
-if (!shard && !isCi) {
-  console.log(dir)
-  process.exit(0)
-}
-
 const [indexArg, totalArg] = (shard ?? '1/1').split('/')
 const index = Number(indexArg)
 const total = Number(totalArg)
@@ -77,7 +68,7 @@ const entries = [...listTestsPerFile()].filter(([file]) => !isDisabled(file))
 if (entries.length === 0) {
   // Never emit an empty list: `playwright test` with no args would run every
   // spec in testDir instead of none.
-  throw new Error(`Every spec in "${dir}" is disabled on CI`)
+  throw new Error(`Every spec in "${dir}" is disabled`)
 }
 
 // Greedy longest-processing-time packing: heaviest file into the emptiest shard.

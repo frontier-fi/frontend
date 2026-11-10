@@ -4,7 +4,6 @@
 import { boostedPoolExamples } from '@repo/lib/modules/pool/__mocks__/pool-examples/boosted'
 import { flatPoolExamples } from '@repo/lib/modules/pool/__mocks__/pool-examples/flat'
 import { nestedPoolExamples } from '@repo/lib/modules/pool/__mocks__/pool-examples/nested'
-import { PoolExample } from '@repo/lib/modules/pool/__mocks__/pool-examples/pool-examples.types'
 import {
   createPoolVarName,
   saveAllPoolApiMocksFile,
@@ -23,7 +22,7 @@ export default async function saveApiMocks({ apiUrl, poolId }: ApiMockOptions) {
   if (poolId) console.log('Saving mock for poolId:', { poolId })
 
   const promises = allPoolExamples.map(example => {
-    if (shouldSkipMock(apiUrl, example) || (poolId && !isSameAddress(example.poolId, poolId))) {
+    if (poolId && !isSameAddress(example.poolId, poolId)) {
       return Promise.resolve(
         example.mockName || createPoolVarName(example.name || example.poolId) + 'Mock'
       )
@@ -45,11 +44,4 @@ export default async function saveApiMocks({ apiUrl, poolId }: ApiMockOptions) {
   await saveAllPoolApiMocksFile(mockFileNames)
 
   console.log(`✅ Updated mocks using api: ${apiUrl} \n`)
-}
-
-function shouldSkipMock(_apiUrl: string, _example: PoolExample) {
-  // Avoid saving mock in CI runs
-  if (process.env.CI) return true
-
-  return false
 }
