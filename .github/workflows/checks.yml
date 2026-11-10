@@ -8,8 +8,6 @@ env:
   NEXT_PUBLIC_API_URL: https://api.frontier.fi/graphql
   NEXT_PUBLIC_WALLET_CONNECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_ID }}
   DRPC_API_KEY: ${{ secrets.DRPC_API_KEY }}
-  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
   Docker-Build:

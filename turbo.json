@@ -124,8 +124,5 @@
       "dependsOn": ["^stylelint:fix"],
       "cache": false
     }
-  },
-  "remoteCache": {
-    "enabled": true
   }
 }
