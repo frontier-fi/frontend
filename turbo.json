@@ -60,7 +60,8 @@
       "outputs": ["node_modules/.cache/tsbuildinfo.json"]
     },
     "test:unit": {
-      "dependsOn": ["@repo/lib#graphql:gen", "^test:unit"]
+      "dependsOn": ["@repo/lib#graphql:gen", "^test:unit"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
     "test:unit:watch": {
       "cache": false,
@@ -68,7 +69,8 @@
       "dependsOn": ["@repo/lib#graphql:gen"]
     },
     "test:integration": {
-      "dependsOn": ["@repo/lib#graphql:gen", "^test:integration"]
+      "dependsOn": ["@repo/lib#graphql:gen", "^test:integration"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
     "test:integration:watch": {
       "cache": false,
