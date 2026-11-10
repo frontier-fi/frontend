@@ -14,6 +14,16 @@ export async function handleCoingeckoAssetPlatformsRequest() {
     next: { revalidate: twentyFourHoursInSecs },
   })
 
+  if (!res.ok) {
+    console.error(
+      JSON.stringify({
+        level: 'error',
+        source: 'coingecko-asset-platforms',
+        status: res.status,
+      })
+    )
+  }
+
   const data: CoingeckoAssetPlatform[] = await res.json()
 
   return NextResponse.json(data, {

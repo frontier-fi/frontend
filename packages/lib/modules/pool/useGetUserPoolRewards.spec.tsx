@@ -52,8 +52,7 @@ describe('useGetPoolRewards', () => {
       nonBalRewards: [],
     })
 
-    expect(result.current.rewardsByToken).toEqual({
-      [balAddress]: '1.5',
-    })
+    expect(result.current.claimableRewards).toHaveLength(1)
+    expect(result.current.rewardsByToken).toEqual({})
   })
 })

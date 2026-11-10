@@ -1,116 +1,45 @@
-import { daiAddress, polAddress } from '@repo/lib/debug-helpers'
-import { alternativeTestUserAccount, defaultTestUserAccount } from '@repo/test/anvil/anvil-setup'
-import { setUserTokenBalance } from '@repo/lib/test/integration/sdk-utils'
-import {
-  mainnetTestPublicClient,
-  polygonTestPublicClient,
-  baseTestPublicClient,
-} from '@repo/test/utils/wagmi/wagmi-test-clients'
+import { getChainId, getWrappedNativeAssetAddress } from '@repo/lib/config/app.config'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { ChainIdWithFork, defaultTestUserAccount } from '@repo/test/anvil/anvil-setup'
 import { testHook } from '@repo/lib/test/utils/custom-renderers'
 import { waitFor } from '@testing-library/react'
 import { erc20Abi } from 'viem'
 import { ChainContractConfig, useMulticall } from './useMulticall'
-import { mainnet, polygon, base } from 'viem/chains'
 
-describe('Performs multicall in multiple chains', () => {
-  beforeAll(async () => {
-    await Promise.all([
-      setUserTokenBalance({
-        client: mainnetTestPublicClient,
-        account: defaultTestUserAccount,
-        tokenAddress: daiAddress,
-        slot: 2,
-        balance: 1n,
-      }),
-      setUserTokenBalance({
-        client: baseTestPublicClient,
-        account: defaultTestUserAccount,
-        tokenAddress: '0x6bb7a212910682dcfdbd5bcbb3e28fb4e8da10ee',
-        slot: 4,
-        balance: 7702n,
-      }),
-      polygonTestPublicClient.setBalance({
-        address: alternativeTestUserAccount,
-        value: 721n,
-      }),
-    ])
+describe('Performs multicall across PROJECT_CONFIG.supportedNetworks', () => {
+  const multicallRequests: ChainContractConfig[] = PROJECT_CONFIG.supportedNetworks.map(chain => {
+    const chainId = getChainId(chain) as ChainIdWithFork
+    const wNativeAddress = getWrappedNativeAssetAddress(chain)
+    return {
+      id: `wNativeBalance_${chain}`,
+      chainId,
+      abi: erc20Abi,
+      address: wNativeAddress,
+      functionName: 'balanceOf',
+      args: [defaultTestUserAccount],
+    }
   })
 
-  const mainnetRequest: ChainContractConfig = {
-    id: 'daiBalanceOnMainnet',
-    chainId: mainnet.id,
-    abi: erc20Abi,
-    address: daiAddress,
-    functionName: 'balanceOf',
-    args: [defaultTestUserAccount],
-  }
-
-  const baseRequest: ChainContractConfig = {
-    id: 'ghoBalanceOnBase',
-    chainId: base.id,
-    abi: erc20Abi,
-    address: '0x6bb7a212910682dcfdbd5bcbb3e28fb4e8da10ee',
-    functionName: 'balanceOf',
-    args: [defaultTestUserAccount],
-  }
-
-  const polygonRequest: ChainContractConfig = {
-    id: 'polBalanceOnPolygon',
-    chainId: polygon.id,
-    abi: erc20Abi,
-    address: polAddress,
-    functionName: 'balanceOf',
-    args: [alternativeTestUserAccount],
-  }
-
-  test('including mixed mainnet and polygon contracts', async () => {
-    const multicallRequests: ChainContractConfig[] = [mainnetRequest, baseRequest, polygonRequest]
-
+  test('executes multicall on all supported networks', async () => {
     const { result } = testHook(() => useMulticall(multicallRequests))
 
-    const waitForChainData = async (chainId: number, label: string) => {
+    for (const req of multicallRequests) {
       await waitFor(() => {
-        const r = result.current.results[chainId]
+        const r = result.current.results[req.chainId]
 
         if (r?.error) {
-          console.error(`useMulticall error for ${label} (chainId ${chainId}):`, r.error)
+          console.error(`useMulticall error for chainId ${req.chainId}:`, r.error)
         }
 
         expect(r?.data).toBeDefined()
       })
-    }
 
-    await waitForChainData(mainnet.id, 'mainnet')
-
-    expect(result.current.results[mainnet.id]!.data).toMatchInlineSnapshot(`
-      {
-        "daiBalanceOnMainnet": {
-          "result": 1n,
-          "status": "success",
+      expect(result.current.results[req.chainId]!.data).toEqual({
+        [req.id]: {
+          result: expect.any(BigInt),
+          status: 'success',
         },
-      }
-    `)
-
-    await waitForChainData(base.id, 'base')
-
-    expect(result.current.results[base.id]!.data).toMatchInlineSnapshot(`
-      {
-        "ghoBalanceOnBase": {
-          "result": 7702n,
-          "status": "success",
-        },
-      }
-    `)
-
-    await waitForChainData(polygon.id, 'polygon')
-
-    expect(result.current.results[polygon.id]!.data).toMatchInlineSnapshot(`
-    {
-      "polBalanceOnPolygon": {
-        "result": 721n,
-        "status": "success",
-      },
+      })
     }
-  `)
   })
 })

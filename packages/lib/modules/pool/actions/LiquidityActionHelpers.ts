@@ -4,7 +4,6 @@ import { nullAddress } from '@repo/lib/modules/web3/contracts/wagmi-helpers'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { isSameAddress } from '@repo/lib/shared/utils/addresses'
-import { SentryError } from '@repo/lib/shared/utils/errors'
 import { bn, isZero } from '@repo/lib/shared/utils/numbers'
 import {
   AddLiquidityQueryOutput,
@@ -239,7 +238,7 @@ export function ensureLastQueryResponse<Q>(
   if (!queryResponse) {
     // This should never happen but this is a check against potential regression bugs
     console.error(`Missing queryResponse in ${liquidityActionDescription}`)
-    throw new SentryError(
+    throw new Error(
       `Missing queryResponse.
 It looks that you tried to call useBuildCallData before the last query finished generating queryResponse`
     )

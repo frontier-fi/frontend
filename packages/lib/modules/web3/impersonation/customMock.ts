@@ -24,7 +24,7 @@ type EmulatedSendCallsParams = {
 
 /*
   Wrapper over wagmi mock to override getAccounts method and, when enabled via
-  localStorage (see packages/e2e-tests/tests/dev/balancer/batched-transactions.spec.ts),
+  localStorage (see packages/e2e-tests/tests/dev/batched-transactions.spec.ts),
   emulate the EIP-5792 methods of an atomic-batching wallet so the batched
   transaction flow can be exercised against the anvil fork without a real
   smart-account wallet.

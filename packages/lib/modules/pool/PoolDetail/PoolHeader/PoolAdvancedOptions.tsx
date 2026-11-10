@@ -18,26 +18,10 @@ import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { MoreVertical } from 'lucide-react'
-import { isCowAmmPool, isMaBeetsPool } from '../../pool.helpers'
-import { usePool } from '../../PoolProvider'
-import { buildCowSwapUrlFromPool } from '@repo/lib/modules/cow/cow.utils'
-import { CowIcon } from '@repo/lib/shared/components/icons/logos/CowIcon'
 
 export function PoolAdvancedOptions() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
   const pathname = usePathname()
-  const { pool } = usePool()
-  const isCowPool = isCowAmmPool(pool.type)
-  const isPoolSwapDisabled = !isMaBeetsPool(pool.id) && isCowPool
-
-  const disabledLinkProps = isPoolSwapDisabled
-    ? {
-        color: 'font.button.disabled',
-        cursor: 'not-allowed',
-        opacity: 0.3,
-        pointerEvents: 'none' as const,
-      }
-    : {}
 
   return (
     <Popover
@@ -65,27 +49,12 @@ export function PoolAdvancedOptions() {
                 spacing="xxs"
                 variants={staggeredFadeInUp}
               >
-                {isCowPool ? (
-                  <HStack>
-                    <CowIcon size={20} />
-                    <Link href={buildCowSwapUrlFromPool(pool)} isExternal variant="nav">
-                      Swap pool tokens on CoW Swap
-                    </Link>
-                  </HStack>
-                ) : (
-                  <HStack>
-                    <SwapIcon size={20} />
-                    <Link
-                      as={NextLink}
-                      href={`${pathname}/swap`}
-                      prefetch
-                      variant="nav"
-                      {...disabledLinkProps}
-                    >
-                      Swap through pool
-                    </Link>
-                  </HStack>
-                )}
+                <HStack>
+                  <SwapIcon size={20} />
+                  <Link as={NextLink} href={`${pathname}/swap`} prefetch variant="nav">
+                    Swap through pool
+                  </Link>
+                </HStack>
               </VStack>
             ) : null}
           </AnimatePresence>

@@ -27,15 +27,8 @@ import ButtonGroup from '@repo/lib/shared/components/btns/button-group/ButtonGro
 import { PoolChartsProvider, usePoolCharts } from './PoolChartsProvider'
 import { EclpChart } from '@repo/lib/modules/eclp/components/EclpChart'
 import { PoolCharts } from './PoolCharts'
-import {
-  AutoRangeChartProvider,
-  useAutoRangeChart,
-} from '@repo/lib/modules/autorange/AutoRangeChartProvider'
-import { AutoRangeChart } from '@repo/lib/modules/autorange/AutoRangeChart'
 import { ReversedToggleButton } from '@repo/lib/shared/components/btns/ReversedToggleButton'
 import { ThumbsDown, ThumbsUp } from 'lucide-react'
-import { WandIcon } from '@repo/lib/shared/components/icons/WandIcon'
-import { useAutoRangeData } from '@repo/lib/modules/autorange/useAutoRangeData'
 import { useGetECLPLiquidityProfile } from '@repo/lib/modules/eclp/hooks/useGetECLPLiquidityProfile'
 
 const COMMON_NOISY_CARD_PROPS: { contentProps: BoxProps; cardProps: BoxProps } = {
@@ -55,16 +48,13 @@ const COMMON_NOISY_CARD_PROPS: { contentProps: BoxProps; cardProps: BoxProps } =
 }
 
 export function PoolChartsContainer() {
-  const autoRangeChartData = useAutoRangeData()
   const eclpLiquidityProfile = useGetECLPLiquidityProfile()
 
   return (
     <PoolChartTabsProvider>
       <PoolChartsProvider>
         <EclpChartProvider eclpLiquidityProfile={eclpLiquidityProfile}>
-          <AutoRangeChartProvider chartData={autoRangeChartData}>
-            <PoolChartsContent />
-          </AutoRangeChartProvider>
+          <PoolChartsContent />
         </EclpChartProvider>
       </PoolChartsProvider>
     </PoolChartTabsProvider>
@@ -85,32 +75,17 @@ function PoolChartsContent({ ...props }: any) {
   } = useEclpChart()
 
   const {
-    hasChartData: hasAutoRangeChartData,
-    isLoading: isLoadingAutoRangeChartData,
-    isPoolWithinTargetRange,
-    outOfRangeText: autoRangeOutOfRangeText,
-    inRangeText: autoRangeInRangeText,
-    inRangeReadjustingText: autoRangeInRangeReadjustingText,
-    isPoolWithinRange,
-    toggleIsReversed: toggleIsReversedAutoRange,
-    tokens: tokensAutoRange,
-  } = useAutoRangeChart()
-
-  const {
     hasChartData: hasPoolChartData,
     isLoading: isLoadingPoolChartsData,
     chartValueSum,
     activePeriod,
   } = usePoolCharts()
 
-  const isLoading = isLoadingEclpChartData || isLoadingPoolChartsData || isLoadingAutoRangeChartData
-  const hasChartData = hasEclpChartData || hasPoolChartData || hasAutoRangeChartData
+  const isLoading = isLoadingEclpChartData || isLoadingPoolChartsData
+  const hasChartData = hasEclpChartData || hasPoolChartData
 
-  const showPoolCharts =
-    activeTab.value !== PoolChartTab.AUTORANGE && activeTab.value !== PoolChartTab.LIQUIDITY_PROFILE
-
-  const showAutoRangeChart = activeTab.value === PoolChartTab.AUTORANGE
   const showLiquidityProfileChart = activeTab.value === PoolChartTab.LIQUIDITY_PROFILE
+  const showPoolCharts = !showLiquidityProfileChart
 
   const clpBadgeConfigs = {
     liquidityProfile: {
@@ -118,16 +93,6 @@ function PoolChartsContent({ ...props }: any) {
       bodyText: poolIsInRange ? eclpInRangeText : eclpOutOfRangeText,
       headerText: `CLP ${poolIsInRange ? 'in' : 'out of'} range`,
       icon: poolIsInRange ? ThumbsUp : ThumbsDown,
-    },
-    autorange: {
-      bgColor: isPoolWithinTargetRange ? 'green.400' : isPoolWithinRange ? 'orange.300' : 'red.400',
-      bodyText: isPoolWithinTargetRange
-        ? autoRangeInRangeText
-        : isPoolWithinRange
-          ? autoRangeInRangeReadjustingText
-          : autoRangeOutOfRangeText,
-      headerText: isPoolWithinTargetRange ? 'Pool in range' : 'Pool readjusting',
-      icon: isPoolWithinTargetRange ? ThumbsUp : WandIcon,
     },
   }
 
@@ -148,12 +113,10 @@ function PoolChartsContent({ ...props }: any) {
                     options={tabsList}
                     size="xxs"
                   />
-                  {(showAutoRangeChart || showLiquidityProfileChart) && (
+                  {showLiquidityProfileChart && (
                     <ReversedToggleButton
-                      toggleIsReversed={
-                        showAutoRangeChart ? toggleIsReversedAutoRange : toggleIsReversedEclp
-                      }
-                      tokenPair={showAutoRangeChart ? tokensAutoRange : tokensEclp}
+                      toggleIsReversed={toggleIsReversedEclp}
+                      tokenPair={tokensEclp}
                     />
                   )}
                   {showPoolCharts && (
@@ -167,9 +130,9 @@ function PoolChartsContent({ ...props }: any) {
                   ml={{ base: undefined, md: 'auto' }}
                   spacing="0"
                 >
-                  {showLiquidityProfileChart && <ClpBadge {...clpBadgeConfigs.liquidityProfile} />}
-                  {showAutoRangeChart && <ClpBadge {...clpBadgeConfigs.autorange} />}
-                  {!showLiquidityProfileChart && !showAutoRangeChart && (
+                  {showLiquidityProfileChart ? (
+                    <ClpBadge {...clpBadgeConfigs.liquidityProfile} />
+                  ) : (
                     <>
                       <Heading fontWeight="bold" size="h5">
                         {chartValueSum}
@@ -181,12 +144,7 @@ function PoolChartsContent({ ...props }: any) {
                   )}
                 </VStack>
               </Stack>
-              <Box
-                h={[showAutoRangeChart ? '500px' : '300px', '400px', 'full']}
-                overflow="hidden"
-                position="relative"
-                w="full"
-              >
+              <Box h={['300px', '400px', 'full']} overflow="hidden" position="relative" w="full">
                 <AnimatePresence mode="wait">
                   {showLiquidityProfileChart && (
                     <motion.div
@@ -202,22 +160,6 @@ function PoolChartsContent({ ...props }: any) {
                       transition={{ duration: 0.3, ease: 'easeInOut' }}
                     >
                       <EclpChart />
-                    </motion.div>
-                  )}
-                  {showAutoRangeChart && (
-                    <motion.div
-                      animate={{ x: '0%' }}
-                      exit={{ x: '-100%' }}
-                      initial={{ x: '100%' }}
-                      key={activeTab.value}
-                      style={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                      }}
-                      transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    >
-                      <AutoRangeChart />
                     </motion.div>
                   )}
                   {showPoolCharts && <PoolCharts key={`default-chart-${activeTab.value}`} />}

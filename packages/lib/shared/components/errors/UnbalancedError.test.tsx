@@ -9,7 +9,6 @@ describe('getErrorLabels', () => {
     'addLiquidityUnbalanced operation will fail at SC level with user defined input.'
   )
 
-  const unbalancedAddErrorV2 = new Error('BAL#304')
   const unbalancedAddErrorV3 = new Error('queryAddLiquidityUnbalanced')
 
   it('should return correct labels for isInvariantRatioAboveMaxSimulationErrorMessage', () => {
@@ -51,16 +50,6 @@ describe('getErrorLabels', () => {
       errorMessage:
         'The price impact cannot be calculated. Proceed if you know exactly what you are doing.',
       proportionalLabel: 'Please try different amounts.',
-    })
-  })
-
-  it('should return correct labels for isUnbalancedAddErrorMessage (v2)', () => {
-    const result = getErrorLabels(true, unbalancedAddErrorV2)
-
-    expect(result).toEqual({
-      errorTitle: 'Token amounts error',
-      errorMessage: 'Your input(s) are either too large or would excessively unbalance the pool.',
-      proportionalLabel: 'Please use proportional mode.',
     })
   })
 

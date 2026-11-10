@@ -56,7 +56,6 @@ describe('getSafeWebUrl', () => {
     expect(getSafeWebUrl(137, SAFE_ADDRESS, 'id')).toContain('matic:')
     expect(getSafeWebUrl(10, SAFE_ADDRESS, 'id')).toContain('oeth:')
     expect(getSafeWebUrl(8453, SAFE_ADDRESS, 'id')).toContain('base:')
-    expect(getSafeWebUrl(146, SAFE_ADDRESS, 'id')).toContain('sonic:')
     expect(getSafeWebUrl(43114, SAFE_ADDRESS, 'id')).toContain('avax:')
   })
 })

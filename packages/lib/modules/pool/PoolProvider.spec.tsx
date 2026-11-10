@@ -5,7 +5,6 @@ import { testHook } from '@repo/lib/test/utils/custom-renderers'
 import { waitFor } from '@testing-library/react'
 import { BaseVariant } from './pool.types'
 import { usePoolLogic } from './PoolProvider'
-import { defaultTestGaugeAddress } from '@repo/lib/test/msw/builders/gqlStaking.builders'
 
 async function testUsePool({
   initialData = defaultPoolResponseMock,
@@ -41,18 +40,16 @@ describe('Gql pool helpers', () => {
     )
   })
 
-  test('returns gauge explorer link when the pool', async () => {
+  test('returns empty gauge explorer link (Frontier has no gauges)', async () => {
     const result = await testUsePool()
 
-    expect(result.current.gaugeExplorerLink).toBe(
-      `https://etherscan.io/address/0x2d42910d826e5500579d121596e98a6eb33c0a1b`
-    )
+    expect(result.current.gaugeExplorerLink).toBe('')
   })
 
-  test('knows if there is gauge', async () => {
+  test('has no gauge address (Frontier has no gauges)', async () => {
     const result = await testUsePool()
 
-    expect(result.current.hasGaugeAddress).toBeTruthy()
-    expect(result.current.gaugeAddress).toBe(defaultTestGaugeAddress)
+    expect(result.current.hasGaugeAddress).toBe(false)
+    expect(result.current.gaugeAddress).toBe('')
   })
 })

@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { captureError, ensureError } from '../../utils/errors'
 import { hours } from '../../utils/time'
 
 type ReputationResponse = {
@@ -57,10 +56,15 @@ export async function checkAddressReputation({
     const isAuthorized = recommendation !== 'Deny'
 
     return NextResponse.json({ isAuthorized })
-  } catch (err) {
-    const error = ensureError(err)
-
-    captureError(error, { extra: { address } })
+  } catch (error) {
+    console.error(
+      JSON.stringify({
+        level: 'error',
+        source: 'hypernative',
+        address,
+        message: error instanceof Error ? error.message : String(error),
+      })
+    )
 
     return NextResponse.json({ isAuthorized: true })
   }

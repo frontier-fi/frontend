@@ -29,7 +29,7 @@ describe('stake.helpers', () => {
       expect(getCanStake(pool)).toBe(false)
     })
 
-    test('returns true when at least one reward has rewardPerSecond !== "0"', () => {
+    test('returns false even when reward has rewardPerSecond !== "0" (Frontier has no gauges)', () => {
       const pool = getPoolWithRewards([
         {
           id: '0x5bbaed1fadc08c5fb3e4ae3c8848777e2da77103-0xba100000625a3754423978a60c9317c58a424e3d-balgauge',
@@ -38,10 +38,10 @@ describe('stake.helpers', () => {
         } as GqlPoolStakingGaugeReward,
       ])
 
-      expect(getCanStake(pool)).toBe(true)
+      expect(getCanStake(pool)).toBe(false)
     })
 
-    test('returns true when mixed zero and non-zero rewards exist', () => {
+    test('returns false when mixed zero and non-zero rewards exist (Frontier has no gauges)', () => {
       const pool = getPoolWithRewards([
         {
           id: '0x5bbaed1fadc08c5fb3e4ae3c8848777e2da77103-0xba100000625a3754423978a60c9317c58a424e3d-balgauge',
@@ -55,7 +55,7 @@ describe('stake.helpers', () => {
         } as GqlPoolStakingGaugeReward,
       ])
 
-      expect(getCanStake(pool)).toBe(true)
+      expect(getCanStake(pool)).toBe(false)
     })
 
     test('returns false when pool has no staking', () => {

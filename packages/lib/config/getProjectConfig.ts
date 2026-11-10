@@ -1,13 +1,3 @@
-import { ProjectConfigBalancer } from './projects/balancer'
-import { ProjectConfig } from './config.types'
+import { ProjectConfigFrontier } from './projects/frontier'
 
-const PROJECT_CONFIGS = {
-  [ProjectConfigBalancer.projectId]: ProjectConfigBalancer,
-}
-
-const projectId = process.env.NEXT_PUBLIC_PROJECT_ID as ProjectConfig['projectId']
-
-export const isBalancer = projectId === ProjectConfigBalancer.projectId || !projectId
-/** @deprecated Beets app removed from this deploy; always false. */
-export const isBeets = false
-export const PROJECT_CONFIG = PROJECT_CONFIGS[projectId] ?? ProjectConfigBalancer
+export const PROJECT_CONFIG = ProjectConfigFrontier

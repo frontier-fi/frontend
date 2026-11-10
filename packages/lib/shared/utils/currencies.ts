@@ -36,7 +36,7 @@ export function symbolForCurrency(currency: SupportedCurrency): string {
   }
 }
 
-const API_KEY = process.env.PRIVATE_CURRENCYAPI_KEY || ''
+const API_KEY = process.env.CURRENCYAPI_KEY || ''
 
 export async function getFxRates(): Promise<FxRates | undefined> {
   try {

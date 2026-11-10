@@ -61,7 +61,7 @@ const features = [
     shortDescription:
       'Frontier Finance focuses on minimizing MEV and maximizing LP profitability by collaborating with intent-centric projects like CowSwap.',
     description:
-      'Frontier Finance focuses on minimizing MEV and maximizing LP profitability by collaborating with intent-centric projects like CowSwap.\n\nv3 leverages custom AMM logic and a hooks framework to enable third-party teams easily to develop MEV mitigation strategies.\n\nSupported by Frontier Finance DAO, this approach aims to help bolster MEV innovation for LPs, enhancing fairness and profitability in on-chain interactions for the future to come.',
+      'Frontier Finance focuses on minimizing MEV and maximizing LP profitability by collaborating with intent-centric projects like CowSwap.\n\nv3 leverages custom AMM logic and a hooks framework to enable third-party teams easily to develop MEV mitigation strategies.\n\nSupported by Frontier Finance, this approach aims to help bolster MEV innovation for LPs, enhancing fairness and profitability in on-chain interactions for the future to come.',
     imageSrc: '/images/graphics/stone-2.png',
   },
   {

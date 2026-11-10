@@ -1,6 +1,6 @@
 import { InlineConfig } from 'vitest/node'
 import { resolve } from 'path'
-import { createVitestConfig } from './vitest.config.base'
+import { createVitestConfig } from './vitest.config.base.ts'
 import { ViteUserConfig } from 'vitest/config'
 
 export function createIntegrationVitestConfig(monorepoRoot: string): ViteUserConfig {

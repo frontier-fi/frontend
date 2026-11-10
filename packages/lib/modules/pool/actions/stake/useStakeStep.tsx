@@ -4,8 +4,6 @@ import {
   TransactionLabels,
   TransactionStep,
 } from '@repo/lib/modules/transactions/transaction-steps/lib'
-import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { useCallback, useMemo, useState } from 'react'
 import { usePool } from '../../PoolProvider'
 import { Pool } from '../../pool.types'
@@ -24,7 +22,6 @@ export function useStakeStep(
   const [isStakeEnabled, setIsStakeEnabled] = useState(false)
 
   const { refetch: refetchPool, chainId } = usePool()
-  const { userAddress } = useUserAccount()
   const [transaction, setTransaction] = useState<ManagedResult | undefined>()
 
   const labels: TransactionLabels = useMemo(
@@ -39,16 +36,6 @@ export function useStakeStep(
     [pool.staking]
   )
 
-  const txSimulationMeta = sentryMetaForWagmiSimulation(
-    'Error in wagmi tx simulation (Staking deposit transaction)',
-    {
-      chainId,
-      userAddress,
-      staking: pool.staking,
-      rawDepositAmount,
-    }
-  )
-
   const props: ManagedTransactionInput = useMemo(
     () => ({
       enabled: (isStakeEnabled && !!pool.staking) || !!rawDepositAmount,
@@ -58,10 +45,9 @@ export function useStakeStep(
       contractAddress: pool.staking?.gauge?.gaugeAddress || '',
       functionName: 'deposit',
       args: [rawDepositAmount || 0n],
-      txSimulationMeta,
       onTransactionChange: setTransaction,
     }),
-    [chainId, isStakeEnabled, labels, pool.staking, rawDepositAmount, txSimulationMeta, transaction]
+    [chainId, isStakeEnabled, labels, pool.staking, rawDepositAmount, transaction]
   )
 
   const onSuccess = useCallback(() => {

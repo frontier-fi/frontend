@@ -1,6 +1,5 @@
-import { Heading, VStack, Text, HStack, Radio, SimpleGrid, useRadioGroup } from '@chakra-ui/react'
+import { VStack, Text, HStack, Radio, SimpleGrid, useRadioGroup } from '@chakra-ui/react'
 import { InfoIconPopover } from '../../InfoIconPopover'
-import { useAutoRangeConfigurationOptions } from './useAutoRangeConfigurationOptions'
 import { usePoolCreationForm } from '../../PoolCreationFormProvider'
 import { NumberInput } from '@repo/lib/shared/components/inputs/NumberInput'
 import { bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
@@ -9,31 +8,6 @@ import { formatNumber } from '../../helpers'
 import { RadioCard } from '@repo/lib/shared/components/inputs/RadioCardGroup'
 import { useWatch, Control, FieldPath, FieldValues } from 'react-hook-form'
 import { useState, SVGProps } from 'react'
-
-export function AutoRangeConfiguration() {
-  const autoRangeConfigurationOptions = useAutoRangeConfigurationOptions()
-
-  return (
-    <VStack align="start" spacing="xl" w="full">
-      <Heading color="font.maxContrast" size="md">
-        AutoRange configuration
-      </Heading>
-      {autoRangeConfigurationOptions.map(option => (
-        <ConfigOptionsGroup
-          control={option.control}
-          customInputLabel={option.customInputLabel}
-          key={option.label}
-          label={option.label}
-          name={option.name}
-          options={option.options}
-          tooltip={option.tooltip}
-          updateFn={option.updateFn}
-          validateFn={option.validateFn}
-        />
-      ))}
-    </VStack>
-  )
-}
 
 export type ConfigOptionsGroupProps<T extends FieldValues = FieldValues> = {
   label: string

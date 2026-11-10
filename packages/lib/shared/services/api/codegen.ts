@@ -11,7 +11,7 @@ import { resolve } from 'path'
 const requireFromHere = createRequire(resolve(__dirname, '__fake.js'))
 const pluginLoader = async (name: string) => import(requireFromHere.resolve(name))
 
-const schemaUrl = process.env.NEXT_PUBLIC_BALANCER_API_URL || 'https://api.frontier.fi/graphql'
+const schemaUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.frontier.fi/graphql'
 
 const config: CodegenConfig = {
   schema: {
@@ -64,7 +64,6 @@ export type GqlChain =
   | 'ARBITRUM'
   | 'AVALANCHE'
   | 'BASE'
-  | 'FANTOM'
   | 'GNOSIS'
   | 'HYPEREVM'
   | 'MAINNET'
@@ -72,8 +71,7 @@ export type GqlChain =
   | 'OPTIMISM'
   | 'PLASMA'
   | 'POLYGON'
-  | 'SEPOLIA'
-  | 'SONIC';`,
+  | 'SEPOLIA';`,
   GqlHookType: `export type GqlHookType =
   | 'AKRON'
   | 'DIRECTIONAL_FEE'
@@ -97,7 +95,6 @@ export type GqlPoolAprItemType =
   /** Represents the yield from an IB (Interest-Bearing) asset APR in a pool. */
   | 'IB_YIELD'
   | 'LOCKING'
-  | 'MABEETS_EMISSIONS'
   /** Rewards distributed by merkl.xyz */
   | 'MERKL'
   | 'NESTED'

@@ -1,3 +1,4 @@
+/// <reference types="next" />
 import { HumanAmount } from '@balancer/sdk'
 import React from 'react'
 

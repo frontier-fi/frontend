@@ -1,9 +1,10 @@
 'use client'
 
-import * as Sentry from '@sentry/nextjs'
 import { default as NextError } from 'next/error'
 import { useEffect } from 'react'
 import { isDev, isStaging } from '@repo/lib/config/app.config'
+import { reportClientError } from '@repo/lib/shared/utils/error-logger'
+import { shouldIgnore } from '@repo/lib/shared/utils/query-errors'
 
 /**
  * Global Next.js ErrorBoundary (!) Next components are not available
@@ -22,12 +23,20 @@ export default function GlobalError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  useEffect(() => {
+    if (shouldIgnore(error.message, error.stack)) return
+
+    reportClientError({
+      category: 'global-error-boundary',
+      errorName: error.name,
+      message: error.message,
+      digest: error.digest,
+      stack: error.stack,
+    })
+  }, [error])
+
   const showResetButton = isDev || isStaging
   const href = typeof window === 'undefined' ? undefined : window.location.href
-
-  useEffect(() => {
-    Sentry.captureException(error)
-  }, [error])
 
   const title = error.digest ? `Something went wrong (${error.digest})` : 'Something went wrong'
 

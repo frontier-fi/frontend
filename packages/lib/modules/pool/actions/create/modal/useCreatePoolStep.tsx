@@ -7,8 +7,6 @@ import { getGqlChain, getChainName } from '@repo/lib/config/app.config'
 import { TransactionStep } from '@repo/lib/modules/transactions/transaction-steps/lib'
 import { CreatePoolInput } from '../types'
 import { useCreatePoolBuildCall } from '@repo/lib/modules/pool/actions/create/useCreatePoolBuildCall'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
-import { useTenderly } from '@repo/lib/modules/web3/useTenderly'
 import { useEffect, useMemo } from 'react'
 import { ManagedSendTransactionButton } from '@repo/lib/modules/transactions/transaction-steps/TransactionButton'
 import { isTransactionSuccess } from '@repo/lib/modules/transactions/transaction-steps/transaction.helper'
@@ -51,13 +49,6 @@ export function useCreatePoolStep({
     enabled: isStepActivated,
   })
 
-  const { buildTenderlyUrl } = useTenderly({ chainId })
-
-  const gasEstimationMeta = sentryMetaForWagmiSimulation('Error in create pool gas estimation', {
-    buildCallQueryData: buildCallDataQuery.data,
-    tenderlyUrl: buildTenderlyUrl(buildCallDataQuery.data),
-  })
-
   const receiptProps = usePoolCreationReceipt({
     txHash: transaction?.result?.data?.transactionHash,
     chain,
@@ -82,7 +73,6 @@ export function useCreatePoolStep({
         if (!buildCallDataQuery.data) return <DisabledTransactionButton />
         return (
           <ManagedSendTransactionButton
-            gasEstimationMeta={gasEstimationMeta}
             id={CREATE_POOL_STEP_ID}
             labels={labels}
             onTransactionChange={setTransaction}
@@ -91,6 +81,6 @@ export function useCreatePoolStep({
         )
       },
     }),
-    [transaction, buildCallDataQuery.data, gasEstimationMeta, poolAddress, labels]
+    [transaction, buildCallDataQuery.data, poolAddress, labels]
   )
 }

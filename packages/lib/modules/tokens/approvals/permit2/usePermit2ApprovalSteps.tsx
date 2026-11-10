@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { getChainId, getNativeAssetAddress, getNetworkConfig } from '@repo/lib/config/app.config'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { isSameAddress } from '@repo/lib/shared/utils/addresses'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { getRequiredTokenApprovals, areEmptyRawAmounts, RawAmount } from '../approval-rules'
 import { ApprovalAction, buildTokenApprovalLabels } from '../approval-labels'
 import { TransactionStep, TxCall } from '@repo/lib/modules/transactions/transaction-steps/lib'
@@ -162,10 +161,6 @@ export function usePermit2ApprovalSteps({
       chainId,
       args: [tokenAddress, spenderAddress, amountToApprove, permitExpiry],
       enabled: isTxEnabled,
-      txSimulationMeta: sentryMetaForWagmiSimulation(
-        'Error in wagmi tx simulation: Approving token',
-        tokenAmountToApprove
-      ),
       onTransactionChange: setTransactionFn(id),
     }
 

@@ -58,11 +58,6 @@
       ]
     },
     {
-      "description": "Keep Sentry packages in sync.",
-      "groupName": "Sentry",
-      "matchPackageNames": ["@sentry/**"]
-    },
-    {
       "description": "Keep Next.js packages aligned.",
       "groupName": "Next ecosystem",
       "matchPackageNames": [

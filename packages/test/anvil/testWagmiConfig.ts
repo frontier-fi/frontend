@@ -1,49 +1,56 @@
-import { ChainIdWithFork, getTestRpcSetup, testAccounts } from '@repo/test/anvil/anvil-setup'
+import {
+  ChainIdWithFork,
+  getForkChainId,
+  getSupportedForkChainIds,
+  getTestRpcSetup,
+  testAccounts,
+} from '@repo/test/anvil/anvil-setup'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { Address, Chain, http } from 'viem'
-import { base, gnosis, mainnet, polygon, sepolia, sonic } from 'viem/chains'
+import { base, mainnet, monad, sepolia } from 'viem/chains'
 import { createConfig } from 'wagmi'
 import { mock } from 'wagmi/connectors'
 
 const TEST_RPC_TIMEOUT_MS = 60_000
 
-export const mainnetTest = {
+type TestChain<TId extends ChainIdWithFork = ChainIdWithFork> = Chain &
+  ReturnType<typeof getTestRpcUrls> & { id: TId }
+
+export const mainnetTest: TestChain<typeof mainnet.id> = {
   ...mainnet,
   ...getTestRpcUrls(mainnet.id),
-} as const satisfies Chain
+}
 
-export const polygonTest = {
-  ...polygon,
-  ...getTestRpcUrls(polygon.id),
-} as const satisfies Chain
-
-export const sepoliaTest = {
+export const sepoliaTest: TestChain<typeof sepolia.id> = {
   ...sepolia,
   ...getTestRpcUrls(sepolia.id),
-} as const satisfies Chain
+}
 
-export const baseTest = {
+export const baseTest: TestChain<typeof base.id> = {
   ...base,
   ...getTestRpcUrls(base.id),
-} as const satisfies Chain
+}
 
-export const gnosisTest = {
-  ...gnosis,
-  ...getTestRpcUrls(gnosis.id),
-} as const satisfies Chain
+export const monadTest: TestChain<typeof monad.id> = {
+  ...monad,
+  ...getTestRpcUrls(monad.id),
+}
 
-export const sonicTest = {
-  ...sonic,
-  ...getTestRpcUrls(sonic.id),
-} as const satisfies Chain
+const allTestChains: TestChain[] = [sepoliaTest, mainnetTest, baseTest, monadTest]
 
-export const testChains = [
-  mainnetTest,
-  polygonTest,
-  sepoliaTest,
-  gnosisTest,
-  baseTest,
-  sonicTest,
-] as const
+const defaultChainId = getForkChainId(PROJECT_CONFIG.defaultNetwork)
+const defaultTestChain = allTestChains.find(c => c.id === defaultChainId) ?? sepoliaTest
+
+export const testChains: readonly [TestChain, ...TestChain[]] = [
+  defaultTestChain,
+  ...allTestChains.filter(c => c.id !== defaultTestChain.id),
+]
+
+const supportedForkChainIds = new Set(getSupportedForkChainIds())
+
+export const activeTestChains: TestChain[] = allTestChains.filter(c =>
+  supportedForkChainIds.has(c.id)
+)
 
 function getTestRpcUrls(chainId: ChainIdWithFork) {
   const { port, rpcUrl } = getTestRpcSetup(chainId)
@@ -71,11 +78,9 @@ function createTestWagmiConfig() {
     storage: null,
     transports: {
       [mainnetTest.id]: http(undefined, { timeout: TEST_RPC_TIMEOUT_MS }),
-      [polygonTest.id]: http(undefined, { timeout: TEST_RPC_TIMEOUT_MS }),
       [sepoliaTest.id]: http(undefined, { timeout: TEST_RPC_TIMEOUT_MS }),
       [baseTest.id]: http(undefined, { timeout: TEST_RPC_TIMEOUT_MS }),
-      [gnosisTest.id]: http(undefined, { timeout: TEST_RPC_TIMEOUT_MS }),
-      [sonicTest.id]: http(undefined, { timeout: TEST_RPC_TIMEOUT_MS }),
+      [monadTest.id]: http(undefined, { timeout: TEST_RPC_TIMEOUT_MS }),
     },
     ssr: false,
   })

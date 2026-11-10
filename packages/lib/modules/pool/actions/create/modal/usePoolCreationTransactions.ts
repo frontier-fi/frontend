@@ -1,5 +1,5 @@
 import { useTransactionSteps } from '@repo/lib/modules/transactions/transaction-steps/useTransactionSteps'
-import { isHash, Address, zeroAddress } from 'viem'
+import { isHash, Address } from 'viem'
 import { useParams } from 'next/navigation'
 import { useCreatePoolStep } from './useCreatePoolStep'
 import { getGqlChain } from '@repo/lib/config/app.config'
@@ -14,8 +14,6 @@ import { useUserSettings } from '@repo/lib/modules/user/settings/UserSettingsPro
 import { getApprovalAndAddSteps } from '@repo/lib/modules/pool/actions/add-liquidity/useAddLiquiditySteps'
 import { useInitializePoolStep } from './useInitializePoolStep'
 import { CreatePoolInput } from '../types'
-import { isCowPool } from '../helpers'
-import { useCreateCowSteps } from './cow-amm-steps/useCreateCowSteps'
 
 type Props = {
   createPoolInput: CreatePoolInput
@@ -38,11 +36,7 @@ export function usePoolCreationTransactions({
   const createPoolStep = useCreatePoolStep({ createPoolInput, poolAddress, setPoolAddress })
   const chain = getGqlChain(chainId)
 
-  // cow requires pool deployment to happen before we know the spender
-  const cowSpenderAdress = poolAddress ? poolAddress : zeroAddress
-
-  const spenderAddress =
-    (protocolVersion as number) === 1 ? cowSpenderAdress : getSpenderForCreatePool(chain)
+  const spenderAddress = getSpenderForCreatePool(chain)
 
   const isPermit2 = protocolVersion === 3
 
@@ -81,22 +75,10 @@ export function usePoolCreationTransactions({
     addLiquidityStep: initV3PoolStep,
   })
 
-  const { finishCowSteps, isLoadingFinishCowSteps } = useCreateCowSteps({
-    initPoolInput,
-    network: chain,
-    poolType,
-  })
-
-  const cowSteps = [...tokenApprovalSteps, ...finishCowSteps]
-
-  const steps = [createPoolStep, ...(isCowPool(poolType) ? cowSteps : v3Steps)]
+  const steps = [createPoolStep, ...v3Steps]
 
   const isLoadingSteps =
-    isLoadingTokenApprovalSteps ||
-    !signPermit2Step ||
-    isLoadingTokenApprovalSteps ||
-    isLoadingPermit2ApprovalSteps ||
-    isLoadingFinishCowSteps
+    isLoadingTokenApprovalSteps || !signPermit2Step || isLoadingPermit2ApprovalSteps
 
   const transactionSteps = useTransactionSteps(steps, isLoadingSteps)
   const initPoolTxHash = transactionSteps.lastTransaction?.result?.data?.transactionHash

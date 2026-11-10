@@ -4,7 +4,6 @@ import {
   TransactionLabels,
   TransactionStep,
 } from '@repo/lib/modules/transactions/transaction-steps/lib'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { VStack } from '@chakra-ui/react'
 import { capitalize } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
@@ -13,7 +12,6 @@ import { swapActionPastTense } from './swap.helpers'
 import { SwapAction } from './swap.types'
 import { useTokenBalances } from '../tokens/TokenBalancesProvider'
 import { useUserAccount } from '../web3/UserAccountProvider'
-import { useTenderly } from '../web3/useTenderly'
 import { getChainId } from '@repo/lib/config/app.config'
 import { DisabledTransactionButton } from '../transactions/transaction-steps/TransactionStepButton'
 import { ApiToken } from '../tokens/token.types'
@@ -41,10 +39,6 @@ export function useSwapStep({
   const [isBuildQueryEnabled, setIsBuildQueryEnabled] = useState(false)
   const { refetchBalances } = useTokenBalances()
   const chainId = getChainId(swapState.selectedChain)
-
-  const { buildTenderlyUrl } = useTenderly({
-    chainId,
-  })
 
   const [transaction, setTransaction] = useState<ManagedResult | undefined>()
 
@@ -75,11 +69,6 @@ export function useSwapStep({
     }
   }, [simulationQuery.data])
 
-  const gasEstimationMeta = sentryMetaForWagmiSimulation('Error in swap gas estimation', {
-    buildCallQueryData: buildSwapQuery.data,
-    tenderlyUrl: buildTenderlyUrl(buildSwapQuery.data),
-  })
-
   const isComplete = () => isTransactionSuccess(transaction)
 
   return useMemo(
@@ -101,7 +90,6 @@ export function useSwapStep({
         return (
           <VStack w="full">
             <ManagedSendTransactionButton
-              gasEstimationMeta={gasEstimationMeta}
               id={swapStepId}
               labels={labels}
               onTransactionChange={setTransaction}
@@ -137,7 +125,6 @@ export function useSwapStep({
       buildSwapQuery.data,
       refetchBalances,
       labels,
-      gasEstimationMeta,
       isComplete,
       chainId,
     ]

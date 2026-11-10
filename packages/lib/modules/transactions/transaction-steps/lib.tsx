@@ -4,7 +4,6 @@ import { Address, Hash } from 'viem'
 import { ManagedTransactionInput } from '../../web3/contracts/useManagedTransaction'
 import { ManagedErc20TransactionInput } from '../../web3/contracts/useManagedErc20Transaction'
 import { ManagedSendTransactionInput } from '../../web3/contracts/useManagedSendTransaction'
-import { LockActionType } from '../../vebal/vote/vote.types'
 import { BaseTransaction } from '@safe-global/safe-apps-sdk'
 
 export enum TransactionState {
@@ -46,7 +45,6 @@ export type StepType =
   | 'claim'
   | 'swap'
   | 'crossChainSync'
-  | LockActionType
   | 'signPermit'
   | 'signPermit2'
   | 'stakeLst'

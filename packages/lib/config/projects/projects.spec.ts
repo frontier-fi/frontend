@@ -1,19 +1,18 @@
 import { describe, expect, test } from 'vitest'
-import { ProjectConfigBalancer } from './balancer'
+import { ProjectConfigFrontier } from './frontier'
 
 describe('Project configs', () => {
-  test('balancer project config has required identity fields', () => {
-    expect(ProjectConfigBalancer.projectId).toBeTypeOf('string')
-    expect(ProjectConfigBalancer.projectName).toBeTypeOf('string')
-    expect(ProjectConfigBalancer.projectUrl).toBeTypeOf('string')
-    expect(ProjectConfigBalancer.projectLogo).toBeTypeOf('string')
+  test('frontier project config has required identity fields', () => {
+    expect(ProjectConfigFrontier.projectId).toBeTypeOf('string')
+    expect(ProjectConfigFrontier.projectName).toBeTypeOf('string')
+    expect(ProjectConfigFrontier.projectUrl).toBeTypeOf('string')
+    expect(ProjectConfigFrontier.projectLogo).toBeTypeOf('string')
   })
 
-  test('balancer options match Frontier deploy', () => {
-    expect(ProjectConfigBalancer.projectId).toBe('balancer')
-    expect(ProjectConfigBalancer.options.showMaBeets).toBe(false)
-    expect(ProjectConfigBalancer.options.allowCreateWallet).toBe(true)
-    expect(ProjectConfigBalancer.options.isOnSafeAppList).toBe(true)
-    expect(ProjectConfigBalancer.supportedNetworks).toContain('SEPOLIA')
+  test('frontier options match Frontier deploy', () => {
+    expect(ProjectConfigFrontier.projectId).toBe('frontier')
+    expect(ProjectConfigFrontier.options.allowCreateWallet).toBe(true)
+    expect(ProjectConfigFrontier.options.isOnSafeAppList).toBe(true)
+    expect(ProjectConfigFrontier.supportedNetworks).toContain('SEPOLIA')
   })
 })

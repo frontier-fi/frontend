@@ -1,152 +1,36 @@
-import {
-  sentryMetaForAddLiquidityHandler,
-  sentryMetaForRemoveLiquidityHandler,
-  captureSentryError,
-  sentryMetaForWagmiSimulation,
-} from '@repo/lib/shared/utils/query-errors'
-import { defaultTestUserAccount } from '@repo/test/anvil/anvil-setup'
-import * as Sentry from '@sentry/nextjs'
-import { waitFor } from '@testing-library/react'
-import sentryTestkit from 'sentry-testkit'
-import { recoveryPoolMock } from '../../modules/pool/__mocks__/recoveryPoolMock'
-import { Extras } from '@sentry/types'
-import { RecoveryRemoveLiquidityHandler } from '../../modules/pool/actions/remove-liquidity/handlers/RecoveryRemoveLiquidity.handler'
-import { UnbalancedAddLiquidityV2Handler } from '@repo/lib/modules/pool/actions/add-liquidity/handlers/UnbalancedAddLiquidityV2.handler'
-import { aWjAuraWethPoolElementMock } from '@repo/lib/test/msw/builders/gqlPoolElement.builders'
-import { AddLiquidityParams } from '@repo/lib/modules/pool/actions/add-liquidity/queries/add-liquidity-keys'
-import { wETHAddress, wjAuraAddress } from '@repo/lib/debug-helpers'
-import { RemoveLiquidityParams } from '@repo/lib/modules/pool/actions/remove-liquidity/queries/remove-liquidity-keys'
+import { describe, expect, it } from 'vitest'
+import { shouldIgnore } from './query-errors'
 
-const { testkit, sentryTransport } = sentryTestkit()
-const test_DSN = 'https://testDns@sentry.io/000001'
-
-Sentry.init({
-  dsn: test_DSN,
-  transport: sentryTransport,
-})
-
-async function getSentryReport() {
-  await waitFor(() => expect(testkit.reports()).toHaveLength(1))
-  return testkit.reports()[0]!
-}
-
-describe('Captures sentry error', () => {
-  afterEach(() => testkit.reset())
-
-  test('for simple Error exception', async function () {
-    const error = new Error('Test error')
-    Sentry.captureException(error, { extra: { foo: 'bar' } })
-
-    const report = await getSentryReport()
-
-    expect(report.error?.message).toBe('Test error')
-    expect(report.extra).toEqual({ foo: 'bar' })
+describe('shouldIgnore', () => {
+  it('ignores user rejected request errors', () => {
+    expect(shouldIgnore('User rejected the request.')).toBe(true)
   })
 
-  test('for remove liquidity handler query error', async function () {
-    const params: RemoveLiquidityParams = {
-      handler: new RecoveryRemoveLiquidityHandler(recoveryPoolMock),
-      userAddress: defaultTestUserAccount,
-      slippage: '0.1',
-      poolId: recoveryPoolMock.id,
-      humanBptIn: '1',
-    }
+  it('ignores rainbowkit/wagmi non-crash noise', () => {
+    expect(shouldIgnore('Connector not connected')).toBe(true)
+    expect(shouldIgnore('Provider not found')).toBe(true)
+    expect(shouldIgnore('this.provider.disconnect is not a function')).toBe(true)
 
-    const error = new Error('test cause error')
-
-    const meta = sentryMetaForRemoveLiquidityHandler('Test error message', {
-      ...params,
-      chainId: 1,
-    })
-
-    captureSentryError(error, meta)
-
-    const report = await getSentryReport()
-
-    expect(report.level).toBe('fatal')
-    expect(report.error?.name).toBe('Error')
-    expect(report.error?.message).toBe('test cause error')
-
-    expect(report.extra).toMatchInlineSnapshot(`
-      {
-        "handler": "RecoveryRemoveLiquidityHandler",
-        "params": {
-          "chainId": 1,
-          "handler": {
-            "helpers": "[LiquidityActionHelpers]",
-          },
-          "humanBptIn": "1",
-          "poolId": "0x4fd4687ec38220f805b6363c3c1e52d0df3b5023000200000000000000000473",
-          "slippage": "0.1",
-          "userAddress": "0x3B7D260597A3e3f90274563a9e481618C6B951Eb",
-        },
-      }
-    `)
+    expect(shouldIgnore('The source https://app.frontier.fi has not been authorized yet')).toBe(
+      true
+    )
   })
 
-  test('for add liquidity handler query error', async function () {
-    const pool = aWjAuraWethPoolElementMock()
+  it('ignores browser extension stack traces', () => {
+    expect(shouldIgnore('Random extension error', 'at extensionServiceWorker.js:12:34')).toBe(true)
 
-    const params: AddLiquidityParams = {
-      handler: new UnbalancedAddLiquidityV2Handler(pool),
-      userAddress: defaultTestUserAccount,
-      slippage: '0.1',
-      pool,
-      humanAmountsIn: [
-        { humanAmount: '3', tokenAddress: wjAuraAddress, symbol: 'wjAura' },
-        { humanAmount: '0.01', tokenAddress: wETHAddress, symbol: 'wETH' },
-      ],
-    }
-
-    const error = new Error('test cause error')
-    const meta = sentryMetaForAddLiquidityHandler('Test error message', { ...params, chainId: 1 })
-    captureSentryError(error, meta)
-
-    const report = await getSentryReport()
-
-    expect(report.level).toBe('fatal')
-    expect(report.error?.name).toBe('Error')
-    expect(report.error?.message).toBe('test cause error')
-
-    expect(report.extra).toMatchInlineSnapshot(`
-      {
-        "handler": "UnbalancedAddLiquidityV2Handler",
-        "params": {
-          "chainId": 1,
-          "handler": {
-            "helpers": "[LiquidityActionHelpers]",
-          },
-          "humanAmountsIn": "[{"humanAmount":"3","tokenAddress":"0x198d7387Fa97A73F05b8578CdEFf8F2A1f34Cd1F","symbol":"wjAura"},{"humanAmount":"0.01","tokenAddress":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2","symbol":"wETH"}]",
-          "poolId": "0x68e3266c9c8bbd44ad9dca5afbfe629022aee9fe000200000000000000000512",
-          "poolType": "WEIGHTED",
-          "slippage": "0.1",
-          "userAddress": "0x3B7D260597A3e3f90274563a9e481618C6B951Eb",
-        },
-      }
-    `)
+    expect(shouldIgnore('Maximum call stack size exceeded', 'at injectWalletGuard.js:1:1')).toBe(
+      true
+    )
   })
 
-  test('for wagmi simulation error', async function () {
-    const extra: Extras = {
-      tokenSymbol: 'BAL',
-      tokenAmount: 100,
-    }
+  it('does not ignore genuine contract or application errors', () => {
+    expect(shouldIgnore('ContractFunctionExecutionError: Execution reverted')).toBe(false)
+    expect(shouldIgnore('Apollo network error in DefaultSwapHandler')).toBe(false)
+  })
 
-    const error = new Error('Error in viem')
-    const meta = sentryMetaForWagmiSimulation('Error executing token approval tx', extra)
-    captureSentryError(error, meta)
-
-    const report = await getSentryReport()
-
-    expect(report.level).toBe('fatal')
-    expect(report.error?.name).toBe('Error')
-    expect(report.error?.message).toBe('Error in viem')
-
-    expect(report.extra).toMatchInlineSnapshot(`
-      {
-        "tokenAmount": 100,
-        "tokenSymbol": "BAL",
-      }
-    `)
+  it('ignores Balancer v3 paused pool/vault errors that have dedicated UI states', () => {
+    expect(shouldIgnore('Reverted with custom error PoolPaused()')).toBe(true)
+    expect(shouldIgnore('Reverted with custom error VaultPaused()')).toBe(true)
   })
 })

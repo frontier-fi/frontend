@@ -37,11 +37,11 @@ export default function Terms() {
             <h2>1. Overview</h2>
             <p>
               This Frontier Finance Terms of Use document (“Terms” or “agreement”) (“Frontier
-              Finance”, “we” and “us” refers to Frontier Finance and its subsidiaries) covers the
-              website, Frontier Finance Protocol user-interface and free application (collectively
-              “the Site”) we own and administer, at times in conjunction with others, which provides
-              the ability to access the decentralized Frontier Finance Protocol. Additionally, you
-              can access the Frontier Finance Protocol through third-party web or mobile interfaces.
+              Finance”, “we” and “us” refers to Frontier Finance Foundation) covers the website,
+              Frontier Finance Protocol user-interface and free application (collectively “the
+              Site”) we own and administer, at times in conjunction with others, which provides the
+              ability to access the decentralized Frontier Finance Protocol. Additionally, you can
+              access the Frontier Finance Protocol through third-party web or mobile interfaces.
               These Terms apply to you (“You” or “you”) as a user of our Site including all the
               products, services, tools and information, without limitation, made available on the
               Site.
@@ -583,9 +583,9 @@ export default function Terms() {
           <div>
             <h2>12. Contact Us</h2>
             <p>
-              Frontier Finance is a foundation company organized in the Cayman Islands with an
-              operating company organized in the British Virgin Islands (BVI). Please contact us if
-              you have any questions about these Terms or other topics, by sending an email to{' '}
+              Frontier Finance Foundation is an exempted company organized in the Cayman Islands.
+              Please contact us if you have any questions about these Terms or other topics, by
+              sending an email to{' '}
               <a className="link" href="mailto:admin@frontier.fi">
                 admin@frontier.fi
               </a>

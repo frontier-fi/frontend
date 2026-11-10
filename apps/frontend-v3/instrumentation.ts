@@ -1,21 +1,23 @@
-import { isSentryEnabled } from './sentry.config'
+import type { Instrumentation } from 'next'
 
-export async function register() {
-  if (!isSentryEnabled) return
+export const onRequestError: Instrumentation.onRequestError = (err, request, context) => {
+  const errorObj = err instanceof Error ? err : new Error(String(err))
+  const digest = (err as { digest?: string })?.digest
 
-  if (process.env.NEXT_RUNTIME === 'nodejs') {
-    await import('./sentry.server.config')
-  }
-
-  if (process.env.NEXT_RUNTIME === 'edge') {
-    await import('./sentry.edge.config')
-  }
-}
-
-export async function onRequestError(
-  ...args: Parameters<typeof import('@sentry/nextjs').captureRequestError>
-) {
-  if (!isSentryEnabled) return
-  const { captureRequestError } = await import('@sentry/nextjs')
-  return captureRequestError(...args)
+  console.error(
+    JSON.stringify({
+      level: 'error',
+      source: 'nextjs-server',
+      timestamp: new Date().toISOString(),
+      name: errorObj.name,
+      message: errorObj.message,
+      digest,
+      stack: errorObj.stack,
+      request: {
+        path: request.path,
+        method: request.method,
+      },
+      context,
+    })
+  )
 }

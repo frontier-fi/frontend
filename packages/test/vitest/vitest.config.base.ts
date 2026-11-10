@@ -28,7 +28,6 @@ export function createVitestConfig(monorepoRoot: string): ViteUserConfig {
         '**/*.script.{test,spec}.*',
       ],
       setupFiles: [
-        resolveFromRoot('./packages/lib/test/vitest/setup-sentry.ts'),
         resolveFromRoot('./packages/lib/test/vitest/setup-vitest.tsx'),
         resolveFromRoot('./packages/lib/test/vitest/setup-msw.ts'),
       ],
@@ -37,6 +36,6 @@ export function createVitestConfig(monorepoRoot: string): ViteUserConfig {
   }
 }
 
-const monorepoRoot = resolve(__dirname, '../../..')
+const monorepoRoot = resolve(import.meta.dirname, '../../..')
 
 export default defineConfig(createVitestConfig(monorepoRoot))

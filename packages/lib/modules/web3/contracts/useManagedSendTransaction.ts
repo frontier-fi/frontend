@@ -11,10 +11,6 @@ import { useOnTransactionConfirmation } from './useOnTransactionConfirmation'
 import { useOnTransactionSubmission } from './useOnTransactionSubmission'
 import { getGqlChain } from '@repo/lib/config/app.config'
 import { useChainSwitch } from '../useChainSwitch'
-import {
-  captureWagmiExecutionError,
-  sentryMetaForWagmiExecution,
-} from '@repo/lib/shared/utils/query-errors'
 import { useNetworkConfig } from '@repo/lib/config/useNetworkConfig'
 import { useRecentTransactions } from '../../transactions/RecentTransactionsProvider'
 import { useTxHash } from '../safe.hooks'
@@ -26,15 +22,10 @@ import { useUserAccount } from '../UserAccountProvider'
 export type ManagedSendTransactionInput = {
   labels: TransactionLabels
   txConfig: TransactionConfig
-  gasEstimationMeta?: Record<string, unknown>
   onTransactionChange: (transaction: ManagedResult) => void
 }
 
-export function useManagedSendTransaction({
-  labels,
-  txConfig,
-  gasEstimationMeta,
-}: ManagedSendTransactionInput) {
+export function useManagedSendTransaction({ labels, txConfig }: ManagedSendTransactionInput) {
   const chainId = txConfig.chainId
   const { shouldChangeNetwork } = useChainSwitch(chainId)
   const { minConfirmations } = useNetworkConfig()
@@ -45,7 +36,6 @@ export function useManagedSendTransaction({
     ...txConfig,
     query: {
       enabled: !!txConfig && !shouldChangeNetwork,
-      meta: gasEstimationMeta,
       // In chains like polygon, we don't want background refetches while waiting for min block confirmations
       ...onlyExplicitRefetch,
     },
@@ -68,15 +58,7 @@ export function useManagedSendTransaction({
     }
   }
 
-  const writeMutation = useSendTransaction({
-    mutation: {
-      meta: sentryMetaForWagmiExecution('Error sending transaction', {
-        txConfig,
-        estimatedGas: estimateGasQuery.data,
-        tenderlyUrl: gasEstimationMeta?.tenderlyUrl,
-      }),
-    },
-  })
+  const writeMutation = useSendTransaction()
 
   const { txHash, isSafeTxLoading } = useTxHash({
     chainId,
@@ -132,23 +114,13 @@ export function useManagedSendTransaction({
         if (!estimateGasQuery.data) return
         if (!txConfig?.to) return
 
-        try {
-          return writeMutation.sendTransactionAsync({
-            chainId,
-            to: txConfig.to,
-            data: txConfig.data,
-            value: txConfig.value,
-            gas: estimateGasQuery.data,
-          })
-        } catch (e: unknown) {
-          captureWagmiExecutionError(e, 'Error in send transaction execution', {
-            chainId,
-            txConfig,
-            gas: estimateGasQuery.data,
-          })
-
-          throw e
-        }
+        return writeMutation.sendTransactionAsync({
+          chainId,
+          to: txConfig.to,
+          data: txConfig.data,
+          value: txConfig.value,
+          gas: estimateGasQuery.data,
+        })
       }
     : undefined
 

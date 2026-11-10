@@ -13,14 +13,14 @@
 */
 import { execFileSync } from 'node:child_process'
 
-const dir = process.argv[2] ?? 'tests/dev/balancer'
+const dir = process.argv[2] ?? 'tests/dev'
 const shard = process.env.E2E_SHARD
 const isCi = !!process.env.CI
 
 // Pool + LBP creation is disabled in the app (routes redirect to "/"), so its
 // specs must not gate CI. The files stay runnable locally, where the creator is
 // still reachable through the dev/staging nav.
-const disabledOnCi = ['create-pool.spec.ts', 'create-lbp.spec.ts']
+const disabledOnCi = ['create-pool.spec.ts']
 
 function isDisabled(file) {
   return isCi && disabledOnCi.some(name => file.endsWith(name))

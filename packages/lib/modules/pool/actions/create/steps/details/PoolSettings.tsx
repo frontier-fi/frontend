@@ -40,7 +40,7 @@ export function PoolSettings() {
   const { poolHooksWhitelist } = usePoolHooksWhitelist(network)
 
   const poolRoleAccountOptions: PoolSettingsOption[] = [
-    { label: `Delegate to the ${PROJECT_CONFIG.projectName} DAO`, value: zeroAddress },
+    { label: `Delegate to ${PROJECT_CONFIG.projectName}`, value: zeroAddress },
     {
       label: 'My connected wallet:',
       value: userAddress,
@@ -153,7 +153,7 @@ export function PoolSettings() {
           name="poolCreator"
           options={poolRoleAccountOptions}
           title="Pool creator"
-          tooltip="The address empowered to set a pool creator fee. Choose the Frontier Finance DAO option to give all fees to the protocol and LPs."
+          tooltip={`The address empowered to set a pool creator fee. Choose the ${PROJECT_CONFIG.projectName} option to give all fees to the protocol and LPs.`}
           validate={validatePoolSettings.poolRoleAccount}
         />
       )}

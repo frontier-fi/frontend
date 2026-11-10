@@ -6,10 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { SwapHandler } from '../handlers/Swap.handler'
 import { swapQueryKeys } from './swapQueryKeys'
 import { SimulateSwapInputs, SimulateSwapResponse } from '../swap.types'
-import { sentryMetaForSwapHandler } from '@repo/lib/shared/utils/query-errors'
 import { isZero } from '@repo/lib/shared/utils/numbers'
-import { getChainId } from '@repo/lib/config/app.config'
-import { useBlockNumber } from 'wagmi'
 import { isWrapWithTooSmallAmount } from '@repo/lib/shared/utils/error-filters'
 
 export type SwapSimulationQueryResult = ReturnType<typeof useSimulateSwapQuery>
@@ -36,9 +33,6 @@ export function useSimulateSwapQuery({
     poolIds,
   }
 
-  const chainId = getChainId(chain)
-  const { data: blockNumber } = useBlockNumber({ chainId })
-
   const queryKey = swapQueryKeys.simulation(inputs)
 
   const queryFn = async () => handler.simulate(inputs)
@@ -57,13 +51,6 @@ export function useSimulateSwapQuery({
       // 2 retries by default
       return failureCount < 2
     },
-    meta: sentryMetaForSwapHandler('Error in swap simulation query', {
-      chainId: getChainId(chain),
-      blockNumber,
-      handler,
-      swapInputs: inputs,
-      enabled,
-    }),
     ...onlyExplicitRefetch,
   })
 }

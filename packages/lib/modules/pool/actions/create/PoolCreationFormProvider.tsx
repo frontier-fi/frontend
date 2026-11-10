@@ -21,8 +21,6 @@ import { useTokens } from '@repo/lib/modules/tokens/TokensProvider'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { fNumCustom } from '@repo/lib/shared/utils/numbers'
 import { useWatch } from 'react-hook-form'
-import { isBalancer } from '@repo/lib/config/getProjectConfig'
-import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { useSearchParams } from 'next/navigation'
 import { useFormSteps } from '@repo/lib/shared/hooks/useFormSteps'
 import { validatePoolTokens } from './validatePoolCreationForm'
@@ -48,7 +46,7 @@ export function usePoolFormLogic() {
     { mode: 'all' }
   )
 
-  const protocol = isBalancer ? BALANCER_PROTOCOL_ID : PROJECT_CONFIG.projectName
+  const protocol = BALANCER_PROTOCOL_ID
 
   const poolCreationForm = usePersistentForm<PoolCreationForm>(
     LS_KEYS.PoolCreation.Form,

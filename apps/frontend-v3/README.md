@@ -47,28 +47,6 @@ on older machines:
 pnpm --filter frontend-v3 dev:no-gen
 ```
 
-## Developing on a local fork
-
-1. Create a `.env.local` file in the root of project:
-
-```
-ETHEREUM_RPC_URL=xxx
-BASE_RPC_URL=xxx
-GNOSIS_RPC_URL=xxx
-```
-
-2. Start local anvil fork
-
-```
-make fork-ethereum
-```
-
-3. Run the development server in fork mode:
-
-```
-pnpm dev:bal:fork
-```
-
 ## Testing
 
 See [Testing instructions](../../README.md#testing).

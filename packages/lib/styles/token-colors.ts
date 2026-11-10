@@ -93,11 +93,6 @@ const tokenColors: Partial<Record<AppChain, Record<Address, TokenColorDef>>> = {
     '0xbc78d84ba0c46dfe32cf2895a19939c86b81a777': { from: '#FDDB6F', to: '#D88B2C' }, // SolvBTC
     '0x9ee1963f05553ef838604dd39403be21cef26aa4': { from: '#AC96FF', to: '#7E00FF' }, // USDp
   },
-  [GqlChainValues.Fantom]: {
-    '0x04068da6c83afcfa0e13ba15a6696662335d5b75': { from: '#FF5733', to: '#FF5733' }, // USDC
-    '0x8d11ec38a3eb5e956b052f67da8bdc9bef8abf3e': { from: '#33FF57', to: '#33FF57' }, // DAI
-    '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83': { from: '#3357FF', to: '#3357FF' }, // WFTM
-  },
   [GqlChainValues.Gnosis]: {
     '0x6b175474e89094c44da98b954eedeac495271d0f': { from: '#FF5733', to: '#FF5733' }, // DAI
     '0x4e15361fd6b4bb609fa63c81a2be19d873717870': { from: '#33FF57', to: '#33FF57' }, // FTM
@@ -139,15 +134,6 @@ const tokenColors: Partial<Record<AppChain, Record<Address, TokenColorDef>>> = {
     '0x0a3d8466f5de586fa5f6de117301e2f90bcc5c48': { from: '#FF9301', to: '#FFC980' }, // RLP
     '0xca79db4b49f608ef54a5cb813fbed3a6387bc645': { from: '#000000', to: '#262626' }, // USDXL
     '0xdc6f4239c1d8d3b955c06cb8f1a6cf18effc5bfe': { from: '#95F4DD', to: '#16D0A3' }, // stathyUSD₮0
-  },
-  [GqlChainValues.Sonic]: {
-    '0x2d0e0814e62d80056181f5cd932274405966e4f0': { from: '#FE0103', to: '#FF6667' }, // BEETS
-    '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38': { from: '#000000', to: '#222222' }, // wS
-    '0xe5da20f15420ad15de0fa650600afc998bbe3955': { from: '#FE0103', to: '#840D11' }, // stS
-    '0x016c306e103fbf48ec24810d078c65ad13c5f11b': { from: '#000000', to: '#333333' }, // SiloWS
-    '0x0c4e186eae8acaa7f7de1315d5ad174be39ec987': { from: '#ADDCEB', to: '#DEF1F7' }, // anS
-    '0x50c42deacd8fc9773493ed674b675be577f2634b': { from: '#F2F3F7', to: '#CECDFE' }, // WETH
-    '0x3bce5cb273f0f148010bbea2470e7b5df84c7812': { from: '#A765DE', to: '#808FC7' }, // scETH
   },
   [GqlChainValues.Plasma]: {
     '0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb': { from: '#27A17C', to: '#42EBB8' }, // USDT0

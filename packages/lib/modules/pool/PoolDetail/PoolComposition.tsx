@@ -22,14 +22,13 @@ import { bn, fNum, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { useLayoutEffect, useRef, useState, Fragment } from 'react'
 import { Address } from 'viem'
 import { usePoolsMetadata } from '../metadata/PoolsMetadataProvider'
-import { isBoosted, isQuantAmmPool } from '../pool.helpers'
+import { isBoosted } from '../pool.helpers'
 import { PoolToken } from '../pool.types'
 import { usePool } from '../PoolProvider'
 import { Pool } from '../pool.types'
 import { PoolTypeTag } from './PoolTypeTag'
 import { getCompositionTokens, getNestedPoolTokens } from '../pool-tokens.utils'
 import { useGetPoolTokensWithActualWeights } from '../useGetPoolTokensWithActualWeights'
-import { ArrowUpRight } from 'lucide-react'
 import { PoolCompositionChart } from './PoolCompositionChart'
 import { PoolTotalLiquidityDisplay } from './PoolTotalLiquidityDisplay'
 import { formatStringsToSentenceList } from '../usePoolTokenPriceWarnings'
@@ -217,29 +216,6 @@ export function PoolComposition() {
                     )}
                   </Text>
                 </>
-              }
-              status="info"
-            />
-          )}
-          {isQuantAmmPool(pool.type) && (
-            <BalAlert
-              content={
-                <Text color="font.dark" fontSize="sm" position="relative" top="2px">
-                  Tokens in BTFs dynamically shift weights to capture appreciation.{' '}
-                  <Link
-                    alignItems="center"
-                    color="black"
-                    display="inline-flex"
-                    fontSize="sm"
-                    href="https://medium.com/@QuantAMM/quantamm-x-balancer-v3-046af77ddc81"
-                    isExternal
-                  >
-                    <Box as="span">Learn more</Box>
-                    <Box as="span" ml={0.5}>
-                      <ArrowUpRight size={12} />
-                    </Box>
-                  </Link>
-                </Text>
               }
               status="info"
             />

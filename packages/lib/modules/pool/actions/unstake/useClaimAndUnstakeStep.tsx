@@ -13,7 +13,6 @@ import { getNetworkConfig } from '@repo/lib/config/app.config'
 import { ManagedTransactionInput } from '@repo/lib/modules/web3/contracts/useManagedTransaction'
 import { useBalTokenRewards } from '@repo/lib/modules/portfolio/PortfolioClaim/useBalRewards'
 import { useClaimableBalances } from '@repo/lib/modules/portfolio/PortfolioClaim/useClaimableBalances'
-import { sentryMetaForWagmiSimulation } from '@repo/lib/shared/utils/query-errors'
 import { useMemo, useState } from 'react'
 import { ManagedTransactionButton } from '@repo/lib/modules/transactions/transaction-steps/TransactionButton'
 import { isTransactionSuccess } from '@repo/lib/modules/transactions/transaction-steps/transaction.helper'
@@ -81,15 +80,6 @@ export function useClaimAndUnstakeStep({
     userAddress,
   })
 
-  const txSimulationMeta = sentryMetaForWagmiSimulation(
-    'Error in wagmi tx simulation (Claim and unstake transaction)',
-    {
-      poolId: pool.id,
-      chainId,
-      unstakeArgs: data,
-    }
-  )
-
   const props: ManagedTransactionInput = {
     contractAddress: contracts.balancer.relayerV6,
     contractId: 'balancer.relayerV6',
@@ -98,7 +88,6 @@ export function useClaimAndUnstakeStep({
     chainId,
     args: [data],
     enabled: !!pool && !isLoadingRelayerApproval && hasApprovedRelayer && data.length > 0,
-    txSimulationMeta,
     onTransactionChange: setTransaction,
   }
 

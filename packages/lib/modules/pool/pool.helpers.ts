@@ -153,12 +153,6 @@ export function isVebalPool(poolId: string): boolean {
   )
 }
 
-export function isMaBeetsPool(poolId: string): boolean {
-  return (
-    poolId.toLowerCase() === '0x10ac2f9dae6539e77e372adb14b1bf8fbd16b3e8000200000000000000000005'
-  )
-}
-
 /** Frontier API has no COW_AMM — always false. */
 export function isCowAmmPool(_poolType: GqlPoolType | string): boolean {
   return false
@@ -367,9 +361,6 @@ export function getPoolAddBlockedReason(pool: Pool, metadata?: PoolMetadata): st
   if (isAffectedByV2Exploit(pool)) {
     reasons.push('This pool type is affected by an exploit. Adding liquidity is not allowed')
   }
-
-  // reason for blocking in custom scenarios eg. maBEETS
-  if (isMaBeetsPool(pool.id)) reasons.push('Please manage your liquidity on the maBEETS page')
 
   if (isNotSupported(pool)) {
     reasons.push(

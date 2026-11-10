@@ -5,13 +5,12 @@ import { emptyAddress } from './contracts/wagmi-helpers'
 import { PropsWithChildren, createContext, useEffect, useState } from 'react'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
 import { Address, isAddress } from 'viem'
-import { setTag, setUser } from '@sentry/nextjs'
-import { config, isProd, shouldUseAnvilFork } from '@repo/lib/config/app.config'
-import { captureError, ensureError } from '@repo/lib/shared/utils/errors'
+import { config, shouldUseAnvilFork } from '@repo/lib/config/app.config'
 import { useIsMounted } from '@repo/lib/shared/hooks/useIsMounted'
 import { useSafeAppConnectionGuard } from './useSafeAppConnectionGuard'
 import { useWCConnectionLocalStorage } from './wallet-connect/useWCConnectionLocalStorage'
 import { clearImpersonatedAddressLS } from '@repo/lib/test/utils/wagmi/fork.helpers'
+import { setClientErrorContext } from '@repo/lib/shared/utils/error-logger'
 
 async function isAuthorizedAddress(address: Address): Promise<boolean> {
   try {
@@ -19,9 +18,7 @@ async function isAuthorizedAddress(address: Address): Promise<boolean> {
     const data = await res.json()
 
     return data?.isAuthorized
-  } catch (err) {
-    const error = ensureError(err)
-    if (isProd) captureError(error)
+  } catch {
     return true
   }
 }
@@ -39,21 +36,12 @@ export function useUserAccountLogic() {
   const { address, ...queryWithoutAddress } = query
 
   function onEmptyUserAddress() {
-    // Clear Sentry user
-    setUser(null)
-
     if (isConnectedToWC) {
       setIsConnectedToWC(false)
     }
   }
 
   function onNewUserAddress(result: UseUserAccountResponse) {
-    // Set Sentry user
-    setUser({
-      id: result.userAddress,
-      username: result.userAddress,
-    })
-
     if (result.isWCConnector) {
       setIsConnectedToWC(true)
     }
@@ -83,10 +71,16 @@ export function useUserAccountLogic() {
   // The usage of mounted helps to overcome nextjs hydration mismatch
   // errors where the state of the user account on the server pass is different
   // than the state on the client side rehydration.
+  //
+  // Do not treat wagmi's auto-reconnect `isConnecting` (no address yet) as loading.
+  // After clearing storage, reconnect walks every connector and WalletConnect can
+  // hang in `connecting`, which previously kept the Connect button disabled forever.
+  const isConnectingWithAddress = !!query.address && query.isConnecting
+
   const result = {
     ...queryWithoutAddress,
-    isLoading: !isMounted || query.isConnecting || checkingAuth,
-    isConnecting: !isMounted || query.isConnecting || checkingAuth,
+    isLoading: !isMounted || checkingAuth || isConnectingWithAddress,
+    isConnecting: !isMounted || checkingAuth || isConnectingWithAddress,
     // We use an emptyAddress when the user is not connected to avoid undefined value and satisfy the TS compiler
     userAddress: isMounted ? query.address || emptyAddress : emptyAddress,
     isConnected: isMounted && !!query.address && !checkingAuth,
@@ -107,6 +101,14 @@ export function useUserAccountLogic() {
     }
   }, [result.userAddress])
 
+  useEffect(() => {
+    setClientErrorContext({
+      userAddress: result.isConnected ? result.userAddress : undefined,
+      wallet: result.connector?.id,
+      walletNetwork: result.chain?.name,
+    })
+  }, [result.isConnected, result.userAddress, result.connector?.id, result.chain?.name])
+
   useConnectionEffect({
     onDisconnect: () => {
       if (shouldUseAnvilFork) {
@@ -120,10 +122,6 @@ export function useUserAccountLogic() {
       }
     },
   })
-
-  useEffect(() => {
-    setTag('wallet', result.connector?.id)
-  }, [result.connector?.id])
 
   return result
 }

@@ -47,7 +47,6 @@ import { SwapSimulationError } from './SwapSimulationError'
 import { ContractWalletAlert } from '@repo/lib/shared/components/alerts/ContractWalletAlert'
 import { useContractWallet } from '../web3/wallets/useContractWallet'
 import { useIsSafeAccount } from '../web3/safe.hooks'
-import { buildCowSwapUrl } from '../cow/cow.utils'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { usePriceImpact } from '@repo/lib/modules/price-impact/PriceImpactProvider'
 import { RoutesCard } from './RoutesCard'
@@ -205,14 +204,6 @@ export function SwapForm({
   const { isContractWallet, isLoading: isLoadingContractWallet } = useContractWallet()
   const isSafeAccount = useIsSafeAccount()
 
-  const cowLink = PROJECT_CONFIG.cowSupportedNetworks.includes(selectedChain)
-    ? buildCowSwapUrl({
-        chain: selectedChain,
-        tokenInAddress: tokenIn.address,
-        tokenOutAddress: tokenOut.address,
-      })
-    : undefined
-
   return (
     <FadeInOnView>
       <Center h="full" maxW="lg" mx="auto" position="relative" w="full">
@@ -310,7 +301,6 @@ export function SwapForm({
                     }
                     accordionPanelComponent={<SwapDetails hideOrderRoute />}
                     action="swap"
-                    cowLink={cowLink}
                     isDisabled={!simulationQuery.data}
                   />
                 </>
