@@ -11,7 +11,7 @@ import { Footer } from '@repo/lib/shared/components/navs/Footer'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 
 export const metadata: Metadata = {
-  metadataBase: new URL(PROJECT_CONFIG.projectUrl),
+  metadataBase: new URL(PROJECT_CONFIG.appUrl),
   title: `Frontier Finance—DeFi Liquidity Pools`,
   description: `Explore liquidity pools on Frontier Finance and earn passively in yield-bearing pools.`,
   icons: [
