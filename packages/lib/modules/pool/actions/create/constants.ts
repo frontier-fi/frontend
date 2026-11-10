@@ -44,7 +44,7 @@ export const MAX_POOL_SYMBOL_LENGTH = 26
 export const MAX_SWAP_FEE_PERCENTAGE = 10
 export const REQUIRED_TOTAL_WEIGHT = 100
 export const MIN_AMPLIFICATION_PARAMETER = Number(STABLE_POOL_CONSTRAINTS.MIN_AMP)
-export const MAX_AMPLIFICATION_PARAMETER = 5000
+export const MAX_AMPLIFICATION_PARAMETER = Number(STABLE_POOL_CONSTRAINTS.MAX_AMP)
 // Temporarily hidden in the create UI; reserved for a future admin mode.
 export const SHOW_ADVANCED_POOL_SETTINGS = false
 export const MAX_LAMBDA = 100000000
