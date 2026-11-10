@@ -181,6 +181,7 @@ export type PromoItem = {
 export interface ProjectConfig {
   projectId: 'frontier'
   projectUrl: string
+  appUrl: string
   projectName: string
   /** Registered legal entity users contract with (Terms of Use, Privacy Policy). */
   legalEntityName: string

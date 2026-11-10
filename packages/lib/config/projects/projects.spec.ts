@@ -6,6 +6,7 @@ describe('Project configs', () => {
     expect(ProjectConfigFrontier.projectId).toBeTypeOf('string')
     expect(ProjectConfigFrontier.projectName).toBeTypeOf('string')
     expect(ProjectConfigFrontier.projectUrl).toBeTypeOf('string')
+    expect(ProjectConfigFrontier.appUrl).toBeTypeOf('string')
     expect(ProjectConfigFrontier.projectLogo).toBeTypeOf('string')
   })
 
