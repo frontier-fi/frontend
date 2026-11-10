@@ -60,11 +60,8 @@ export const ProjectConfigFrontier: ProjectConfig = {
       },
     ],
     legalLinks: [
-      { label: 'Terms of use' },
-      { label: 'Privacy policy' },
-      { label: 'Cookies policy' },
-      { label: '3rd party services' },
-      { label: 'Risks' },
+      { label: '3rd party services', href: '/3rd-party-services' },
+      { label: 'Risks', href: '/risks' },
     ],
   },
   footer: {
