@@ -75,10 +75,12 @@ export function useUserAccountLogic() {
   // Do not treat wagmi's auto-reconnect `isConnecting` (no address yet) as loading.
   // After clearing storage, reconnect walks every connector and WalletConnect can
   // hang in `connecting`, which previously kept the Connect button disabled forever.
+  const isConnectingWithAddress = !!query.address && query.isConnecting
+
   const result = {
     ...queryWithoutAddress,
-    isLoading: !isMounted || checkingAuth || (!!query.address && query.isConnecting),
-    isConnecting: !isMounted || query.isConnecting || checkingAuth,
+    isLoading: !isMounted || checkingAuth || isConnectingWithAddress,
+    isConnecting: !isMounted || checkingAuth || isConnectingWithAddress,
     // We use an emptyAddress when the user is not connected to avoid undefined value and satisfy the TS compiler
     userAddress: isMounted ? query.address || emptyAddress : emptyAddress,
     isConnected: isMounted && !!query.address && !checkingAuth,

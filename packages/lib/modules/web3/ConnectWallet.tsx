@@ -57,7 +57,7 @@ export function ConnectWallet({
                 </WalletButton.Custom>
               )}
               <Button
-                isDisabled={!mounted || authenticationStatus === 'loading'}
+                isDisabled={isLoading || !mounted}
                 loadingText={connectLabel}
                 onClick={handleConnectClick}
                 type="button"
