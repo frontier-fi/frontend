@@ -138,7 +138,7 @@ export const INITIAL_POOL_CREATION_FORM: PoolCreationForm = {
   enableDonation: false,
   disableUnbalancedLiquidity: false,
   hasAcceptedTokenWeightsRisk: false,
-  hasAcceptedPoolCreationRisk: false,
+  hasAcceptedPoolCreationRisk: true,
   hasAcceptedSimilarPoolsWarning: false,
 }
 

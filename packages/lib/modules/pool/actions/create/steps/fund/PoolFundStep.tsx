@@ -12,17 +12,10 @@ import { SeedAmountInput } from './SeedAmountInput'
 export function PoolFundStep() {
   const { poolAddress, poolCreationForm } = usePoolCreationForm()
 
-  const [poolType, poolTokens, hasAcceptedTokenWeightsRisk, hasAcceptedPoolCreationRisk] = useWatch(
-    {
-      control: poolCreationForm.control,
-      name: [
-        'poolType',
-        'poolTokens',
-        'hasAcceptedTokenWeightsRisk',
-        'hasAcceptedPoolCreationRisk',
-      ],
-    }
-  )
+  const [poolType, poolTokens, hasAcceptedTokenWeightsRisk] = useWatch({
+    control: poolCreationForm.control,
+    name: ['poolType', 'poolTokens', 'hasAcceptedTokenWeightsRisk'],
+  })
 
   const { hasValidationErrors } = useTokenInputsValidation()
 
@@ -30,9 +23,7 @@ export function PoolFundStep() {
 
   const isWeightRiskRequired = isWeightedPool(poolType) || isCowPool(poolType)
 
-  const hasAcceptedRisks = isWeightRiskRequired
-    ? hasAcceptedTokenWeightsRisk && hasAcceptedPoolCreationRisk
-    : hasAcceptedPoolCreationRisk
+  const hasAcceptedRisks = isWeightRiskRequired ? hasAcceptedTokenWeightsRisk : true
 
   const formState = useFormState({ control: poolCreationForm.control })
   const isDisabled = !formState.isValid || !hasAcceptedRisks || !isTokenAmountsValid
