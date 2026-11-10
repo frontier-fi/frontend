@@ -6,7 +6,6 @@ import { ChainIdWithFork, defaultTestUserAccount } from '@repo/test/anvil/anvil-
 import { act, waitFor } from '@testing-library/react'
 import { connectWithDefaultUser } from '@repo/test/utils/wagmi/wagmi-connections'
 import { Address, encodeFunctionData, parseUnits } from 'viem'
-import { getTestClient } from '@repo/test/utils/wagmi/wagmi-test-clients'
 import { useManagedSendTransaction } from './useManagedSendTransaction'
 
 const wethDepositAbi = [
@@ -26,7 +25,6 @@ describe('useManagedSendTransaction flow', () => {
     const defaultChain = PROJECT_CONFIG.defaultNetwork
     const chainId = getChainId(defaultChain) as ChainIdWithFork
     const wNativeAddress = getWrappedNativeAssetAddress(defaultChain) as Address
-    const client = getTestClient(chainId)
 
     const txConfig = {
       account: defaultTestUserAccount,
@@ -51,18 +49,10 @@ describe('useManagedSendTransaction flow', () => {
 
     await act(async () => result.current.executeAsync?.())
 
-    const hash = await waitFor(() => {
-      const hash = result.current.execution.data
-      expect(result.current.execution.data).toBeDefined()
-      return hash || ('' as Address)
-    })
+    await waitFor(() => expect(result.current.execution.data).toBeDefined())
 
-    const transactionReceipt = await act(async () =>
-      client.waitForTransactionReceipt({
-        hash,
-      })
-    )
+    await waitFor(() => expect(result.current.result.isSuccess).toBeTruthy())
 
-    expect(transactionReceipt.status).toBe('success')
+    expect(result.current.result.data?.status).toBe('success')
   })
 })
