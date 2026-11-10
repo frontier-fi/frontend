@@ -15,7 +15,6 @@
     "NEXT_RUNTIME",
     "NEXT_PHASE",
     "NEXT_PUBLIC_E2E_DEV",
-    "CI",
     "ALLOWED_ORIGINS",
     "TZ"
   ],
@@ -94,6 +93,7 @@
       "dependsOn": ["^transit"]
     },
     "test:e2e:dev": {
+      "cache": false,
       "dependsOn": ["frontend-v3#build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*", "NEXT_E2E_DEV"],
       "env": ["E2E_SHARD"]
@@ -124,8 +124,5 @@
       "dependsOn": ["^stylelint:fix"],
       "cache": false
     }
-  },
-  "remoteCache": {
-    "enabled": true
   }
 }

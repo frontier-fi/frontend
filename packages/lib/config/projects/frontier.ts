@@ -12,8 +12,9 @@ const hiddenPoolTypes: PoolFilterType[] = [
 export const ProjectConfigFrontier: ProjectConfig = {
   projectId: 'frontier',
   projectName: 'Frontier Finance',
-  legalEntityName: 'Frontier Finance Foundation',
+  legalEntityName: 'Frontier Finance',
   projectUrl: 'https://frontier.fi',
+  appUrl: 'https://app.frontier.fi',
   projectLogo: '/images/icons/0xff.png',
   acceptedPoliciesVersion: undefined,
   // Frontier API is Sepolia-only for now (api.frontier.fi).

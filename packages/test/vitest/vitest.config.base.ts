@@ -32,6 +32,7 @@ export function createVitestConfig(monorepoRoot: string): ViteUserConfig {
         resolveFromRoot('./packages/lib/test/vitest/setup-msw.ts'),
       ],
       css: true,
+      maxWorkers: 2,
     },
   }
 }
