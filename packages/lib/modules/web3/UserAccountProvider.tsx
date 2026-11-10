@@ -71,9 +71,13 @@ export function useUserAccountLogic() {
   // The usage of mounted helps to overcome nextjs hydration mismatch
   // errors where the state of the user account on the server pass is different
   // than the state on the client side rehydration.
+  //
+  // Do not treat wagmi's auto-reconnect `isConnecting` (no address yet) as loading.
+  // After clearing storage, reconnect walks every connector and WalletConnect can
+  // hang in `connecting`, which previously kept the Connect button disabled forever.
   const result = {
     ...queryWithoutAddress,
-    isLoading: !isMounted || query.isConnecting || checkingAuth,
+    isLoading: !isMounted || checkingAuth || (!!query.address && query.isConnecting),
     isConnecting: !isMounted || query.isConnecting || checkingAuth,
     // We use an emptyAddress when the user is not connected to avoid undefined value and satisfy the TS compiler
     userAddress: isMounted ? query.address || emptyAddress : emptyAddress,
