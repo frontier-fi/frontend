@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from 'msw'
 
 export const defaultPostMswHandlers = [
   // Handle happy-dom's CORS preflights locally instead of hitting the real network.
@@ -12,6 +12,6 @@ export const defaultPostMswHandlers = [
       },
     })
   }),
-  http.post('http://127.0.0.1:8*/*', () => {}),
-  http.get('/', () => {}),
+  http.post(/^http:\/\/127\.0\.0\.1:8\d+\/.*/, () => delay('infinite')),
+  http.get('/', () => HttpResponse.text('')),
 ]
