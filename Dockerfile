@@ -19,7 +19,7 @@ ENV NEXT_PUBLIC_APP_ENV=${NEXT_PUBLIC_APP_ENV} \
     NODE_OPTIONS="--max-old-space-size=4096"
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm fetch --frozen-lockfile
+RUN pnpm fetch
 
 COPY . .
 RUN pnpm install --frozen-lockfile \
