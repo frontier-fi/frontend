@@ -96,6 +96,9 @@ export function useManagedErc20Transaction({
     hash: txHash,
     confirmations: minConfirmations,
     timeout: getWaitForReceiptTimeout(chainId),
+    query: {
+      ...onlyExplicitRefetch,
+    },
   })
 
   const bundle = {
