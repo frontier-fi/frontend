@@ -36,6 +36,6 @@ export function createVitestConfig(monorepoRoot: string): ViteUserConfig {
   }
 }
 
-const monorepoRoot = resolve(__dirname, '../../..')
+const monorepoRoot = resolve(import.meta.dirname, '../../..')
 
 export default defineConfig(createVitestConfig(monorepoRoot))

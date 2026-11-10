@@ -58,7 +58,7 @@ export function PoolDetailsContent() {
   const { poolHooksWhitelist } = usePoolHooksWhitelist(network)
 
   function formatPoolManager(manager: string) {
-    if (manager === zeroAddress) return `${PROJECT_CONFIG.projectName} DAO`
+    if (manager === zeroAddress) return PROJECT_CONFIG.projectName
     return <BlockExplorerLink address={manager as `0x${string}`} chain={network} fontSize="md" />
   }
 
