@@ -5,6 +5,7 @@ import { usePoolCreationForm } from '../../PoolCreationFormProvider'
 import { useEffect } from 'react'
 import { usePoolHooksContract } from './usePoolHooksContract'
 import { isStableSurgePool, isAutoRangePool } from '../../helpers'
+import { SHOW_ADVANCED_POOL_SETTINGS } from '../../constants'
 import { useWatch } from 'react-hook-form'
 import { TooltipWithTouch } from '@repo/lib/shared/components/tooltips/TooltipWithTouch'
 
@@ -66,14 +67,16 @@ export function LiquidityManagement() {
           onChange={e => poolCreationForm.setValue('disableUnbalancedLiquidity', !e.target.checked)}
         />
       </TooltipWithTouch>
-      <TooltipWithTouch label={donationsToolTip} placement="right">
-        <PoolCreationCheckbox
-          isChecked={enableDonation}
-          isDisabled={isDonationToggleDisabled}
-          label="Allow donations"
-          onChange={e => poolCreationForm.setValue('enableDonation', e.target.checked)}
-        />
-      </TooltipWithTouch>
+      {SHOW_ADVANCED_POOL_SETTINGS && (
+        <TooltipWithTouch label={donationsToolTip} placement="right">
+          <PoolCreationCheckbox
+            isChecked={enableDonation}
+            isDisabled={isDonationToggleDisabled}
+            label="Allow donations"
+            onChange={e => poolCreationForm.setValue('enableDonation', e.target.checked)}
+          />
+        </TooltipWithTouch>
+      )}
     </VStack>
   )
 }

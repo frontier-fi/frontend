@@ -5,7 +5,7 @@
   "type": "module",
   "devDependencies": {
     "@apollo/client": "catalog:",
-    "@balancer/sdk": "github:frontier-fi/sdk#4356e40fb42edf6a795df67035aa2db74cad45fb",
+    "@balancer/sdk": "github:frontier-fi/sdk#cd309ed8873386c00f5e65342bb73641e3503dc8",
     "@repo/eslint-config": "workspace:*",
     "@repo/prettier-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",

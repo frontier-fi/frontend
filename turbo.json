@@ -50,7 +50,7 @@
       "outputs": ["node_modules/.cache/.eslintcache", ".next/cache/eslint"]
     },
     "typecheck": {
-      "dependsOn": ["^graphql:gen", "^transit"],
+      "dependsOn": ["graphql:gen", "@repo/lib#graphql:gen", "^transit"],
       "inputs": [
         "$TURBO_DEFAULT$",
         "../../packages/lib/global.d.ts",
@@ -59,28 +59,28 @@
       "outputs": ["node_modules/.cache/tsbuildinfo.json"]
     },
     "test:unit": {
-      "dependsOn": ["^graphql:gen", "^test:unit"],
+      "dependsOn": ["@repo/lib#graphql:gen", "^test:unit"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
     "test:unit:watch": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^graphql:gen"]
+      "dependsOn": ["@repo/lib#graphql:gen"]
     },
     "test:integration": {
-      "dependsOn": ["^graphql:gen", "^test:integration"],
+      "dependsOn": ["@repo/lib#graphql:gen", "^test:integration"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
     "test:integration:watch": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^graphql:gen"],
+      "dependsOn": ["@repo/lib#graphql:gen"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
     "test:save-api-mocks": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^graphql:gen"],
+      "dependsOn": ["@repo/lib#graphql:gen"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
     "test:e2e:build": {

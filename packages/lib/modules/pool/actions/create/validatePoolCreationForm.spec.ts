@@ -199,16 +199,16 @@ describe('validatePoolCreationForm', () => {
     })
 
     describe('amplificationParameter', () => {
-      it('validates amp is within SDK constraints (1 to 50000)', () => {
+      it('validates amp is within UI constraints (1 to 5000)', () => {
         expect(validatePoolSettings.amplificationParameter('1')).toBe(true)
         expect(validatePoolSettings.amplificationParameter('100')).toBe(true)
-        expect(validatePoolSettings.amplificationParameter('50000')).toBe(true)
+        expect(validatePoolSettings.amplificationParameter('5000')).toBe(true)
 
         expect(validatePoolSettings.amplificationParameter('0.5')).toContain(
           'Value must be between'
         )
 
-        expect(validatePoolSettings.amplificationParameter('50001')).toContain(
+        expect(validatePoolSettings.amplificationParameter('5001')).toContain(
           'Value must be between'
         )
       })

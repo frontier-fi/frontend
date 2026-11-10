@@ -5,7 +5,7 @@ packages:
 allowBuilds:
   # Git-hosted Frontier fork — prepare runs tsup to produce dist/
   "@balancer/sdk": true
-  "@balancer/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/4356e40fb42edf6a795df67035aa2db74cad45fb": true
+  "@balancer/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8": true
   "@parcel/watcher": true
   "@reown/appkit": true
   bufferutil: true
@@ -36,7 +36,7 @@ peerDependencyRules:
 
 overrides:
   # Frontier fork until published to npm (Sepolia vault/router addresses).
-  "@balancer/sdk": "github:frontier-fi/sdk#4356e40fb42edf6a795df67035aa2db74cad45fb"
+  "@balancer/sdk": "github:frontier-fi/sdk#cd309ed8873386c00f5e65342bb73641e3503dc8"
   # Remove debug's optional color peer so every app shares the same
   # Chakra/Emotion/Next instances (see PR #2883). Keep this declarative:
   # Renovate disables pnpmfile hooks when generating lockfiles.

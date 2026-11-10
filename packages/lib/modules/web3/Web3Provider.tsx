@@ -8,7 +8,6 @@ import { useColorMode, useTheme } from '@chakra-ui/react'
 import { readThemeToken, ThemeColorMode } from '@repo/lib/shared/services/chakra/read-theme-token'
 import { merge } from 'lodash'
 import { UserSettingsProvider } from '../user/settings/UserSettingsProvider'
-import { AcceptPoliciesModal } from './AcceptPoliciesModal'
 import { BlockedAddressModal } from './BlockedAddressModal'
 import { CustomAvatar } from './CustomAvatar'
 import { UserAccountProvider } from './UserAccountProvider'
@@ -70,7 +69,6 @@ function RainbowKitThemedProvider({ children }: PropsWithChildren) {
         >
           {children}
           <BlockedAddressModal />
-          <AcceptPoliciesModal />
         </UserSettingsProvider>
       </UserAccountProvider>
     </RainbowKitProvider>

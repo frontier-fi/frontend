@@ -9,12 +9,7 @@ import {
 } from '@repo/lib/modules/transactions/transaction-steps/lib'
 import { isSameAddress } from '@repo/lib/shared/utils/addresses'
 import { Address, ContractFunctionArgs, ContractFunctionName } from 'viem'
-import {
-  useEstimateGas,
-  useSimulateContract,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from 'wagmi'
+import { useSimulateContract, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { useTxHash } from '../safe.hooks'
 import { useChainSwitch } from '../useChainSwitch'
 import { usdtAbi } from './abi/UsdtAbi'
@@ -75,15 +70,6 @@ export function useManagedErc20Transaction({
     },
   })
 
-  const estimateGasQuery = useEstimateGas({
-    ...txConfig,
-    query: {
-      enabled: !!txConfig && !shouldChangeNetwork,
-      // In chains like polygon, we don't want background refetches while waiting for min block confirmations
-      ...onlyExplicitRefetch,
-    },
-  })
-
   const writeQuery = useWriteContract()
 
   const { txHash, isSafeTxLoading } = useTxHash({
@@ -96,11 +82,14 @@ export function useManagedErc20Transaction({
     hash: txHash,
     confirmations: minConfirmations,
     timeout: getWaitForReceiptTimeout(chainId),
+    query: {
+      ...onlyExplicitRefetch,
+    },
   })
 
   const bundle = {
     chainId,
-    simulation: estimateGasQuery as TransactionSimulation,
+    simulation: simulateQuery as TransactionSimulation,
     execution: writeQuery as TransactionExecution,
     result: transactionStatusQuery,
     isSafeTxLoading,
