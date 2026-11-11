@@ -12,7 +12,7 @@ export function proxyExternalImageUrl(originalUrl: string): string {
       if (domain.startsWith('*.')) {
         // Handle wildcard subdomains
         const baseDomain = domain.slice(2)
-        return url.hostname.endsWith(baseDomain) || url.hostname === baseDomain
+        return url.hostname === baseDomain || url.hostname.endsWith('.' + baseDomain)
       }
 
       return url.hostname === domain

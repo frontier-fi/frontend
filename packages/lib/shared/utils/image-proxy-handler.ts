@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { secondsToMilliseconds } from 'date-fns'
 
+const SUPPORTED_IMAGE_MIME_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/webp',
+  'image/gif',
+  'image/avif',
+])
+
+function normalizeImageMimeType(rawContentType: string | null): string {
+  if (!rawContentType) return 'image/png'
+  return rawContentType.split(';')[0]?.trim().toLowerCase() || 'image/png'
+}
+
 /**
  * Generic image proxy handler to avoid CORS issues with external images
  * Particularly useful for CoinGecko assets that don't have proper CORS headers
@@ -74,6 +88,12 @@ export async function handleImageProxy(request: NextRequest) {
       return NextResponse.json({ error: 'Image too large' }, { status: 413 })
     }
 
+    const contentType = normalizeImageMimeType(response.headers.get('content-type'))
+
+    if (!SUPPORTED_IMAGE_MIME_TYPES.has(contentType)) {
+      return NextResponse.json({ error: 'Unsupported image content type' }, { status: 415 })
+    }
+
     const imageBuffer = await response.arrayBuffer()
 
     // Double-check actual buffer size
@@ -81,13 +101,14 @@ export async function handleImageProxy(request: NextRequest) {
       return NextResponse.json({ error: 'Image too large' }, { status: 413 })
     }
 
-    const contentType = response.headers.get('content-type') || 'image/png'
-
     return new NextResponse(imageBuffer, {
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'public, max-age=86400, s-maxage=86400', // Cache for 24 hours
         'Access-Control-Allow-Origin': '*',
+        'Content-Security-Policy': "default-src 'none'; sandbox",
+        'X-Content-Type-Options': 'nosniff',
+        'Content-Disposition': 'inline; filename="image"',
       },
     })
   } catch (error) {
