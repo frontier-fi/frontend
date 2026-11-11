@@ -180,7 +180,11 @@ export function get24HoursFromNowInSecs() {
   return getTimestampInMinsFromNow(24 * 60)
 }
 
-export function getDefaultDeadlineSeconds(ttlSeconds = 1200): bigint {
+export const DEFAULT_DEADLINE_SECONDS = 20 * 60
+export const SAFE_DEADLINE_SECONDS = 24 * 60 * 60
+
+export function getDefaultDeadlineSeconds(isSafeAccount = false): bigint {
+  const ttlSeconds = isSafeAccount ? SAFE_DEADLINE_SECONDS : DEFAULT_DEADLINE_SECONDS
   return BigInt(Math.floor(Date.now() / 1000) + ttlSeconds)
 }
 

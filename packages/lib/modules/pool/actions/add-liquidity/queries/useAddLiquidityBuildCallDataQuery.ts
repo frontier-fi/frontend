@@ -10,6 +10,7 @@ import { AddLiquiditySimulationQueryResult } from './useAddLiquiditySimulationQu
 import { useDebounce } from 'use-debounce'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
 import { usePermit2Signature } from '@repo/lib/modules/tokens/approvals/permit2/Permit2SignatureProvider'
+import { useIsSafeAccount } from '@repo/lib/modules/web3/safe.hooks'
 import { isV3Pool } from '../../../pool.helpers'
 
 export type AddLiquidityBuildQueryResponse = ReturnType<typeof useAddLiquidityBuildCallDataQuery>
@@ -35,6 +36,7 @@ export function useAddLiquidityBuildCallDataQuery({
   const { pool } = usePool()
   const { relayerApprovalSignature } = useRelayerSignature()
   const { permit2Signature: permit2 } = usePermit2Signature()
+  const isSafeAccount = useIsSafeAccount()
   const debouncedHumanAmountsIn = useDebounce(humanAmountsIn, defaultDebounceMs)[0]
 
   const hasPermit2 = isV3Pool(pool) && !!permit2
@@ -46,6 +48,7 @@ export function useAddLiquidityBuildCallDataQuery({
     pool,
     humanAmountsIn: debouncedHumanAmountsIn,
     hasPermit2,
+    isSafeAccount,
   }
 
   const queryKey = addLiquidityKeys.buildCallData(params)
@@ -58,6 +61,7 @@ export function useAddLiquidityBuildCallDataQuery({
       humanAmountsIn: debouncedHumanAmountsIn,
       slippagePercent: slippage,
       queryOutput,
+      isSafeAccount,
       relayerApprovalSignature, // only present in Add Nested Liquidity with sign relayer mode
       permit2, // only present in V3 pools
     })

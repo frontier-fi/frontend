@@ -16,6 +16,7 @@ export type AddLiquidityParams = {
   slippage: string
   humanAmountsIn: HumanTokenAmountWithSymbol[]
   hasPermit2?: boolean
+  isSafeAccount?: boolean
   relicId?: string
 }
 
@@ -26,12 +27,13 @@ function liquidityParams({
   slippage,
   humanAmountsIn,
   hasPermit2,
+  isSafeAccount,
 }: AddLiquidityParams) {
   return `${getHandlerClassName(handler)}:${userAddress}:${
     pool.id
   }:${slippage}:${stringifyHumanAmountsIn(pool, humanAmountsIn)}${
     hasPermit2 ? 'permit2' : 'no-permit2'
-  }`
+  }${isSafeAccount ? ':safe' : ''}`
 }
 
 export function stringifyHumanAmountsIn(

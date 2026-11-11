@@ -24,11 +24,12 @@ export abstract class BaseDefaultSwapHandler implements SwapHandler {
     account,
     selectedChain,
     wethIsEth,
+    isSafeAccount,
     permit2,
   }: SdkBuildSwapInputs): TransactionConfig {
     const baseBuildCallParams = {
       slippage: Slippage.fromPercentage(slippagePercent as `${number}`),
-      deadline: getDefaultDeadlineSeconds(),
+      deadline: getDefaultDeadlineSeconds(isSafeAccount),
       wethIsEth,
       queryOutput,
     }

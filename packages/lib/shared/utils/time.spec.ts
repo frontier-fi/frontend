@@ -22,12 +22,12 @@ describe('unixTimestampToDateTimeLocalString', () => {
 })
 
 describe('getDefaultDeadlineSeconds', () => {
-  it('returns a bounded unix timestamp offset in seconds', () => {
+  it('returns 20-minute deadline for standard wallets and 24-hour deadline for Safe accounts', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2025-08-12T10:00:00.000Z'))
 
     expect(getDefaultDeadlineSeconds()).toBe(1754994000n)
-    expect(getDefaultDeadlineSeconds(300)).toBe(1754993100n)
+    expect(getDefaultDeadlineSeconds(true)).toBe(1755079200n)
 
     vi.useRealTimers()
   })

@@ -74,6 +74,7 @@ export class UnbalancedAddLiquidityViaSwapV3Handler implements AddLiquidityHandl
     slippagePercent,
     queryOutput,
     account,
+    isSafeAccount,
     permit2,
   }: SdkBuildAddLiquidityInput): Promise<TransactionConfig> {
     const addLiquidity = new AddLiquidityUnbalancedViaSwapV3()
@@ -84,7 +85,7 @@ export class UnbalancedAddLiquidityViaSwapV3Handler implements AddLiquidityHandl
       ...sdkQueryOutput,
       slippage: Slippage.fromPercentage(`${Number(slippagePercent)}`),
       wethIsEth: this.helpers.isNativeAssetIn(humanAmountsIn),
-      deadline: getDefaultDeadlineSeconds(),
+      deadline: getDefaultDeadlineSeconds(isSafeAccount),
     }
 
     const {
