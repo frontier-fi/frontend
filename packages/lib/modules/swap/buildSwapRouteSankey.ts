@@ -237,6 +237,7 @@ export function buildSwapRouteSankey(
       // Fill skipped columns so ribbons don't cross over parallel hops.
       for (let depth = sourceDepth + 1; depth < targetDepth; depth++) {
         const pass = ensurePassthrough(depth, pathKey, colorAddress)
+
         addLink(
           previous,
           pass,
@@ -244,6 +245,7 @@ export function buildSwapRouteSankey(
           colorAddress,
           depth === sourceDepth + 1 ? poolId : undefined
         )
+
         previous = pass
       }
 
