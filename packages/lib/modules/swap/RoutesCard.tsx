@@ -184,7 +184,10 @@ export function RoutesCard({ paths, chain, totalInputAmount, totalOutputAmount }
 
         <RoutesVisualization
           chain={chain}
-          chartHeight={Math.min(220, Math.max(130, 80 + maxHops * 36))}
+          chartHeight={Math.min(
+            280,
+            Math.max(150, 100 + maxHops * 40 + Math.max(0, paths.length - 1) * 36)
+          )}
           maxHops={maxHops}
           paths={paths}
           showHeader={false}

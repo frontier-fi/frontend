@@ -16,7 +16,7 @@ allowBuilds:
   utf-8-validate: true
 
 catalog:
-  "@apollo/client": "4.3.7"
+  "@apollo/client": "4.3.4"
 
 packageExtensions:
   # debug declares only optional peer metadata. Declare the peer explicitly so
@@ -37,6 +37,7 @@ peerDependencyRules:
 overrides:
   # Frontier fork until published to npm (Sepolia vault/router addresses).
   "@balancer/sdk": "github:frontier-fi/sdk#cd309ed8873386c00f5e65342bb73641e3503dc8"
+  "@balancer-labs/balancer-maths": "npm:@frontier-fi/maths@0.1.1"
   # Remove debug's optional color peer so every app shares the same
   # Chakra/Emotion/Next instances (see PR #2883). Keep this declarative:
   # Renovate disables pnpmfile hooks when generating lockfiles.
@@ -44,24 +45,14 @@ overrides:
   "@types/react": "19.3"
   "@types/react-dom": "19.3"
   # Keep @vitest/mocker on the same MSW version as the test handlers.
-  "@vitest/mocker>msw": "3.0.4"
+  "@vitest/mocker>msw": "3.0.3"
 
 publicHoistPattern:
   - "*graphql*" # https://github.com/vercel/next.js/issues/68805
   - "@reown/*" # Fix for @reown/appkit resolution in Next + pnpm
 
+minimumReleaseAge: 10080
+
 minimumReleaseAgeExclude:
   - "@balancer/sdk"
-  - "@eslint-react/ast@5.19.1"
-  - "@eslint-react/core@5.19.1"
-  - "@eslint-react/eslint-plugin@5.19.1"
-  - "@eslint-react/eslint@5.19.1"
-  - "@eslint-react/jsx@5.19.1"
-  - "@eslint-react/shared@5.19.1"
-  - "@eslint-react/var@5.19.1"
-  - eslint-plugin-react-dom@5.19.1
-  - eslint-plugin-react-jsx@5.19.1
-  - eslint-plugin-react-naming-convention@5.19.1
-  - eslint-plugin-react-rsc@5.19.1
-  - eslint-plugin-react-web-api@5.19.1
-  - eslint-plugin-react-x@5.19.1
+  - "@frontier-fi/*"

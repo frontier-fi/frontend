@@ -10,6 +10,7 @@ export function useTransactionStateLogic() {
      This is useful for ensuring that the `onSuccess` callback is not called in every render as it is normally a heavy operation (refetch data, etc.).
    */
   const [onSuccessCalled, setOnSuccessCalled] = useState<{ [txHash: Hex]: boolean }>({})
+  const [isBatchSubmitting, setIsBatchSubmitting] = useState(false)
 
   function getTransactionHash(step: TransactionStep): Hex | undefined {
     const txHash = step.transaction?.result.data?.transactionHash
@@ -40,6 +41,8 @@ export function useTransactionStateLogic() {
     updateOnSuccessCalled,
     isOnSuccessCalled,
     setOnSuccessCalled,
+    isBatchSubmitting,
+    setIsBatchSubmitting,
   }
 }
 

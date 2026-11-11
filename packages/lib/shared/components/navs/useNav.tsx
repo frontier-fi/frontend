@@ -30,9 +30,17 @@ export function useNav() {
       href: '/portfolio',
       label: 'Portfolio',
     },
+    {
+      href: '/create',
+      label: 'Create',
+    },
   ]
 
   function linkColorFor(path: string) {
+    if (path === '/create' && pathname.startsWith('/create')) {
+      return 'font.highlight'
+    }
+
     return pathname === path ? 'font.highlight' : 'font.primary'
   }
 

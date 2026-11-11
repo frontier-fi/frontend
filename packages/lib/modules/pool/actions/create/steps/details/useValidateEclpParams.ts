@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { GyroECLPMath } from '@balancer-labs/balancer-maths'
+import { GyroECLPMath } from '@frontier-fi/maths'
 import { computeDerivedEclpParams, PoolType } from '@balancer/sdk'
 import { usePoolCreationForm } from '../../PoolCreationFormProvider'
 import { DEFAULT_DECIMALS } from '../../constants'

@@ -116,7 +116,7 @@ export function usePoolAlerts(pool: Pool) {
           hook?.addresses[getChainId(pool.chain)]?.includes(pool.hook.address as Address)
       )?.name
 
-      if ('reviewData' in hook && !hasReviewedHook(hook)) {
+      if (!hasReviewedHook(hook)) {
         alerts.push({
           identifier: `PoolHookNotReviewed`,
           content: `This pool contains a hook called ${hookName} which has not been reviewed. For your safety, you can’t interact with this pool on this UI.`,
@@ -165,7 +165,7 @@ export function usePoolAlerts(pool: Pool) {
               hook?.addresses[getChainId(pool.chain)]?.includes(nestedPool.hook.address as Address)
           )?.name
 
-          if ('reviewData' in nestedPool.hook && !hasReviewedHook(nestedPool.hook)) {
+          if (!hasReviewedHook(nestedPool.hook)) {
             alerts.push({
               identifier: `NestedPoolHookNotReviewed`,
               content: `This pool contains a nested pool with a hook called ${hookName} which has not been reviewed. For your safety, you can’t interact with this pool on this UI.`,

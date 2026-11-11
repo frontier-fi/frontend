@@ -5,6 +5,7 @@ import {
   TransactionLabels,
 } from '@repo/lib/modules/transactions/transaction-steps/lib'
 import { useEffect } from 'react'
+import { zeroAddress } from 'viem'
 import { useEstimateGas, useSendTransaction, useWaitForTransactionReceipt } from 'wagmi'
 import { TransactionConfig, TransactionExecution, TransactionSimulation } from './contract.types'
 import { useOnTransactionConfirmation } from './useOnTransactionConfirmation'
@@ -22,20 +23,26 @@ import { useUserAccount } from '../UserAccountProvider'
 export type ManagedSendTransactionInput = {
   labels: TransactionLabels
   txConfig: TransactionConfig
+  enabled?: boolean
   onTransactionChange: (transaction: ManagedResult) => void
 }
 
-export function useManagedSendTransaction({ labels, txConfig }: ManagedSendTransactionInput) {
+export function useManagedSendTransaction({
+  labels,
+  txConfig,
+  enabled = true,
+}: ManagedSendTransactionInput) {
   const chainId = txConfig.chainId
   const { shouldChangeNetwork } = useChainSwitch(chainId)
   const { minConfirmations } = useNetworkConfig()
   const { updateTrackedTransaction } = useRecentTransactions()
   const { connector } = useUserAccount()
+  const hasValidTarget = Boolean(txConfig?.to) && txConfig.to !== zeroAddress
 
   const estimateGasQueryOriginal = useEstimateGas({
     ...txConfig,
     query: {
-      enabled: !!txConfig && !shouldChangeNetwork,
+      enabled: enabled && hasValidTarget && !shouldChangeNetwork,
       // In chains like polygon, we don't want background refetches while waiting for min block confirmations
       ...onlyExplicitRefetch,
     },
@@ -111,8 +118,8 @@ export function useManagedSendTransaction({ labels, txConfig }: ManagedSendTrans
 
   const managedSendAsync = txConfig
     ? async () => {
+        if (!enabled || !hasValidTarget) return
         if (!estimateGasQuery.data) return
-        if (!txConfig?.to) return
 
         return writeMutation.sendTransactionAsync({
           chainId,

@@ -18,6 +18,7 @@ import { ArrowUpRight } from 'lucide-react'
 import { getWarnings } from '../../pool.helpers'
 import { PropsWithChildren } from 'react'
 import { InfoPopoverToken } from '@repo/lib/modules/tokens/token.types'
+import { normalizeRelativeReviewPath } from '@repo/lib/shared/utils/strings'
 
 type RateProviderInfoPopOverProps = {
   token: InfoPopoverToken
@@ -34,6 +35,7 @@ function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
   const warnings = getWarnings(data.warnings || [])
   const hasMarketRateWarning = warnings.includes('market-rate')
   const otherWarnings = warnings.filter(warning => warning !== 'market-rate')
+  const reviewPath = normalizeRelativeReviewPath(data.reviewFile)
 
   return (
     <>
@@ -46,7 +48,7 @@ function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
           </Text>
           <Text fontSize="sm">
             Learn more about{' '}
-            <Link href="/risks#rate-provider-risk" target="_blank">
+            <Link href="/risks#rate-provider-risk" rel="noopener noreferrer" target="_blank">
               <Box as="span" color="font.link">
                 rate provider risks
               </Box>
@@ -80,7 +82,7 @@ function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
             ) : (
               <Text fontSize="sm">
                 None except{' '}
-                <Link href="/risks#rate-provider-risk" target="_blank">
+                <Link href="/risks#rate-provider-risk" rel="noopener noreferrer" target="_blank">
                   <Box as="span" color="font.link">
                     rate provider risks
                   </Box>
@@ -104,9 +106,10 @@ function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
             </Text>
             <Text fontSize="sm">{data.factory ?? 'None'}</Text>
           </VStack>
-          {data.reviewFile && (
+          {reviewPath && (
             <Link
-              href={`https://github.com/frontier-fi/code-review/blob/main/rate-providers/${data.reviewFile}`}
+              href={`https://github.com/frontier-fi/code-review/blob/main/rate-providers/${reviewPath}`}
+              rel="noopener noreferrer"
               target="_blank"
             >
               <HStack gap="xxs">

@@ -11,6 +11,30 @@ interface SmartCircularImageProps {
   border?: string
 }
 
+const OPTIMIZED_REMOTE_HOSTS = new Set([
+  'assets.coingecko.com',
+  'coin-images.coingecko.com',
+  'raw.githubusercontent.com',
+  'assets.smold.app',
+])
+
+function canOptimizeImageSrc(src: string): boolean {
+  if (!src || src.startsWith('/') || src.startsWith('data:') || src.startsWith('blob:')) {
+    return true
+  }
+
+  try {
+    const parsed = new URL(src)
+    if (parsed.protocol !== 'https:') return false
+    return (
+      OPTIMIZED_REMOTE_HOSTS.has(parsed.hostname) ||
+      parsed.hostname.endsWith('.githubusercontent.com')
+    )
+  } catch {
+    return false
+  }
+}
+
 export function SmartCircularImage({
   src,
   alt,
@@ -122,6 +146,8 @@ export function SmartCircularImage({
     p: border ? 1 : 0,
   }
 
+  const shouldSkipOptimization = imageProps.unoptimized ?? !canOptimizeImageSrc(src)
+
   if (isCircular) {
     // For circular images: preserve full image
     return (
@@ -136,6 +162,7 @@ export function SmartCircularImage({
               objectFit: 'cover',
             }}
             {...imageProps}
+            unoptimized={shouldSkipOptimization}
           />
         </Box>
       </Box>
@@ -155,6 +182,7 @@ export function SmartCircularImage({
               borderRadius: '50%',
             }}
             {...imageProps}
+            unoptimized={shouldSkipOptimization}
           />
         </Box>
       </Box>

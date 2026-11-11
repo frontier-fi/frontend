@@ -10,11 +10,10 @@ import { usePoolHooksWhitelist } from './usePoolHooksWhitelist'
 import { useEffect } from 'react'
 import { usePublicClient } from 'wagmi'
 import { reClammPoolAbi } from '@repo/lib/modules/web3/contracts/abi/generated'
-import { getChainId } from '@repo/lib/config/app.config'
+import { getChainId, isDev } from '@repo/lib/config/app.config'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { isStablePool, isStableSurgePool, isPoolCreatorEnabled } from '../../helpers'
-import { SHOW_ADVANCED_POOL_SETTINGS } from '../../constants'
 import { useWatch } from 'react-hook-form'
 import { ConfigOptionsGroup } from './AutoRangeConfiguration'
 import {
@@ -71,9 +70,9 @@ export function PoolSettings() {
   }, [poolType, poolHooksWhitelist])
 
   useEffect(() => {
-    if (SHOW_ADVANCED_POOL_SETTINGS) return
+    if (isDev) return
 
-    // Keep roles delegated and donations off while advanced settings are hidden.
+    // Keep roles delegated and donations off outside dev.
     poolCreationForm.setValue('poolCreator', zeroAddress)
     poolCreationForm.setValue('swapFeeManager', zeroAddress)
     poolCreationForm.setValue('pauseManager', zeroAddress)
@@ -157,7 +156,7 @@ export function PoolSettings() {
         Pool settings
       </Heading>
 
-      {SHOW_ADVANCED_POOL_SETTINGS && (
+      {isDev && (
         <>
           {isPoolCreatorEnabled(poolType) && (
             <PoolSettingsRadioGroup

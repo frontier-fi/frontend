@@ -5,7 +5,7 @@ import { usePoolCreationForm } from '../../PoolCreationFormProvider'
 import { useEffect } from 'react'
 import { usePoolHooksContract } from './usePoolHooksContract'
 import { isStableSurgePool, isAutoRangePool } from '../../helpers'
-import { SHOW_ADVANCED_POOL_SETTINGS } from '../../constants'
+import { isDev } from '@repo/lib/config/app.config'
 import { useWatch } from 'react-hook-form'
 import { TooltipWithTouch } from '@repo/lib/shared/components/tooltips/TooltipWithTouch'
 
@@ -67,7 +67,7 @@ export function LiquidityManagement() {
           onChange={e => poolCreationForm.setValue('disableUnbalancedLiquidity', !e.target.checked)}
         />
       </TooltipWithTouch>
-      {SHOW_ADVANCED_POOL_SETTINGS && (
+      {isDev && (
         <TooltipWithTouch label={donationsToolTip} placement="right">
           <PoolCreationCheckbox
             isChecked={enableDonation}

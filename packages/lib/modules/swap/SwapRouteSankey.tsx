@@ -4,6 +4,7 @@ import { Path } from '@balancer/sdk'
 import { Box, useColorModeValue, useTheme } from '@chakra-ui/react'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { fNum } from '@repo/lib/shared/utils/numbers'
+import { escapeHtml } from '@repo/lib/shared/utils/strings'
 import * as echarts from 'echarts/core'
 import { SankeyChart } from 'echarts/charts'
 import { TooltipComponent } from 'echarts/components'
@@ -24,11 +25,11 @@ type Props = {
 const LINK_OPACITY = 0.32
 const LINK_OPACITY_FOCUS = 0.7
 const ICON_SIZE = 14
+const MAX_SYMBOL_CHARS = 12
 
-function escapeHtml(s: string) {
-  return s.replace(/[&<>"']/g, c =>
-    c === '&' ? '&amp;' : c === '<' ? '&lt;' : c === '>' ? '&gt;' : c === '"' ? '&quot;' : '&#39;'
-  )
+function truncateSymbol(symbol: string) {
+  if (symbol.length <= MAX_SYMBOL_CHARS) return symbol
+  return `${symbol.slice(0, MAX_SYMBOL_CHARS - 1)}…`
 }
 
 /**
@@ -62,7 +63,14 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
     [paths, chain, getToken]
   )
 
-  const chartHeight = height ?? Math.min(280, Math.max(120, 72 + graph.nodes.length * 28))
+  const splitPathCount = graph.links.filter(l => l.source.startsWith('0:')).length
+
+  const chartHeight =
+    height ??
+    Math.min(
+      300,
+      Math.max(140, 96 + graph.nodes.length * 28 + Math.max(0, splitPathCount - 1) * 36)
+    )
 
   const option = useMemo(() => {
     const totalValue = graph.links
@@ -72,28 +80,34 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
     const rootInputSymbol = graph.nodes.find(n => n.depth === 0)?.symbol ?? ''
 
     const data = graph.nodes.map(n => {
-      // Alternate above/below so neighboring hop labels don't sit on the same line.
-      const position = n.depth % 2 === 0 ? 'top' : 'bottom'
+      const isFirst = n.depth === 0
+      const isLast = n.depth === graph.maxDepth && !n.isPassthrough
+
+      // Keep labels inside the plot: source to the right of its bar, hops below,
+      // destination to the left of its bar (avoids clipping left/right edges).
+      const position = isFirst ? 'right' : isLast ? 'left' : 'bottom'
+      const align = isFirst ? ('left' as const) : isLast ? ('right' as const) : ('center' as const)
+      const displaySymbol = truncateSymbol(n.symbol)
 
       const baseLabel = {
+        show: !n.isPassthrough,
         color: labelColor,
         fontSize: 11,
-        distance: 6,
+        distance: isFirst || isLast ? 8 : 6,
         position,
-        align: 'center' as const,
-        width: 76,
-        overflow: 'truncate' as const,
+        align,
+        verticalAlign: 'middle' as const,
       }
 
       let label: Record<string, unknown> = {
         ...baseLabel,
-        formatter: n.symbol,
+        formatter: displaySymbol,
       }
 
-      if (n.logoURI) {
+      if (n.logoURI && !n.isPassthrough) {
         label = {
           ...baseLabel,
-          formatter: `{icon|}{sym|${n.symbol}}`,
+          formatter: `{icon|}{sym|${displaySymbol}}`,
           rich: {
             icon: {
               backgroundColor: { image: n.logoURI },
@@ -105,9 +119,7 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
               color: labelColor,
               fontSize: 11,
               verticalAlign: 'middle',
-              padding: [0, 0, 0, 2],
-              width: 56,
-              overflow: 'truncate',
+              padding: [0, 0, 0, 4],
             },
           },
         }
@@ -129,6 +141,8 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
             ],
           },
           borderWidth: 0,
+          // Passthroughs are lane spacers — keep them visually quiet.
+          opacity: n.isPassthrough ? 0.35 : 1,
         },
         label,
       }
@@ -186,9 +200,12 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
 
             const unitSuffix = rootInputSymbol ? ` ${escapeHtml(rootInputSymbol)}` : ''
 
+            const srcLabel = src?.isPassthrough ? '…' : (src?.symbol ?? '')
+            const tgtLabel = tgt?.isPassthrough ? '…' : (tgt?.symbol ?? '')
+
             return `<div style="${tooltipStyles}">
               <div style="color:${tooltipHeading};font-weight:600;margin-bottom:4px">
-                ${escapeHtml(src?.symbol ?? '')} → ${escapeHtml(tgt?.symbol ?? '')}
+                ${escapeHtml(srcLabel)} → ${escapeHtml(tgtLabel)}
               </div>
               <div>${fNum('token', value)}${unitSuffix} <span style="opacity:.7">(${fNum('sharePercent', pct)} of input)</span></div>
               ${poolLine}
@@ -197,7 +214,7 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
 
           if (params.dataType === 'node' && params.name) {
             const node = graph.nodes.find(n => n.name === params.name)
-            if (!node) return ''
+            if (!node || node.isPassthrough) return ''
 
             const hopLabel =
               node.depth === 0
@@ -220,19 +237,20 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
       series: [
         {
           type: 'sankey',
-          left: 8,
-          right: 16,
-          top: 28,
-          bottom: 28,
-          nodeWidth: 22,
-          nodeGap: 12,
+          left: 28,
+          right: 28,
+          top: 24,
+          bottom: 36,
+          nodeWidth: 18,
+          nodeGap: 22,
           orient: 'horizontal',
           draggable: false,
           emphasis: { focus: 'adjacency' },
-          layoutIterations: 0,
+          // Separate parallel ribbons vertically; depths stay fixed via node.depth.
+          layoutIterations: 32,
           lineStyle: {
             color: 'gradient',
-            curveness: 0.5,
+            curveness: 0.55,
           },
           data,
           links,

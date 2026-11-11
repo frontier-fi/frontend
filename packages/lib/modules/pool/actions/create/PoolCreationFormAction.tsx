@@ -7,7 +7,7 @@ import { PoolCreationModal } from './modal/PoolCreationModal'
 import { useRef, useEffect } from 'react'
 import { InvalidTotalWeightAlert } from './InvalidTotalWeightAlert'
 import { useCopyToClipboard } from '@repo/lib/shared/hooks/useCopyToClipboard'
-import { isAutoRangePool, isCowPool } from './helpers'
+import { isAutoRangePool, isCowPool, isEclpCreationDisabled } from './helpers'
 import { useFormState, useWatch } from 'react-hook-form'
 
 export function PoolCreationFormAction({ disabled }: { disabled?: boolean }) {
@@ -37,6 +37,8 @@ export function PoolCreationFormAction({ disabled }: { disabled?: boolean }) {
   if (!isConnected) return <ConnectWallet variant="primary" w="full" />
 
   const showBackButton = !isFirstStep && !poolAddress
+  const isEclpSubmitDisabled = isLastStep && isEclpCreationDisabled(poolType)
+  const isSubmitDisabled = disabled || isEclpSubmitDisabled
 
   const initializeUrl = `${window.location.origin}/create/${network}/${poolType}/${poolAddress}`
 
@@ -70,7 +72,8 @@ export function PoolCreationFormAction({ disabled }: { disabled?: boolean }) {
 
           {isLastStep ? (
             <Button
-              disabled={disabled}
+              disabled={isSubmitDisabled}
+              isDisabled={isSubmitDisabled}
               onClick={previewModalDisclosure.onOpen}
               size="lg"
               variant="primary"
@@ -79,14 +82,21 @@ export function PoolCreationFormAction({ disabled }: { disabled?: boolean }) {
               {poolAddress ? 'Initialize Pool' : 'Create Pool'}
             </Button>
           ) : (
-            <Button disabled={disabled} onClick={goToNextStep} size="lg" variant="primary" w="full">
+            <Button
+              disabled={disabled}
+              isDisabled={disabled}
+              onClick={goToNextStep}
+              size="lg"
+              variant="primary"
+              w="full"
+            >
               Next
             </Button>
           )}
         </HStack>
       </VStack>
 
-      {formState.isValid && isLastStep && (
+      {formState.isValid && isLastStep && !isEclpSubmitDisabled && (
         <PoolCreationModal
           finalFocusRef={nextBtn}
           isOpen={previewModalDisclosure.isOpen}

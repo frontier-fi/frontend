@@ -66,6 +66,7 @@ export interface BuildSwapInputs extends SwapState {
   slippagePercent: string
   simulateResponse: SimulateSwapResponse
   wethIsEth: boolean
+  isSafeAccount?: boolean
   relayerApprovalSignature?: Hex
   permit2?: Permit2 // only used by v3 swaps
 }

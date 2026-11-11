@@ -1,6 +1,7 @@
 import {
   dateTimeToUnixTimestampBigInt,
   formatDistanceToNowAbbr,
+  getDefaultDeadlineSeconds,
   unixTimestampToDateTimeLocalString,
 } from './time'
 
@@ -17,6 +18,18 @@ describe('unixTimestampToDateTimeLocalString', () => {
     const dateTimeLocal = unixTimestampToDateTimeLocalString(unixTimestamp)
 
     expect(dateTimeToUnixTimestampBigInt(dateTimeLocal)).toBe(BigInt(unixTimestamp))
+  })
+})
+
+describe('getDefaultDeadlineSeconds', () => {
+  it('returns 20-minute deadline for standard wallets and 24-hour deadline for Safe accounts', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-08-12T10:00:00.000Z'))
+
+    expect(getDefaultDeadlineSeconds()).toBe(1754994000n)
+    expect(getDefaultDeadlineSeconds(true)).toBe(1755079200n)
+
+    vi.useRealTimers()
   })
 })
 

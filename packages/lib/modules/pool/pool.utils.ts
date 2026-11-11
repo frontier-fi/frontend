@@ -175,7 +175,7 @@ export const poolClickHandler = (
   const poolPath = getPoolPath(pool)
 
   if (event.ctrlKey || event.metaKey) {
-    window.open(poolPath, '_blank')
+    window.open(poolPath, '_blank', 'noopener,noreferrer')
   } else {
     router.push(poolPath)
   }

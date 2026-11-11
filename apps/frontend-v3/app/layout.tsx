@@ -54,8 +54,8 @@ export default function RootLayout({ children }: PropsWithChildren) {
             {children}
             <Footer
               logoType={<BalancerLogoType />}
-              subTitle="Frontier Finance is a battle-tested toolkit for true AMM experimentation and innovation."
-              title="AMMs made easy"
+              subTitle="Frontier Finance provides unique solutions to many liquidity provision needs"
+              title="The Frontier AMM"
             />
           </Providers>
         </ThemeProvider>

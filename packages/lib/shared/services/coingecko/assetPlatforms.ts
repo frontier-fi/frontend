@@ -22,6 +22,8 @@ export async function handleCoingeckoAssetPlatformsRequest() {
         status: res.status,
       })
     )
+
+    throw new Error(`Failed to fetch Coingecko asset platforms: ${res.status}`)
   }
 
   const data: CoingeckoAssetPlatform[] = await res.json()

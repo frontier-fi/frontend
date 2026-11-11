@@ -16,6 +16,7 @@ import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import { getWarnings } from '../../pool.helpers'
 import { PropsWithChildren } from 'react'
+import { normalizeRelativeReviewPath } from '@repo/lib/shared/utils/strings'
 
 type PopoverInfoBodyProps = {
   data: GqlHookReviewData | undefined | null
@@ -26,6 +27,7 @@ type HookInfoPopOverProps = PopoverInfoBodyProps & PropsWithChildren
 
 function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
   const warnings = getWarnings(data?.warnings || [])
+  const reviewPath = normalizeRelativeReviewPath(data?.reviewFile)
 
   return (
     <>
@@ -38,7 +40,7 @@ function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
           </Text>
           <Text fontSize="sm">
             Learn more about{' '}
-            <Link href="/risks#hooks-risk" target="_blank">
+            <Link href="/risks#hooks-risk" rel="noopener noreferrer" target="_blank">
               <Box as="span" color="font.link">
                 hook risks
               </Box>
@@ -65,7 +67,7 @@ function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
             ) : (
               <Text fontSize="sm">
                 None except{' '}
-                <Link href="/risks#hooks-risk" target="_blank">
+                <Link href="/risks#hooks-risk" rel="noopener noreferrer" target="_blank">
                   <Box as="span" color="font.link">
                     hook risks
                   </Box>
@@ -73,9 +75,10 @@ function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
               </Text>
             )}
           </VStack>
-          {data?.reviewFile && (
+          {reviewPath && (
             <Link
-              href={`https://github.com/frontier-fi/code-review/blob/main/hooks/${data.reviewFile}`}
+              href={`https://github.com/frontier-fi/code-review/blob/main/hooks/${reviewPath}`}
+              rel="noopener noreferrer"
               target="_blank"
             >
               <HStack gap="xxs">

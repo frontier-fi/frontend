@@ -16,6 +16,7 @@ import { useCurrency } from '@repo/lib/shared/hooks/useCurrency'
 import { isCowAmmPool } from '../../../pool.helpers'
 import { PoolChartTab, usePoolChartTabs } from './PoolChartTabsProvider'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
+import { escapeHtml } from '@repo/lib/shared/utils/strings'
 
 type NonEmptyPoolChartPeriods = [PoolChartPeriod, ...PoolChartPeriod[]]
 
@@ -178,10 +179,10 @@ export const getDefaultPoolChartOptions = (
             toolTipTheme.container
           }">
             <div style="font-size: 0.85rem; font-weight: 500; color: ${toolTipTheme.text};">
-              ${options?.useTimeRange ? formattedDateWithTimeRange : formattedDate}
+              ${escapeHtml(options?.useTimeRange ? formattedDateWithTimeRange : formattedDate)}
             </div>
             <div style="font-size: 14px; font-weight: 500; color: ${toolTipTheme.text};">
-              ${currencyFormatter(data.value[1])}
+              ${escapeHtml(currencyFormatter(data.value[1]))}
             </div>
           </div>
         `

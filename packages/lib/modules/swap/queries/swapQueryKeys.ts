@@ -15,7 +15,7 @@ function simulateInputKey({
 
 type BuildKeyParams = Pick<
   BuildSwapInputs,
-  'account' | 'selectedChain' | 'slippagePercent' | 'simulateResponse'
+  'account' | 'selectedChain' | 'slippagePercent' | 'simulateResponse' | 'isSafeAccount'
 >
 
 function buildInputKey({
@@ -23,8 +23,9 @@ function buildInputKey({
   selectedChain,
   slippagePercent,
   simulateResponse,
+  isSafeAccount,
 }: BuildKeyParams) {
-  return `${account}:${selectedChain}:${slippagePercent}:${JSON.stringify(simulateResponse)}`
+  return `${account}:${selectedChain}:${slippagePercent}:${JSON.stringify(simulateResponse)}${isSafeAccount ? ':safe' : ''}`
 }
 
 export const swapQueryKeys = {

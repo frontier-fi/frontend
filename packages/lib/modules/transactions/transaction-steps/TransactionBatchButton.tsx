@@ -1,10 +1,13 @@
 'use client'
 
 import { Button, VStack } from '@chakra-ui/react'
+import { useContext, useEffect } from 'react'
 import { GenericError } from '@repo/lib/shared/components/errors/GenericError'
 import { ManagedResult, TransactionLabels, TransactionStep } from './lib'
 import { RegularSwitchNetworkButton, useChainSwitch } from '../../web3/useChainSwitch'
 import { useBatchSubmitter } from './useBatchSubmitter'
+import { TransactionStateContext } from './TransactionStateProvider'
+import { isTxBatchReady } from './tx-batch.helpers'
 
 type Props = {
   labels: TransactionLabels
@@ -33,7 +36,18 @@ export function TransactionBatchButton({
     onTransactionChange,
   })
 
+  const setIsBatchSubmitting = useContext(TransactionStateContext)?.setIsBatchSubmitting
+  const isBatchActive = submitter.isLoading || !submitter.canSubmit
+
+  useEffect(() => {
+    setIsBatchSubmitting?.(isBatchActive)
+    return () => setIsBatchSubmitting?.(false)
+  }, [isBatchActive, setIsBatchSubmitting])
+
+  const isBatchReady = isTxBatchReady(currentStep)
+
   async function handleOnClick() {
+    if (!isBatchReady) return
     await submitter.submit()
   }
 
@@ -46,6 +60,7 @@ export function TransactionBatchButton({
 
       {!shouldChangeNetwork && submitter.canSubmit && (
         <Button
+          isDisabled={!isBatchReady}
           isLoading={submitter.isLoading}
           loadingText={submitter.label}
           onClick={handleOnClick}

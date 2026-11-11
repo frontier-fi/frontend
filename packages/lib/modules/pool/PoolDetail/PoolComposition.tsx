@@ -28,6 +28,7 @@ import { usePool } from '../PoolProvider'
 import { Pool } from '../pool.types'
 import { PoolTypeTag } from './PoolTypeTag'
 import { getCompositionTokens, getNestedPoolTokens } from '../pool-tokens.utils'
+import { toSafeHttpsUrl } from '@repo/lib/shared/utils/strings'
 import { useGetPoolTokensWithActualWeights } from '../useGetPoolTokensWithActualWeights'
 import { PoolCompositionChart } from './PoolCompositionChart'
 import { PoolTotalLiquidityDisplay } from './PoolTotalLiquidityDisplay'
@@ -137,8 +138,12 @@ export function PoolComposition() {
   const totalLiquidity = calcTotalUsdValue(compositionTokens, chain)
   const erc4626Metadata = getErc4626Metadata(pool)
 
-  const hasReadMoreURL = erc4626Metadata.some(metadata => metadata.readMoreURL)
-  const filteredErc4626Metadata = erc4626Metadata.filter(metadata => metadata.readMoreURL)
+  const protocolLinks = erc4626Metadata.flatMap(metadata => {
+    const readMoreUrl = toSafeHttpsUrl(metadata.readMoreURL)
+    return readMoreUrl ? [{ name: metadata.name.split(' ')[0]!, readMoreUrl }] : []
+  })
+
+  const hasReadMoreURL = protocolLinks.length > 0
 
   const protocolNames = erc4626Metadata.map(metadata => metadata.name.split(' ')[0]!)
   const formattedProtocolNames = formatStringsToSentenceList(protocolNames)
@@ -190,27 +195,26 @@ export function PoolComposition() {
                       <>
                         {' '}
                         Read more about{' '}
-                        {filteredErc4626Metadata.length > 0 &&
-                          filteredErc4626Metadata.map((metadata, index) => (
-                            <Fragment key={index}>
-                              <Link href={metadata.readMoreURL} isExternal>
-                                <Box
-                                  as="span"
-                                  color="purple.500"
-                                  fontSize="sm"
-                                  fontWeight="bold"
-                                  textDecoration="underline"
-                                >
-                                  {protocolNames[index]}
-                                </Box>
-                              </Link>
-                              {index < filteredErc4626Metadata.length - 2
-                                ? ', '
-                                : index === filteredErc4626Metadata.length - 2
-                                  ? ' & '
-                                  : ''}
-                            </Fragment>
-                          ))}
+                        {protocolLinks.map((protocol, index) => (
+                          <Fragment key={index}>
+                            <Link href={protocol.readMoreUrl} isExternal rel="noopener noreferrer">
+                              <Box
+                                as="span"
+                                color="purple.500"
+                                fontSize="sm"
+                                fontWeight="bold"
+                                textDecoration="underline"
+                              >
+                                {protocol.name}
+                              </Box>
+                            </Link>
+                            {index < protocolLinks.length - 2
+                              ? ', '
+                              : index === protocolLinks.length - 2
+                                ? ' & '
+                                : ''}
+                          </Fragment>
+                        ))}
                         .
                       </>
                     )}

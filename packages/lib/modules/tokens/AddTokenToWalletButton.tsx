@@ -3,6 +3,7 @@
 import { PlusSquareIcon } from '@chakra-ui/icons'
 import { IconButton, IconButtonProps, Tooltip } from '@chakra-ui/react'
 import { useWalletClient } from 'wagmi'
+import { getChainId } from '@repo/lib/config/app.config'
 import { useTokens } from './TokensProvider'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { ensureError } from '@repo/lib/shared/utils/errors'
@@ -16,15 +17,18 @@ export function AddTokenToWalletButton({
   const { getToken } = useTokens()
 
   const token = getToken(tokenAddress, chain)
-  const label = 'Add token to wallet'
+  const isMatchingChain = walletClient?.chain?.id === getChainId(chain)
+
+  const label =
+    walletClient && !isMatchingChain ? 'Switch wallet network to add token' : 'Add token to wallet'
 
   async function addToWallet() {
-    if (!token) {
+    if (!token || !walletClient || !isMatchingChain) {
       return
     }
 
     try {
-      await walletClient?.watchAsset({
+      await walletClient.watchAsset({
         type: 'ERC20',
         options: {
           address: token.address,
@@ -52,6 +56,7 @@ export function AddTokenToWalletButton({
         aria-label={label}
         h="6"
         icon={<PlusSquareIcon />}
+        isDisabled={!walletClient || !isMatchingChain}
         isRound
         onClick={addToWallet}
         size="xs"

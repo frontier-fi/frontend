@@ -1,8 +1,8 @@
 import { usePoolCreationForm } from '../PoolCreationFormProvider'
 import { TokenType, CreatePoolV3BaseInput, PoolType } from '@balancer/sdk'
 import { zeroAddress } from 'viem'
-import { PERCENTAGE_DECIMALS, DEFAULT_DECIMALS, SHOW_ADVANCED_POOL_SETTINGS } from '../constants'
-import { getNetworkConfig, getGqlChain } from '@repo/lib/config/app.config'
+import { PERCENTAGE_DECIMALS, DEFAULT_DECIMALS } from '../constants'
+import { getNetworkConfig, getGqlChain, isDev } from '@repo/lib/config/app.config'
 import { parseAmount } from '@repo/lib/shared/utils/numbers'
 import { CreatePoolInput } from '../types'
 import { calculateRotationComponents } from '../steps/details/gyro.helpers'
@@ -34,16 +34,10 @@ export function useCreatePoolInput(chainId: number): CreatePoolInput {
   const nativeAsset = tokens.nativeAsset.address
   const wNativeAsset = tokens.addresses.wNativeAsset
 
-  const resolvedSwapFeeManager = SHOW_ADVANCED_POOL_SETTINGS
-    ? swapFeeManager || zeroAddress
-    : zeroAddress
-
-  const resolvedPauseManager = SHOW_ADVANCED_POOL_SETTINGS
-    ? pauseManager || zeroAddress
-    : zeroAddress
-
-  const resolvedPoolCreator = SHOW_ADVANCED_POOL_SETTINGS ? poolCreator : zeroAddress
-  const resolvedEnableDonation = SHOW_ADVANCED_POOL_SETTINGS ? enableDonation : false
+  const resolvedSwapFeeManager = isDev ? swapFeeManager || zeroAddress : zeroAddress
+  const resolvedPauseManager = isDev ? pauseManager || zeroAddress : zeroAddress
+  const resolvedPoolCreator = isDev ? poolCreator : zeroAddress
+  const resolvedEnableDonation = isDev ? enableDonation : false
 
   const baseInput: CreatePoolV3BaseInput = {
     chainId,

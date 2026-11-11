@@ -11,15 +11,22 @@ import { AbiMap } from '@repo/lib/modules/web3/contracts/AbiMap'
   calls array of EIP-5792 `wallet_sendCalls` and to the Safe Apps SDK
   transaction type (the value string conversion happens in the submitter).
 */
+export function isTxBatchReady(transactionStep: TransactionStep): boolean {
+  if (!transactionStep.batchableTxCall) return false
+  const pendingNestedSteps = transactionStep.nestedSteps?.filter(step => !step.isComplete()) ?? []
+  return pendingNestedSteps.every(step => Boolean(step.batchableTxCall))
+}
+
 export function buildTxBatch(transactionStep: TransactionStep): TxCall[] {
-  if (!transactionStep.nestedSteps) return [transactionStep.batchableTxCall!]
-  return [
-    ...transactionStep.nestedSteps
-      // Comment the following line to test batching when tokens are already allowed
-      .filter(step => !step.isComplete())
-      .map(step => step.batchableTxCall!),
-    transactionStep.batchableTxCall!,
-  ]
+  const nestedCalls = (transactionStep.nestedSteps ?? [])
+    // Comment the following line to test batching when tokens are already allowed
+    .filter(step => !step.isComplete())
+    .map(step => step.batchableTxCall)
+    .filter((call): call is TxCall => Boolean(call))
+
+  return transactionStep.batchableTxCall
+    ? [...nestedCalls, transactionStep.batchableTxCall]
+    : nestedCalls
 }
 
 export function hasSomePendingNestedTxInBatch(step: TransactionStep): boolean {

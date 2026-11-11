@@ -115,4 +115,61 @@ describe('buildSwapRouteSankey', () => {
 
     expect(graph).toEqual({ nodes: [], links: [], maxDepth: 0 })
   })
+
+  test('pins shorter-path outputs to maxDepth with passthrough lane (no cross-layer link)', () => {
+    const direct = {
+      tokens: [
+        { address: DAI, decimals: 18 },
+        { address: USDC, decimals: 6 },
+      ],
+      pools: ['0x87be519ba74b9118b4b5e572440dabc0b35bf964'],
+      isBuffer: [false],
+      inputAmountRaw: 200000000000000000n, // 0.2 DAI
+      outputAmountRaw: 1n,
+      protocolVersion: 3,
+    } as Path
+
+    const viaWeth = {
+      tokens: [
+        { address: DAI, decimals: 18 },
+        { address: WETH, decimals: 18 },
+        { address: USDC, decimals: 6 },
+      ],
+      pools: [
+        '0xd181617f85b6ff1728211c53c0a2b8108bd4a69d',
+        '0x87be519ba74b9118b4b5e572440dabc0b35bf964',
+      ],
+      isBuffer: [false, false],
+      inputAmountRaw: 50000000000000000n, // 0.05 DAI
+      outputAmountRaw: 1n,
+      protocolVersion: 3,
+    } as Path
+
+    const graph = buildSwapRouteSankey([direct, viaWeth], GqlChainValues.Sepolia, getToken)
+
+    expect(graph.maxDepth).toBe(2)
+
+    expect(graph.nodes.map(n => `${n.depth}:${n.isPassthrough ? 'pass' : n.symbol}`)).toEqual([
+      '0:DAI',
+      '1:WETH',
+      '1:pass',
+      '2:USDC',
+    ])
+
+    // No direct cross-layer edge from depth 0 → depth 2.
+    expect(graph.links.some(l => l.source === `0:${DAI}` && l.target === `2:${USDC}`)).toBe(false)
+
+    const passNode = graph.nodes.find(n => n.isPassthrough)
+    expect(passNode?.depth).toBe(1)
+
+    const intoPass = graph.links.find(l => l.source === `0:${DAI}` && l.target === passNode?.name)
+    const outOfPass = graph.links.find(l => l.source === passNode?.name && l.target === `2:${USDC}`)
+    const hopToWeth = graph.links.find(l => l.source === `0:${DAI}` && l.target === `1:${WETH}`)
+    const hopToUsdc = graph.links.find(l => l.source === `1:${WETH}` && l.target === `2:${USDC}`)
+
+    expect(intoPass?.value).toBeCloseTo(0.2)
+    expect(outOfPass?.value).toBeCloseTo(0.2)
+    expect(hopToWeth?.value).toBeCloseTo(0.05)
+    expect(hopToUsdc?.value).toBeCloseTo(0.05)
+  })
 })

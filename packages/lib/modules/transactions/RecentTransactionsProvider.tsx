@@ -24,8 +24,7 @@ export type RecentTransactionsResponse = ReturnType<typeof useRecentTransactions
 export const TransactionsContext = createContext<RecentTransactionsResponse | null>(null)
 const NUM_RECENT_TRANSACTIONS = 20
 const RECENT_TRANSACTIONS_KEY = `${PROJECT_CONFIG.projectId}.recentTransactions`
-import SafeAppsSDK from '@safe-global/safe-apps-sdk'
-import { safeStatusToBalancerStatus } from './transaction-steps/safe/safe.helpers'
+import { getSafeAppsSdk, safeStatusToBalancerStatus } from './transaction-steps/safe/safe.helpers'
 import { useInterval } from 'usehooks-ts'
 
 // How long a persisted EIP-5792 batch can stay 'confirming' before it is considered lost
@@ -274,8 +273,6 @@ export function useRecentTransactionsLogic() {
   }, [])
 
   useInterval(() => {
-    const safeAppsSdk = new SafeAppsSDK()
-
     const unconfirmedTransactions = Object.values(transactions).filter(
       tx => (tx.type === 'safe' || tx.type === 'eip5792') && tx.status === 'confirming'
     )
@@ -286,9 +283,12 @@ export function useRecentTransactionsLogic() {
       updateTrackedTransaction
     )
 
-    unconfirmedTransactions.forEach(safeTrackedTx => {
-      if (safeTrackedTx.type !== 'safe') return
+    const unconfirmedSafeTransactions = unconfirmedTransactions.filter(tx => tx.type === 'safe')
+    if (unconfirmedSafeTransactions.length === 0) return
 
+    const safeAppsSdk = getSafeAppsSdk()
+
+    unconfirmedSafeTransactions.forEach(safeTrackedTx => {
       safeAppsSdk.txs.getBySafeTxHash(safeTrackedTx.hash).then(tx => {
         updateTrackedTransaction(safeTrackedTx.hash, {
           status: safeStatusToBalancerStatus(tx.txStatus),

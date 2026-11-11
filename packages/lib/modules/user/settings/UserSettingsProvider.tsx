@@ -28,8 +28,10 @@ const DEFAULT_ENABLE_SIGNATURES: YesNo = 'yes'
 const DEFAULT_ACCEPTED_POLICIES: string[] = []
 const DEFAULT_ENABLE_TX_BUNDLING: YesNo = 'yes'
 
-function isValidSlippage(value: string): boolean {
-  return isBnParseable(value) && bn(value).gt(0)
+const MAX_SLIPPAGE_PERCENT = 50
+
+export function isValidSlippage(value: string): boolean {
+  return isBnParseable(value) && bn(value).gt(0) && bn(value).lte(MAX_SLIPPAGE_PERCENT)
 }
 
 export type UseUserSettingsResult = ReturnType<typeof useUserSettingsLogic>
