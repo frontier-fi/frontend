@@ -3,7 +3,7 @@ import { BPT_DECIMALS } from '@repo/lib/modules/pool/pool.constants'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { bn } from '@repo/lib/shared/utils/numbers'
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount, vaultExtensionAbi_V3 } from '@balancer/sdk'
 import { Address, Log, erc20Abi, formatUnits, parseAbiItem, parseAbi, parseEventLogs } from 'viem'
 import { HumanTokenAmount } from '../../../tokens/token.types'
 import { emptyAddress } from '../../../web3/contracts/wagmi-helpers'
@@ -153,7 +153,21 @@ export function parseLstWithdrawReceipt({ receiptLogs, userAddress, chain }: Par
   }
 }
 
-export function parsePoolCreationReceipt({ receiptLogs }: ParseProps) {
+export function parsePoolCreationReceipt({ receiptLogs, chain }: ParseProps) {
+  const { vaultV3, bCoWFactory } = getNetworkConfig(chain).contracts.balancer
+
+  if (vaultV3) {
+    const registeredLogs = parseEventLogs({
+      abi: vaultExtensionAbi_V3,
+      eventName: 'PoolRegistered',
+      logs: receiptLogs.filter(log => isSameAddress(log.address, vaultV3)),
+    })
+
+    if (registeredLogs[0]) {
+      return { poolAddress: registeredLogs[0].args.pool }
+    }
+  }
+
   const logs = parseEventLogs({
     abi: parseAbi([
       'event LOG_NEW_POOL(address indexed caller, address indexed bPool)',
@@ -162,7 +176,18 @@ export function parsePoolCreationReceipt({ receiptLogs }: ParseProps) {
     logs: receiptLogs,
   })
 
-  const log = logs[0]
+  const log = logs.find(entry => {
+    if (entry.eventName === 'PoolCreated') {
+      return !vaultV3
+    }
+
+    if (entry.eventName === 'LOG_NEW_POOL' && bCoWFactory) {
+      return isSameAddress(entry.address, bCoWFactory)
+    }
+
+    return true
+  })
+
   if (!log) return { poolAddress: undefined }
 
   return { poolAddress: log.eventName === 'PoolCreated' ? log.args.pool : log.args.bPool }

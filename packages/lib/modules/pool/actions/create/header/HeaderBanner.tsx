@@ -1,9 +1,8 @@
 'use client'
 
-import { Box, Heading, HStack, Stack, Text, VStack, Link } from '@chakra-ui/react'
+import { Box, Heading, HStack, Stack, Text, VStack } from '@chakra-ui/react'
 import { NoisyCard } from '@repo/lib/shared/components/containers/NoisyCard'
 import { FeatureLink } from './FeatureLink'
-import { ArrowUpRight } from 'lucide-react'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { LbpBenefitsChartIcon } from '@repo/lib/shared/components/icons/lbp/LbpBenefitsChartIcon'
 import { LbpBenefitsLightningIcon } from '@repo/lib/shared/components/icons/lbp/LbpBenefitsLightningIcon'
@@ -59,21 +58,6 @@ export function HeaderBanner() {
                 {PROJECT_CONFIG.projectName} handles the low level tasks, like token accounting and
                 security, allowing you to focus on innovating with custom logic.
               </Text>
-              <Link
-                href="https://docs.balancer.fi/partner-onboarding/balancer-v3/v3-overview.html"
-                isExternal
-              >
-                <HStack
-                  _hover={{ cursor: 'pointer', color: 'font.linkHover' }}
-                  color="font.link"
-                  gap="xxs"
-                >
-                  <Text _hover={{ color: 'font.linkHover' }} color="font.link" variant="ghost">
-                    View Partner Onboarding docs
-                  </Text>
-                  <ArrowUpRight size={14} />
-                </HStack>
-              </Link>
             </VStack>
           </VStack>
 

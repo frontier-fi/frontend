@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { PoolType } from '@balancer/sdk'
 import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import {
@@ -19,6 +19,7 @@ import {
   isCowPool,
   isCowProtocol,
   isCustomWeightedPool,
+  isEclpCreationDisabled,
   isGyroEllipticPool,
   isPoolCreatorEnabled,
   isStablePool,
@@ -194,5 +195,33 @@ describe('isPoolCreatorEnabled', () => {
     expect(isPoolCreatorEnabled(PoolType.GyroE)).toBe(false)
     expect(isPoolCreatorEnabled(PoolType.ReClamm)).toBe(false)
     expect(isPoolCreatorEnabled(PoolType.CowAmm)).toBe(false)
+  })
+})
+
+describe('isEclpCreationDisabled', () => {
+  it('enables Gyro E-CLP creation only when isDev is true and leaves other pool types enabled', () => {
+    expect(isEclpCreationDisabled(PoolType.GyroE, true)).toBe(false)
+    expect(isEclpCreationDisabled(PoolType.GyroE, false)).toBe(true)
+    expect(isEclpCreationDisabled(PoolType.Stable, false)).toBe(false)
+    expect(isEclpCreationDisabled(PoolType.Weighted, false)).toBe(false)
+  })
+
+  it('uses app.config isDev by default across dev and prod environments', async () => {
+    const originalAppEnv = process.env.NEXT_PUBLIC_APP_ENV
+
+    try {
+      process.env.NEXT_PUBLIC_APP_ENV = 'dev'
+      vi.resetModules()
+      const devHelpers = await import('./helpers')
+      expect(devHelpers.isEclpCreationDisabled(PoolType.GyroE)).toBe(false)
+
+      process.env.NEXT_PUBLIC_APP_ENV = 'prod'
+      vi.resetModules()
+      const prodHelpers = await import('./helpers')
+      expect(prodHelpers.isEclpCreationDisabled(PoolType.GyroE)).toBe(true)
+    } finally {
+      process.env.NEXT_PUBLIC_APP_ENV = originalAppEnv
+      vi.resetModules()
+    }
   })
 })

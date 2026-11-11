@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import { loadEnvFile } from 'node:process'
 import { dirname, resolve } from 'path'
 import { Instance, Server } from 'prool'
@@ -5,6 +6,18 @@ import { fileURLToPath } from 'url'
 
 import { ANVIL_NETWORKS, getForkUrl } from './anvil-setup'
 import { activeTestChains } from './testWagmiConfig'
+
+const PINNED_ANVIL_VERSION = '1.9.0'
+
+function assertAnvilVersion() {
+  const output = execFileSync('anvil', ['--version'], { encoding: 'utf8' }).trim()
+
+  if (!output.includes(`Version: ${PINNED_ANVIL_VERSION}`)) {
+    throw new Error(
+      `Anvil version mismatch: expected ${PINNED_ANVIL_VERSION} (matching CI checks.yml), got "${output}". Run "foundryup --install v${PINNED_ANVIL_VERSION}" or update Homebrew foundry.`
+    )
+  }
+}
 
 const currentDir = dirname(fileURLToPath(import.meta.url))
 
@@ -54,6 +67,8 @@ async function waitForAnvilReady(port: number, chainName: string, maxAttempts = 
 }
 
 export async function setup() {
+  assertAnvilVersion()
+
   const promises = []
 
   for (const chain of activeTestChains) {

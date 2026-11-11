@@ -111,7 +111,7 @@ export interface NetworkConfig {
 }
 
 export interface Config {
-  appEnv: 'dev' | 'test' | 'staging' | 'prod'
+  appEnv: 'dev' | 'test' | 'prod'
   apiUrl: string
   networks: NetworkConfigs
 }
@@ -134,6 +134,8 @@ type OptionsConfig = {
   hideProtocolVersion: string[]
   /** When true, omit the Hooks filter section from the pools Filters popover. */
   hideHooksFilters?: boolean
+  /** When false, treat hooks that omit reviewData in the API schema as N/A instead of unreviewed. */
+  requireHookReview?: boolean
   showPoolName: boolean
   allowCreateWallet: boolean
   isOnSafeAppList: boolean
@@ -181,6 +183,7 @@ export type PromoItem = {
 export interface ProjectConfig {
   projectId: 'frontier'
   projectUrl: string
+  appUrl: string
   projectName: string
   /** Registered legal entity users contract with (Terms of Use, Privacy Policy). */
   legalEntityName: string

@@ -15,6 +15,8 @@ export type SwapSankeyNode = {
   /** Lighter bottom of the bar gradient. */
   colorEnd: string
   logoURI?: string
+  /** Unlabeled spacer so shorter paths don't draw cross-layer ribbons over hops. */
+  isPassthrough?: boolean
 }
 
 export type SwapSankeyLink = {
@@ -117,9 +119,17 @@ function shortAddress(address: string) {
   return `${normalized.slice(0, 5)}...${normalized.slice(-3)}`
 }
 
+function passthroughId(depth: number, pathKey: string) {
+  return `${depth}:pass:${pathKey}`
+}
+
 /**
  * Convert Balancer SOR `Path[]` into a left→right Sankey graph.
  * Each hop becomes a ribbon; split routes show as parallel ribbons that merge at the out token.
+ *
+ * Shorter paths pin their output at the global max depth. Skipped middle columns get
+ * unlabeled passthrough nodes so the ribbon stays in its own lane instead of drawing
+ * a cross-layer band over longer hops (e.g. WBTC→USDC beside WBTC→WETH→USDC).
  */
 export function buildSwapRouteSankey(
   paths: Path[],
@@ -128,16 +138,25 @@ export function buildSwapRouteSankey(
 ): SwapSankeyGraph {
   const nodes = new Map<string, SwapSankeyNode>()
   const links = new Map<string, SwapSankeyLink>()
-  let maxDepth = 0
+
+  const usablePaths = paths.filter(path => {
+    if (!path.tokens?.length) return false
+    const inputDecimals = path.tokens[0]?.decimals ?? 18
+    const pathValue = Number(formatUnits(path.inputAmountRaw, inputDecimals))
+    return Number.isFinite(pathValue) && pathValue > 0
+  })
+
+  const maxDepth = usablePaths.reduce(
+    (depth, path) => Math.max(depth, (path.tokens?.length ?? 1) - 1),
+    0
+  )
 
   function ensureNode(depth: number, address: string) {
     const id = nodeId(depth, address)
     if (nodes.has(id)) return id
 
     const token = getToken(address, chain)
-
     const normalized = address.toLowerCase()
-
     const colors = colorFor(chain, normalized)
 
     nodes.set(id, {
@@ -150,48 +169,102 @@ export function buildSwapRouteSankey(
       logoURI: token?.logoURI ?? undefined,
     })
 
-    maxDepth = Math.max(maxDepth, depth)
     return id
   }
 
-  for (const path of paths) {
-    if (!path.tokens?.length) continue
+  function ensurePassthrough(depth: number, pathKey: string, colorAddress: string) {
+    const id = passthroughId(depth, pathKey)
+    if (nodes.has(id)) return id
 
+    const colors = colorFor(chain, colorAddress)
+
+    nodes.set(id, {
+      name: id,
+      depth,
+      address: colorAddress.toLowerCase(),
+      symbol: '',
+      color: colors.color,
+      colorEnd: colors.colorEnd,
+      isPassthrough: true,
+    })
+
+    return id
+  }
+
+  function addLink(
+    source: string,
+    target: string,
+    value: number,
+    colorAddress: string,
+    poolId: string | undefined
+  ) {
+    const linkKey = `${source}->${target}->${poolId ?? 'buffer'}`
+    const existing = links.get(linkKey)
+
+    if (existing) {
+      existing.value += value
+      return
+    }
+
+    links.set(linkKey, {
+      source,
+      target,
+      value,
+      poolId,
+      color: colorFor(chain, colorAddress).color,
+    })
+  }
+
+  usablePaths.forEach((path, pathIndex) => {
     const inputDecimals = path.tokens[0]?.decimals ?? 18
     const pathValue = Number(formatUnits(path.inputAmountRaw, inputDecimals))
-    if (!Number.isFinite(pathValue) || pathValue <= 0) continue
+    const lastIndex = path.tokens.length - 1
+    const pathKey = `${pathIndex}:${path.pools?.join('-') || 'path'}`
 
     // Walk consecutive tokens; buffer hops still transfer value token→token.
-    for (let i = 0; i < path.tokens.length - 1; i++) {
+    for (let i = 0; i < lastIndex; i++) {
       const tokenIn = path.tokens[i]
       const tokenOut = path.tokens[i + 1]
       if (!tokenIn || !tokenOut) continue
 
-      const source = ensureNode(i, tokenIn.address)
-      const target = ensureNode(i + 1, tokenOut.address)
-      const poolId = path.pools[i]
-      const isBuffer = path.isBuffer?.[i] === true
-      const linkKey = `${source}->${target}->${poolId ?? 'buffer'}`
+      const sourceDepth = i
+      const targetDepth = i + 1 === lastIndex ? maxDepth : i + 1
+      const poolId = path.isBuffer?.[i] === true ? undefined : path.pools[i]
+      const colorAddress = tokenIn.address
 
-      const existing = links.get(linkKey)
+      let previous = ensureNode(sourceDepth, tokenIn.address)
 
-      if (existing) {
-        existing.value += pathValue
-      } else {
-        links.set(linkKey, {
-          source,
-          target,
-          value: pathValue,
-          poolId: isBuffer ? undefined : poolId,
-          color: colorFor(chain, tokenIn.address).color,
-        })
+      // Fill skipped columns so ribbons don't cross over parallel hops.
+      for (let depth = sourceDepth + 1; depth < targetDepth; depth++) {
+        const pass = ensurePassthrough(depth, pathKey, colorAddress)
+
+        addLink(
+          previous,
+          pass,
+          pathValue,
+          colorAddress,
+          depth === sourceDepth + 1 ? poolId : undefined
+        )
+
+        previous = pass
       }
-    }
-  }
 
-  // Stable order: by depth, then symbol — keeps the chart anchored across quote refreshes.
+      const target = ensureNode(targetDepth, tokenOut.address)
+
+      addLink(
+        previous,
+        target,
+        pathValue,
+        colorAddress,
+        targetDepth === sourceDepth + 1 ? poolId : undefined
+      )
+    }
+  })
+
+  // Stable order: by depth, real tokens before passthroughs, then symbol.
   const sortedNodes = [...nodes.values()].sort((a, b) => {
     if (a.depth !== b.depth) return a.depth - b.depth
+    if (!!a.isPassthrough !== !!b.isPassthrough) return a.isPassthrough ? 1 : -1
     return a.symbol.localeCompare(b.symbol)
   })
 

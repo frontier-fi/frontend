@@ -1,5 +1,5 @@
 import { SupportedChainId } from '@repo/lib/config/config.types'
-import {
+import SafeAppsSDK, {
   GatewayTransactionDetails,
   TransactionStatus as SafeTransactionStatus,
 } from '@safe-global/safe-apps-sdk'
@@ -7,6 +7,22 @@ import { arbitrum, avalanche, base, gnosis, mainnet, optimism, polygon, sepolia 
 import { SafeAppTx, TransactionState, TxCall } from '../lib'
 import { Address } from 'viem'
 import { TransactionStatus as BalancerTransactionStatus } from '@repo/lib/modules/transactions/RecentTransactionsProvider'
+
+const SAFE_APP_ALLOWED_DOMAINS = [
+  /^https:\/\/app\.safe\.global$/,
+  /^https:\/\/[\w-]+\.safe\.global$/,
+]
+
+let safeAppsSdkInstance: SafeAppsSDK | undefined
+
+// Reuse a single SDK client to avoid registering duplicate window message listeners
+export function getSafeAppsSdk(): SafeAppsSDK {
+  if (!safeAppsSdkInstance) {
+    safeAppsSdkInstance = new SafeAppsSDK({ allowedDomains: SAFE_APP_ALLOWED_DOMAINS })
+  }
+
+  return safeAppsSdkInstance
+}
 
 const SAFE_CHAIN_PREFIX: Record<SupportedChainId, string> = {
   [mainnet.id]: 'eth',

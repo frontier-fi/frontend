@@ -31,6 +31,7 @@ export function useRecoveryModeStep() {
   }
 
   const networkConfig = getNetworkConfig(chainId)
+  const vaultAddress = networkConfig.contracts.balancer.vaultV3
 
   const txConfig: TransactionConfig = {
     account: userAddress,
@@ -40,7 +41,7 @@ export function useRecoveryModeStep() {
       functionName: 'enableRecoveryMode',
       args: [pool.address as Address],
     }),
-    to: networkConfig.contracts.balancer.vaultV3 || zeroAddress,
+    to: vaultAddress || zeroAddress,
   }
 
   return {
@@ -57,6 +58,7 @@ export function useRecoveryModeStep() {
     renderAction: () => {
       return (
         <ManagedSendTransactionButton
+          enabled={Boolean(vaultAddress)}
           id={STEP_ID}
           labels={labels}
           onTransactionChange={setTransaction}

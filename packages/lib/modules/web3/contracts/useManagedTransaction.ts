@@ -8,12 +8,7 @@ import {
   TransactionLabels,
 } from '@repo/lib/modules/transactions/transaction-steps/lib'
 import { Abi, Address, ContractFunctionArgs, ContractFunctionName } from 'viem'
-import {
-  useSimulateContract,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-  useEstimateGas,
-} from 'wagmi'
+import { useSimulateContract, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { useChainSwitch } from '../useChainSwitch'
 import { AbiMap } from './AbiMap'
 import { TransactionExecution, TransactionSimulation, WriteAbiMutability } from './contract.types'
@@ -79,16 +74,6 @@ export function useManagedTransaction({
     value,
   })
 
-  const estimateGasQuery = useEstimateGas({
-    ...txConfig,
-    chainId,
-    query: {
-      enabled: !!txConfig && !shouldChangeNetwork,
-      // In chains like polygon, we don't want background refetches while waiting for min block confirmations
-      ...onlyExplicitRefetch,
-    },
-  })
-
   const { mockedTxHash, setMockedTxHash } = useMockedTxHash()
 
   const writeQuery = useWriteContract()
@@ -109,7 +94,7 @@ export function useManagedTransaction({
 
   const bundle = {
     chainId,
-    simulation: estimateGasQuery as TransactionSimulation,
+    simulation: simulateQuery as TransactionSimulation,
     execution: writeQuery as TransactionExecution,
     result: transactionStatusQuery,
     isSafeTxLoading,

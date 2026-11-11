@@ -20,7 +20,23 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**',
+        hostname: 'assets.coingecko.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'coin-images.coingecko.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'raw.githubusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.githubusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.smold.app',
       },
     ],
     localPatterns: [
@@ -71,6 +87,22 @@ export default nextConfig
  * More info: https://help.safe.global/en/articles/40859-add-a-custom-safe-app
  */
 async function manifestHeaders() {
+  const defaultHeaders = [
+    {
+      key: 'Content-Security-Policy',
+      value:
+        "frame-ancestors 'self' https://app.safe.global https://*.safe.global; object-src 'none'; base-uri 'self'",
+    },
+    {
+      key: 'X-Content-Type-Options',
+      value: 'nosniff',
+    },
+    {
+      key: 'Referrer-Policy',
+      value: 'strict-origin-when-cross-origin',
+    },
+  ]
+
   const corsHeaders = [
     {
       key: 'Access-Control-Allow-Origin',
@@ -87,6 +119,10 @@ async function manifestHeaders() {
   ]
 
   return [
+    {
+      source: '/:path*',
+      headers: defaultHeaders,
+    },
     {
       source: '/manifest.json',
       headers: corsHeaders,

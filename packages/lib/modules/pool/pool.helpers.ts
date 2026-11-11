@@ -299,8 +299,7 @@ export function hasRateProvider(token: GqlPoolTokenDetail | any): boolean {
 }
 
 export function hasReviewedHook(hook: HookFragment): boolean {
-  // Frontier Hook fragment has no reviewData — treat as N/A (do not block as unreviewed)
-  if (!('reviewData' in hook)) return true
+  if (!('reviewData' in hook)) return !(PROJECT_CONFIG.options.requireHookReview ?? true)
   return !!(hook as { reviewData?: unknown }).reviewData
 }
 

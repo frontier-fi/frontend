@@ -22,7 +22,10 @@ import { useEffect, useRef } from 'react'
 
 export function PoolCreationForm() {
   const { isLoadingPool } = useHydratePoolCreationForm()
-  const { steps, currentStepIndex, currentStep, goToStep, canRenderStep } = usePoolCreationForm()
+
+  const { steps, currentStepIndex, currentStep, goToStep, canRenderStep, poolAddress } =
+    usePoolCreationForm()
+
   const { isMobile } = useBreakpoints()
   const stepperRef = useRef<HTMLDivElement>(null)
 
@@ -76,16 +79,17 @@ export function PoolCreationForm() {
                 >
                   {steps.map((step, index) => {
                     const isCompleted = index < currentStepIndex
+                    const canNavigateToStep = isCompleted && !poolAddress
                     const isActive = index === currentStepIndex
                     return (
                       <Step key={step.id} w="full">
                         <Box
-                          _hover={isCompleted ? { opacity: 0.8 } : undefined}
+                          _hover={canNavigateToStep ? { opacity: 0.8 } : undefined}
                           alignItems="center"
-                          cursor={isCompleted ? 'pointer' : 'default'}
+                          cursor={canNavigateToStep ? 'pointer' : 'default'}
                           display="flex"
                           gap="2"
-                          onClick={() => isCompleted && goToStep(index)}
+                          onClick={() => canNavigateToStep && goToStep(index)}
                         >
                           <StepIndicator>
                             <StepStatus

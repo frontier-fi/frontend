@@ -220,12 +220,32 @@ describe('BaseDefaultSwapHandler', () => {
       expect(mockBuildCallWithPermit2).toHaveBeenCalledWith(
         expect.objectContaining({
           slippage: expect.anything(),
-          deadline: BigInt(Number.MAX_SAFE_INTEGER),
+          deadline: expect.any(BigInt),
           wethIsEth: false,
           queryOutput: expect.anything(),
         }),
         mockPermit2
       )
+
+      const buildCallArgs = mockBuildCallWithPermit2.mock.calls[0]?.[0]
+      expect(buildCallArgs?.deadline).toBeGreaterThan(0n)
+      expect(buildCallArgs?.deadline).toBeLessThan(BigInt(Number.MAX_SAFE_INTEGER))
+    })
+
+    it('uses a 24-hour deadline when building for a Safe account', () => {
+      const { mockBuildCall, simulateResponse } = createMockSdkSimulateSwapResponse({
+        protocolVersion: 3,
+      })
+
+      const baseInputs = createSdkBuildSwapInputs({ simulateResponse })
+
+      handler.build({ ...baseInputs, isSafeAccount: false })
+      handler.build({ ...baseInputs, isSafeAccount: true })
+
+      const eoaDeadline = mockBuildCall.mock.calls[0]?.[0]?.deadline as bigint
+      const safeDeadline = mockBuildCall.mock.calls[1]?.[0]?.deadline as bigint
+      expect(safeDeadline - eoaDeadline).toBeGreaterThanOrEqual(85195n)
+      expect(safeDeadline - eoaDeadline).toBeLessThanOrEqual(85205n)
     })
   })
 })

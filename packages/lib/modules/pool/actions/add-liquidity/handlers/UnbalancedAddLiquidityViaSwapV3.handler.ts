@@ -16,6 +16,7 @@ import { Pool } from '../../../pool.types'
 import { LiquidityActionHelpers, areEmptyAmounts, getSender } from '../../LiquidityActionHelpers'
 import { Address } from 'viem'
 import { isZero } from '@repo/lib/shared/utils/numbers'
+import { getDefaultDeadlineSeconds } from '@repo/lib/shared/utils/time'
 
 export class UnbalancedAddLiquidityViaSwapV3Handler implements AddLiquidityHandler {
   protected helpers: LiquidityActionHelpers
@@ -73,6 +74,7 @@ export class UnbalancedAddLiquidityViaSwapV3Handler implements AddLiquidityHandl
     slippagePercent,
     queryOutput,
     account,
+    isSafeAccount,
     permit2,
   }: SdkBuildAddLiquidityInput): Promise<TransactionConfig> {
     const addLiquidity = new AddLiquidityUnbalancedViaSwapV3()
@@ -83,7 +85,7 @@ export class UnbalancedAddLiquidityViaSwapV3Handler implements AddLiquidityHandl
       ...sdkQueryOutput,
       slippage: Slippage.fromPercentage(`${Number(slippagePercent)}`),
       wethIsEth: this.helpers.isNativeAssetIn(humanAmountsIn),
-      deadline: BigInt(Number.MAX_SAFE_INTEGER),
+      deadline: getDefaultDeadlineSeconds(isSafeAccount),
     }
 
     const {

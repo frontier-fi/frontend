@@ -346,14 +346,19 @@ export async function handleClientErrorLogRequest(request: NextRequest): Promise
       return createBadRequestResponse('Log payload too large')
     }
 
-    const parsed = JSON.parse(rawBody) as Record<string, unknown>
+    const parsed = JSON.parse(rawBody) as unknown
+
+    const payload =
+      parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : { data: parsed }
 
     console.error(
       safeJsonStringify({
+        ...payload,
         level: 'error',
         source: 'client',
         timestamp: new Date().toISOString(),
-        ...parsed,
       })
     )
 

@@ -126,7 +126,7 @@ export function PoolCreationModal({
                 isDisabled={false}
                 isLoading={false}
                 marginTop="4"
-                onClick={() => window.open(poolPath, '_blank')}
+                onClick={() => window.open(poolPath, '_blank', 'noopener,noreferrer')}
                 size="lg"
                 variant="primary"
                 w="full"

@@ -10,7 +10,7 @@ import { usePoolHooksWhitelist } from './usePoolHooksWhitelist'
 import { useEffect } from 'react'
 import { usePublicClient } from 'wagmi'
 import { reClammPoolAbi } from '@repo/lib/modules/web3/contracts/abi/generated'
-import { getChainId } from '@repo/lib/config/app.config'
+import { getChainId, isDev } from '@repo/lib/config/app.config'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { isStablePool, isStableSurgePool, isPoolCreatorEnabled } from '../../helpers'
@@ -68,6 +68,16 @@ export function PoolSettings() {
       }
     }
   }, [poolType, poolHooksWhitelist])
+
+  useEffect(() => {
+    if (isDev) return
+
+    // Keep roles delegated and donations off outside dev.
+    poolCreationForm.setValue('poolCreator', zeroAddress)
+    poolCreationForm.setValue('swapFeeManager', zeroAddress)
+    poolCreationForm.setValue('pauseManager', zeroAddress)
+    poolCreationForm.setValue('enableDonation', false)
+  }, [poolCreationForm])
 
   const publicClient = usePublicClient({ chainId: getChainId(network) })
 
@@ -128,8 +138,8 @@ export function PoolSettings() {
               },
               {
                 label: 'Very flat curve',
-                displayValue: '10,000',
-                rawValue: '10000',
+                displayValue: '5,000',
+                rawValue: '5000',
                 svg: VeryFlatCurve,
               },
             ]}
@@ -146,37 +156,41 @@ export function PoolSettings() {
         Pool settings
       </Heading>
 
-      {isPoolCreatorEnabled(poolType) && (
-        <PoolSettingsRadioGroup
-          customInputLabel="Custom pool creator address"
-          customInputType="address"
-          name="poolCreator"
-          options={poolRoleAccountOptions}
-          title="Pool creator"
-          tooltip={`The address empowered to set a pool creator fee. Choose the ${PROJECT_CONFIG.projectName} option to give all fees to the protocol and LPs.`}
-          validate={validatePoolSettings.poolRoleAccount}
-        />
+      {isDev && (
+        <>
+          {isPoolCreatorEnabled(poolType) && (
+            <PoolSettingsRadioGroup
+              customInputLabel="Custom pool creator address"
+              customInputType="address"
+              name="poolCreator"
+              options={poolRoleAccountOptions}
+              title="Pool creator"
+              tooltip={`The address empowered to set a pool creator fee. Choose the ${PROJECT_CONFIG.projectName} option to give all fees to the protocol and LPs.`}
+              validate={validatePoolSettings.poolRoleAccount}
+            />
+          )}
+
+          <PoolSettingsRadioGroup
+            customInputLabel="Custom swap fee manager address"
+            customInputType="address"
+            name="swapFeeManager"
+            options={poolRoleAccountOptions}
+            title="Swap fee manager"
+            tooltip="Account empowered to set static swap fees for a pool"
+            validate={validatePoolSettings.poolRoleAccount}
+          />
+
+          <PoolSettingsRadioGroup
+            customInputLabel="Custom pause manager address"
+            customInputType="address"
+            name="pauseManager"
+            options={poolRoleAccountOptions}
+            title="Pause manager"
+            tooltip="Account empowered to pause/unpause the pool (note that governance can always pause a pool)"
+            validate={validatePoolSettings.poolRoleAccount}
+          />
+        </>
       )}
-
-      <PoolSettingsRadioGroup
-        customInputLabel="Custom swap fee manager address"
-        customInputType="address"
-        name="swapFeeManager"
-        options={poolRoleAccountOptions}
-        title="Swap fee manager"
-        tooltip="Account empowered to set static swap fees for a pool"
-        validate={validatePoolSettings.poolRoleAccount}
-      />
-
-      <PoolSettingsRadioGroup
-        customInputLabel="Custom pause manager address"
-        customInputType="address"
-        name="pauseManager"
-        options={poolRoleAccountOptions}
-        title="Pause manager"
-        tooltip="Account empowered to pause/unpause the pool (note that governance can always pause a pool)"
-        validate={validatePoolSettings.poolRoleAccount}
-      />
 
       <PoolSettingsRadioGroup
         customInputLabel="Custom swap fee"

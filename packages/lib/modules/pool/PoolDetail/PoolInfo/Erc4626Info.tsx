@@ -18,6 +18,7 @@ import { ArrowUpRight } from 'lucide-react'
 import { getWarnings } from '../../pool.helpers'
 import { PropsWithChildren } from 'react'
 import { InfoPopoverToken } from '@repo/lib/modules/tokens/token.types'
+import { normalizeRelativeReviewPath } from '@repo/lib/shared/utils/strings'
 
 type Erc4626InfoPopOverProps = {
   token: InfoPopoverToken
@@ -32,6 +33,7 @@ type PopoverInfoBodyProps = {
 
 function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
   const warnings = getWarnings(data.warnings || [])
+  const reviewPath = normalizeRelativeReviewPath(data.reviewFile)
   return (
     <>
       {level === 0 && (
@@ -43,7 +45,7 @@ function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
           </Text>
           <Text fontSize="sm">
             Learn more about{' '}
-            <Link href="/risks#boosted-pools" target="_blank">
+            <Link href="/risks#boosted-pools" rel="noopener noreferrer" target="_blank">
               <Box as="span" color="font.link">
                 boosted pools (tokenized vaults) risks
               </Box>
@@ -70,7 +72,7 @@ function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
             ) : (
               <Text fontSize="sm">
                 None except{' '}
-                <Link href="/risks#boosted-pools" target="_blank">
+                <Link href="/risks#boosted-pools" rel="noopener noreferrer" target="_blank">
                   <Box as="span" color="font.link">
                     boosted pools (tokenized vaults) risks
                   </Box>
@@ -78,9 +80,10 @@ function PopoverInfoBody({ data, level }: PopoverInfoBodyProps) {
               </Text>
             )}
           </VStack>
-          {data.reviewFile && (
+          {reviewPath && (
             <Link
-              href={`https://github.com/frontier-fi/code-review/blob/main/erc4626/${data.reviewFile}`}
+              href={`https://github.com/frontier-fi/code-review/blob/main/erc4626/${reviewPath}`}
+              rel="noopener noreferrer"
               target="_blank"
             >
               <HStack gap="xxs">

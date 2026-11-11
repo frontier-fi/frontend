@@ -12,7 +12,8 @@ import { LabelWithIcon } from '@repo/lib/shared/components/btns/button-group/Lab
 import { getTransactionButtonLabel } from './transaction-button.helpers'
 import { useIsSafeAccount, useIsSafeApp } from '../../web3/safe.hooks'
 import { MultisigStatus } from './safe/MultisigStatus'
-import SafeAppsSDK, { GatewayTransactionDetails } from '@safe-global/safe-apps-sdk'
+import { GatewayTransactionDetails } from '@safe-global/safe-apps-sdk'
+import { getSafeAppsSdk } from './safe/safe.helpers'
 import { useRecentTransactions } from '../RecentTransactionsProvider'
 import { Address } from 'viem'
 
@@ -75,31 +76,32 @@ export function TransactionStepButton({ step }: Props) {
   const { isTxTracked, addTrackedTransaction } = useRecentTransactions()
   const isSafeApp = useIsSafeApp()
   const safeTxHash = isSafeApp ? step.execution.data : undefined
-  const safeAppsSdk = new SafeAppsSDK()
 
   useEffect(() => {
     if (safeTxHash) {
-      safeAppsSdk.txs.getBySafeTxHash(safeTxHash).then(tx => {
-        setSafeTxDetails(tx)
+      getSafeAppsSdk()
+        .txs.getBySafeTxHash(safeTxHash)
+        .then(tx => {
+          setSafeTxDetails(tx)
 
-        if (!isTxTracked(safeTxHash)) {
-          addTrackedTransaction(
-            {
-              hash: safeTxHash,
-              type: 'safe',
-              status: 'confirming',
-              chain: getGqlChain(chainId),
-              init: 'Safe wallet multisignature',
-              label: labels.init,
-              description: labels.description,
-              timestamp: Date.now(),
-              safeTxId: tx.txId,
-              safeTxAddress: tx.safeAddress as Address,
-            },
-            false
-          )
-        }
-      })
+          if (!isTxTracked(safeTxHash)) {
+            addTrackedTransaction(
+              {
+                hash: safeTxHash,
+                type: 'safe',
+                status: 'confirming',
+                chain: getGqlChain(chainId),
+                init: 'Safe wallet multisignature',
+                label: labels.init,
+                description: labels.description,
+                timestamp: Date.now(),
+                safeTxId: tx.txId,
+                safeTxAddress: tx.safeAddress as Address,
+              },
+              false
+            )
+          }
+        })
     }
   }, [safeTxHash])
 

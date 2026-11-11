@@ -9,6 +9,7 @@ import { swapQueryKeys } from './swapQueryKeys'
 import { SwapSimulationQueryResult } from './useSimulateSwapQuery'
 import { useRelayerSignature } from '../../relayer/RelayerSignatureProvider'
 import { usePermit2Signature } from '../../tokens/approvals/permit2/Permit2SignatureProvider'
+import { useIsSafeAccount } from '../../web3/safe.hooks'
 
 export type BuildSwapQueryResponse = ReturnType<typeof useBuildSwapQuery>
 
@@ -33,6 +34,7 @@ export function useBuildSwapQuery({
   const { slippage } = useUserSettings()
   const { relayerApprovalSignature } = useRelayerSignature()
   const { permit2Signature: permit2 } = usePermit2Signature()
+  const isSafeAccount = useIsSafeAccount()
 
   const { selectedChain, tokenIn, tokenOut, swapType } = swapState
 
@@ -41,6 +43,7 @@ export function useBuildSwapQuery({
     account: userAddress,
     slippagePercent: slippage,
     simulateResponse: simulationQuery.data || ({} as SimulateSwapResponse),
+    isSafeAccount,
   })
 
   const queryFn = async () => {
@@ -55,6 +58,7 @@ export function useBuildSwapQuery({
       selectedChain,
       simulateResponse,
       wethIsEth,
+      isSafeAccount,
       relayerApprovalSignature,
       permit2,
     })

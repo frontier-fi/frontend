@@ -22,8 +22,15 @@ export function getTransports(chain: Chain) {
     ])
   }
 
-  if (overrideRpcUrl) return fallback([http(overrideRpcUrl), http(fallbackRpcUrl), http()])
-  return fallback([http(), http(fallbackRpcUrl)])
+  if (overrideRpcUrl) {
+    return fallback(
+      fallbackRpcUrl
+        ? [http(overrideRpcUrl), http(fallbackRpcUrl), http()]
+        : [http(overrideRpcUrl), http()]
+    )
+  }
+
+  return fallback(fallbackRpcUrl ? [http(fallbackRpcUrl), http()] : [http()])
 }
 
 export const transports = Object.fromEntries(

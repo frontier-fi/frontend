@@ -12,8 +12,9 @@ const hiddenPoolTypes: PoolFilterType[] = [
 export const ProjectConfigFrontier: ProjectConfig = {
   projectId: 'frontier',
   projectName: 'Frontier Finance',
-  legalEntityName: 'Frontier Finance Foundation',
+  legalEntityName: 'Frontier Finance',
   projectUrl: 'https://frontier.fi',
+  appUrl: 'https://app.frontier.fi',
   projectLogo: '/images/icons/0xff.png',
   acceptedPoliciesVersion: undefined,
   // Frontier API is Sepolia-only for now (api.frontier.fi).
@@ -38,6 +39,7 @@ export const ProjectConfigFrontier: ProjectConfig = {
     hidePoolTypes: hiddenPoolTypes,
     hideProtocolVersion: ['v2', 'v3', 'cow'],
     hideHooksFilters: true,
+    requireHookReview: false,
     showPoolName: false,
     allowCreateWallet: true,
     isOnSafeAppList: true,
@@ -60,11 +62,8 @@ export const ProjectConfigFrontier: ProjectConfig = {
       },
     ],
     legalLinks: [
-      { label: 'Terms of use' },
-      { label: 'Privacy policy' },
-      { label: 'Cookies policy' },
-      { label: '3rd party services' },
-      { label: 'Risks' },
+      { label: '3rd party services', href: '/3rd-party-services' },
+      { label: 'Risks', href: '/risks' },
     ],
   },
   footer: {

@@ -86,7 +86,7 @@ export function Hero() {
               letterSpacing="-2px"
               lineHeight={1}
               pr="2"
-              text="AMMs made easy"
+              text="The Frontier AMM"
             />
             <MotionHeading
               animate={

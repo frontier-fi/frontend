@@ -82,8 +82,8 @@ jobs:
               echo "::error::.do/prod.yaml uses $name, which is empty in this job. Secrets also need a line in the env of this job."
               exit 1
             fi
-            if [[ "$value" == *"'"* || "$value" == *$'\n'* || "$value" == *$'\r'* ]]; then
-              echo "::error::$name contains a single quote or a line break, which breaks .do/prod.yaml."
+            if [[ "$value" == *"'"* || "$value" == *'"'* || "$value" == *'\'* || "$value" == *$'\n'* || "$value" == *$'\r'* ]]; then
+              echo "::error::$name contains quotes, a backslash, or a line break, which breaks .do/prod.yaml."
               exit 1
             fi
           done

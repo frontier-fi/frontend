@@ -14,6 +14,7 @@ import {
 } from '@chakra-ui/react'
 import { ReactNode, type JSX } from 'react'
 import { ArrowUpRight } from 'lucide-react'
+import { toSafeHttpsUrl } from '@repo/lib/shared/utils/strings'
 
 interface CustomPopoverProps extends Omit<PopoverProps, 'children'> {
   children: ReactNode | ((props: { isOpen: boolean; content: JSX.Element }) => ReactNode)
@@ -33,6 +34,8 @@ export function CustomPopover({
   showArrow = true,
   ...props
 }: CustomPopoverProps) {
+  const normalizedFooterUrl = toSafeHttpsUrl(footerUrl)
+
   const popoverContent = (
     <PopoverContent maxW="300px" p="sm" w="auto">
       {showArrow && <PopoverArrow bg="background.level3" />}
@@ -50,9 +53,9 @@ export function CustomPopover({
           </Text>
         </PopoverBody>
       )}
-      {footerUrl && (
+      {normalizedFooterUrl && (
         <PopoverFooter p="0">
-          <Link href={footerUrl} isExternal variant="link">
+          <Link href={normalizedFooterUrl} isExternal rel="noopener noreferrer" variant="link">
             <HStack gap="xxs">
               <Text color="link" fontSize="sm">
                 Learn more

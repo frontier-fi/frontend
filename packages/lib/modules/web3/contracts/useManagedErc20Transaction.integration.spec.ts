@@ -15,11 +15,11 @@ import { useManagedErc20Transaction } from './useManagedErc20Transaction'
 const TRANSACTION_WAIT_TIMEOUT_MS = 60_000
 const TRANSACTION_TEST_TIMEOUT_MS = 120_000
 
-await connectWithDefaultUser()
-
 test(
   'token approval transaction (wNative)',
   async () => {
+    await connectWithDefaultUser()
+
     const defaultChain = PROJECT_CONFIG.defaultNetwork
     const chainId = getChainId(defaultChain)
     const wNativeAddress = getWrappedNativeAssetAddress(defaultChain) as Address
@@ -41,7 +41,9 @@ test(
       timeout: TRANSACTION_WAIT_TIMEOUT_MS,
     })
 
-    await act(() => result.current.executeAsync())
+    await act(async () => {
+      await result.current.executeAsync()
+    })
 
     await waitFor(() => expect(result.current.execution.isSuccess).toBeTruthy(), {
       timeout: TRANSACTION_WAIT_TIMEOUT_MS,

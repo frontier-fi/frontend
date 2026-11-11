@@ -1,4 +1,5 @@
 import { CardHeader, CardBody, Heading, HStack, Text } from '@chakra-ui/react'
+import type { ReactNode } from 'react'
 import { usePoolCreationForm } from '../PoolCreationFormProvider'
 import { zeroAddress } from 'viem'
 import { BlockExplorerLink } from '@repo/lib/shared/components/BlockExplorerLink'
@@ -6,6 +7,7 @@ import { usePoolHooksWhitelist } from '../steps/details/usePoolHooksWhitelist'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { PreviewPoolCreationCard } from './PreviewPoolCreationCard'
 import { isStablePool, isCowPool, isPoolCreatorEnabled } from '../helpers'
+import { isDev } from '@repo/lib/config/app.config'
 import { useWatch } from 'react-hook-form'
 
 export function PreviewPoolDetails() {
@@ -79,19 +81,29 @@ export function PoolDetailsContent() {
   const showPoolSettings = !isCowPool(poolType)
   const showAmplificationParameter = isStablePool(poolType)
 
-  const poolDetailsMap = {
+  const poolDetailsMap: Record<string, ReactNode> = {
     'Pool name': name,
     'Pool symbol': symbol,
-    ...(showPoolSettings && {
-      ...(isPoolCreatorEnabled(poolType) && { 'Pool creator': formatPoolManager(poolCreator) }),
-      'Swap fee manager': formatPoolManager(swapFeeManager),
-      'Pool pause manager': formatPoolManager(pauseManager),
-      'Swap fee percentage': `${swapFeePercentage}%`,
-      ...(showAmplificationParameter && { 'Amplification parameter': amplificationParameter }),
-      'Pool hook': formatPoolHook(poolHooksContract),
-      'Allow flexible adds/removes': disableUnbalancedLiquidity ? 'No' : 'Yes',
-      'Allow donations': enableDonation ? 'Yes' : 'No',
-    }),
+    ...(showPoolSettings
+      ? {
+          ...(isDev
+            ? {
+                ...(isPoolCreatorEnabled(poolType)
+                  ? { 'Pool creator': formatPoolManager(poolCreator) }
+                  : {}),
+                'Swap fee manager': formatPoolManager(swapFeeManager),
+                'Pool pause manager': formatPoolManager(pauseManager),
+                'Allow donations': enableDonation ? 'Yes' : 'No',
+              }
+            : {}),
+          'Swap fee percentage': `${swapFeePercentage}%`,
+          ...(showAmplificationParameter
+            ? { 'Amplification parameter': amplificationParameter }
+            : {}),
+          'Pool hook': formatPoolHook(poolHooksContract),
+          'Allow flexible adds/removes': disableUnbalancedLiquidity ? 'No' : 'Yes',
+        }
+      : {}),
   }
 
   const isDetailsActive = isStep('Details')

@@ -224,6 +224,14 @@ export function useUninitializedPool() {
     query: { enabled: isAutoRangePoolType && shouldHydratePoolCreationForm },
   })
 
+  const { data: eclpParams, isLoading: isLoadingEclpParams } = useReadContract({
+    address: poolAddressParam,
+    abi: gyroEclpPoolAbi,
+    functionName: 'getECLPParams',
+    chainId,
+    query: { enabled: isGyroEclpType && shouldHydratePoolCreationForm },
+  })
+
   const poolFormData = useMemo(() => {
     const network = networkParam
     const poolType = poolTypeParam
@@ -256,6 +264,7 @@ export function useUninitializedPool() {
     const hasRequiredWeightedInfo = !isWeightedPoolType || !!normalizedWeights
     const hasRequiredStableInfo = !isStablePoolType || !!amplificationParameter
     const hasRequiredAutoRangeInfo = !isAutoRangePoolType || !!autoRangeConfig
+    const hasRequiredEclpInfo = !isGyroEclpType || !!eclpParams
 
     if (
       !network ||
@@ -271,7 +280,8 @@ export function useUninitializedPool() {
       !poolHooksContract ||
       !hasRequiredWeightedInfo ||
       !hasRequiredStableInfo ||
-      !hasRequiredAutoRangeInfo
+      !hasRequiredAutoRangeInfo ||
+      !hasRequiredEclpInfo
     ) {
       return undefined
     }
@@ -292,7 +302,7 @@ export function useUninitializedPool() {
       amplificationParameter,
       weightedPoolStructure,
     }
-  }, [amplificationParameterRes, poolTokens])
+  }, [amplificationParameterRes, poolTokens, eclpParams, isGyroEclpType])
 
   const autoRangeFormData = useMemo(() => {
     if (!autoRangeConfig || !isAutoRangePoolType) return undefined
@@ -313,14 +323,6 @@ export function useUninitializedPool() {
       centerednessMargin: formatUnits(initialCenterednessMargin, PERCENTAGE_DECIMALS),
     }
   }, [autoRangeConfig, isAutoRangePoolType])
-
-  const { data: eclpParams, isLoading: isLoadingEclpParams } = useReadContract({
-    address: poolAddressParam,
-    abi: gyroEclpPoolAbi,
-    functionName: 'getECLPParams',
-    chainId,
-    query: { enabled: isGyroEclpType && shouldHydratePoolCreationForm },
-  })
 
   const eclpFormData = useMemo(() => {
     if (!eclpParams || !isGyroEclpType) return undefined

@@ -6,7 +6,7 @@ import { useNetworkConfig } from '@repo/lib/config/useNetworkConfig'
 import { getWaitForReceiptTimeout } from '@repo/lib/modules/web3/contracts/wagmi-helpers'
 import { ensureError } from '@repo/lib/shared/utils/errors'
 import { onlyExplicitRefetch } from '@repo/lib/shared/utils/queries'
-import SafeAppsSDK, { GatewayTransactionDetails } from '@safe-global/safe-apps-sdk'
+import { GatewayTransactionDetails } from '@safe-global/safe-apps-sdk'
 import { noop } from 'lodash'
 import { useEffect, useRef, useState } from 'react'
 import { TransactionExecution, TransactionSimulation } from '../../../web3/contracts/contract.types'
@@ -16,6 +16,7 @@ import { buildTxBatch } from '../tx-batch.helpers'
 import { getTransactionButtonLabel } from '../transaction-button.helpers'
 import { MultisigStatus } from './MultisigStatus'
 import {
+  getSafeAppsSdk,
   isSafeTxCancelled,
   isSafeTxSuccess,
   isSafeTxWaitingForConfirmations,
@@ -57,7 +58,7 @@ export function useSafeBatchSubmitter({
   const [safeTxDetails, setSafeTxDetails] = useState<GatewayTransactionDetails | undefined>()
   const safeTxStatus = safeTxDetails?.txStatus
 
-  const safeAppsSdk = new SafeAppsSDK()
+  const safeAppsSdk = getSafeAppsSdk()
 
   const transactionStatusQuery = useWaitForTransactionReceipt({
     chainId,

@@ -14,7 +14,7 @@ export default function Privacy() {
             <Box mt="3xl" pb="md">
               <h1>Risks of using&nbsp;Frontier Finance</h1>
               <p>
-                <em>Last Updated: May 2025</em>
+                <em>Last Updated: November 2026</em>
               </p>
               <p>
                 <em>
@@ -50,9 +50,6 @@ export default function Privacy() {
                       </li>
                       <li>
                         <Link href="risks#composability-risk">DeFi composability risk</Link>
-                      </li>
-                      <li>
-                        <Link href="risks#governance-risk">DAO Governance risk</Link>
                       </li>
                       <li>
                         <Link href="risks#flash-loans-risk">Flash Loans risk</Link>
@@ -91,29 +88,12 @@ export default function Privacy() {
                         <Link href="risks#stable-pools">Stable Pools</Link>
                       </li>
                       <li>
-                        <Link href="risks#lbp">LBP - Liquidity Bootstrapping Pools</Link>
-                      </li>
-                      <li>
                         <Link href="risks#boosted-pools">Boosted Pools</Link>
-                      </li>
-                      <li>
-                        <Link href="risks#stablesurge-hook">StableSurge Hook</Link>
-                      </li>
-                      <li>
-                        <Link href="risks#mevcapture-hook">MEV Capture Hook</Link>
                       </li>
                       <li>
                         <Link href="risks#concentrated-liquidity-pools">
                           Concentrated Liquidity Pools
                         </Link>
-                      </li>
-                      <li>
-                        <Link href="risks#autorange">
-                          AutoRange - Readjusting Concentrated Liquidity AMM
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="risks#btf">Blockchain Traded Funds</Link>
                       </li>
                     </ul>
                   </li>
@@ -126,25 +106,13 @@ export default function Privacy() {
                         <Link href="risks#arbitrum">Arbitrum</Link>
                       </li>
                       <li>
-                        <Link href="risks#optimism">Optimism</Link>
-                      </li>
-                      <li>
                         <Link href="risks#base">Base</Link>
-                      </li>
-                      <li>
-                        <Link href="risks#polygon">Polygon PoS</Link>
-                      </li>
-                      <li>
-                        <Link href="risks#gnosis">Gnosis chain</Link>
                       </li>
                       <li>
                         <Link href="risks#avalanche">Avalanche</Link>
                       </li>
                       <li>
-                        <Link href="risks#hyperevm">Hyper EVM</Link>
-                      </li>
-                      <li>
-                        <Link href="risks#plasma">Plasma chain</Link>
+                        <Link href="risks#monad">Monad</Link>
                       </li>
                     </ul>
                   </li>
@@ -175,8 +143,7 @@ export default function Privacy() {
               </p>
               <h5>The Frontier Finance Vault</h5>
               <p>
-                The main architectural change between Frontier Finance V1 and Frontier Finance V2 is
-                the transition to&nbsp;a single vault that holds and manages all the assets added by
+                Frontier Finance is a single vault that holds and manages all the assets added by
                 all Frontier Finance pools. This separates the AMM logic from the token management
                 and accounting. Token management/accounting is done by the vault while the AMM logic
                 is individual to each pool. This provides many advantages, including flexibility and
@@ -199,13 +166,6 @@ export default function Privacy() {
                   The core of Frontier Finance smart contracts are immutable and do not use proxies
                   or other upgrade mechanisms. Note: Within DeFI, upgradable contracts are a major
                   way exploits have been introduced.
-                </li>
-                <li>
-                  In addition, Frontier Finance has a bug bounty program via{' '}
-                  <a href="https://immunefi.com/bounty/balancer/">Immunefi</a> to attract white-hat
-                  hackers to responsibly disclose any bugs. Rewards are distributed based on threat
-                  level—for critical smart contract vulnerabilities, there is a minimum reward of
-                  250 ETH and a maximum reward of 1,000 ETH.
                 </li>
               </ul>
               <h5>How can LPs mitigate this risk?</h5>
@@ -349,9 +309,9 @@ export default function Privacy() {
                   uncorrelated drop in a token&rsquo;s value.
                 </li>
                 <li>
-                  New pools have a &lsquo;recovery mode&rsquo; which can be enabled by the Emergency
-                  DAO Multisig. Pools in recovery mode provide a simple way for LPs to exit the pool
-                  proportionally at the cost of disabling protocol fees (swaps, joins etc still
+                  New pools have a &lsquo;recovery mode&rsquo; which can be enabled by the Frontier
+                  Finance Multisig. Pools in recovery mode provide a simple way for LPs to exit the
+                  pool proportionally at the cost of disabling protocol fees (swaps, joins etc still
                   work).
                 </li>
               </ul>
@@ -399,154 +359,6 @@ export default function Privacy() {
                 Other risks could cascade if a protocol within a composability stack has a liquidity
                 crisis, an unfavorable governance decision or regulatory outcome.
               </p>
-            </div>
-          </FadeInOnView>
-          <FadeInOnView>
-            <div className="subsection">
-              <h4 className="anchor" id="governance-risk">
-                DAO Governance risk
-              </h4>
-              <p>
-                Frontier Finance uses off-chain voting via{' '}
-                <a href="https://snapshot.org/">Snapshot</a>
-                —originally developed in-house by Frontier Finance Labs—to signal the will of BAL
-                token holders. Following{' '}
-                <a href="https://forum.balancer.fi/t/bip-919-bal-tokenomics-revamp/7001">BIP-919</a>
-                , the veBAL system is winding down: protocol fee distributions to veBAL have ceased
-                and any BAL holder can participate in governance without locking. Existing veBAL
-                positions retain their voting power for the remainder of their lock.
-              </p>
-              <p>
-                A summary of the immutability of the Frontier Finance Protocol&rsquo;s smart
-                contracts:
-              </p>
-              <ul>
-                <li>
-                  Frontier Finance V1 contracts are immutable, so there were no core protocol
-                  parameters that could be changed.
-                </li>
-                <li>
-                  Frontier Finance V2 contracts do allow for some tweaking of core protocol
-                  parameters, including the ability to:
-                  <ul>
-                    <li>
-                      Set a share of swap fees to be diverted to the protocol (hard capped at 50% of
-                      the swap fee)
-                    </li>
-                    <li>Set a Flash Loan fee</li>
-                    <li>
-                      Extract from the vault collected protocol fees and/or excess balances (e.g.
-                      airdrops), to any destination
-                    </li>
-                    <li>Set the address of the oracle implementation</li>
-                    <li>
-                      Set relayer addresses: relayers are (user opt-in, audited) contracts that can
-                      make calls to the vault (with the transaction “sender” being any arbitrary
-                      address) and use the sender&rsquo;s ERC20 vault allowance, internal balance or
-                      BPTs on their behalf
-                    </li>
-                    <li>
-                      Set dynamic-fee controllers: addresses (initially assigned to Gauntlet) that
-                      may change the swap fee for pools created by the dynamic-fee pool factory that
-                      will be deployed by Frontier Finance Labs
-                    </li>
-                    <li>Add and remove gauges</li>
-                  </ul>
-                </li>
-                <li>
-                  Frontier Finance contracts are also immutable. As with V2, a limited set of
-                  parameters can be tweaked via the Authorizer under DAO governance—e.g. protocol
-                  fee parameters, registration of new pool factories, and approval of hook
-                  contracts. New factories, novel pool types and new chain deployments require a DAO
-                  Multisig vote per{' '}
-                  <a href="https://forum.balancer.fi/t/bip-918-operational-restructuring-for-balancer/7000">
-                    BIP-918
-                  </a>
-                  .
-                </li>
-              </ul>
-              <p>
-                Following{' '}
-                <a href="https://forum.balancer.fi/t/bip-918-operational-restructuring-for-balancer/7000">
-                  BIP-918
-                </a>
-                , authority is split between the core team and the DAO Multisig under a published{' '}
-                <a href="https://docs.balancer.fi/concepts/governance/multisig.html#multisig-mandate-authorizations">
-                  multisig mandate
-                </a>
-                . Operational decisions—protocol fee parameter adjustments, new chain deployments,
-                vendor and sprint prioritization, chain deprecation, budget-approved hiring, and
-                partner fee-split negotiations—are made by the core team without a Snapshot vote.
-                Decisions that materially change the protocol—introducing new pool factories or
-                novel pool types, formal new chain approvals, and any change to BAL supply or
-                minting parameters—require a Snapshot vote ratified by the DAO Multisig. Treasury,
-                legal entity, and onchain operations are managed by separate Treasury Council,
-                Directors, and Onchain Ltd multisigs respectively.
-              </p>
-              <p>The main risks with this setup of off-chain voting executed by multisigs:</p>
-              <ul>
-                <li>
-                  The{' '}
-                  <a href="https://docs.balancer.fi/concepts/governance/multisig.html#multisig-mandate-authorizations">
-                    multisig
-                  </a>{' '}
-                  could go rogue and disregard the decision made by BAL holders in the off-chain
-                  voting.
-                </li>
-                <li>
-                  The{' '}
-                  <a href="https://docs.balancer.fi/concepts/governance/multisig.html#dao-multisig-signer-set">
-                    multisig signer set
-                  </a>{' '}
-                  could mistakenly execute the wrong instruction without malice.
-                </li>
-                <li>
-                  An individual or an entity could acquire substantial BAL and vote against the
-                  interests of the majority of the community.
-                </li>
-              </ul>
-              <h5>How Frontier Finance aims to mitigate this risk:</h5>
-              <ul>
-                <li>
-                  The core of Frontier Finance smart contracts are immutable and do not use proxies
-                  or other upgrade mechanisms. Only parameters, which are considered to be less
-                  &lsquo;dangerous&rsquo; may be tweaked.
-                </li>
-                <li>
-                  The Multisig does&nbsp;not&nbsp;have custody of, nor control over, funds from
-                  liquidity providers locked inside Frontier Finance Protocol contracts. Frontier
-                  Finance were designed so that even if a multisig goes rogue, all the liquidity is
-                  safe and can be withdrawn by their rightful owners.
-                </li>
-                <li>
-                  The DAO Multisig{' '}
-                  <a href="https://docs.balancer.fi/concepts/governance/multisig.html#dao-multisig-signer-set">
-                    signer set
-                  </a>{' '}
-                  is intentionally diverse—drawn from independent organizations across the
-                  ecosystem—and signers forfeit their position if they act contrary to token holder
-                  voting outcomes or remain inactive.
-                </li>
-                <li>
-                  Per{' '}
-                  <a href="https://forum.balancer.fi/t/bip-918-operational-restructuring-for-balancer/7000">
-                    BIP-918
-                  </a>
-                  , the core team is accountable through mandatory quarterly transparency reports
-                  and 6- and 12-month KPI checkpoints.
-                </li>
-              </ul>
-              <h5>How LPs can mitigate this risk:</h5>
-              <ul>
-                <li>
-                  LPs should stay up to date with Frontier Finance Governance by following
-                  discussions on the forum and participating in the off-chain voting.
-                </li>
-                <li>
-                  LPs may review past votes and verify that the DAO Multisig has executed outcomes
-                  accurately.
-                </li>
-              </ul>
             </div>
           </FadeInOnView>
           <FadeInOnView>
@@ -1139,106 +951,6 @@ export default function Privacy() {
               </FadeInOnView>
               <FadeInOnView>
                 <div className="subsection">
-                  <h4 className="anchor" id="lbp">
-                    LBP - Liquidity Bootstrapping Pools
-                  </h4>
-                  <p>
-                    Liquidity Bootstrapping Pools (LBPs) are pools that dynamically change token
-                    weighting over time. LBPs utilize weighted math with time-dependent weights,
-                    enabling fair market price discovery and promoting wider token distribution.
-                    Frontier Finance users can create and join/exit LBPs, subject to applicable laws
-                    and regulations in their respective jurisdictions.
-                  </p>
-                  <p>
-                    Frontier Finance is not involved with the projects that create LBPs. Each LBP is
-                    independently created and managed by its owner. Frontier Finance Foundation has
-                    developed a user interface to access LBP smart contracts deployed on each
-                    blockchain where the Frontier Finance Protocol is live.
-                  </p>
-                  <p>The use of LBPs presents certain risks, including but not limited to:</p>
-                  <p>For Creators (pool owners):</p>
-                  <ul>
-                    <li>
-                      Price Volatility: The LBP mechanism can lead to significant price
-                      fluctuations, especially if the initial price is set too high or the pool
-                      lacks sufficient liquidity.
-                    </li>
-                    <li>
-                      Parameter Risk: Incorrect parameters can result in a failed launch, with the
-                      token price not behaving as expected.
-                    </li>
-                    <li>
-                      Liquidity Risk: Low liquidity can lead to high price slippage and increased
-                      susceptibility to manipulation.
-                    </li>
-                    <li>
-                      Market Manipulation: Although designed for fair price discovery, LBPs are not
-                      immune to market manipulation, including wash trading and pump-and-dump
-                      schemes.
-                    </li>
-                  </ul>
-                  <p>For Liquidity Providers (participants):</p>
-                  <ul>
-                    <li>
-                      Amplified Impermanent Loss: Impermanent Loss (IL) can be amplified in LBPs due
-                      to dynamic price changes. As the new token's price decreases, LPs experience
-                      greater IL compared to traditional AMMs.
-                    </li>
-                    <li>
-                      Downward Price Pressure: The inherent design of LBPs exerts downward pressure
-                      on the token price. LPs should be aware that the token price may be lower when
-                      they withdraw their liquidity compared to when they entered.
-                    </li>
-                    <li>
-                      Project Risk: LBPs can be used for malicious purposes, including rug pulls and
-                      scams. LPs can lose their funds if the project team abandons the project or
-                      the token becomes worthless.
-                    </li>
-                    <li>
-                      Price Uncertainty: New tokens in LBPs lack historical price data, making it
-                      challenging to assess the token's true value and potential risks. Emotional
-                      decision-making and poor investment choices can exacerbate these challenges.
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h5>How Frontier Finance aims to mitigate this risk:</h5>
-                  <ul>
-                    <li>
-                      Parameter Guidance: Frontier Finance provides tools and guidance to help
-                      projects determine appropriate parameters for their LBPs, such as starting
-                      price, duration, and weight curve. This helps prevent drastic price
-                      fluctuations and ensures a smoother launch.
-                    </li>
-                    <li>
-                      Education and Resources: Frontier Finance provides comprehensive documentation
-                      and educational resources to help users understand the risks associated with
-                      LBPs.
-                    </li>
-                  </ul>
-                  <h5>How can LPs mitigate these risks?</h5>
-                  <ul>
-                    <li>
-                      Conduct Thorough Research: Before providing liquidity, research the project,
-                      team, and tokenomics.
-                    </li>
-                    <li>
-                      Understand LBP Mechanics: Gain a thorough understanding of the LBP mechanism
-                      and its specific parameters, including the starting price, duration, and decay
-                      rate.
-                    </li>
-                    <li>
-                      Invest Responsibly: Do not invest more than you can afford to lose, especially
-                      in new and unproven projects.
-                    </li>
-                    <li>
-                      Monitor Pool Activity: Actively monitor the pool's liquidity and price action.
-                    </li>
-                  </ul>
-                </div>
-              </FadeInOnView>
-              <FadeInOnView>
-                <div className="subsection">
                   <h4 className="anchor" id="boosted-pools">
                     Boosted Pools
                   </h4>
@@ -1295,138 +1007,6 @@ export default function Privacy() {
                     </Link>
                     , as described above.
                   </p>
-                </div>
-              </FadeInOnView>
-
-              <FadeInOnView>
-                <div className="subsection">
-                  <h4 className="anchor" id="stablesurge-hook">
-                    StableSurge Hook
-                  </h4>
-                  <p>
-                    If a pool is pushed beyond its threshold balance, a surge is initiated,
-                    resulting in an increasing tax on sellers who negatively impact the peg of the
-                    asset by continuing to push the pool out of balance. On the other hand, the
-                    liquidity providers who maintain the risk of being in the pool, earn an
-                    increased fee, resulting in higher returns on their position during times of
-                    volatility.
-                  </p>
-                  <p>
-                    The directional fee nature of the StableSurge hooks only charges the increased
-                    fee on those sellers who are driving the peg further from equilibrium, while
-                    those who are buying the underperforming asset are only charged the base fee.
-                    This aligns the incentives of the liquidity providers and the project entity,
-                    which inherently wants its token to stay as close to the peg as possible.
-                  </p>
-                  <p>
-                    Stable Surge hooks introduces dynamic swap fees designed to protect peg, but may
-                    also impact the risk profile of a pool. Please also refer to the{' '}
-                    <Link href="risks#hooks-risk">
-                      <span>Hooks</span>
-                    </Link>{' '}
-                    risk section and other{' '}
-                    <Link href="risks#general">
-                      <span>General</span>
-                    </Link>{' '}
-                    risks.
-                  </p>
-                  <p>
-                    StableSurge pools with price oracles for volatile assets are a new design space
-                    currently being experimented. LPs are free to join at their own risk, but these
-                    pools can leak real value (permanent loss) and the APR shown in calculations is
-                    not an accurate reflection of the real return. Learn more about oracle and path
-                    dependency risks in the{' '}
-                    <Link href="risks#stable-pools">
-                      <span>Stable Pools</span>
-                    </Link>{' '}
-                    risk section.
-                  </p>
-                  <ul>
-                    <li>
-                      Dynamic fee volatility: these fees are not fixed and can change significantly
-                      based on several factors, including but not limited to: pool imbalances,
-                      market volatility, and the specific configuration of the StableSurge
-                      parameters. You may encounter unexpectedly high fees, especially during
-                      periods of market stress or when the pool is significantly off-target. While
-                      the hook can lead to lower fees, there is no guarantee of consistency, and
-                      fees can rapidly increase.
-                    </li>
-                    <li>
-                      Parameter Sensitivity: The performance of the StableSurge hook is highly
-                      dependent on the correct configuration of its parameters. Incorrectly
-                      configured parameters could lead to unintended consequences, such as
-                      excessively high fees, ineffective rebalancing, or even instability in the
-                      pool. Changes to these parameters can also significantly alter the pool&apos;s
-                      behavior.
-                    </li>
-                    <li>
-                      Rate provider risk: inaccurate or manipulated oracle data could lead to
-                      unexpected fee adjustments and potential losses. Rate provider failures or
-                      manipulation are inherent risks in decentralized finance. Learn more about
-                      rate provider and oracle risks in the{' '}
-                      <Link href="risks#stable-pools">
-                        <span>Stable Pools</span>
-                      </Link>{' '}
-                      risk section.
-                    </li>
-                  </ul>
-                </div>
-              </FadeInOnView>
-
-              <FadeInOnView>
-                <div className="subsection">
-                  <h4 className="anchor" id="mevcapture-hook">
-                    MEV Capture Hook
-                  </h4>
-                  <p>
-                    Maximal Extractable Value (MEV) refers to the profit that can be extracted by
-                    manipulating transaction order within a block. This hook aims to capture some of
-                    the MEV and redistribute it to liquidity providers (LPs).
-                  </p>
-                  <p>
-                    Basically, when MEV extraction occurs within one of these pools, a portion of
-                    the profit gained by the searcher (MEV extractor) is automatically collected as
-                    a fee. This fee is then distributed to the LPs who have provided liquidity to
-                    that pool. The intention is to compensate LPs for the potential negative impact
-                    of MEV on their returns and to create a more equitable distribution of value
-                    generated within the pool.
-                  </p>
-                  <p>
-                    This hook introduces a novel mechanism that may impact the risk profile of a
-                    pool. Please also refer to the{' '}
-                    <Link href="risks#hooks-risk">
-                      <span>Hooks</span>
-                    </Link>{' '}
-                    risk section and other{' '}
-                    <Link href="risks#general">
-                      <span>General</span>
-                    </Link>{' '}
-                    risks.
-                  </p>
-                  <ul>
-                    <li>
-                      Fee volatility: these fees are not fixed and can change significantly based on
-                      several factors, including but not limited to: pool imbalances, market
-                      volatility, and the specific configuration of the taxation parameters, like
-                      the multiplier and minimum threshold. The amount of MEV extracted and the
-                      resulting fee will vary depending on market conditions and the activity of
-                      searchers (MEV extractors).
-                    </li>
-                    <li>
-                      Ineffective capture: MEV capture hook is a novel implementation and there is
-                      no guarantee it will be successful in capturing all or even a significant
-                      portion of MEV. Sophisticated searchers might find ways to circumvent the fee,
-                      reducing its effectiveness and the potential benefits for LPs. The
-                      mechanism&apos;s design may need adjustments over time as MEV techniques
-                      evolve.
-                    </li>
-                    <li>
-                      To ensure precise and fair allocation, transactions subject to MEV Capture
-                      hook are restricted to single-hop trades. This is enforced by the router and
-                      allows us to definitively identify which pool should receive the collected
-                      fees.
-                    </li>
-                  </ul>
                 </div>
               </FadeInOnView>
 
@@ -1502,167 +1082,6 @@ export default function Privacy() {
                   </ul>
                 </div>
               </FadeInOnView>
-              <FadeInOnView>
-                <div className="subsection">
-                  <h4 className="anchor" id="autorange">
-                    AutoRange pools
-                  </h4>
-                  <p>
-                    AutoRange (Readjusting Concentrated Liquidity AMM) is a novel pool type built on
-                    Frontier Finance, designed to offer concentrated liquidity with self-readjusting
-                    price ranges and fungible liquidity. While they aim to reduce the active
-                    management burden for LPs, higher swap fees and better capital efficiency when
-                    in range, they introduce specific risk.
-                  </p>
-                  <ul>
-                    <li>
-                      <b>Impermanent Loss and Parametrization Risk</b>: AutoRange pools'
-                      self-adjusting ranges aim to keep liquidity active, but impermanent loss
-                      remains a core risk that in this case can be potentially exacerbated by
-                      suboptimal range, margin and “daily price shift exponent” adjustments. The
-                      efficacy of the parameters in the mechanism which replaces manual LP
-                      intervention, introduces risks, including (but not limited to): potential for
-                      miscalculation, inefficient capital utilization, or exploitability if
-                      rebalancing patterns are predictable.
-                    </li>
-                    <li>
-                      <b>Path Dependency Risk</b>: Unlike traditional CFMM (Constant Function Market
-                      Makers) where “impermanent” loss can revert by the return of the asset to its
-                      original ratio, path-dependant pools are affected by the sequence of price
-                      change, meaning the losses incurred to the asset in one side of the pool
-                      during certain price fluctuations can become “permanent”.
-                    </li>
-                    <li>
-                      <b>Low liquidity and price manipulation</b>: AutoRange pools are not suitable
-                      for great volatility and assets with low liquidity that can be easily
-                      exploitable, for the reasons and risks detailed above, where the pool can
-                      easily fall out of range and losses can become permanent.
-                    </li>
-                    <li>
-                      <b>Admin Parametrization</b>: By changing the sensitivity and behavior of the
-                      pool after deployment, the price range can be narrowed or widened, even if the
-                      price range can’t be set directly. The pool admin can: 1) change the
-                      centeredness margin (the threshold for updates); 2) change the daily price
-                      shift exponent (the speed of updates); and 3) initiate an update to the price
-                      interval (i.e., the distance, or ratio, between the minimum and maximum price
-                      bounds), or simply stop an ongoing update. All of these changes will update
-                      the virtual balances and potentially slightly change the price.
-                    </li>
-                  </ul>
-                </div>
-              </FadeInOnView>
-              <FadeInOnView>
-                <div className="subsection">
-                  <h4 className="anchor" id="btf">
-                    Blockchain Traded Funds
-                  </h4>
-
-                  <p>
-                    Blockchain Traded Funds (or Temporal Function Market Making - TFMM) tackles
-                    impermanent loss in traditional AMMs by continuously adjusting weights within
-                    the pool, rather than relying on token allocations. This dynamic rebalancing
-                    process allows the protocol to respond more effectively to market conditions,
-                    thereby mitigating IL risk associated with market price fluctuations. These
-                    rules are programmed to respond to specific market conditions, allowing for
-                    real-time adjustments without requiring manual intervention, by analyzing market
-                    data and applying the appropriate parameters for capital allocation within the
-                    fund, thus enabling effective risk management and optimization of returns.
-                  </p>
-
-                  <p>
-                    The Frontier Finance UI allows users to manage liquidity in certain QuantAMM
-                    pools (TFMM). This is not an endorsement of their products or the safety of
-                    their smart contracts. Users interacting with TFMM pools should be aware of the
-                    risks below. Please also refer to the General risks section.
-                  </p>
-
-                  <ul>
-                    <li>
-                      <b>Market volatility</b>: run directional strategies. These are not market
-                      neutral. The dynamic nature of the TFMM may not always respond adequately to
-                      extreme market volatility or adverse conditions, potentially leading to losses
-                      if market prices deviate significantly from expected trends.
-                    </li>
-                    <li>
-                      <b>MEV</b> - Change weights is equivalent to changing the price offered for
-                      swaps by the pool. This mechanism to expose a rebalance opportunity has been
-                      studied however there is an inherent multiblock MEV opportunity. This is
-                      mitigated by design choices (see mitigation section)
-                    </li>
-                    <li>
-                      <b>Strategy Automation</b> - Strategies require periodic triggering, if this
-                      triggering is not performed the strategy will not update weight trajectories
-                    </li>
-                    <li>
-                      <b>Strategy Parameterization</b> - It is expected behaviour that a periodic
-                      update will not occur if a variable in the strategy calculation means that the
-                      strategy is not mathematically possible to run. E.g. a divide by 0 situation.
-                    </li>
-                    <li>
-                      <b>Oracle risks</b>: reliance on oracles for price feeds introduces risk in
-                      terms of potential inaccuracies in data, which could adversely impact the
-                      rebalancing processes and overall fund performance. Additionally,
-                      infrastructure issues such as high gas costs could affect the efficiency of
-                      operations within the protocol. See more on oracle risks on the rate provider
-                      subsection.
-                    </li>
-                    <li>
-                      <b>Sub-optimal arbitrage</b> TFMM changes the weights within the TFMM pricing
-                      formula. At any one block TFMM is a standard CFMM pool. For actual NAV/Market
-                      value to be rebalanced to the target weights arbitrageurs have to take the
-                      immediate small arbitrage profit so that the holdings of the pool are inline
-                      with the weights. If there are no arbitrageurs, holdings will not be
-                      rebalanced. The more aggressive the arbitrage the more efficient the
-                      rebalancing.
-                    </li>
-                  </ul>
-
-                  <p>How QuantAMM mitigates these risks:</p>
-                  <ul>
-                    <li>
-                      <b>Market Volatility</b> - given the nature of BTFs in so that they are not
-                      reliant trade volumes, back test simulations are provided to give visibility
-                      on simulated behaviour under different market conditions. Given the BTF
-                      strategies rely on “historical memory” of price changes, historical
-                      performance and simulations are not indicative of future performance.
-                    </li>
-                    <li>
-                      <b>Pool Tuning</b> - Strategy parameters are fixed on creation mitigating the
-                      possibility of parameter manipulation.
-                    </li>
-                    <li>
-                      <b>Strategy automation</b> - Chainlink automation is used to trigger
-                    </li>
-                    <li>
-                      Future updates to TFMM may include increased monitoring of performance
-                      metrics, enhanced simulation testing, or improved user interfaces to minimize
-                      the chance of errors in parameter settings.
-                    </li>
-                    <li>
-                      Chainlink oracles are primarily used to mitigate oracle risk and any
-                      additional pool creation requires approval from the protocol team.
-                    </li>
-                    <li>
-                      Implement necessary fixes once identified, updating smart contracts, adjusting
-                      parameters or improving risk disclosures.
-                    </li>
-                    <li>
-                      <b>Sub-optimal arbitrage</b> - This is a relatively small risk given at any
-                      one block arbitrageurs are faced with a standard balancer pool so they can
-                      price and take the arbitrage opportunity without any additional new invariant
-                      prediction work. Frontier Finance has also integrated BTFs in the smart order
-                      router also increasing the likelihood of being exposed to traders. Work has
-                      already begun on DEX aggregator integration and when there is a minimal amount
-                      of TVL in the pool aggregators will expose the pool for further volumes.
-                    </li>
-                  </ul>
-                  <p>
-                    Before interacting with any QuantAMM Blockchain Traded Funds, users must read
-                    and accept QuantAMM&rsquo;s{' '}
-                    <a href="https://www.quantamm.fi/tos">Terms of Use</a>.
-                  </p>
-                </div>
-              </FadeInOnView>
 
               <Divider />
               <FadeInOnView>
@@ -1694,6 +1113,7 @@ export default function Privacy() {
                   </p>
                 </div>
               </FadeInOnView>
+
               <FadeInOnView>
                 <div className="subsection">
                   <h4 className="anchor" id="arbitrum">
@@ -1710,262 +1130,69 @@ export default function Privacy() {
                   </p>
                 </div>
               </FadeInOnView>
+              <FadeInOnView>
+                <div className="subsection">
+                  <h4 className="anchor" id="base">
+                    Base Chain risks
+                  </h4>
+                  <p>
+                    <a href="https://www.base.org/">Base</a> is an Optimistic Rollup that has been
+                    developed on the Ethereum network by Coinbase. It utilizes OP Stack technology
+                    from Optimism.
+                  </p>
+                  <p>
+                    View the risks of using Base on{' '}
+                    <a href="https://l2beat.com/scaling/projects/base">L2Beat</a>.
+                  </p>
+                </div>
+              </FadeInOnView>
+              <FadeInOnView>
+                <div className="subsection">
+                  <h4 className="anchor" id="avalanche">
+                    Avalanche risks
+                  </h4>
+                  <p>
+                    <a href="https://www.avax.network/">Avalanche</a> is a Layer 1 blockchain that
+                    is completely independent from the Ethereum blockchain. It&apos;s actually a
+                    heterogeneous network of blockchains which allows separate chains to be created
+                    for different applications.
+                  </p>
+                  <p>
+                    A Subnet is a sovereign network which defines its own rules regarding its
+                    membership and token economics. The security of assets within a specific subnet
+                    is directly tied to the security and integrity of its validators.{' '}
+                  </p>
+                  <p>
+                    Since Avalanche is independent from Ethereum, user&apos;s may face additional
+                    risks around briding assets.{' '}
+                  </p>
+                </div>
+              </FadeInOnView>
+              <FadeInOnView>
+                <div className="subsection">
+                  <h4 className="anchor" id="monad">
+                    Monad risks
+                  </h4>
+                  <p>
+                    <a href="https://www.monad.xyz/">Monad</a> is a high-performance Layer 1
+                    blockchain with EVM compatibility. It is independent from Ethereum Mainnet and
+                    uses its own consensus and execution architecture.
+                  </p>
+                  <p>
+                    Because Monad does not derive security from Ethereum, users face Layer 1 network
+                    risks including consensus failures, validator set risks, and potential bridge
+                    risks when moving assets between Monad and other networks.
+                  </p>
+                  <p>
+                    Monad is a newer network. Users should account for early-stage risks such as
+                    undiscovered software bugs, evolving infrastructure, and changing operational
+                    assumptions as the network matures.
+                  </p>
+                </div>
+              </FadeInOnView>
+
+              <Divider />
             </FadeInOnView>
-            <div className="subsection">
-              <h4 className="anchor" id="optimism">
-                Optimism risks
-              </h4>
-              <p>
-                <a href="https://www.optimism.io/">Optimism</a> is a Layer 2 scaling solution for
-                Ethereum that uses Optimistic Rollups to improve transaction throughput and reduce
-                fees. Although the Frontier Finance App UI doesn&rsquo;t currently support Optimism,
-                Frontier Finance Protocol smart contracts may be deployed on Optimism by third
-                parties.
-              </p>
-              <p>
-                View the risks of using Optimism on{' '}
-                <a href="https://l2beat.com/scaling/projects/optimism">L2Beat</a>.
-              </p>
-            </div>
-          </FadeInOnView>
-          <FadeInOnView>
-            <div className="subsection">
-              <h4 className="anchor" id="base">
-                Base Chain risks
-              </h4>
-              <p>
-                <a href="https://www.base.org/">Base</a> is an Optimistic Rollup that has been
-                developed on the Ethereum network by Coinbase. It utilizes OP Stack technology from
-                Optimism.
-              </p>
-              <p>
-                View the risks of using Base on{' '}
-                <a href="https://l2beat.com/scaling/projects/base">L2Beat</a>.
-              </p>
-            </div>
-          </FadeInOnView>
-          <FadeInOnView>
-            <div className="subsection">
-              <h4 className="anchor" id="polygon">
-                Polygon PoS risks
-              </h4>
-              <p>
-                <a href="https://polygon.technology/">Polygon PoS</a> is Proof-of-Stake (PoS)
-                sidechain scaling solution that runs in parallel to Ethereum Mainnet. Its validators
-                are solely responsible for validating Polygon transactions. It does not derive
-                security from Ethereum Mainnet.
-              </p>
-              <p>
-                Polygon is subject to the same risks of other PoS chains. In particular, it has a
-                smaller pool of capital and validator set to gain consensus compared to Ethereum
-                Mainnet.
-              </p>
-            </div>
-          </FadeInOnView>
-          <FadeInOnView>
-            <div className="subsection">
-              {' '}
-              <h4 className="anchor" id="gnosis">
-                Gnosis chain risks
-              </h4>
-              <p>
-                <a href="https://www.gnosis.io/">Gnosis Chain</a>, formerly known as xDai Chain, is
-                a sidechain for Ethereum focused on providing fast, stable, and cost-effective
-                transactions. It uses a PoS consensus mechanism and is secured by a set of
-                independent validators. It does not derive security from Ethereum Mainnet.
-              </p>
-              <p>
-                The Gnosis chain is subject to the same risks of other PoS chains. In particular, it
-                has a smaller pool of capital and validator set to gain consensus compared to
-                Ethereum Mainnet.
-              </p>
-            </div>
-          </FadeInOnView>
-          <FadeInOnView>
-            <div className="subsection">
-              <h4 className="anchor" id="avalanche">
-                Avalanche risks
-              </h4>
-              <p>
-                <a href="https://www.avax.network/">Avalanche</a> is a Layer 1 blockchain that is
-                completely independent from the Ethereum blockchain. It&apos;s actually a
-                heterogeneous network of blockchains which allows separate chains to be created for
-                different applications.
-              </p>
-              <p>
-                A Subnet is a sovereign network which defines its own rules regarding its membership
-                and token economics. The security of assets within a specific subnet is directly
-                tied to the security and integrity of its validators.{' '}
-              </p>
-              <p>
-                Since Avalanche is independent from Ethereum, user&apos;s may face additional risks
-                around briding assets.{' '}
-              </p>
-            </div>
-            <FadeInOnView>
-              <div className="subsection">
-                <h4 className="anchor" id="hyperevm">
-                  Hyper EVM risks
-                </h4>
-                <p>
-                  <a href="https://hyperfoundation.org/">Hyper EVM</a> is a standalone Layer 1 chain
-                  with its own consensus mechanism, not directly on Ethereum mainnet like typical L2
-                  rollups.
-                </p>
-                <p>
-                  HyperEVM is integrated with HyperCore, the main Hyperliquid blockchain. Smart
-                  contracts on HyperEVM can directly access HyperCore’s native order books. It
-                  allows developers to deploy Ethereum-compatible smart contracts, including DeFi
-                  applications like liquidity pools, interacting via <b>precompiles</b>. While this
-                  offers novel use cases, it also means the operation of dApps may depend on the
-                  performance and security of both layers.
-                </p>
-                <p>Specific risks include:</p>
-                <ul>
-                  <li>
-                    Incorrect data reads from HyperCore, such as wrong prices, affecting pool
-                    pricing and leading to arbitrage opportunities or losses.
-                  </li>
-                  <li>
-                    Failed write operations causing desynchronization between pool state and
-                    HyperCore, potentially locking assets.
-                  </li>
-                  <li>
-                    Gas exhaustion due to invalid precompile calls, impacting pool operations under
-                    high gas price conditions.
-                  </li>
-                </ul>
-                <p>
-                  While HyperBFT's one-block finality aims to minimize such risks, predictable
-                  transaction ordering or network conditions could still enable these attacks,
-                  particularly in high-frequency trading scenarios common in liquidity pools.
-                </p>
-                <p>
-                  <b>Native Gas Token (HYPE):</b> Transactions on Hyper EVM use HYPE for gas fees
-                  (not ETH). Users should be aware of price volatility and liquidity considerations
-                  related to this token.
-                </p>
-                <p>
-                  <b>Dual-Block Architecture:</b> HyperEVM splits throughput across two block types:
-                  a) Small blocks for fast transaction processing and quick confirmations; and b)
-                  Large blocks for complex or high-value transactions, such as contract deployments.
-                  This architecture is designed to optimize speed and capacity, but also introduces
-                  unique technical dynamics that may impact transaction settlement.
-                </p>
-                <p>
-                  <b>Timing-Based Attacks:</b> write operations from HyperEVM to HyperCore may be
-                  delayed onchain to prevent latency advantages. However, it introduces risks of MEV
-                  attacks, exploiting price movements.
-                </p>
-                <p>
-                  <b>Early Stage and Unknown Vulnerabilities:</b> HyperEVM launched on mainnet in
-                  February 2025 and users interacting may consider undiscovered bugs into the risk
-                  profile.
-                </p>
-              </div>
-            </FadeInOnView>
-            <FadeInOnView>
-              <div className="subsection">
-                <h4 className="anchor" id="plasma">
-                  Plasma chain risks
-                </h4>
-                <p>
-                  <a href="https://www.plasma.to/">Plasma</a> is a high-performance layer-1
-                  blockchain focused on stablecoin payments. It uses PlasmaBFT, a pipelined
-                  implementation of Fast HotStuff-style BFT consensus, combined with a modified Reth
-                  execution layer for EVM compatibility.
-                </p>
-                <p>
-                  Key features include stablecoins with zero-fee USD₮ transfers, custom gas tokens,
-                  support for confidential payments, and the throughput to scale globally.
-                </p>
-                <p>Specific risks include:</p>
-                <ul>
-                  <li>
-                    <b>Centralization Risks:</b>
-                    <ul>
-                      <li>
-                        Plasma follows a progressive decentralization model. Currently, the
-                        validator set is centralized, creating single points of failure and
-                        governance risks. The transition to full decentralization is still in
-                        progress with three phases:
-                        <ul>
-                          <li>
-                            <b>Centralized Operation:</b> Initially all consensus nodes operated by
-                            Plasma team
-                          </li>
-                          <li>
-                            <b>Trusted Validator Set:</b> Small group of external validators
-                          </li>
-                          <li>
-                            <b>Permissionless Participation:</b> Eventually open to the public
-                          </li>
-                        </ul>
-                      </li>
-                    </ul>
-                  </li>
-                  <li>
-                    <b>Technical Risks:</b>
-                    <ul>
-                      <li>
-                        <b>New chain and consensus implementation risks:</b> Plasma relies on a
-                        custom BFT consensus implementation, PlasmaBFT, built around a pipelined
-                        Fast HotStuff variant and a modified Reth execution client. As with any new
-                        consensus and client stack, there is a risk of undiscovered bugs, design
-                        flaws, or implementation errors that could lead to chain halts, consensus
-                        failures, or safety violations (e.g., unexpected reorgs or double-spends).
-                      </li>
-                      <li>
-                        <b>Bridge Risks:</b> The Bitcoin bridge relies on a permissioned verifier
-                        network using MPC/threshold signatures, introducing trust assumptions around
-                        the verifier set.
-                      </li>
-                      <li>
-                        <b>Consensus Dependencies:</b> Non-validator nodes rely on trusted
-                        validators for consensus updates, creating potential sync failures if
-                        validator connections are lost.
-                      </li>
-                    </ul>
-                  </li>
-                  <li>
-                    <b>Operational Risks:</b>
-                    <ul>
-                      <li>
-                        <b>Beta status:</b> Plasma Mainnet is currently in &quot;beta&quot;,
-                        indicating the network may experience instability or require breaking
-                        changes.
-                      </li>
-                      <li>
-                        <b>Upgrade downtime:</b> Most non-validator node upgrades require 15–30
-                        minutes of downtime. Major releases introducing new features or consensus
-                        changes may require longer sync windows.
-                      </li>
-                      <li>
-                        <b>Limited Decentralization:</b> The current trusted validator model means
-                        network governance and security depend on a small set of known operators.
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
-                <p>Users of Frontier Finance on Plasma should understand that:</p>
-                <ul>
-                  <li>
-                    Frontier Finance does not control Plasma&apos;s consensus, validators, bridge
-                    infrastructure, or governance.
-                  </li>
-                  <li>
-                    A severe incident at the Plasma network or bridge level can result in partial or
-                    total loss of funds, even if Frontier Finance smart contracts perform exactly as
-                    specified.
-                  </li>
-                  <li>
-                    Users should evaluate Plasma&apos;s network assumptions, maturity, and bridge
-                    designs, and only deploy funds consistent with their own risk tolerance.
-                  </li>
-                </ul>
-              </div>
-            </FadeInOnView>
-            <Divider />
           </FadeInOnView>
           <FadeInOnView>
             <div className="subsection">

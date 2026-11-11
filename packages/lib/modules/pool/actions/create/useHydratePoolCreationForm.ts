@@ -23,15 +23,15 @@ export function useHydratePoolCreationForm() {
   }, [areAllParamsDefined])
 
   useEffect(() => {
-    if (!isLoadingPool && shouldHydratePoolCreationForm) {
-      if (poolFormData) poolCreationForm.reset(poolFormData)
+    if (!isLoadingPool && shouldHydratePoolCreationForm && poolFormData) {
+      poolCreationForm.reset(poolFormData)
       if (autoRangeFormData) autoRangeConfigForm.reset(autoRangeFormData)
       if (eclpFormData) eclpConfigForm.reset(eclpFormData)
 
       setPoolAddress(poolAddressParam)
       goToLastStep()
     }
-  }, [isLoadingPool, shouldHydratePoolCreationForm])
+  }, [isLoadingPool, shouldHydratePoolCreationForm, poolFormData])
 
   return { isLoadingPool }
 }

@@ -3,6 +3,7 @@ import SafeAppsSDK, { TransactionStatus } from '@safe-global/safe-apps-sdk'
 import { useQuery } from '@tanstack/react-query'
 import { Address, Hex } from 'viem'
 import { useUserAccount } from '../../../web3/UserAccountProvider'
+import { getSafeAppsSdk } from './safe.helpers'
 
 type Props = {
   enabled: boolean
@@ -18,8 +19,7 @@ export function useSafeTxQuery({ enabled, wagmiTxHash }: Props) {
 
   async function queryFn(): Promise<Address | undefined> {
     if (wagmiTxHash) {
-      const safeAppsSdk = new SafeAppsSDK()
-      return await pollSafeTxStatus(safeAppsSdk, wagmiTxHash)
+      return await pollSafeTxStatus(getSafeAppsSdk(), wagmiTxHash)
     }
   }
 

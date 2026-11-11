@@ -18,10 +18,14 @@ export function usePriceImpactLogic() {
         ? Number(priceImpact)
         : priceImpact
 
-  const priceImpactLevel =
-    priceImpactValue == null || Number.isNaN(priceImpactValue)
-      ? 'low'
-      : getPriceImpactLevel(priceImpactValue)
+  const priceImpactLevel: PriceImpactLevel =
+    priceImpact === null
+      ? 'unknown'
+      : priceImpactValue === undefined
+        ? 'low'
+        : Number.isNaN(priceImpactValue)
+          ? 'unknown'
+          : getPriceImpactLevel(priceImpactValue)
 
   const priceImpactColor = getPriceImpactColor(priceImpactLevel)
 

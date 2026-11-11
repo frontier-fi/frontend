@@ -479,13 +479,24 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
     const currentIsTokenInSet = currentState.tokenIn.address !== emptyAddress
     const currentIsTokenOutSet = currentState.tokenOut.address !== emptyAddress
 
-    if (
-      currentIsTokenInSet &&
-      currentIsTokenOutSet &&
-      !bn(currentTokenInUsd).isZero() &&
-      !bn(currentTokenOutUsd).isZero()
-    ) {
-      setPriceImpact(calcMarketPriceImpact(currentTokenInUsd, currentTokenOutUsd))
+    const hasNonZeroAmounts =
+      isBnParseable(currentState.tokenIn.amount) &&
+      bn(currentState.tokenIn.amount).gt(0) &&
+      isBnParseable(currentState.tokenOut.amount) &&
+      bn(currentState.tokenOut.amount).gt(0)
+
+    const isCurrentWrap = isWrapOrUnwrap(
+      currentState.tokenIn.address,
+      currentState.tokenOut.address,
+      selectedChain
+    )
+
+    if (currentIsTokenInSet && currentIsTokenOutSet && hasNonZeroAmounts && !isCurrentWrap) {
+      if (!bn(currentTokenInUsd).isZero() && !bn(currentTokenOutUsd).isZero()) {
+        setPriceImpact(calcMarketPriceImpact(currentTokenInUsd, currentTokenOutUsd))
+      } else {
+        setPriceImpact(null)
+      }
     } else {
       resetPriceImpact()
     }
@@ -694,14 +705,14 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
     if (swapState.swapType === GqlSorSwapTypeValues.ExactIn) {
       calcPriceImpact()
     }
-  }, [tokenOutUsd])
+  }, [tokenOutUsd, swapState.tokenOut.amount])
 
   // If token in value changes when swapping exact out, recalculate price impact.
   useEffect(() => {
     if (swapState.swapType === GqlSorSwapTypeValues.ExactOut) {
       calcPriceImpact()
     }
-  }, [tokenInUsd])
+  }, [tokenInUsd, swapState.tokenIn.amount])
 
   const { isDisabled, disabledReason } = isDisabledWithReason(
     [!isConnected, LABELS.walletNotConnected],

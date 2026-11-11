@@ -2,7 +2,7 @@
 
 import { default as NextError } from 'next/error'
 import { useEffect } from 'react'
-import { isDev, isStaging } from '@repo/lib/config/app.config'
+import { isDev } from '@repo/lib/config/app.config'
 import { reportClientError } from '@repo/lib/shared/utils/error-logger'
 import { shouldIgnore } from '@repo/lib/shared/utils/query-errors'
 
@@ -35,7 +35,7 @@ export default function GlobalError({
     })
   }, [error])
 
-  const showResetButton = isDev || isStaging
+  const showResetButton = isDev
   const href = typeof window === 'undefined' ? undefined : window.location.href
 
   const title = error.digest ? `Something went wrong (${error.digest})` : 'Something went wrong'
