@@ -30,7 +30,10 @@ import {
 import { useTransactionSteps } from '@repo/lib/modules/transactions/transaction-steps/useTransactionSteps'
 import { useTotalUsdValue } from '@repo/lib/modules/tokens/useTotalUsdValue'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
-import { isUnhandledAddPriceImpactError } from '@repo/lib/modules/price-impact/price-impact.utils'
+import {
+  cannotCalculatePriceImpactError,
+  isUnhandledAddPriceImpactError,
+} from '@repo/lib/modules/price-impact/price-impact.utils'
 import { usePriceImpact } from '@repo/lib/modules/price-impact/PriceImpactProvider'
 import { useModalWithPoolRedirect } from '../../useModalWithPoolRedirect'
 import { supportsWethIsEth } from '../../pool.helpers'
@@ -179,7 +182,9 @@ export function useAddLiquidityLogic(
     enabled,
   })
 
-  const needsToAcceptHighPI = hasToAcceptHighPriceImpact && !acceptPriceImpactRisk
+  const needsToAcceptHighPI =
+    (hasToAcceptHighPriceImpact || cannotCalculatePriceImpactError(priceImpactQuery.error)) &&
+    !acceptPriceImpactRisk
 
   const { steps, isLoadingSteps } = useAddLiquiditySteps({
     helpers,

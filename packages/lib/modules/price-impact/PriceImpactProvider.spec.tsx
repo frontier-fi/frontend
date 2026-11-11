@@ -62,4 +62,25 @@ describe('usePriceImpactLogic', () => {
 
     expect(result.current.acceptPriceImpactRisk).toBe(true)
   })
+
+  it('maps null price impact to unknown level until reset', () => {
+    const { result } = renderHook(() => usePriceImpactLogic())
+
+    act(() => {
+      result.current.setPriceImpact(null)
+    })
+
+    expect(result.current.priceImpact).toBeNull()
+    expect(result.current.priceImpactLevel).toBe('unknown')
+    expect(result.current.priceImpactColor).toBe('font.error')
+    expect(result.current.hasToAcceptHighPriceImpact).toBe(true)
+
+    act(() => {
+      result.current.resetPriceImpact()
+    })
+
+    expect(result.current.priceImpact).toBeUndefined()
+    expect(result.current.priceImpactLevel).toBe('low')
+    expect(result.current.hasToAcceptHighPriceImpact).toBe(false)
+  })
 })
