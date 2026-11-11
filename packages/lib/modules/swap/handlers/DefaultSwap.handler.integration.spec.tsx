@@ -15,6 +15,7 @@ const SWAP_SIMULATION_TEST_TIMEOUT_MS = 120_000
 describe.runIf(isChainSupported(GqlChainValues.Sepolia))(
   'Pool Swap handler with Sepolia v3 pool',
   () => {
+    const sepoliaV3PoolId = '0x4898409f170de235844822a9545a54dbe637c049'
     const usdcAaveAddress = '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8' as const
     const daiAaveAddress = '0xff34b3d4aee8ddcd6f9afffb6fe49bd371b8a357' as const
     const handler = new DefaultSwapHandler(apolloTestClient)
@@ -28,6 +29,7 @@ describe.runIf(isChainSupported(GqlChainValues.Sepolia))(
           swapAmount: '1',
           tokenIn: usdcAaveAddress,
           tokenOut: daiAaveAddress,
+          poolIds: [sepoliaV3PoolId],
         })
 
         expect(result.hopCount).toBeGreaterThan(0)
@@ -51,6 +53,7 @@ describe.runIf(isChainSupported(GqlChainValues.Sepolia))(
           swapAmount: '1',
           tokenIn: usdcAaveAddress,
           tokenOut: daiAaveAddress,
+          poolIds: [sepoliaV3PoolId],
         })
 
         const tokenIn: SwapTokenInput = {
@@ -91,6 +94,7 @@ describe.runIf(isChainSupported(GqlChainValues.Sepolia))(
           swapAmount: '1',
           tokenIn: usdcAaveAddress,
           tokenOut: daiAaveAddress,
+          poolIds: [sepoliaV3PoolId],
         })
 
         expect(result.hopCount).toBeGreaterThan(0)
