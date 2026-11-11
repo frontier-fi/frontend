@@ -4,6 +4,7 @@ import { Path } from '@balancer/sdk'
 import { Box, useColorModeValue, useTheme } from '@chakra-ui/react'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { fNum } from '@repo/lib/shared/utils/numbers'
+import { escapeHtml } from '@repo/lib/shared/utils/strings'
 import * as echarts from 'echarts/core'
 import { SankeyChart } from 'echarts/charts'
 import { TooltipComponent } from 'echarts/components'
@@ -24,12 +25,6 @@ type Props = {
 const LINK_OPACITY = 0.32
 const LINK_OPACITY_FOCUS = 0.7
 const ICON_SIZE = 14
-
-function escapeHtml(s: string) {
-  return s.replace(/[&<>"']/g, c =>
-    c === '&' ? '&amp;' : c === '<' ? '&lt;' : c === '>' ? '&gt;' : c === '"' ? '&quot;' : '&#39;'
-  )
-}
 
 /**
  * ODOS-style horizontal Sankey for a swap quote: source token → hop tokens → out token,

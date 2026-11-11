@@ -22,6 +22,7 @@ import {
 } from '@repo/lib/shared/utils/blockExplorer'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { useCurrentDate } from '@repo/lib/shared/hooks/date.hooks'
+import { escapeHtml, toSafeHttpsOrRelativeUrl } from '@repo/lib/shared/utils/strings'
 
 type ChartInfoTokens = {
   token?: ApiToken
@@ -174,8 +175,11 @@ const getDefaultPoolActivityChartOptions = (
         }) as ChartInfoTokens[]
 
         const tx = metaData.tx
-        const txLink = getBlockExplorerTxUrl(tx, metaData.chain)
-        const addressLink = getBlockExplorerAddressUrl(userAddress, metaData.chain)
+        const txLink = toSafeHttpsOrRelativeUrl(getBlockExplorerTxUrl(tx, metaData.chain))
+
+        const addressLink = toSafeHttpsOrRelativeUrl(
+          getBlockExplorerAddressUrl(userAddress, metaData.chain)
+        )
 
         const typeStr =
           metaData.type === GqlPoolEventTypeValues.Add
@@ -186,6 +190,12 @@ const getDefaultPoolActivityChartOptions = (
 
         const arrow = `<svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" fill="none"><path stroke="#718096" stroke-linecap="round" stroke-linejoin="round" d="M2 1h6v6M1 8l7-7"/></svg>`
 
+        const formattedTime = escapeHtml(
+          format(new Date(timestamp * 1000), 'MMM d, h:mma')
+            .replace('AM', 'am')
+            .replace('PM', 'pm')
+        )
+
         return `
           <div style="max-width: 152px; padding: none; display: flex; flex-direction: column;${
             toolTipTheme.container
@@ -195,49 +205,72 @@ const getDefaultPoolActivityChartOptions = (
               toolTipTheme.heading
             }; color: ${toolTipTheme.text}; ">
               <span>${typeStr} </span>
-              <span>&nbsp;${currencyFormatter(metaData.usdValue)}&nbsp;</span>
-              <span>on ${getChainShortName(metaData.chain)}</span>
+              <span>&nbsp;${escapeHtml(currencyFormatter(metaData.usdValue))}&nbsp;</span>
+              <span>on ${escapeHtml(getChainShortName(metaData.chain))}</span>
             </div>
-            <div style="display:flex;flex-direction:column;justify-content:flex-start;gap:0;margin-top:4px";>
-              ${tokens?.map((token, index) => {
-                return `
+            <div style="display:flex;flex-direction:column;justify-content:flex-start;gap:0;margin-top:4px">
+              ${
+                tokens
+                  ?.map((token, index) => {
+                    const logoSrc = toSafeHttpsOrRelativeUrl(token.token?.logoURI)
+
+                    const amountLabel = escapeHtml(
+                      Number(Number(token.amount).toFixed(2)).toLocaleString()
+                    )
+
+                    const symbolLabel = escapeHtml(token.token?.symbol ?? '')
+                    return `
                   <div style="color: ${
                     toolTipTheme.text
                   }; display:flex;justify-content:start;align-items:center;gap:6px; margin-bottom:${
                     index === tokens.length - 1 ? `4px` : `-20px`
                   }">
-                    <img src="${
-                      token.token?.logoURI
-                    }" style="width: 16px; height: 16px; border-radius: 50%; margin-right;letter-spacing:-0.1px" />
+                    ${
+                      logoSrc
+                        ? `<img src="${escapeHtml(
+                            logoSrc
+                          )}" style="width: 16px; height: 16px; border-radius: 50%; margin-right;letter-spacing:-0.1px" />`
+                        : ''
+                    }
                     <div style="text-align:left">
-                      <span>${Number(Number(token.amount).toFixed(2)).toLocaleString()}</span>
-                      <span>${token.token?.symbol}</span>
+                      <span>${amountLabel}</span>
+                      <span>${symbolLabel}</span>
                     </div>
                   </div>
                 `
-              })}
+                  })
+                  .join('') ?? ''
+              }
             </div>
-            <a style="width:100%;display:flex;align-items:center;font-size: 0.75rem; padding-top:4px;font-weight: 500; color: ${
-              toolTipTheme.text
-            };" href="${txLink}" target="_blank" rel="noopener">
+            ${
+              txLink
+                ? `<a style="width:100%;display:flex;align-items:center;font-size: 0.75rem; padding-top:4px;font-weight: 500; color: ${
+                    toolTipTheme.text
+                  };" href="${escapeHtml(txLink)}" target="_blank" rel="noopener noreferrer">
             <span style="margin-right:4px;">
-                    Tx: ${format(new Date(timestamp * 1000), 'MMM d, h:mma')
-                      .replace('AM', 'am')
-                      .replace('PM', 'pm')}
+                    Tx: ${formattedTime}
                   </span>
 
               ${arrow}
-            </a>
-            <div style="width:100%;display:flex;align-items:center;font-size: 0.75rem; line-height:1;font-weight: 500; margin-top:4px; color: ${
-              toolTipTheme.text
-            };">
-                <a style="display:flex;align-items:center;" href=${addressLink} target="_blank" rel="noopener">
-                  <span style="font-size: 0.75rem; margin-right:4px;">By: ${abbreviateAddress(
-                    userAddress
+            </a>`
+                : ''
+            }
+            ${
+              addressLink
+                ? `<div style="width:100%;display:flex;align-items:center;font-size: 0.75rem; line-height:1;font-weight: 500; margin-top:4px; color: ${
+                    toolTipTheme.text
+                  };">
+                <a style="display:flex;align-items:center;" href="${escapeHtml(
+                  addressLink
+                )}" target="_blank" rel="noopener noreferrer">
+                  <span style="font-size: 0.75rem; margin-right:4px;">By: ${escapeHtml(
+                    abbreviateAddress(userAddress)
                   )}</span>
                   ${arrow}
                 </a>
-            </div>
+            </div>`
+                : ''
+            }
           </div>
       `
       },

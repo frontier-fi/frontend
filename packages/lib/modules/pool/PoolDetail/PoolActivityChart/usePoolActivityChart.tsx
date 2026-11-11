@@ -22,6 +22,7 @@ import {
   getBlockExplorerAddressUrl,
   getBlockExplorerTxUrl,
 } from '@repo/lib/shared/utils/blockExplorer'
+import { escapeHtml, toSafeHttpsOrRelativeUrl } from '@repo/lib/shared/utils/strings'
 
 const getDefaultPoolActivityChartOptions = (
   theme: any, // TODO: type this
@@ -125,9 +126,17 @@ const getDefaultPoolActivityChartOptions = (
         }) as PoolActivityTokens[]
 
         const tx = metaData.tx
-        const txLink = getBlockExplorerTxUrl(tx, chain)
-        const addressLink = getBlockExplorerAddressUrl(userAddress, chain)
+        const txLink = toSafeHttpsOrRelativeUrl(getBlockExplorerTxUrl(tx, chain))
+
+        const addressLink = toSafeHttpsOrRelativeUrl(getBlockExplorerAddressUrl(userAddress, chain))
+
         const arrow = `<svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" fill="none"><path stroke="#718096" stroke-linecap="round" stroke-linejoin="round" d="M2 1h6v6M1 8l7-7"/></svg>`
+
+        const formattedTime = escapeHtml(
+          format(new Date(timestamp * 1000), 'MMM d, h:mma')
+            .replace('AM', 'am')
+            .replace('PM', 'pm')
+        )
 
         return `
           <div style="padding: none; display: flex; flex-direction: column;${
@@ -138,53 +147,72 @@ const getDefaultPoolActivityChartOptions = (
             }; display:flex;justify-content:start;gap:4px;letter-spacing:-0.25px;${
               toolTipTheme.heading
             };">
-              <span>${data.seriesName}</span>
-              <span>${currencyFormatter(metaData.usdValue)}</span>
+              <span>${escapeHtml(String(data.seriesName ?? ''))}</span>
+              <span>${escapeHtml(currencyFormatter(metaData.usdValue))}</span>
             </div>
             <div style="display:flex;flex-direction:column;justify-content:flex-start;gap:0;margin-top:4px">
-              ${tokens?.map((token, index) => {
-                return `
+              ${
+                tokens
+                  ?.map((token, index) => {
+                    const logoSrc = toSafeHttpsOrRelativeUrl(token.token?.logoURI)
+
+                    const amountLabel = escapeHtml(
+                      Number(Number(token.amount).toFixed(2)).toLocaleString()
+                    )
+
+                    const symbolLabel = escapeHtml(token.token?.symbol ?? '')
+                    return `
                   <div style="color: ${
                     toolTipTheme.text
                   }; display:flex;justify-content:start;align-items:center;gap:6px; margin-bottom:${
                     index === tokens.length - 1 ? `4px` : `-20px`
                   }">
                     ${
-                      token.token?.logoURI
-                        ? `<img src="${
-                            token.token?.logoURI
-                          }" style="width: 16px; height: 16px; border-radius: 50%; margin-right;letter-spacing:-0.1px" />`
+                      logoSrc
+                        ? `<img src="${escapeHtml(
+                            logoSrc
+                          )}" style="width: 16px; height: 16px; border-radius: 50%; margin-right;letter-spacing:-0.1px" />`
                         : ``
                     }
                     <div style="text-align:left">
-                      <span>${Number(Number(token.amount).toFixed(2)).toLocaleString()}</span>
-                      <span>${token.token?.symbol}</span>
+                      <span>${amountLabel}</span>
+                      <span>${symbolLabel}</span>
                     </div>
                   </div>
                 `
-              })}
+                  })
+                  .join('') ?? ''
+              }
             </div>
-            <a style="width:100%;display:flex;align-items:center;justify-content:space-between;font-size: 0.75rem; font-weight: 500; color: ${
-              toolTipTheme.text
-            };" href=${txLink} target="_blank" rel="noopener">
+            ${
+              txLink
+                ? `<a style="width:100%;display:flex;align-items:center;justify-content:space-between;font-size: 0.75rem; font-weight: 500; color: ${
+                    toolTipTheme.text
+                  };" href="${escapeHtml(txLink)}" target="_blank" rel="noopener noreferrer">
             <span style="margin-right:4px;">
-                    Tx: ${format(new Date(timestamp * 1000), 'MMM d, h:mma')
-                      .replace('AM', 'am')
-                      .replace('PM', 'pm')}
+                    Tx: ${formattedTime}
                   </span>
 
               ${arrow}
-            </a>
-            <div style="width:100%;display:flex;align-items:center;justify-content:space-between;font-size: 0.75rem; line-height:1;font-weight: 500; margin-top:4px; color: ${
-              toolTipTheme.text
-            };">
-                <a style="display:flex;align-items:center;" href=${addressLink} target="_blank" rel="noopener">
-                  <span style="font-size: 0.75rem; margin-right:4px;">By: ${abbreviateAddress(
-                    userAddress
+            </a>`
+                : ''
+            }
+            ${
+              addressLink
+                ? `<div style="width:100%;display:flex;align-items:center;justify-content:space-between;font-size: 0.75rem; line-height:1;font-weight: 500; margin-top:4px; color: ${
+                    toolTipTheme.text
+                  };">
+                <a style="display:flex;align-items:center;" href="${escapeHtml(
+                  addressLink
+                )}" target="_blank" rel="noopener noreferrer">
+                  <span style="font-size: 0.75rem; margin-right:4px;">By: ${escapeHtml(
+                    abbreviateAddress(userAddress)
                   )}</span>
                   ${arrow}
                 </a>
-            </div>
+            </div>`
+                : ''
+            }
           </div>
       `
       },

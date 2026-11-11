@@ -37,3 +37,26 @@ export function isValidTelegramHandle(handle: string): string | true {
 export function hasWhitespace(s: string) {
   return /\s/g.test(s)
 }
+
+export function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, c =>
+    c === '&' ? '&amp;' : c === '<' ? '&lt;' : c === '>' ? '&gt;' : c === '"' ? '&quot;' : '&#39;'
+  )
+}
+
+export function toSafeHttpsOrRelativeUrl(raw?: string | null): string | undefined {
+  if (!raw) return undefined
+  const trimmed = raw.trim()
+  if (!trimmed) return undefined
+
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//')) {
+    return trimmed
+  }
+
+  try {
+    const parsed = new URL(trimmed)
+    return parsed.protocol === 'https:' ? parsed.toString() : undefined
+  } catch {
+    return undefined
+  }
+}

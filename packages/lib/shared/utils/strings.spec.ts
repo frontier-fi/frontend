@@ -1,4 +1,10 @@
-import { hasWhitespace, isValidTelegramHandle, isValidTwitterHandle } from './strings'
+import {
+  escapeHtml,
+  hasWhitespace,
+  isValidTelegramHandle,
+  isValidTwitterHandle,
+  toSafeHttpsOrRelativeUrl,
+} from './strings'
 
 describe('Twitter handle validation', () => {
   it('should allow no handle', () => {
@@ -64,5 +70,27 @@ describe('Whitespace check', () => {
 
   it('should return false for strings without whitespace', () => {
     expect(hasWhitespace('abc')).toBe(false)
+  })
+})
+
+describe('escapeHtml', () => {
+  it('encodes special characters used in html markup and attributes', () => {
+    expect(escapeHtml('<$0.01 & "TKN\'s">')).toBe('&lt;$0.01 &amp; &quot;TKN&#39;s&quot;&gt;')
+  })
+})
+
+describe('toSafeHttpsOrRelativeUrl', () => {
+  it('keeps https urls and root-relative paths', () => {
+    expect(toSafeHttpsOrRelativeUrl('https://etherscan.io/tx/0x123')).toBe(
+      'https://etherscan.io/tx/0x123'
+    )
+
+    expect(toSafeHttpsOrRelativeUrl('/api/proxy/image?url=abc')).toBe('/api/proxy/image?url=abc')
+  })
+
+  it('returns undefined for non-https schemes or protocol-relative urls', () => {
+    expect(toSafeHttpsOrRelativeUrl('http://example.com/icon.png')).toBeUndefined()
+    expect(toSafeHttpsOrRelativeUrl('//example.com/icon.png')).toBeUndefined()
+    expect(toSafeHttpsOrRelativeUrl('')).toBeUndefined()
   })
 })
