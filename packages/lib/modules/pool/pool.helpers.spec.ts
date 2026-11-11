@@ -24,6 +24,7 @@ import {
   v3SepoliaNestedBoosted,
 } from './__mocks__/pool-examples/boosted'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { zeroAddress } from 'viem'
 
 describe('getPoolActionableTokens', () => {
@@ -181,15 +182,32 @@ describe('shouldBlockAddLiquidity', () => {
       expect(getPoolAddBlockedReason(pool)).toHaveLength(1)
     })
 
-    it('should block if pool hook omits reviewData', () => {
+    it('treats hook omitting reviewData as N/A when requireHookReview is false', () => {
       const pool = getApiPoolMock(stableSurgeBoosted)
       const hookWithoutReviewData = { ...pool.hook } as Record<string, unknown>
       delete hookWithoutReviewData.reviewData
       pool.hook = hookWithoutReviewData as Pool['hook']
 
-      expect(hasReviewedHook(pool.hook!)).toBe(false)
-      expect(shouldBlockAddLiquidity(pool)).toBe(true)
-      expect(getPoolAddBlockedReason(pool)).toContain('Unreviewed hook')
+      expect(hasReviewedHook(pool.hook!)).toBe(true)
+      expect(getPoolAddBlockedReason(pool)).not.toContain('Unreviewed hook')
+    })
+
+    it('blocks when hook omits reviewData and requireHookReview is true', () => {
+      const pool = getApiPoolMock(stableSurgeBoosted)
+      const hookWithoutReviewData = { ...pool.hook } as Record<string, unknown>
+      delete hookWithoutReviewData.reviewData
+      pool.hook = hookWithoutReviewData as Pool['hook']
+
+      const previous = PROJECT_CONFIG.options.requireHookReview
+      PROJECT_CONFIG.options.requireHookReview = true
+
+      try {
+        expect(hasReviewedHook(pool.hook!)).toBe(false)
+        expect(shouldBlockAddLiquidity(pool)).toBe(true)
+        expect(getPoolAddBlockedReason(pool)).toContain('Unreviewed hook')
+      } finally {
+        PROJECT_CONFIG.options.requireHookReview = previous
+      }
     })
 
     it('returns true in hasReviewedHook when reviewData is present', () => {

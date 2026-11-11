@@ -299,7 +299,7 @@ export function hasRateProvider(token: GqlPoolTokenDetail | any): boolean {
 }
 
 export function hasReviewedHook(hook: HookFragment): boolean {
-  if (!('reviewData' in hook)) return false
+  if (!('reviewData' in hook)) return !(PROJECT_CONFIG.options.requireHookReview ?? true)
   return !!(hook as { reviewData?: unknown }).reviewData
 }
 

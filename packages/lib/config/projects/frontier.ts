@@ -39,6 +39,7 @@ export const ProjectConfigFrontier: ProjectConfig = {
     hidePoolTypes: hiddenPoolTypes,
     hideProtocolVersion: ['v2', 'v3', 'cow'],
     hideHooksFilters: true,
+    requireHookReview: false,
     showPoolName: false,
     allowCreateWallet: true,
     isOnSafeAppList: true,
