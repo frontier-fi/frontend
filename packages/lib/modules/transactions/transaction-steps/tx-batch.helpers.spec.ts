@@ -3,6 +3,7 @@ import {
   buildTxBatch,
   getPendingNestedSteps,
   hasSomePendingNestedTxInBatch,
+  isTxBatchReady,
 } from './tx-batch.helpers'
 
 describe('buildTxBatch', () => {
@@ -26,6 +27,40 @@ describe('buildTxBatch', () => {
     } as any
 
     expect(buildTxBatch(step)).toEqual([{ to: '0xbbb' }, { to: '0xaaa' }])
+  })
+
+  it('omits undefined calls when step calldata is still loading', () => {
+    const step = {
+      nestedSteps: [{ isComplete: () => false, batchableTxCall: undefined }],
+      batchableTxCall: undefined,
+    } as any
+
+    expect(buildTxBatch(step)).toEqual([])
+  })
+})
+
+describe('isTxBatchReady', () => {
+  it('returns false when parent or pending nested calls are missing', () => {
+    expect(isTxBatchReady({ batchableTxCall: undefined } as any)).toBe(false)
+
+    expect(
+      isTxBatchReady({
+        batchableTxCall: { to: '0xaaa', data: '0x' },
+        nestedSteps: [{ isComplete: () => false, batchableTxCall: undefined }],
+      } as any)
+    ).toBe(false)
+  })
+
+  it('returns true when parent and all pending nested calls are built', () => {
+    expect(
+      isTxBatchReady({
+        batchableTxCall: { to: '0xaaa', data: '0x' },
+        nestedSteps: [
+          { isComplete: () => false, batchableTxCall: { to: '0xbbb', data: '0x' } },
+          { isComplete: () => true, batchableTxCall: undefined },
+        ],
+      } as any)
+    ).toBe(true)
   })
 })
 
