@@ -180,6 +180,10 @@ export function get24HoursFromNowInSecs() {
   return getTimestampInMinsFromNow(24 * 60)
 }
 
+export function getDefaultDeadlineSeconds(ttlSeconds = 1200): bigint {
+  return BigInt(Math.floor(Date.now() / 1000) + ttlSeconds)
+}
+
 /*
   Get start of day in UTC timezone
 */

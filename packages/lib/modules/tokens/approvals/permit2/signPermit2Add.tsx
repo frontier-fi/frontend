@@ -1,6 +1,6 @@
 import { Pool } from '@repo/lib/modules/pool/pool.types'
 import { ensureError } from '@repo/lib/shared/utils/errors'
-import { get24HoursFromNowInSecs } from '@repo/lib/shared/utils/time'
+import { get24HoursFromNowInSecs, getDefaultDeadlineSeconds } from '@repo/lib/shared/utils/time'
 import {
   AddLiquidityKind,
   AddLiquidityQueryOutput,
@@ -81,7 +81,7 @@ async function sign({
       ...unbalancedOutput,
       slippage: baseInput.slippage,
       wethIsEth: baseInput.wethIsEth,
-      deadline: BigInt(Number.MAX_SAFE_INTEGER),
+      deadline: getDefaultDeadlineSeconds(),
     }
 
     return Permit2Helper.signAddLiquidityUnbalancedViaSwapApproval({

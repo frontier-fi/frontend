@@ -8,6 +8,7 @@ import { SwapHandler } from './Swap.handler'
 import { formatUnits } from 'viem'
 import { getRpcUrl } from '../../web3/transports'
 import { bn } from '@repo/lib/shared/utils/numbers'
+import { getDefaultDeadlineSeconds } from '@repo/lib/shared/utils/time'
 import { ProtocolVersion } from '../../pool/pool.types'
 
 /**
@@ -27,7 +28,7 @@ export abstract class BaseDefaultSwapHandler implements SwapHandler {
   }: SdkBuildSwapInputs): TransactionConfig {
     const baseBuildCallParams = {
       slippage: Slippage.fromPercentage(slippagePercent as `${number}`),
-      deadline: BigInt(Number.MAX_SAFE_INTEGER),
+      deadline: getDefaultDeadlineSeconds(),
       wethIsEth,
       queryOutput,
     }

@@ -220,12 +220,16 @@ describe('BaseDefaultSwapHandler', () => {
       expect(mockBuildCallWithPermit2).toHaveBeenCalledWith(
         expect.objectContaining({
           slippage: expect.anything(),
-          deadline: BigInt(Number.MAX_SAFE_INTEGER),
+          deadline: expect.any(BigInt),
           wethIsEth: false,
           queryOutput: expect.anything(),
         }),
         mockPermit2
       )
+
+      const buildCallArgs = mockBuildCallWithPermit2.mock.calls[0]?.[0]
+      expect(buildCallArgs?.deadline).toBeGreaterThan(0n)
+      expect(buildCallArgs?.deadline).toBeLessThan(BigInt(Number.MAX_SAFE_INTEGER))
     })
   })
 })
