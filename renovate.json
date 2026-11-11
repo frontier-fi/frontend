@@ -9,7 +9,7 @@
   "ignoreDeps": ["viem", "@balancer/sdk"],
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor"],
+      "matchUpdateTypes": ["patch", "minor"],
       "minimumReleaseAge": "7 days"
     },
     {

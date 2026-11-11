@@ -10,6 +10,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   release:
     name: Release
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       # A pull request opened with GITHUB_TOKEN starts no workflows, so the Checks workflow that the
