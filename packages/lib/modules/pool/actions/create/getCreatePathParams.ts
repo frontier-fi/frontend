@@ -1,6 +1,6 @@
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { SupportedPoolTypes } from './types'
-import { Address } from 'viem'
+import { Address, isAddress } from 'viem'
 
 export type CreatePathParams = {
   network?: GqlChain
@@ -17,6 +17,6 @@ export function getCreatePathParams(slug?: string[]): CreatePathParams {
   return {
     network: network as GqlChain | undefined,
     poolType: poolType as SupportedPoolTypes | undefined,
-    poolAddress: poolAddress as Address | undefined,
+    poolAddress: poolAddress && isAddress(poolAddress) ? poolAddress : undefined,
   }
 }

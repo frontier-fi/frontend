@@ -153,7 +153,9 @@ export function parseLstWithdrawReceipt({ receiptLogs, userAddress, chain }: Par
   }
 }
 
-export function parsePoolCreationReceipt({ receiptLogs }: ParseProps) {
+export function parsePoolCreationReceipt({ receiptLogs, chain }: ParseProps) {
+  const vaultV3Address = getNetworkConfig(chain).contracts.balancer.vaultV3
+
   const logs = parseEventLogs({
     abi: parseAbi([
       'event LOG_NEW_POOL(address indexed caller, address indexed bPool)',
@@ -162,7 +164,14 @@ export function parsePoolCreationReceipt({ receiptLogs }: ParseProps) {
     logs: receiptLogs,
   })
 
-  const log = logs[0]
+  const log = logs.find(entry => {
+    if (entry.eventName === 'PoolCreated' && vaultV3Address) {
+      return isSameAddress(entry.address, vaultV3Address)
+    }
+
+    return true
+  })
+
   if (!log) return { poolAddress: undefined }
 
   return { poolAddress: log.eventName === 'PoolCreated' ? log.args.pool : log.args.bPool }
