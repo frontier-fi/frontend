@@ -1,5 +1,5 @@
 import { useQueries } from '@tanstack/react-query'
-import { groupBy, keyBy, set } from 'lodash'
+import { groupBy, keyBy } from 'lodash'
 import { ContractFunctionParameters } from 'viem'
 import { multicall } from 'wagmi/actions'
 import { useCallback } from 'react'
@@ -49,9 +49,9 @@ export function useMulticall(
           })
 
           // map the result to its id based on the call index
-          const idMappedResults = results
-            .map((result, i) => ({ ...result, id: multicalls[i]!.id }))
-            .reduce((o, { id, ...rest }) => set(o, id, rest), {})
+          const idMappedResults = Object.fromEntries(
+            results.map((result, i) => [multicalls[i]!.id, result])
+          )
 
           return idMappedResults
         },

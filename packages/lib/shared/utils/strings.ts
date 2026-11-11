@@ -44,6 +44,19 @@ export function escapeHtml(s: string): string {
   )
 }
 
+export function toSafeHttpsUrl(raw?: string | null): string | undefined {
+  if (!raw) return undefined
+  const trimmed = raw.trim()
+  if (!trimmed) return undefined
+
+  try {
+    const parsed = new URL(trimmed)
+    return parsed.protocol === 'https:' ? parsed.toString() : undefined
+  } catch {
+    return undefined
+  }
+}
+
 export function toSafeHttpsOrRelativeUrl(raw?: string | null): string | undefined {
   if (!raw) return undefined
   const trimmed = raw.trim()
@@ -53,10 +66,19 @@ export function toSafeHttpsOrRelativeUrl(raw?: string | null): string | undefine
     return trimmed
   }
 
-  try {
-    const parsed = new URL(trimmed)
-    return parsed.protocol === 'https:' ? parsed.toString() : undefined
-  } catch {
+  return toSafeHttpsUrl(trimmed)
+}
+
+export function normalizeRelativeReviewPath(raw?: string | null): string | undefined {
+  if (!raw) return undefined
+  const trimmed = raw.trim().replace(/^(\.\/)+|^\/+/, '')
+  if (!trimmed || /[\\?#:]/.test(trimmed)) return undefined
+
+  const segments = trimmed.split('/')
+
+  if (segments.some(segment => !segment || segment === '.' || segment === '..')) {
     return undefined
   }
+
+  return segments.map(segment => encodeURIComponent(segment)).join('/')
 }

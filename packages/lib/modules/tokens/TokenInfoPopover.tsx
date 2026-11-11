@@ -35,7 +35,9 @@ export function TokenInfoPopover({ tokenAddress, chain, isBpt = false }: Props) 
   const token = getToken(tokenAddress, chain)
   const coingeckoId = token?.coingeckoId
 
-  const coingeckoUrl = coingeckoId ? `https://www.coingecko.com/en/coins/${coingeckoId}` : undefined
+  const coingeckoUrl = coingeckoId
+    ? `https://www.coingecko.com/en/coins/${encodeURIComponent(coingeckoId)}`
+    : undefined
 
   return (
     <Popover arrowSize={12} placement="right" variant="tooltip">

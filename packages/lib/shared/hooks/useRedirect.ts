@@ -9,7 +9,7 @@ export function useRedirect(path: string) {
    */
   function redirectToPage(event?: MouseEvent<HTMLElement>) {
     if (event && (event.ctrlKey || event.metaKey)) {
-      window.open(path, '_blank')
+      window.open(path, '_blank', 'noopener,noreferrer')
     } else {
       router.push(path)
     }

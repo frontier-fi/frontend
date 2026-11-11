@@ -3,7 +3,9 @@ import {
   hasWhitespace,
   isValidTelegramHandle,
   isValidTwitterHandle,
+  normalizeRelativeReviewPath,
   toSafeHttpsOrRelativeUrl,
+  toSafeHttpsUrl,
 } from './strings'
 
 describe('Twitter handle validation', () => {
@@ -92,5 +94,35 @@ describe('toSafeHttpsOrRelativeUrl', () => {
     expect(toSafeHttpsOrRelativeUrl('http://example.com/icon.png')).toBeUndefined()
     expect(toSafeHttpsOrRelativeUrl('//example.com/icon.png')).toBeUndefined()
     expect(toSafeHttpsOrRelativeUrl('')).toBeUndefined()
+  })
+})
+
+describe('toSafeHttpsUrl', () => {
+  it('keeps https urls and rejects relative or non-https urls', () => {
+    expect(toSafeHttpsUrl('https://docs.frontier.fi/guides')).toBe(
+      'https://docs.frontier.fi/guides'
+    )
+
+    expect(toSafeHttpsUrl('/pools')).toBeUndefined()
+    expect(toSafeHttpsUrl('http://example.com')).toBeUndefined()
+    expect(toSafeHttpsUrl('data:text/html,hello')).toBeUndefined()
+  })
+})
+
+describe('normalizeRelativeReviewPath', () => {
+  it('normalizes relative review file paths', () => {
+    expect(normalizeRelativeReviewPath('./StableSurge.md')).toBe('StableSurge.md')
+
+    expect(normalizeRelativeReviewPath('./MorphoVaults/V1.1-Steakhouse.md')).toBe(
+      'MorphoVaults/V1.1-Steakhouse.md'
+    )
+  })
+
+  it('returns undefined for parent segments, query strings, or full urls', () => {
+    expect(normalizeRelativeReviewPath('../../other-repo/file.md')).toBeUndefined()
+    expect(normalizeRelativeReviewPath('folder/../file.md')).toBeUndefined()
+    expect(normalizeRelativeReviewPath('file.md?raw=1')).toBeUndefined()
+    expect(normalizeRelativeReviewPath('https://example.com/file.md')).toBeUndefined()
+    expect(normalizeRelativeReviewPath('')).toBeUndefined()
   })
 })

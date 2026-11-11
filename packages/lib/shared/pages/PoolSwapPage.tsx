@@ -10,7 +10,7 @@ import { SwapForm } from '@repo/lib/modules/swap/SwapForm'
 import SwapLayout from '@repo/lib/modules/swap/SwapLayout'
 import { PathParams, SwapProviderProps } from '@repo/lib/modules/swap/SwapProvider'
 import { BalAlert } from '@repo/lib/shared/components/alerts/BalAlert'
-import { Hash } from 'viem'
+import { isHash } from 'viem'
 
 type Props = {
   txHash?: string[]
@@ -36,7 +36,8 @@ export function PoolSwapPage({ txHash }: Props) {
     )
   }
 
-  const maybeTxHash = (txHash?.[0] as Hash) || undefined
+  const rawTxHash = txHash?.[0] || ''
+  const maybeTxHash = isHash(rawTxHash) ? rawTxHash : undefined
 
   const pathParams: PathParams = {
     chain: chainToSlugMap[pool.chain],
