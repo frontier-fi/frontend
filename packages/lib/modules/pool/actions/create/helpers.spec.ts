@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { PoolType } from '@balancer/sdk'
 import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import {
@@ -19,6 +19,7 @@ import {
   isCowPool,
   isCowProtocol,
   isCustomWeightedPool,
+  isEclpCreationDisabled,
   isGyroEllipticPool,
   isPoolCreatorEnabled,
   isStablePool,
@@ -194,5 +195,35 @@ describe('isPoolCreatorEnabled', () => {
     expect(isPoolCreatorEnabled(PoolType.GyroE)).toBe(false)
     expect(isPoolCreatorEnabled(PoolType.ReClamm)).toBe(false)
     expect(isPoolCreatorEnabled(PoolType.CowAmm)).toBe(false)
+  })
+})
+
+describe('isEclpCreationDisabled', () => {
+  it('disables Gyro E-CLP creation in prod while leaving other pool types and local/dev enabled', () => {
+    expect(isEclpCreationDisabled(PoolType.GyroE, true)).toBe(true)
+    expect(isEclpCreationDisabled(PoolType.GyroE, false)).toBe(false)
+    expect(isEclpCreationDisabled(PoolType.Stable, true)).toBe(false)
+    expect(isEclpCreationDisabled(PoolType.Weighted, true)).toBe(false)
+  })
+})
+
+describe('SHOW_ADVANCED_POOL_SETTINGS', () => {
+  it('enables advanced pool settings in dev and hides them in prod', async () => {
+    const originalAppEnv = process.env.NEXT_PUBLIC_APP_ENV
+
+    try {
+      process.env.NEXT_PUBLIC_APP_ENV = 'dev'
+      vi.resetModules()
+      const devConstants = await import('./constants')
+      expect(devConstants.SHOW_ADVANCED_POOL_SETTINGS).toBe(true)
+
+      process.env.NEXT_PUBLIC_APP_ENV = 'prod'
+      vi.resetModules()
+      const prodConstants = await import('./constants')
+      expect(prodConstants.SHOW_ADVANCED_POOL_SETTINGS).toBe(false)
+    } finally {
+      process.env.NEXT_PUBLIC_APP_ENV = originalAppEnv
+      vi.resetModules()
+    }
   })
 })
