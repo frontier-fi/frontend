@@ -13,6 +13,7 @@ import { sDAIWeighted } from './__mocks__/pool-examples/flat'
 import { subDays } from 'date-fns'
 import {
   getPoolAddBlockedReason,
+  hasReviewedHook,
   shouldBlockAddLiquidity,
   getPoolActivityDateCaption,
   getPoolActivityTitle,
@@ -178,6 +179,25 @@ describe('shouldBlockAddLiquidity', () => {
 
       expect(shouldBlockAddLiquidity(pool)).toBe(true)
       expect(getPoolAddBlockedReason(pool)).toHaveLength(1)
+    })
+
+    it('should block if pool hook omits reviewData', () => {
+      const pool = getApiPoolMock(stableSurgeBoosted)
+      const hookWithoutReviewData = { ...pool.hook } as Record<string, unknown>
+      delete hookWithoutReviewData.reviewData
+      pool.hook = hookWithoutReviewData as Pool['hook']
+
+      expect(hasReviewedHook(pool.hook!)).toBe(false)
+      expect(shouldBlockAddLiquidity(pool)).toBe(true)
+      expect(getPoolAddBlockedReason(pool)).toContain('Unreviewed hook')
+    })
+
+    it('returns true in hasReviewedHook when reviewData is present', () => {
+      const pool = getApiPoolMock(stableSurgeBoosted)
+
+      ;(pool.hook as { reviewData?: { summary: string } }).reviewData = { summary: 'safe' }
+
+      expect(hasReviewedHook(pool.hook!)).toBe(true)
     })
 
     it('should block if pool has a hook that is unsafe', () => {
