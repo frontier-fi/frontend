@@ -3,7 +3,7 @@ import { proxyExternalImageUrl } from '@repo/lib/modules/pool/utils/image-proxy'
 
 export function getBaseUrl() {
   if (typeof window === 'undefined') {
-    return 'http://localhost:3000'
+    return `http://localhost:${process.env.PORT || '3000'}`
   }
 
   if (window.location.origin) {

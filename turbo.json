@@ -18,7 +18,7 @@
     "ALLOWED_ORIGINS",
     "TZ"
   ],
-  "globalPassThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"],
+  "globalPassThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH", "PORT"],
   "tasks": {
     "dev": {
       "cache": false,
