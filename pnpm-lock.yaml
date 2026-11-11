@@ -170,6 +170,7 @@ catalogs:
 
 overrides:
   '@balancer/sdk': github:frontier-fi/sdk#cd309ed8873386c00f5e65342bb73641e3503dc8
+  '@balancer-labs/balancer-maths': npm:@frontier-fi/maths@0.1.1
   debug>supports-color: '-'
   '@types/react': '19.3'
   '@types/react-dom': '19.3'
@@ -443,9 +444,6 @@ importers:
       '@apollo/client':
         specifier: 'catalog:'
         version: 4.3.4(graphql-ws@6.4.0(crossws@0.3.5)(graphql@17.0.2)(ws@8.22.0))(graphql@17.0.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rxjs@7.8.2)
-      '@balancer-labs/balancer-maths':
-        specifier: 0.0.41
-        version: 0.0.41
       '@balancer/sdk':
         specifier: github:frontier-fi/sdk#cd309ed8873386c00f5e65342bb73641e3503dc8
         version: https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8(typescript@6.0.3)(zod@4.6.7)
@@ -473,6 +471,9 @@ importers:
       '@emotion/react':
         specifier: 11.14.0
         version: 11.14.0(@types/react@19.3.0)(react@19.3.1)
+      '@frontier-fi/maths':
+        specifier: 0.1.1
+        version: 0.1.1
       '@nikolovlazar/chakra-ui-prose':
         specifier: ^1.2.1
         version: 1.2.1(@chakra-ui/react@2.10.10(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(framer-motion@14.0.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@chakra-ui/system@2.6.2(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(react@19.3.1))(react@19.3.1)
@@ -860,14 +861,6 @@ packages:
   '@babel/types@7.29.8':
     resolution: {integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==}
     engines: {node: '>=6.9.0'}
-
-  '@balancer-labs/balancer-maths@0.0.40':
-    resolution: {integrity: sha512-oSd9ozJctBv6D/CjPZwCsGRerOHwIRjOciOnwxxNQUaSeFlbm8YSEAdDtQ8eggTmJ75pxEBHrl+rC4IpbgAWBg==}
-    engines: {node: '>=18.x'}
-
-  '@balancer-labs/balancer-maths@0.0.41':
-    resolution: {integrity: sha512-ihYLgOnFoVbyN1HJmLT2WH4DzCJt65PMfjtZVoXc4JaK+2Pd8dwcRVbpdLfyXAqfpVZAW9zqB/2JnBHemyuMrQ==}
-    engines: {node: '>=18.x'}
 
   '@balancer/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8':
     resolution: {gitHosted: true, integrity: sha512-j3TYQC2ppxwRbT72I4PLQSikKPqcc/z9orqbBQoPWO/yA8MlzMgiPciZyWEYNv/Tbcob1seUzjYkYXyCoPh2ow==, tarball: https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8}
@@ -1682,6 +1675,10 @@ packages:
 
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
+
+  '@frontier-fi/maths@0.1.1':
+    resolution: {integrity: sha512-9VwvJTCd+QuGiAq2LlYpyhZPTt/HLJZKil+QlOhEPK86NckhBr7SOKiwoZARyZhjOf06dQoxgzXGHCyyJ9wWBQ==}
+    engines: {node: '>=18.x'}
 
   '@graphql-codegen/add@7.1.1':
     resolution: {integrity: sha512-xN4za/V9e1NentxtKQYKKWzSoWNs3x72vqUZ4YGIzFLLGOJOCNVrR9lXDDQHDPrtcPZaj06zksdrfuJ7qutNCA==}
@@ -8601,13 +8598,9 @@ snapshots:
       '@babel/helper-string-parser': 7.29.11
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@balancer-labs/balancer-maths@0.0.40': {}
-
-  '@balancer-labs/balancer-maths@0.0.41': {}
-
   '@balancer/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8(typescript@6.0.3)(zod@3.25.76)':
     dependencies:
-      '@balancer-labs/balancer-maths': 0.0.40
+      '@balancer-labs/balancer-maths': '@frontier-fi/maths@0.1.1'
       viem: 2.57.11(typescript@6.0.3)(zod@3.25.76)
     transitivePeerDependencies:
       - bufferutil
@@ -8617,7 +8610,7 @@ snapshots:
 
   '@balancer/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8(typescript@6.0.3)(zod@4.6.7)':
     dependencies:
-      '@balancer-labs/balancer-maths': 0.0.40
+      '@balancer-labs/balancer-maths': '@frontier-fi/maths@0.1.1'
       viem: 2.57.11(typescript@6.0.3)(zod@4.6.7)
     transitivePeerDependencies:
       - bufferutil
@@ -9522,6 +9515,8 @@ snapshots:
       '@floating-ui/utils': 0.2.12
 
   '@floating-ui/utils@0.2.12': {}
+
+  '@frontier-fi/maths@0.1.1': {}
 
   '@graphql-codegen/add@7.1.1(graphql@17.0.2)':
     dependencies:

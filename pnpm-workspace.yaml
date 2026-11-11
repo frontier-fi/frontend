@@ -37,6 +37,7 @@ peerDependencyRules:
 overrides:
   # Frontier fork until published to npm (Sepolia vault/router addresses).
   "@balancer/sdk": "github:frontier-fi/sdk#cd309ed8873386c00f5e65342bb73641e3503dc8"
+  "@balancer-labs/balancer-maths": "npm:@frontier-fi/maths@0.1.1"
   # Remove debug's optional color peer so every app shares the same
   # Chakra/Emotion/Next instances (see PR #2883). Keep this declarative:
   # Renovate disables pnpmfile hooks when generating lockfiles.
@@ -54,3 +55,4 @@ minimumReleaseAge: 10080
 
 minimumReleaseAgeExclude:
   - "@balancer/sdk"
+  - "@frontier-fi/*"
