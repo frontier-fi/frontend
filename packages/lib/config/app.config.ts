@@ -21,7 +21,6 @@ export const config: Config = {
 
 export const isDev = config.appEnv === 'dev'
 export const isProd = config.appEnv === 'prod'
-export const isStaging = config.appEnv === 'staging'
 /*
   Used by E2E dev tests to setup wagmi config to use an anvil fork
   It is also recommended to set NEXT_PUBLIC_E2E_DEV when using Rivet

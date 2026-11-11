@@ -1,10 +1,10 @@
-import { isDev, isStaging } from '@repo/lib/config/app.config'
+import { isDev } from '@repo/lib/config/app.config'
 import { DefaultPageContainer } from '@repo/lib/shared/components/containers/DefaultPageContainer'
 import { notFound } from 'next/navigation'
 import { PropsWithChildren } from 'react'
 
 export default function DebugLayout({ children }: PropsWithChildren) {
-  if (!isDev && !isStaging) {
+  if (!isDev) {
     notFound()
   }
 

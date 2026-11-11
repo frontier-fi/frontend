@@ -62,7 +62,7 @@ if (isBrowser()) {
     }
   }
 
-  // Add mock connector for development/staging environments
+  // Add mock connector for non-production environments
   if (!isProd) {
     connectors.push(createMockConnector({ index: connectors.length }))
   }

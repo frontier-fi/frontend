@@ -111,7 +111,7 @@ export interface NetworkConfig {
 }
 
 export interface Config {
-  appEnv: 'dev' | 'test' | 'staging' | 'prod'
+  appEnv: 'dev' | 'test' | 'prod'
   apiUrl: string
   networks: NetworkConfigs
 }
