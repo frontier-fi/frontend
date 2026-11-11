@@ -199,28 +199,26 @@ describe('isPoolCreatorEnabled', () => {
 })
 
 describe('isEclpCreationDisabled', () => {
-  it('disables Gyro E-CLP creation in prod while leaving other pool types and local/dev enabled', () => {
-    expect(isEclpCreationDisabled(PoolType.GyroE, true)).toBe(true)
-    expect(isEclpCreationDisabled(PoolType.GyroE, false)).toBe(false)
-    expect(isEclpCreationDisabled(PoolType.Stable, true)).toBe(false)
-    expect(isEclpCreationDisabled(PoolType.Weighted, true)).toBe(false)
+  it('enables Gyro E-CLP creation only when isDev is true and leaves other pool types enabled', () => {
+    expect(isEclpCreationDisabled(PoolType.GyroE, true)).toBe(false)
+    expect(isEclpCreationDisabled(PoolType.GyroE, false)).toBe(true)
+    expect(isEclpCreationDisabled(PoolType.Stable, false)).toBe(false)
+    expect(isEclpCreationDisabled(PoolType.Weighted, false)).toBe(false)
   })
-})
 
-describe('SHOW_ADVANCED_POOL_SETTINGS', () => {
-  it('enables advanced pool settings in dev and hides them in prod', async () => {
+  it('uses app.config isDev by default across dev and prod environments', async () => {
     const originalAppEnv = process.env.NEXT_PUBLIC_APP_ENV
 
     try {
       process.env.NEXT_PUBLIC_APP_ENV = 'dev'
       vi.resetModules()
-      const devConstants = await import('./constants')
-      expect(devConstants.SHOW_ADVANCED_POOL_SETTINGS).toBe(true)
+      const devHelpers = await import('./helpers')
+      expect(devHelpers.isEclpCreationDisabled(PoolType.GyroE)).toBe(false)
 
       process.env.NEXT_PUBLIC_APP_ENV = 'prod'
       vi.resetModules()
-      const prodConstants = await import('./constants')
-      expect(prodConstants.SHOW_ADVANCED_POOL_SETTINGS).toBe(false)
+      const prodHelpers = await import('./helpers')
+      expect(prodHelpers.isEclpCreationDisabled(PoolType.GyroE)).toBe(true)
     } finally {
       process.env.NEXT_PUBLIC_APP_ENV = originalAppEnv
       vi.resetModules()

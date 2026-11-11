@@ -9,7 +9,6 @@ import {
   EclpConfigForm,
 } from './types'
 import { getSwapFeePercentageOptions } from './helpers'
-import { isDev } from '@repo/lib/config/app.config'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
@@ -46,8 +45,6 @@ export const MAX_SWAP_FEE_PERCENTAGE = 10
 export const REQUIRED_TOTAL_WEIGHT = 100
 export const MIN_AMPLIFICATION_PARAMETER = Number(STABLE_POOL_CONSTRAINTS.MIN_AMP)
 export const MAX_AMPLIFICATION_PARAMETER = Number(STABLE_POOL_CONSTRAINTS.MAX_AMP)
-// Shown in local/dev environments; hidden in production.
-export const SHOW_ADVANCED_POOL_SETTINGS = isDev
 export const MAX_LAMBDA = 100000000
 export const COW_AMM_RAW_WEIGHT_50 = parseUnits('1', DEFAULT_DECIMALS) // quirk for 50/50 pool, weight must be 1e18 for both tokens
 export const COW_AMM_RAW_WEIGHT_80 = parseUnits('8', DEFAULT_DECIMALS)

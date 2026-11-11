@@ -1,5 +1,5 @@
 import { PoolType } from '@balancer/sdk'
-import { isProd } from '@repo/lib/config/app.config'
+import { isDev } from '@repo/lib/config/app.config'
 import { bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import type { GqlPoolType } from '@repo/lib/shared/services/api/generated/graphql'
 import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
@@ -109,8 +109,8 @@ export function isGyroEllipticPool(poolType: PoolType): boolean {
   return poolType === PoolType.GyroE
 }
 
-export function isEclpCreationDisabled(poolType: PoolType, isProdEnv = isProd): boolean {
-  return isProdEnv && isGyroEllipticPool(poolType)
+export function isEclpCreationDisabled(poolType: PoolType, isDevEnv = isDev): boolean {
+  return !isDevEnv && isGyroEllipticPool(poolType)
 }
 
 export function isCowPool(poolType: PoolType | undefined): boolean {

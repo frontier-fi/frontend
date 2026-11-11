@@ -7,7 +7,7 @@ import { usePoolHooksWhitelist } from '../steps/details/usePoolHooksWhitelist'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { PreviewPoolCreationCard } from './PreviewPoolCreationCard'
 import { isStablePool, isCowPool, isPoolCreatorEnabled } from '../helpers'
-import { SHOW_ADVANCED_POOL_SETTINGS } from '../constants'
+import { isDev } from '@repo/lib/config/app.config'
 import { useWatch } from 'react-hook-form'
 
 export function PreviewPoolDetails() {
@@ -86,7 +86,7 @@ export function PoolDetailsContent() {
     'Pool symbol': symbol,
     ...(showPoolSettings
       ? {
-          ...(SHOW_ADVANCED_POOL_SETTINGS
+          ...(isDev
             ? {
                 ...(isPoolCreatorEnabled(poolType)
                   ? { 'Pool creator': formatPoolManager(poolCreator) }
