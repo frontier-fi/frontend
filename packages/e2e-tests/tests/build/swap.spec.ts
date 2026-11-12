@@ -10,7 +10,7 @@ test('Frontier: swap page renders', async ({ page }) => {
   await clickButton(page, 'Select token')
   await page
     .getByPlaceholder('Search by name, symbol or')
-    .fill('0x7b79995e5f793a07bc00c21412e50ecae098e7f9')
+    .fill('0xfff9976782d46cc05630d1f6ebab18b2324d6b14')
   await page.getByText('Wrapped Ether').first().click()
 
   // Fills 1 ETH token in
