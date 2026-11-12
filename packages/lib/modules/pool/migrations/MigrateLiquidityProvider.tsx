@@ -103,7 +103,7 @@ export function useFetchPool(
     variables: {
       id: id || zeroAddress,
       chain: getGqlChain(chainId || 0),
-      userAddress: userAddress.toLowerCase(),
+      userAddress: userAddress ? userAddress.toLowerCase() : undefined,
     },
     skip: !chainId || !id,
   })

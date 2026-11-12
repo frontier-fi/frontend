@@ -1,3 +1,4 @@
+import { isDev } from '@repo/lib/config/app.config'
 import type { GqlPoolUserBalance } from '@repo/lib/shared/services/api/graphql-derived-types'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
@@ -57,10 +58,12 @@ export function useOnchainUserPoolBalances(pools: Pool[] = []) {
 }
 
 function captureUnstakedMulticallError(unstakedPoolBalancesError: ReadContractsErrorType) {
-  console.log(
-    'Error in  unstake pool balances multicall in useOnchainUserPoolBalances',
-    unstakedPoolBalancesError
-  )
+  if (isDev) {
+    console.log(
+      'Error in  unstake pool balances multicall in useOnchainUserPoolBalances',
+      unstakedPoolBalancesError
+    )
+  }
 }
 
 /**

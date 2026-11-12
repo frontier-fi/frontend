@@ -1,6 +1,7 @@
 'use client'
 
-import { ChainSlug, getChainSlug } from '@repo/lib/modules/pool/pool.utils'
+import { getSupportedChainFromSlug } from '@repo/lib/modules/pool/pool.utils'
+import { notFound } from 'next/navigation'
 import { PriceImpactProvider } from '@repo/lib/modules/price-impact/PriceImpactProvider'
 import { RelayerSignatureProvider } from '@repo/lib/modules/relayer/RelayerSignatureProvider'
 import { SwapProviderProps, SwapProvider } from '@repo/lib/modules/swap/SwapProvider'
@@ -21,7 +22,13 @@ export default function SwapLayout({ props, children }: Props) {
   const { getTokensByChain, isLoadingTokens } = useTokens()
 
   const chain = props.pathParams.chain
-  const initChain = chain ? getChainSlug(chain as ChainSlug) : PROJECT_CONFIG.defaultNetwork
+  const resolvedChain = chain ? getSupportedChainFromSlug(chain) : undefined
+
+  if (chain && !resolvedChain) {
+    notFound()
+  }
+
+  const initChain = resolvedChain ?? PROJECT_CONFIG.defaultNetwork
   const initTokens = props.poolActionableTokens || getTokensByChain(initChain)
 
   if (!initTokens) {

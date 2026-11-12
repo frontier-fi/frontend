@@ -1,4 +1,6 @@
 import { TOTAL_APR_TYPES } from '@repo/lib/shared/hooks/useAprTooltip'
+import { shouldUseAnvilFork } from '@repo/lib/config/app.config'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import type {
   GqlPoolAprItem,
   GqlPoolTokenDetail,
@@ -60,9 +62,23 @@ export const chainToSlugMap: Partial<Record<AppChain, ChainSlug>> = {
   [GqlChainValues.Monad]: ChainSlug.Monad,
 }
 
+export function tryGetChainSlug(chainSlug: string): AppChain | undefined {
+  const slugToChainMap = invert(chainToSlugMap) as Record<string, AppChain | undefined>
+  return slugToChainMap[chainSlug.toLowerCase()]
+}
+
+export function getSupportedChainFromSlug(chainSlug: string): GqlChain | undefined {
+  const chain = tryGetChainSlug(chainSlug)
+  if (!chain) return undefined
+  if (shouldUseAnvilFork) return chain as GqlChain
+
+  return PROJECT_CONFIG.supportedNetworks.includes(chain as GqlChain)
+    ? (chain as GqlChain)
+    : undefined
+}
+
 export function getChainSlug(chainSlug: ChainSlug): AppChain {
-  const slugToChainMap = invert(chainToSlugMap) as Record<ChainSlug, AppChain>
-  const chain = slugToChainMap[chainSlug]
+  const chain = tryGetChainSlug(chainSlug)
   if (!chain) throw new Error(`Chain ${chainSlug} is not a valid chainName`)
   return chain
 }

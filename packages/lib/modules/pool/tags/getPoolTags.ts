@@ -1,3 +1,4 @@
+import { logServerEvent } from '@repo/lib/shared/utils/server-log'
 import { mins } from '@repo/lib/shared/utils/time'
 
 const POOL_TAGS_URL =
@@ -32,7 +33,17 @@ export async function getPoolTags(): Promise<PoolTag[] | undefined> {
       }
     })
   } catch (error) {
-    console.error('Unable to fetch pool tags', error)
+    const reason = error instanceof Error ? error.message : String(error)
+
+    logServerEvent({
+      level: 'warn',
+      source: 'pool-metadata',
+      category: 'pool_metadata',
+      errorName: error instanceof Error ? error.name : undefined,
+      url: POOL_TAGS_URL,
+      message: `Unable to fetch pool tags: ${reason}`,
+    })
+
     return undefined
   }
 }

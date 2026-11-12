@@ -3,6 +3,7 @@
 import { isDev } from '../../config/app.config'
 import { shouldIgnore } from '../utils/query-errors'
 import { megazordBalancerAbi, reportClientError } from '../utils/error-logger'
+import { sanitizeSensitiveData } from '../utils/server-log'
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ReactNode } from 'react'
@@ -20,13 +21,18 @@ export const queryClient = new QueryClient({
 
       if (error.message.includes('unknown reason') || error.message.includes('custom error')) {
         decodedRevert = decodeError(error)
-        console.log('Decoded reason: ', decodedRevert)
+
+        if (isDev) {
+          console.log('Decoded reason: ', sanitizeSensitiveData(decodedRevert))
+        }
       }
 
-      console.log('Query error', {
-        error,
-        queryKey: query.queryKey,
-      })
+      if (isDev) {
+        console.log('Query error', {
+          error: sanitizeSensitiveData(error),
+          queryKey: sanitizeSensitiveData(query.queryKey),
+        })
+      }
 
       reportClientError({
         category: 'react-query',
@@ -44,10 +50,12 @@ export const queryClient = new QueryClient({
     onError: (error, variables) => {
       if (shouldIgnore(error.message, error.stack)) return
 
-      console.log('Mutation error: ', {
-        error,
-        variables,
-      })
+      if (isDev) {
+        console.log('Mutation error: ', {
+          error: sanitizeSensitiveData(error),
+          variables: sanitizeSensitiveData(variables),
+        })
+      }
 
       reportClientError({
         category: 'wagmi-mutation',

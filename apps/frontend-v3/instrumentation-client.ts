@@ -4,8 +4,16 @@ import { shouldIgnore } from '@repo/lib/shared/utils/query-errors'
 
 if (typeof window !== 'undefined') {
   window.addEventListener('error', event => {
+    if (
+      !event.error &&
+      !event.filename &&
+      (event.message === 'Script error.' || event.message === 'Script error')
+    ) {
+      return
+    }
+
     const error = ensureError(event.error ?? event.message)
-    const stack = error.stack || event.filename || ''
+    const stack = [error.stack, event.filename].filter(Boolean).join('\n')
 
     if (shouldIgnore(error.message, stack)) return
 
