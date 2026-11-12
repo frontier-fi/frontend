@@ -12,6 +12,7 @@ import {
 import { TokensProvider } from '@repo/lib/modules/tokens/TokensProvider'
 import { FiatFxRatesProvider } from '../../hooks/FxRatesProvider'
 import { getFxRates } from '../../utils/currencies'
+import { logServerEvent } from '../../utils/server-log'
 import { mins } from '../../utils/time'
 import { PropsWithChildren } from 'react'
 import { getHooksMetadata } from '@repo/lib/modules/hooks/getHooksMetadata'
@@ -51,7 +52,16 @@ async function fetchProtocolStats(): Promise<GetProtocolStatsQuery | undefined> 
 
     return data
   } catch (error) {
-    console.warn('GetProtocolStats failed; continuing without protocol stats', error)
+    const reason = error instanceof Error ? error.message : String(error)
+
+    logServerEvent({
+      level: 'warn',
+      source: 'nextjs-server',
+      operationName: 'GetProtocolStats',
+      errorName: error instanceof Error ? error.name : undefined,
+      message: `GetProtocolStats failed; continuing without protocol stats: ${reason}`,
+    })
+
     return undefined
   }
 }

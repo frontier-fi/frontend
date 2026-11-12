@@ -33,4 +33,36 @@ describe('shouldIgnore', () => {
     expect(shouldIgnore('Reverted with custom error PoolPaused()')).toBe(true)
     expect(shouldIgnore('Reverted with custom error VaultPaused()')).toBe(true)
   })
+
+  it('ignores unsupported EIP-5792 wallet_getCapabilities errors and window.ethereum extension clashes', () => {
+    expect(shouldIgnore('Method wallet_getCapabilities is not supported')).toBe(true)
+
+    expect(
+      shouldIgnore(
+        'Cannot redefine property: ethereum',
+        'at Object.defineProperty (evmAsk.js:1:10)'
+      )
+    ).toBe(true)
+
+    expect(shouldIgnore('Cannot redefine property: ethereum')).toBe(true)
+  })
+
+  it('ignores ResizeObserver notification noise and browser extension scheme stack traces', () => {
+    expect(shouldIgnore('ResizeObserver loop completed with undelivered notifications.')).toBe(true)
+
+    expect(
+      shouldIgnore(
+        'Uncaught TypeError: boom',
+        'at chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/inpage.js:1:2'
+      )
+    ).toBe(true)
+
+    expect(
+      shouldIgnore('Uncaught TypeError: boom', 'at moz-extension://abc123/content.js:5:10')
+    ).toBe(true)
+
+    expect(
+      shouldIgnore('Uncaught TypeError: boom', 'at safari-web-extension://abc123/script.js:1:1')
+    ).toBe(true)
+  })
 })

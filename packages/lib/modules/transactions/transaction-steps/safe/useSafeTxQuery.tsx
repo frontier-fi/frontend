@@ -1,3 +1,4 @@
+import { isDev } from '@repo/lib/config/app.config'
 import { onlyExplicitRefetch } from '@repo/lib/shared/utils/queries'
 import SafeAppsSDK, { TransactionStatus } from '@safe-global/safe-apps-sdk'
 import { useQuery } from '@tanstack/react-query'
@@ -33,7 +34,10 @@ export function useSafeTxQuery({ enabled, wagmiTxHash }: Props) {
 
 export async function pollSafeTxStatus(sdk: SafeAppsSDK, txHash: Address): Promise<Address> {
   while (true) {
-    console.log('Polling safe transaction status...')
+    if (isDev) {
+      console.log('Polling safe transaction status...')
+    }
+
     const safeTxDetails = await sdk.txs.getBySafeTxHash(txHash)
 
     // if safe tx is successful, return the on chain tx hash

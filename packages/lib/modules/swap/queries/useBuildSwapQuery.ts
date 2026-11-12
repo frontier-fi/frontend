@@ -49,7 +49,7 @@ export function useBuildSwapQuery({
   const queryFn = async () => {
     const simulateResponse = ensureLastQueryResponse('Swap query', simulationQuery.data)
 
-    const response = handler.build({
+    return handler.build({
       tokenIn,
       tokenOut,
       swapType,
@@ -62,11 +62,6 @@ export function useBuildSwapQuery({
       relayerApprovalSignature,
       permit2,
     })
-
-    console.log('Swap callData built:', response)
-    if (permit2) console.log('Swap permit2:', permit2)
-
-    return response
   }
 
   return useQuery({

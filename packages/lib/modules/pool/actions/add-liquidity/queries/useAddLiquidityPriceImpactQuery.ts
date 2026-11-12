@@ -1,5 +1,6 @@
 'use client'
 
+import { isDev } from '@repo/lib/config/app.config'
 import { useUserSettings } from '@repo/lib/modules/user/settings/UserSettingsProvider'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { defaultDebounceMs, onlyExplicitRefetch } from '@repo/lib/shared/utils/queries'
@@ -11,6 +12,7 @@ import { useQuery } from '@tanstack/react-query'
 import { usePool } from '../../../PoolProvider'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
 import { isInvariantRatioPIErrorMessage } from '@repo/lib/shared/utils/error-filters'
+import { sanitizeSensitiveData } from '@repo/lib/shared/utils/server-log'
 
 type Params = {
   handler: AddLiquidityHandler
@@ -42,7 +44,10 @@ export function useAddLiquidityPriceImpactQuery({ handler, humanAmountsIn, enabl
     enabled: enabled && !areEmptyAmounts(debouncedHumanAmountsIn),
     retry(failureCount, error) {
       if (isInvariantRatioPIErrorMessage(error?.message)) {
-        if (failureCount === 1) console.log('Silenced PI error: ', { error })
+        if (isDev && failureCount === 1) {
+          console.log('Silenced PI error: ', { error: sanitizeSensitiveData(error) })
+        }
+
         // Avoid more retries
         return false
       }

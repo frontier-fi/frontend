@@ -1,3 +1,4 @@
+import { logServerEvent } from '@repo/lib/shared/utils/server-log'
 import { mins } from '@repo/lib/shared/utils/time'
 
 /**
@@ -14,10 +15,24 @@ export async function fetchAndMapMetadata<T>(
       next: { revalidate: mins(revalidateMins).toSecs() },
     })
 
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`)
+    }
+
     const metadata = (await res.json()) as T[]
     return mapFn(metadata)
   } catch (error) {
-    console.error(`Unable to fetch metadata from ${url}`, error)
+    const reason = error instanceof Error ? error.message : String(error)
+
+    logServerEvent({
+      level: 'warn',
+      source: 'pool-metadata',
+      category: 'pool_metadata',
+      errorName: error instanceof Error ? error.name : undefined,
+      url,
+      message: `Unable to fetch metadata from ${url}: ${reason}`,
+    })
+
     return undefined
   }
 }

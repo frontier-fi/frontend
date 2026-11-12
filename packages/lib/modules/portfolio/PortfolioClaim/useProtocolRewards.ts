@@ -1,6 +1,7 @@
 import { useReadContract } from 'wagmi'
 import { useUserAccount } from '../../web3/UserAccountProvider'
 import { FeeDistributorStaticAbi } from '../../web3/contracts/abi/FeeDistributorStaticAbi'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { getNetworkConfig } from '@repo/lib/config/networks'
 import { formatUnits } from 'viem'
 import { useTokens } from '../../tokens/TokensProvider'
@@ -18,6 +19,7 @@ export function useProtocolRewards() {
   const { priceFor, getToken, isLoadingTokens } = useTokens()
 
   const networkConfig = getNetworkConfig(GqlChainValues.Mainnet)
+  const isMainnetSupported = PROJECT_CONFIG.supportedNetworks.includes(GqlChainValues.Mainnet)
 
   const {
     data: protocolRewardsData = [],
@@ -32,7 +34,7 @@ export function useProtocolRewards() {
     functionName: 'claimTokens',
     args: [userAddress, claimableVeBalRewardsTokens],
     query: {
-      enabled: isConnected && !isLoadingTokens,
+      enabled: isConnected && !isLoadingTokens && isMainnetSupported,
       select: data => {
         return (data as bigint[]).map((clBalance, index) => {
           const tokenAddress = claimableVeBalRewardsTokens[index]

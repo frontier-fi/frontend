@@ -1,3 +1,4 @@
+import { logServerEvent } from '@repo/lib/shared/utils/server-log'
 import { mins } from '@repo/lib/shared/utils/time'
 
 const ERC4626_METADATA_URL =
@@ -33,7 +34,17 @@ export async function getErc4626Metadata(): Promise<Erc4626Metadata[] | undefine
       }
     })
   } catch (error) {
-    console.error('Unable to fetch erc4626 metadata', error)
+    const reason = error instanceof Error ? error.message : String(error)
+
+    logServerEvent({
+      level: 'warn',
+      source: 'pool-metadata',
+      category: 'pool_metadata',
+      errorName: error instanceof Error ? error.name : undefined,
+      url: ERC4626_METADATA_URL,
+      message: `Unable to fetch erc4626 metadata: ${reason}`,
+    })
+
     return undefined
   }
 }
