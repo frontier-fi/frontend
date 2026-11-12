@@ -20,7 +20,7 @@ const networkConfig: NetworkConfig = {
   tokens: {
     addresses: {
       bal: '0xb19382073c7a0addbb56ac6af1808fa49e377b75',
-      wNativeAsset: '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9',
+      wNativeAsset: '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14',
     },
     nativeAsset: {
       name: 'Ether',
@@ -60,7 +60,7 @@ const networkConfig: NetworkConfig = {
   layerZeroChainId: 10161,
   lbps: {
     collateralTokens: [
-      '0x7b79995e5f793a07bc00c21412e50ecae098e7f9', // WETH
+      '0xfff9976782d46cc05630d1f6ebab18b2324d6b14', // WETH
       '0x6bf294b80c7d8dc72dee762af5d01260b756a051', // USDT
       '0x80d6d3946ed8a1da4e226aa21ccddc32bd127d1a', // USDC
     ],
