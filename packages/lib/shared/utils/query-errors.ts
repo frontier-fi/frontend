@@ -45,6 +45,19 @@ export function shouldIgnore(message: string, stackTrace = ''): boolean {
   if (message.includes('.getAccounts is not a function')) return true
 
   /*
+    Wagmi's injected connector calls `.map(...)` on the wallet's `eth_accounts` response inside
+    `Object.getAccounts` / `Object.onConnect`, throwing when an injected wallet extension returns
+    a non-array value during connection initialization.
+  */
+  if (
+    message.includes('.map is not a function') &&
+    stackTrace.includes('getAccounts') &&
+    stackTrace.includes('onConnect')
+  ) {
+    return true
+  }
+
+  /*
     Error thrown by Library detector chrome extension:
     https://chromewebstore.google.com/detail/library-detector/cgaocdmhkmfnkdkbnckgmpopcbpaaejo?hl=en
   */

@@ -65,4 +65,28 @@ describe('shouldIgnore', () => {
       shouldIgnore('Uncaught TypeError: boom', 'at safari-web-extension://abc123/script.js:1:1')
     ).toBe(true)
   })
+
+  it('ignores wagmi injected connector .map TypeError only when scoped to getAccounts + onConnect', () => {
+    const wagmiConnectStack = [
+      'TypeError: (intermediate value).map is not a function',
+      '    at Object.getAccounts (https://app.frontier.fi/_next/static/chunks/1bo3_9kgbrgqt.js:1:32046)',
+      '    at async Object.onConnect (https://app.frontier.fi/_next/static/chunks/1bo3_9kgbrgqt.js:1:34759)',
+    ].join('\n')
+
+    expect(shouldIgnore('(intermediate value).map is not a function', wagmiConnectStack)).toBe(true)
+
+    expect(
+      shouldIgnore(
+        '(intermediate value).map is not a function',
+        'TypeError: (intermediate value).map is not a function\n    at SwapForm (https://app.frontier.fi/_next/static/chunks/app.js:1:120)'
+      )
+    ).toBe(false)
+
+    expect(
+      shouldIgnore(
+        'tokens.map is not a function',
+        'TypeError: tokens.map is not a function\n    at Object.getAccounts (https://app.frontier.fi/_next/static/chunks/app.js:1:120)'
+      )
+    ).toBe(false)
+  })
 })
