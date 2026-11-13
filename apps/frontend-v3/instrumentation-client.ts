@@ -1,6 +1,6 @@
 import { reportClientError } from '@repo/lib/shared/utils/error-logger'
 import { ensureError } from '@repo/lib/shared/utils/errors'
-import { shouldIgnore } from '@repo/lib/shared/utils/query-errors'
+import { isExtensionOrigin, shouldIgnore } from '@repo/lib/shared/utils/query-errors'
 
 if (typeof window !== 'undefined') {
   window.addEventListener('error', event => {
@@ -15,6 +15,7 @@ if (typeof window !== 'undefined') {
     const error = ensureError(event.error ?? event.message)
     const stack = [error.stack, event.filename].filter(Boolean).join('\n')
 
+    if (isExtensionOrigin(event.filename, error.stack)) return
     if (shouldIgnore(error.message, stack)) return
 
     reportClientError({
@@ -29,6 +30,7 @@ if (typeof window !== 'undefined') {
     const error = ensureError(event.reason)
     const stack = error.stack || ''
 
+    if (isExtensionOrigin(undefined, stack)) return
     if (shouldIgnore(error.message, stack)) return
 
     reportClientError({

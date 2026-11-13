@@ -157,15 +157,6 @@ export function shouldIgnore(message: string, stackTrace = ''): boolean {
 
   if (stackTrace.includes('extensionServiceWorker.js')) return true
 
-  if (
-    stackTrace.includes('chrome-extension://') ||
-    stackTrace.includes('moz-extension://') ||
-    stackTrace.includes('safari-web-extension://') ||
-    stackTrace.includes('safari-extension://')
-  ) {
-    return true
-  }
-
   if (isPausedErrorMessage(message)) return true
 
   /*
@@ -192,4 +183,21 @@ export function shouldIgnore(message: string, stackTrace = ''): boolean {
   if (message.includes('Unreachable URL')) return true
 
   return false
+}
+
+const EXTENSION_URL_REGEX = /(?:chrome|moz|safari-web|safari)-extension:\/\//
+
+/*
+  True when the error was thrown by browser extension code (script filename or top stack frame),
+  not when extension frames merely appear further down the stack (e.g. an injected wallet provider).
+  Only meant for the global window error / unhandledrejection handlers.
+*/
+export function isExtensionOrigin(filename?: string, stackTrace = ''): boolean {
+  if (filename && EXTENSION_URL_REGEX.test(filename)) return true
+
+  const topFrame = stackTrace
+    .split('\n')
+    .find(line => /^\s*at\s/.test(line) || /^\S*@\S+:\d+/.test(line))
+
+  return !!topFrame && EXTENSION_URL_REGEX.test(topFrame)
 }
