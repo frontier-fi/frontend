@@ -1,67 +1,53 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { fetchAndMapMetadata, lowerCaseAddresses } from './fetchAndLowercaseAddresses'
+import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
+import { HooksMetadata } from '../../modules/hooks/getHooksMetadata'
+import { lowerCaseAddresses } from './fetchAndLowercaseAddresses'
 
-type TestMetadata = {
-  id: string
-  addresses: Record<string, string[]>
-}
-
-describe('fetchAndLowercaseAddresses', () => {
-  afterEach(() => {
-    vi.restoreAllMocks()
-  })
-
-  it('fetches and lowercases metadata addresses on 200', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(
-        JSON.stringify([
-          {
-            id: 'hook_1',
-            addresses: {
-              '11155111': ['0xAbCdEf0000000000000000000000000000001234'],
-            },
-          },
-        ]),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
-      )
-    )
-
-    const result = await fetchAndMapMetadata<TestMetadata>(
-      'https://example.com/hooks/index.json',
-      lowerCaseAddresses
-    )
-
-    expect(result).toEqual([
-      {
-        id: 'hook_1',
-        addresses: {
-          '11155111': ['0xabcdef0000000000000000000000000000001234'],
-        },
+test('lowerCaseAddresses converts uppercase addresses to lowercase', () => {
+  const metadata: HooksMetadata[] = [
+    {
+      id: 'hook1',
+      name: 'Test Hook',
+      description: 'A test hook',
+      addresses: {
+        [GqlChainValues.Mainnet]: [
+          '0xabcdef1234567890ABCDEF1234567890ABCDEF12',
+          '0x1234567890ABCDEF1234567890ABCDEF12345678',
+        ],
+        [GqlChainValues.Arbitrum]: ['0xFEDCBA0987654321FEDCBA0987654321FEDCBA09'],
       },
-    ])
-  })
+    },
+    {
+      id: 'hook2',
+      name: 'Another Hook',
+      description: 'Another test hook',
+      addresses: {
+        [GqlChainValues.Polygon]: ['0xAAAABBBBCCCCddddEEEEFFFF0000111122223333'],
+      },
+    },
+  ]
 
-  it('logs structured warn JSON via logServerEvent and returns undefined on non-2xx or network error', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+  const result = lowerCaseAddresses(metadata)
 
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('Not Found', { status: 404 }))
-
-    const result = await fetchAndMapMetadata<TestMetadata>(
-      'https://example.com/hooks/index.json',
-      lowerCaseAddresses
-    )
-
-    expect(result).toBeUndefined()
-    expect(warnSpy).toHaveBeenCalledOnce()
-
-    const logged = JSON.parse(warnSpy.mock.calls[0]?.[0] as string)
-
-    expect(logged).toMatchObject({
-      level: 'warn',
-      source: 'pool-metadata',
-      category: 'pool_metadata',
-      url: 'https://example.com/hooks/index.json',
-      message: 'Unable to fetch metadata from https://example.com/hooks/index.json: HTTP 404',
-    })
-  })
+  expect(result).toEqual([
+    {
+      id: 'hook1',
+      name: 'Test Hook',
+      description: 'A test hook',
+      addresses: {
+        [GqlChainValues.Mainnet]: [
+          '0xabcdef1234567890abcdef1234567890abcdef12',
+          '0x1234567890abcdef1234567890abcdef12345678',
+        ],
+        [GqlChainValues.Arbitrum]: ['0xfedcba0987654321fedcba0987654321fedcba09'],
+      },
+    },
+    {
+      id: 'hook2',
+      name: 'Another Hook',
+      description: 'Another test hook',
+      addresses: {
+        [GqlChainValues.Polygon]: ['0xaaaabbbbccccddddeeeeFFFF0000111122223333'.toLowerCase()],
+      },
+    },
+  ])
 })

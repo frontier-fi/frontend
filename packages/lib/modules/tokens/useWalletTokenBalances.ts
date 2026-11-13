@@ -17,7 +17,6 @@ import { useMemo, useCallback } from 'react'
 import { chunkArray } from '@repo/lib/shared/utils/array'
 import { reportClientError } from '@repo/lib/shared/utils/error-logger'
 import { ensureError } from '@repo/lib/shared/utils/errors'
-import { shouldIgnore } from '@repo/lib/shared/utils/query-errors'
 
 const MIN_TOKEN_VALUE_USD = 1
 const BALANCE_STALE_TIME = 30_000
@@ -72,18 +71,16 @@ export function useWalletTokenBalances(chains: GqlChain[], enabled: boolean) {
       } catch (error) {
         const err = ensureError(error)
 
-        if (!shouldIgnore(err.message, err.stack)) {
-          reportClientError({
-            category: 'wallet-balances',
-            errorName: 'WalletTokenBalancesError',
-            message: `Error fetching wallet balances for chain ${chain}: ${err.message}`,
-            stack: err.stack,
-            extra: {
-              chain,
-              chainId: networkConfig.chainId,
-            },
-          })
-        }
+        reportClientError({
+          category: 'wallet-balances',
+          errorName: 'WalletTokenBalancesError',
+          message: `Error fetching wallet balances for chain ${chain}: ${err.message}`,
+          stack: err.stack,
+          extra: {
+            chain,
+            chainId: networkConfig.chainId,
+          },
+        })
 
         return { chain, success: false as const, error }
       }

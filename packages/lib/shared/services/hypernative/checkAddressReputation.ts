@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server'
-import { isAddress } from 'viem'
-import { logServerEvent } from '../../utils/server-log'
 import { hours } from '../../utils/time'
-
-const UPSTREAM_TIMEOUT_MS = 10_000
 
 type ReputationResponse = {
   data: Array<{ flags: string[]; address: string; recommendation: string }>
@@ -29,10 +25,6 @@ export async function checkAddressReputation({
   hypernativeApiId,
   hypernativeApiSecret,
 }: Params) {
-  if (!isAddress(address)) {
-    return NextResponse.json({ error: 'Invalid address' }, { status: 400 })
-  }
-
   try {
     const res = await fetch('https://api.hypernative.xyz/screener/reputation', {
       method: 'POST',
@@ -48,19 +40,10 @@ export async function checkAddressReputation({
       next: {
         revalidate: hours(12).toSecs(),
       },
-      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     })
 
     if (!res.ok) {
-      logServerEvent({
-        level: 'error',
-        source: 'hypernative',
-        status: res.status,
-        address,
-        message: `Failed to fetch reputation. Response status: ${res.status}`,
-      })
-
-      return NextResponse.json({ isAuthorized: true })
+      throw new Error('Failed to fetch reputation. Response status: ' + res.status)
     }
 
     const response: ReputationResponse = await res.json()
@@ -74,24 +57,14 @@ export async function checkAddressReputation({
 
     return NextResponse.json({ isAuthorized })
   } catch (error) {
-    const isTimeout =
-      error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')
-
-    const rawMessage = error instanceof Error ? error.message : String(error)
-
-    const safeMessage = [hypernativeApiSecret, hypernativeApiId].reduce(
-      (msg, secret) => (secret ? msg.replaceAll(secret, '[REDACTED]') : msg),
-      rawMessage
+    console.error(
+      JSON.stringify({
+        level: 'error',
+        source: 'hypernative',
+        address,
+        message: error instanceof Error ? error.message : String(error),
+      })
     )
-
-    logServerEvent({
-      level: 'error',
-      source: 'hypernative',
-      status: isTimeout ? 504 : 502,
-      address,
-      errorName: error instanceof Error ? error.name : undefined,
-      message: safeMessage,
-    })
 
     return NextResponse.json({ isAuthorized: true })
   }

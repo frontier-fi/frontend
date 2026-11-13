@@ -19,7 +19,7 @@ import { bn, isBnParseable, parseAmount } from '@repo/lib/shared/utils/numbers'
 import { invert } from 'lodash'
 import { PropsWithChildren, createContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Address, Hash, isAddress } from 'viem'
-import { chainToSlugMap, tryGetChainSlug } from '../pool/pool.utils'
+import { ChainSlug, chainToSlugMap, getChainSlug } from '../pool/pool.utils'
 import { getWalletChainSyncAction } from './useWalletChainSync'
 import { calcMarketPriceImpact } from '../price-impact/price-impact.utils'
 import { usePriceImpact } from '../price-impact/PriceImpactProvider'
@@ -576,8 +576,10 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
   }
 
   function setInitialChain(slugChain?: string) {
-    const resolvedSlugChain = slugChain ? tryGetChainSlug(slugChain) : undefined
-    const _chain = resolvedSlugChain || walletChain
+    const _chain =
+      slugChain && getChainSlug(slugChain as ChainSlug)
+        ? getChainSlug(slugChain as ChainSlug)
+        : walletChain
 
     setSelectedChain(_chain)
   }

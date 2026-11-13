@@ -11,7 +11,6 @@ import { useEffect } from 'react'
 import { usePublicClient } from 'wagmi'
 import { reClammPoolAbi } from '@repo/lib/modules/web3/contracts/abi/generated'
 import { getChainId, isDev } from '@repo/lib/config/app.config'
-import { sanitizeSensitiveData } from '@repo/lib/shared/utils/server-log'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { isStablePool, isStableSurgePool, isPoolCreatorEnabled } from '../../helpers'
@@ -104,10 +103,7 @@ export function PoolSettings() {
         return (error as any).shortMessage
       }
 
-      if (isDev) {
-        console.error(sanitizeSensitiveData(error))
-      }
-
+      console.error(error)
       return 'Unexpected error validating hooks contract address'
     }
   }

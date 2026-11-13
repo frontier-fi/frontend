@@ -1,6 +1,5 @@
 'use client'
 
-import { isDev } from '@repo/lib/config/app.config'
 import { useUserSettings } from '@repo/lib/modules/user/settings/UserSettingsProvider'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { defaultDebounceMs, onlyExplicitRefetch } from '@repo/lib/shared/utils/queries'
@@ -12,7 +11,6 @@ import { useQuery } from '@tanstack/react-query'
 import { usePool } from '../../../PoolProvider'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
 import { isInvariantRatioSimulationErrorMessage } from '@repo/lib/shared/utils/error-filters'
-import { sanitizeSensitiveData } from '@repo/lib/shared/utils/server-log'
 import { Address } from 'viem'
 
 export type AddLiquiditySimulationQueryResult = ReturnType<typeof useAddLiquiditySimulationQuery>
@@ -55,10 +53,7 @@ export function useAddLiquiditySimulationQuery({
     gcTime: 0,
     retry(failureCount, error) {
       if (isInvariantRatioSimulationErrorMessage(error?.message)) {
-        if (isDev && failureCount === 1) {
-          console.log('Silenced simulation error: ', { error: sanitizeSensitiveData(error) })
-        }
-
+        if (failureCount === 1) console.log('Silenced simulation error: ', { error })
         // Avoid more retries
         return false
       }

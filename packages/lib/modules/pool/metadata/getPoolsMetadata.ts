@@ -1,4 +1,3 @@
-import { logServerEvent } from '@repo/lib/shared/utils/server-log'
 import { mins } from '@repo/lib/shared/utils/time'
 import { AlertStatus } from '@chakra-ui/react'
 
@@ -34,17 +33,7 @@ export async function getPoolsMetadata(): Promise<PoolsMetadata | undefined> {
 
     return (await res.json()) as PoolsMetadata
   } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error)
-
-    logServerEvent({
-      level: 'warn',
-      source: 'pool-metadata',
-      category: 'pool_metadata',
-      errorName: error instanceof Error ? error.name : undefined,
-      url: POOLS_METADATA_URL,
-      message: `Unable to fetch pools metadata: ${reason}`,
-    })
-
+    console.error('Unable to fetch pools metadata', error)
     return undefined
   }
 }
