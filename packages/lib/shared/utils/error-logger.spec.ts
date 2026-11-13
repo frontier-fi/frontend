@@ -471,6 +471,46 @@ describe('error-logger', () => {
       expect(limitedRes.status).toBe(429)
     })
 
+    it('caps total log volume per instance at 300 requests/min across all IPs', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      const makeReq = (ip: string) =>
+        new NextRequest('http://localhost:3000/api/log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'do-connecting-ip': ip },
+          body: JSON.stringify({ category: 'window-error', message: 'boom' }),
+        })
+
+      for (let i = 0; i < 300; i++) {
+        const res = await handleClientErrorLogRequest(
+          makeReq(`10.0.${Math.floor(i / 250)}.${i % 250}`)
+        )
+        expect(res.status).toBe(204)
+      }
+
+      const limitedRes = await handleClientErrorLogRequest(makeReq('198.51.100.250'))
+      expect(limitedRes.status).toBe(429)
+      expect(Number(limitedRes.headers.get('Retry-After'))).toBeGreaterThan(0)
+    })
+
+    it('does not count per-IP rejections against the global cap', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      const makeReq = (ip: string) =>
+        new NextRequest('http://localhost:3000/api/log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'do-connecting-ip': ip },
+          body: JSON.stringify({ category: 'window-error', message: 'boom' }),
+        })
+
+      for (let i = 0; i < 400; i++) {
+        await handleClientErrorLogRequest(makeReq('203.0.113.50'))
+      }
+
+      const otherIpRes = await handleClientErrorLogRequest(makeReq('203.0.113.51'))
+      expect(otherIpRes.status).toBe(204)
+    })
+
     it('keeps oversized 0x calldata queryKey logs <= 1,600 bytes with flow, severity, and source intact', async () => {
       const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       const hugeCalldata = `0xabcdef12${'00'.repeat(1500)}987654`

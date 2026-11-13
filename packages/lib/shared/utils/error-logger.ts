@@ -21,6 +21,8 @@ const MAX_CLIENT_DEDUPE_ENTRIES = 200
 const RATE_LIMIT_MAX_REQUESTS = 20
 const RATE_LIMIT_WINDOW_MS = 60_000
 const MAX_RATE_LIMIT_ENTRIES = 5_000
+// Per-instance backstop on total log volume, independent of how clients are keyed
+const GLOBAL_RATE_LIMIT_MAX_REQUESTS = 300
 
 export const megazordBalancerAbi = [
   ...balancerRouterAbiExtended,
@@ -416,9 +418,11 @@ type RateLimitBucket = {
 }
 
 const clientErrorRateLimitMap = new Map<string, RateLimitBucket>()
+let globalClientErrorBucket: RateLimitBucket = { count: 0, resetAt: 0 }
 
 export function resetClientErrorRateLimiter(): void {
   clientErrorRateLimitMap.clear()
+  globalClientErrorBucket = { count: 0, resetAt: 0 }
   clientErrorDedupeMap.clear()
 }
 
@@ -433,10 +437,29 @@ function getClientIp(request: NextRequest): string {
   return firstHop || 'local'
 }
 
-function checkClientErrorRateLimit(
-  ip: string
-): { allowed: true } | { allowed: false; retryAfterSeconds: number } {
+type RateLimitResult = { allowed: true } | { allowed: false; retryAfterSeconds: number }
+
+function checkClientErrorRateLimit(ip: string): RateLimitResult {
   const now = Date.now()
+
+  if (now >= globalClientErrorBucket.resetAt) {
+    globalClientErrorBucket = { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS }
+  }
+
+  if (globalClientErrorBucket.count >= GLOBAL_RATE_LIMIT_MAX_REQUESTS) {
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.max(1, Math.ceil((globalClientErrorBucket.resetAt - now) / 1000)),
+    }
+  }
+
+  const result = checkIpRateLimit(ip, now)
+  if (result.allowed) globalClientErrorBucket.count += 1
+
+  return result
+}
+
+function checkIpRateLimit(ip: string, now: number): RateLimitResult {
   const existing = clientErrorRateLimitMap.get(ip)
 
   if (existing && now < existing.resetAt) {
