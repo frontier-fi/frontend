@@ -60,7 +60,7 @@ export function useRemoveLiquidityBuildCallDataQuery({
   const queryFn = async () => {
     const queryOutput = ensureLastQueryResponse('Remove liquidity query', simulationQuery.data)
 
-    const res = await handler.buildCallData({
+    return handler.buildCallData({
       account: userAddress,
       slippagePercent: slippage,
       queryOutput,
@@ -68,10 +68,6 @@ export function useRemoveLiquidityBuildCallDataQuery({
       wethIsEth,
       permit: permitSignature,
     })
-
-    console.log('Call data built:', res)
-    if (permitSignature) console.log('permit for call data:', permitSignature)
-    return res
   }
 
   return useQuery({

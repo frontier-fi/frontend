@@ -69,7 +69,9 @@ export function useInitializePoolBuildCall({
       poolType,
       initPoolInput.chainId,
       initPoolInput.amountsIn,
-      permit2Signature,
+      userAddress,
+      // Redacted by sanitizeSensitiveData wherever the query key is logged or reported
+      permit2Signature?.signature ?? 'no-permit2',
     ],
     queryFn,
     enabled: enabled && isConnected,

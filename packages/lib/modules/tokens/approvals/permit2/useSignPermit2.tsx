@@ -91,8 +91,7 @@ export function useSignPermit2({
       }
 
       setPermit2Signature(signature)
-    } catch (error) {
-      console.error(error)
+    } catch {
       setError('Error in permit2 signature call')
       setSignPermit2State(SignatureState.Ready)
     }

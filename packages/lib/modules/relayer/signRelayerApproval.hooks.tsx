@@ -61,8 +61,7 @@ export function useSignRelayerApproval(chainId: SupportedChainId) {
       }
 
       setRelayerApprovalSignature(signature)
-    } catch (error) {
-      console.error(error)
+    } catch {
       setError('Error in relayer signature call')
       setSignRelayerState(SignatureState.Ready)
     }

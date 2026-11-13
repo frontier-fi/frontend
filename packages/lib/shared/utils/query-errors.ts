@@ -45,6 +45,19 @@ export function shouldIgnore(message: string, stackTrace = ''): boolean {
   if (message.includes('.getAccounts is not a function')) return true
 
   /*
+    Wagmi's injected connector calls `.map(...)` on the wallet's `eth_accounts` response inside
+    `Object.getAccounts` / `Object.onConnect`, throwing when an injected wallet extension returns
+    a non-array value during connection initialization.
+  */
+  if (
+    message.includes('.map is not a function') &&
+    stackTrace.includes('getAccounts') &&
+    stackTrace.includes('onConnect')
+  ) {
+    return true
+  }
+
+  /*
     Error thrown by Library detector chrome extension:
     https://chromewebstore.google.com/detail/library-detector/cgaocdmhkmfnkdkbnckgmpopcbpaaejo?hl=en
   */
@@ -59,7 +72,12 @@ export function shouldIgnore(message: string, stackTrace = ''): boolean {
   /*
     More info: https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
   */
-  if (message.includes('ResizeObserver loop limit exceeded')) return true
+  if (
+    message.includes('ResizeObserver loop limit exceeded') ||
+    message.includes('ResizeObserver loop completed with undelivered notifications')
+  ) {
+    return true
+  }
 
   /*
     Wallet Connect bug when switching certain networks.
@@ -83,9 +101,20 @@ export function shouldIgnore(message: string, stackTrace = ''): boolean {
   }
 
   /*
-    com.okex.wallet injects code that causes this error
+    Multiple browser wallet extensions clash when injecting `window.ethereum` (or com.okex.wallet `inject.bundle.js`).
   */
+  if (message.startsWith('Cannot redefine property: ethereum')) {
+    return true
+  }
+
   if (message.startsWith('Cannot redefine property:') && stackTrace.includes('inject.bundle.js')) {
+    return true
+  }
+
+  /*
+    Wallets that do not implement EIP-5792 reject `wallet_getCapabilities` — expected and handled as unsupported.
+  */
+  if (message.includes('wallet_getCapabilities')) {
     return true
   }
 
@@ -154,4 +183,21 @@ export function shouldIgnore(message: string, stackTrace = ''): boolean {
   if (message.includes('Unreachable URL')) return true
 
   return false
+}
+
+const EXTENSION_URL_REGEX = /(?:chrome|moz|safari-web|safari)-extension:\/\//
+
+/*
+  True when the error was thrown by browser extension code (script filename or top stack frame),
+  not when extension frames merely appear further down the stack (e.g. an injected wallet provider).
+  Only meant for the global window error / unhandledrejection handlers.
+*/
+export function isExtensionOrigin(filename?: string, stackTrace = ''): boolean {
+  if (filename && EXTENSION_URL_REGEX.test(filename)) return true
+
+  const topFrame = stackTrace
+    .split('\n')
+    .find(line => /^\s*at\s/.test(line) || /^\S*@\S+:\d+/.test(line))
+
+  return !!topFrame && EXTENSION_URL_REGEX.test(topFrame)
 }

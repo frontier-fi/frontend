@@ -94,10 +94,43 @@ describe('currencies', () => {
 
     expect(rates).toBeUndefined()
     expect(fetchSpy).toHaveBeenCalledTimes(1)
+    expect(errorSpy).toHaveBeenCalledOnce()
 
-    expect(errorSpy).toHaveBeenCalledWith(
-      'Unable to fetch FX rates:',
-      'FX rates request failed with status 401'
-    )
+    const logged = JSON.parse(errorSpy.mock.calls[0]?.[0] as string)
+
+    expect(logged).toMatchObject({
+      level: 'error',
+      source: 'fx-rates',
+      category: 'fx_rates_fetch',
+      status: 401,
+      message: 'Unable to fetch FX rates: FX rates request failed with status 401',
+    })
+  })
+
+  it('logs single-line structured JSON after exhausting retries on network errors', async () => {
+    process.env.CURRENCYAPI_KEY = 'test-key'
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const resetError = new TypeError('fetch failed', {
+      cause: new Error('read ECONNRESET'),
+    })
+
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(resetError)
+
+    const rates = await getFxRates()
+
+    expect(rates).toBeUndefined()
+    expect(fetchSpy).toHaveBeenCalledTimes(3)
+    expect(errorSpy).toHaveBeenCalledOnce()
+
+    const logged = JSON.parse(errorSpy.mock.calls[0]?.[0] as string)
+
+    expect(logged).toMatchObject({
+      level: 'error',
+      source: 'fx-rates',
+      category: 'fx_rates_fetch',
+      errorName: 'TypeError',
+      message: 'Unable to fetch FX rates: fetch failed (read ECONNRESET)',
+    })
   })
 })

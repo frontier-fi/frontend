@@ -4,10 +4,10 @@ import { GetPoolDocument } from '@repo/lib/shared/services/api/generated/graphql
 import { ensureError } from '@repo/lib/shared/utils/errors'
 
 export async function getPoolQuery(apolloClient: ApolloClient, chain: ChainSlug, id: string) {
-  const _chain = getChainSlug(chain)
-  const variables = { id: id.toLowerCase(), chain: _chain }
-
   try {
+    const _chain = getChainSlug(chain)
+    const variables = { id: id.toLowerCase(), chain: _chain }
+
     const result = await apolloClient.query({
       query: GetPoolDocument,
       variables,

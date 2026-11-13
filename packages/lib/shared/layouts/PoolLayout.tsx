@@ -1,5 +1,9 @@
 import { Pool, PoolVariant } from '@repo/lib/modules/pool/pool.types'
-import { ChainSlug, getChainSlug, getPoolTypeLabel } from '@repo/lib/modules/pool/pool.utils'
+import {
+  ChainSlug,
+  getPoolTypeLabel,
+  getSupportedChainFromSlug,
+} from '@repo/lib/modules/pool/pool.utils'
 import { PropsWithChildren, Suspense } from 'react'
 import { PoolDetailSkeleton } from '@repo/lib/modules/pool/PoolDetail/PoolDetailSkeleton'
 import { getApolloServerClient } from '@repo/lib/shared/services/api/apollo-server.client'
@@ -27,6 +31,8 @@ export async function generatePoolMetadata({
   chain,
   variant,
 }: PoolLayoutProps): Promise<PoolMetadata> {
+  if (!getSupportedChainFromSlug(chain)) return { metadata: {} }
+
   const { data } = await getPoolQuery(getApolloServerClient(), chain, id)
 
   const pool = data?.pool
@@ -48,18 +54,22 @@ export async function generatePoolMetadata({
 }
 
 export async function PoolLayout({ id, chain, variant, children }: PoolLayoutProps) {
-  const _chain = getChainSlug(chain)
+  const _chain = getSupportedChainFromSlug(chain)
+
+  if (!_chain) {
+    notFound()
+  }
 
   const { data, error } = await getPoolQuery(getApolloServerClient(), chain, id)
 
   if (error) {
-    if (error?.message === 'Pool with id does not exist') {
+    if (error.message.includes('Pool with id does not exist')) {
       notFound()
     }
 
-    throw new Error('Failed to fetch pool')
+    throw new Error(`Failed to fetch pool (${_chain} ${id}): ${error.message}`)
   } else if (!data) {
-    throw new Error('Failed to fetch pool')
+    throw new Error(`Failed to fetch pool (${_chain} ${id}): empty response`)
   }
 
   return (
