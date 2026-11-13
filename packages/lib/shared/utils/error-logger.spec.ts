@@ -485,6 +485,7 @@ describe('error-logger', () => {
         const res = await handleClientErrorLogRequest(
           makeReq(`10.0.${Math.floor(i / 250)}.${i % 250}`)
         )
+
         expect(res.status).toBe(204)
       }
 
