@@ -1,44 +1,7 @@
 import { config } from '@repo/lib/config/app.config'
-import { logServerEvent } from '../../utils/server-log'
 
 const MAX_GRAPHQL_BODY_BYTES = 256 * 1024
 const UPSTREAM_TIMEOUT_MS = 15_000
-
-function extractGraphqlErrorInfo(responseText: string): {
-  hasErrors: boolean
-  graphqlError?: string
-  graphqlCode?: string
-} {
-  try {
-    const parsed = JSON.parse(responseText) as {
-      errors?: Array<{ message?: unknown; extensions?: { code?: unknown } }>
-    }
-
-    if (!Array.isArray(parsed?.errors) || parsed.errors.length === 0) {
-      return { hasErrors: false }
-    }
-
-    const firstError = parsed.errors[0]
-
-    const graphqlError =
-      typeof firstError?.message === 'string' && firstError.message.length > 0
-        ? firstError.message
-        : undefined
-
-    const graphqlCode =
-      typeof firstError?.extensions?.code === 'string' && firstError.extensions.code.length > 0
-        ? firstError.extensions.code
-        : undefined
-
-    return { hasErrors: true, graphqlError, graphqlCode }
-  } catch {
-    return { hasErrors: false }
-  }
-}
-
-function isExpectedGraphqlNotFound(graphqlError?: string): boolean {
-  return !!graphqlError?.includes('Pool with id does not exist')
-}
 
 /** Same-origin proxy for browser GraphQL. Avoids Apollo CSRF failing CORS preflight. */
 export async function proxyGraphqlRequest(request: Request) {
@@ -92,76 +55,35 @@ export async function proxyGraphqlRequest(request: Request) {
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     })
 
-    const responseText = await upstream.text()
-    const responseContentType = upstream.headers.get('content-type') || 'application/json'
-
     if (upstream.status >= 400) {
-      const { graphqlError, graphqlCode } = extractGraphqlErrorInfo(responseText)
-      const opLabel = operationName ?? 'unknown'
-
-      const message = graphqlError
-        ? `[graphql-proxy] ${opLabel} HTTP ${upstream.status}: ${graphqlError}`
-        : `[graphql-proxy] ${opLabel} HTTP ${upstream.status}`
-
-      logServerEvent({
-        level: 'error',
-        source: 'graphql-proxy',
-        status: upstream.status,
-        operationName,
-        message,
-        graphqlCode,
-        graphqlError,
-        apiUrl: config.apiUrl,
-      })
-
-      return new Response(responseText, {
-        status: upstream.status,
-        headers: {
-          'content-type': responseContentType,
-        },
-      })
-    }
-
-    if (responseText.includes('"errors"')) {
-      const { hasErrors, graphqlError, graphqlCode } = extractGraphqlErrorInfo(responseText)
-
-      if (hasErrors && !isExpectedGraphqlNotFound(graphqlError)) {
-        const opLabel = operationName ?? 'unknown'
-        const level = graphqlCode === 'INTERNAL_SERVER_ERROR' ? 'error' : 'warn'
-
-        const message = graphqlError
-          ? `[graphql-proxy] ${opLabel} GraphQL error: ${graphqlError}`
-          : `[graphql-proxy] ${opLabel} GraphQL error`
-
-        logServerEvent({
-          level,
+      console.error(
+        JSON.stringify({
+          level: 'error',
           source: 'graphql-proxy',
           status: upstream.status,
           operationName,
-          message,
-          graphqlCode,
-          graphqlError,
           apiUrl: config.apiUrl,
         })
-      }
+      )
     }
 
-    return new Response(responseText, {
+    return new Response(upstream.body, {
       status: upstream.status,
       headers: {
-        'content-type': responseContentType,
+        'content-type': upstream.headers.get('content-type') || 'application/json',
       },
     })
   } catch (error) {
-    logServerEvent({
-      level: 'error',
-      source: 'graphql-proxy',
-      status: 502,
-      operationName,
-      errorName: error instanceof Error ? error.name : undefined,
-      message: error instanceof Error ? error.message : String(error),
-      apiUrl: config.apiUrl,
-    })
+    console.error(
+      JSON.stringify({
+        level: 'error',
+        source: 'graphql-proxy',
+        status: 502,
+        operationName,
+        apiUrl: config.apiUrl,
+        message: error instanceof Error ? error.message : String(error),
+      })
+    )
 
     return Response.json(
       { errors: [{ message: 'Upstream GraphQL request failed' }] },

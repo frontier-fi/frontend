@@ -1,4 +1,3 @@
-import { logServerEvent } from '@repo/lib/shared/utils/server-log'
 import { mins } from '@repo/lib/shared/utils/time'
 
 const POOL_MIGRATIONS_URL =
@@ -23,17 +22,7 @@ export async function getPoolMigrations(): Promise<PoolMigration[]> {
 
     return (await res.json()) as PoolMigration[]
   } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error)
-
-    logServerEvent({
-      level: 'warn',
-      source: 'pool-metadata',
-      category: 'pool_metadata',
-      errorName: error instanceof Error ? error.name : undefined,
-      url: POOL_MIGRATIONS_URL,
-      message: `Unable to fetch pool migrations: ${reason}`,
-    })
-
+    console.error('Unable to fetch pool migrations', error)
     return []
   }
 }

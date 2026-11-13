@@ -22,6 +22,7 @@ export async function POST(request: NextRequest, props: Params) {
 
   const params = await props.params
   const { chain } = params
+  const rpcResponse = await postRpcCall(request, chain as GqlChain)
 
-  return postRpcCall(request, chain as GqlChain)
+  return Response.json(rpcResponse)
 }

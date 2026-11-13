@@ -1,12 +1,11 @@
 'use client'
 
-import { getChainId, isDev } from '@repo/lib/config/app.config'
+import { getChainId } from '@repo/lib/config/app.config'
 import { Toast } from '@repo/lib/shared/components/toasts/Toast'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
 import { reportClientError } from '@repo/lib/shared/utils/error-logger'
 import { ensureError } from '@repo/lib/shared/utils/errors'
-import { sanitizeSensitiveData } from '@repo/lib/shared/utils/server-log'
 import { secs } from '@repo/lib/shared/utils/time'
 import { AlertStatus, ToastId, useToast } from '@chakra-ui/react'
 import { milliseconds } from 'date-fns'
@@ -122,9 +121,7 @@ export function useRecentTransactionsLogic() {
 
         setTransactions(updatePayload)
       } catch (error) {
-        if (isDev) {
-          console.error('Error in RecentTransactionsProvider: ', sanitizeSensitiveData(error))
-        }
+        console.error('Error in RecentTransactionsProvider: ', error)
 
         const err = ensureError(error)
         const isTimeoutError = err.name === 'WaitForTransactionReceiptTimeoutError'
@@ -208,10 +205,7 @@ export function useRecentTransactionsLogic() {
     const cachedTransaction = transactions[hash]
 
     if (!cachedTransaction) {
-      if (isDev) {
-        console.log('Cannot update a cached tracked transaction', { hash, transactions })
-      }
-
+      console.log('Cannot update a cached tracked transaction', { hash, transactions })
       throw new Error('Cannot update a cached tracked transaction that does not exist.')
     }
 
@@ -376,12 +370,7 @@ async function reconcileEip5792Transactions(
         ...(txHash ? { hash: txHash } : {}),
       })
     } catch (error) {
-      if (isDev) {
-        console.error(
-          'Error reconciling an EIP-5792 batch in RecentTransactionsProvider: ',
-          sanitizeSensitiveData(error)
-        )
-      }
+      console.error('Error reconciling an EIP-5792 batch in RecentTransactionsProvider: ', error)
 
       // The wallet may not know the id (e.g. after reconnecting to another wallet):
       // only mark it terminal once the entry is stale, not on the first failure

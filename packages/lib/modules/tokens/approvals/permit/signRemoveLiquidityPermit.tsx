@@ -38,6 +38,7 @@ export async function signRemoveLiquidityPermit({
     return signature
   } catch (e: unknown) {
     const error = ensureError(e)
+    console.log(error)
     // When the user explicitly rejects in the wallet we return undefined to ignore the error and do nothing
     if (error.name === 'UserRejectedRequestError') return
     throw error

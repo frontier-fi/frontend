@@ -1,5 +1,4 @@
 import type { Instrumentation } from 'next'
-import { logServerEvent } from '@repo/lib/shared/utils/server-log'
 
 function isIgnoredScannerError(message: string): boolean {
   return (
@@ -17,17 +16,20 @@ export const onRequestError: Instrumentation.onRequestError = (err, request, con
 
   const digest = (err as { digest?: string })?.digest
 
-  logServerEvent({
-    level: 'error',
-    source: 'nextjs-server',
-    errorName: errorObj.name,
-    message: errorObj.message,
-    digest,
-    stack: errorObj.stack,
-    request: {
-      path: request.path,
-      method: request.method,
-    },
-    context,
-  })
+  console.error(
+    JSON.stringify({
+      level: 'error',
+      source: 'nextjs-server',
+      timestamp: new Date().toISOString(),
+      name: errorObj.name,
+      message: errorObj.message,
+      digest,
+      stack: errorObj.stack,
+      request: {
+        path: request.path,
+        method: request.method,
+      },
+      context,
+    })
+  )
 }

@@ -12,15 +12,8 @@ import {
   getAllowedOrigins,
   isAllowedOrigin,
 } from './internal-api/errors'
-import { logServerEvent, redactSensitiveText, sanitizeSensitiveData } from './server-log'
 
 const MAX_LOG_BODY_BYTES = 16 * 1024
-const MAX_CLIENT_KEEPALIVE_BYTES = 12 * 1024
-const CLIENT_DEDUPE_WINDOW_MS = 30_000
-const MAX_CLIENT_DEDUPE_ENTRIES = 200
-const RATE_LIMIT_MAX_REQUESTS = 20
-const RATE_LIMIT_WINDOW_MS = 60_000
-const MAX_RATE_LIMIT_ENTRIES = 5_000
 
 export const megazordBalancerAbi = [
   ...balancerRouterAbiExtended,
@@ -50,21 +43,15 @@ const CRITICAL_FLOW_PATHS = [
 
 export type CriticalFlow = (typeof CRITICAL_FLOW_PATHS)[number]
 
-const CLIENT_ERROR_CATEGORIES = [
-  'react-query',
-  'wagmi-mutation',
-  'error-boundary',
-  'global-error-boundary',
-  'window-error',
-  'unhandled-rejection',
-  'wallet-balances',
-  'tx-receipt-timeout',
-] as const
-
-export type ClientErrorCategory = (typeof CLIENT_ERROR_CATEGORIES)[number]
-
-const CRITICAL_FLOW_SET = new Set<string>(CRITICAL_FLOW_PATHS)
-const CLIENT_ERROR_CATEGORY_SET = new Set<string>(CLIENT_ERROR_CATEGORIES)
+export type ClientErrorCategory =
+  | 'react-query'
+  | 'wagmi-mutation'
+  | 'error-boundary'
+  | 'global-error-boundary'
+  | 'window-error'
+  | 'unhandled-rejection'
+  | 'wallet-balances'
+  | 'tx-receipt-timeout'
 
 export type ClientErrorContext = {
   userAddress?: string
@@ -305,71 +292,6 @@ export function safeJsonStringify(value: unknown): string {
   })
 }
 
-const clientErrorDedupeMap = new Map<string, number>()
-
-const CLIENT_DROP_ORDER = ['stack', 'extra', 'variables', 'queryKey', 'decodedRevert'] as const
-
-function shouldSendDeduplicatedClientError(dedupeKey: string): boolean {
-  const now = Date.now()
-  const previousTimestamp = clientErrorDedupeMap.get(dedupeKey)
-
-  if (previousTimestamp !== undefined && now - previousTimestamp < CLIENT_DEDUPE_WINDOW_MS) {
-    return false
-  }
-
-  if (
-    !clientErrorDedupeMap.has(dedupeKey) &&
-    clientErrorDedupeMap.size >= MAX_CLIENT_DEDUPE_ENTRIES
-  ) {
-    for (const [key, ts] of clientErrorDedupeMap) {
-      if (now - ts >= CLIENT_DEDUPE_WINDOW_MS) {
-        clientErrorDedupeMap.delete(key)
-      }
-    }
-
-    if (clientErrorDedupeMap.size >= MAX_CLIENT_DEDUPE_ENTRIES) {
-      const oldestKey = clientErrorDedupeMap.keys().next().value
-
-      if (oldestKey !== undefined) {
-        clientErrorDedupeMap.delete(oldestKey)
-      }
-    }
-  }
-
-  clientErrorDedupeMap.set(dedupeKey, now)
-  return true
-}
-
-function serializeClientErrorBody(record: Record<string, unknown>): string {
-  const sanitizedRoot = sanitizeSensitiveData(record) as Record<string, unknown>
-  const mutable: Record<string, unknown> = { ...sanitizedRoot }
-  const encoder = new TextEncoder()
-
-  let body = JSON.stringify(mutable)
-
-  if (encoder.encode(body).byteLength <= MAX_CLIENT_KEEPALIVE_BYTES) {
-    return body
-  }
-
-  for (const field of CLIENT_DROP_ORDER) {
-    if (!(field in mutable)) continue
-
-    delete mutable[field]
-    body = JSON.stringify(mutable)
-
-    if (encoder.encode(body).byteLength <= MAX_CLIENT_KEEPALIVE_BYTES) {
-      return body
-    }
-  }
-
-  if (typeof mutable.message === 'string' && mutable.message.length > 512) {
-    mutable.message = `${mutable.message.slice(0, 509)}...`
-    body = JSON.stringify(mutable)
-  }
-
-  return body
-}
-
 export function reportClientError(payload: ClientErrorPayload): void {
   if (typeof window === 'undefined') return
   if (process.env.NODE_ENV === 'test') return
@@ -382,13 +304,7 @@ export function reportClientError(payload: ClientErrorPayload): void {
     const isCritical = !!flow && !isSwapWithNoPathsError(message)
     const severity = payload.severity ?? (isCritical ? 'fatal' : 'error')
 
-    const dedupeKey = `${payload.category}:${fingerprint ?? payload.errorName ?? ''}:${redactSensitiveText(message).slice(0, 160)}:${flow ?? ''}`
-
-    if (!shouldSendDeduplicatedClientError(dedupeKey)) {
-      return
-    }
-
-    const body = serializeClientErrorBody({
+    const body = safeJsonStringify({
       ...clientErrorContext,
       ...payload,
       severity,
@@ -410,124 +326,6 @@ export function reportClientError(payload: ClientErrorPayload): void {
   }
 }
 
-type RateLimitBucket = {
-  count: number
-  resetAt: number
-}
-
-const clientErrorRateLimitMap = new Map<string, RateLimitBucket>()
-
-export function resetClientErrorRateLimiter(): void {
-  clientErrorRateLimitMap.clear()
-  clientErrorDedupeMap.clear()
-}
-
-function getClientIp(request: NextRequest): string {
-  const forwardedFor = request.headers.get('x-forwarded-for')
-  const firstHop = forwardedFor?.split(',')[0]?.trim()
-
-  return firstHop || 'local'
-}
-
-function checkClientErrorRateLimit(
-  ip: string
-): { allowed: true } | { allowed: false; retryAfterSeconds: number } {
-  const now = Date.now()
-  const existing = clientErrorRateLimitMap.get(ip)
-
-  if (existing && now < existing.resetAt) {
-    if (existing.count >= RATE_LIMIT_MAX_REQUESTS) {
-      return {
-        allowed: false,
-        retryAfterSeconds: Math.max(1, Math.ceil((existing.resetAt - now) / 1000)),
-      }
-    }
-
-    existing.count += 1
-    return { allowed: true }
-  }
-
-  if (!clientErrorRateLimitMap.has(ip) && clientErrorRateLimitMap.size >= MAX_RATE_LIMIT_ENTRIES) {
-    for (const [key, bucket] of clientErrorRateLimitMap) {
-      if (now >= bucket.resetAt) {
-        clientErrorRateLimitMap.delete(key)
-      }
-    }
-
-    if (clientErrorRateLimitMap.size >= MAX_RATE_LIMIT_ENTRIES) {
-      const oldestKey = clientErrorRateLimitMap.keys().next().value
-
-      if (oldestKey !== undefined) {
-        clientErrorRateLimitMap.delete(oldestKey)
-      }
-    }
-  }
-
-  clientErrorRateLimitMap.set(ip, {
-    count: 1,
-    resetAt: now + RATE_LIMIT_WINDOW_MS,
-  })
-
-  return { allowed: true }
-}
-
-async function readRequestBodyWithCap(
-  request: NextRequest,
-  maxBytes: number
-): Promise<{ ok: true; text: string } | { ok: false; reason: 'too_large' | 'read_error' }> {
-  const contentLength = request.headers.get('content-length')
-
-  if (contentLength && Number(contentLength) > maxBytes) {
-    return { ok: false, reason: 'too_large' }
-  }
-
-  if (!request.body) {
-    return { ok: true, text: '' }
-  }
-
-  const reader = request.body.getReader()
-  const chunks: Uint8Array[] = []
-  let totalBytes = 0
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-
-      if (value) {
-        totalBytes += value.byteLength
-
-        if (totalBytes > maxBytes) {
-          await reader.cancel().catch(() => {})
-          return { ok: false, reason: 'too_large' }
-        }
-
-        chunks.push(value)
-      }
-    }
-  } catch {
-    return { ok: false, reason: 'read_error' }
-  }
-
-  const combined = new Uint8Array(totalBytes)
-  let offset = 0
-
-  for (const chunk of chunks) {
-    combined.set(chunk, offset)
-    offset += chunk.byteLength
-  }
-
-  return { ok: true, text: new TextDecoder().decode(combined) }
-}
-
-function pickNonEmptyString(record: Record<string, unknown>, key: string): string | undefined {
-  const value = record[key]
-  if (typeof value !== 'string') return undefined
-
-  const trimmed = value.trim()
-  return trimmed.length > 0 ? value : undefined
-}
-
 export async function handleClientErrorLogRequest(request: NextRequest): Promise<Response> {
   const allowedOrigins = getAllowedOrigins()
 
@@ -535,99 +333,37 @@ export async function handleClientErrorLogRequest(request: NextRequest): Promise
     return createForbiddenResponse()
   }
 
-  const rateLimit = checkClientErrorRateLimit(getClientIp(request))
+  const contentLength = request.headers.get('content-length')
 
-  if (!rateLimit.allowed) {
-    return Response.json(
-      { error: 'Too many log requests' },
-      {
-        status: 429,
-        headers: {
-          'Retry-After': String(rateLimit.retryAfterSeconds),
-        },
-      }
-    )
+  if (contentLength && Number(contentLength) > MAX_LOG_BODY_BYTES) {
+    return createBadRequestResponse('Log payload too large')
   }
-
-  const bodyResult = await readRequestBodyWithCap(request, MAX_LOG_BODY_BYTES)
-
-  if (!bodyResult.ok) {
-    return createBadRequestResponse(
-      bodyResult.reason === 'too_large' ? 'Log payload too large' : 'Invalid JSON payload'
-    )
-  }
-
-  let parsed: unknown
 
   try {
-    parsed = JSON.parse(bodyResult.text)
+    const rawBody = await request.text()
+
+    if (new TextEncoder().encode(rawBody).byteLength > MAX_LOG_BODY_BYTES) {
+      return createBadRequestResponse('Log payload too large')
+    }
+
+    const parsed = JSON.parse(rawBody) as unknown
+
+    const payload =
+      parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : { data: parsed }
+
+    console.error(
+      safeJsonStringify({
+        ...payload,
+        level: 'error',
+        source: 'client',
+        timestamp: new Date().toISOString(),
+      })
+    )
+
+    return new Response(null, { status: 204 })
   } catch {
     return createBadRequestResponse('Invalid JSON payload')
   }
-
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    return createBadRequestResponse('Invalid client error payload')
-  }
-
-  const record = parsed as Record<string, unknown>
-
-  if (typeof record.category !== 'string' || !CLIENT_ERROR_CATEGORY_SET.has(record.category)) {
-    return createBadRequestResponse('Invalid client error category')
-  }
-
-  const category = record.category as ClientErrorCategory
-
-  const severity =
-    record.severity === 'fatal' || record.severity === 'error' ? record.severity : undefined
-
-  const flow =
-    typeof record.flow === 'string' && CRITICAL_FLOW_SET.has(record.flow)
-      ? (record.flow as CriticalFlow)
-      : undefined
-
-  const fingerprint = pickNonEmptyString(record, 'fingerprint')
-  const errorName = pickNonEmptyString(record, 'errorName')
-  const shortMessage = pickNonEmptyString(record, 'shortMessage')
-  const digest = pickNonEmptyString(record, 'digest')
-  const stack = pickNonEmptyString(record, 'stack')
-  const url = pickNonEmptyString(record, 'url')
-  const userAddress = pickNonEmptyString(record, 'userAddress')
-  const wallet = pickNonEmptyString(record, 'wallet')
-  const walletNetwork = pickNonEmptyString(record, 'walletNetwork')
-
-  const message =
-    pickNonEmptyString(record, 'message') ||
-    shortMessage ||
-    errorName ||
-    fingerprint ||
-    `Client ${category} error`
-
-  const extra =
-    record.extra && typeof record.extra === 'object' && !Array.isArray(record.extra)
-      ? (record.extra as Record<string, unknown>)
-      : undefined
-
-  logServerEvent({
-    level: 'error',
-    source: 'client',
-    severity,
-    category,
-    flow,
-    fingerprint,
-    errorName,
-    message,
-    shortMessage,
-    digest,
-    userAddress,
-    wallet,
-    walletNetwork,
-    url,
-    decodedRevert: record.decodedRevert,
-    queryKey: record.queryKey,
-    variables: record.variables,
-    extra,
-    stack,
-  })
-
-  return new Response(null, { status: 204 })
 }

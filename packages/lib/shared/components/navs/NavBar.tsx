@@ -240,6 +240,7 @@ export function NavBar({
       as={motion.div}
       borderColor="border.base"
       boxShadow={showShadow ? 'lg' : 'none'}
+      onScroll={e => console.log('Navbar scroll:', e)}
       pos="fixed"
       style={{
         backdropFilter: disableBlur ? 'none' : backdropFilter,

@@ -1,8 +1,6 @@
 import { ErrorAlert } from './ErrorAlert'
 import { AlertProps, Text } from '@chakra-ui/react'
-import { isDev } from '@repo/lib/config/app.config'
 import { DiscordLink } from '@repo/lib/shared/components/links/DiscordLink'
-import { sanitizeSensitiveData } from '@repo/lib/shared/utils/server-log'
 
 type Props = AlertProps & {
   error: Error
@@ -10,9 +8,7 @@ type Props = AlertProps & {
 }
 
 export function UnbalancedNestedAddError({ error }: Props) {
-  if (isDev) {
-    console.log('Nested pool add error: ', sanitizeSensitiveData(error))
-  }
+  console.log('Nested pool add error: ', error)
 
   /*
     Possible errors include:

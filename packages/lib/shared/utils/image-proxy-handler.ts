@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { secondsToMilliseconds } from 'date-fns'
-import { logServerEvent } from './server-log'
 
 const SUPPORTED_IMAGE_MIME_TYPES = new Set([
   'image/png',
@@ -65,13 +64,14 @@ export async function handleImageProxy(request: NextRequest) {
     clearTimeout(timeoutId)
 
     if (!response.ok) {
-      logServerEvent({
-        level: 'error',
-        source: 'image-proxy',
-        status: response.status,
-        imageUrl,
-        message: `Failed to fetch image (${response.status})`,
-      })
+      console.error(
+        JSON.stringify({
+          level: 'error',
+          source: 'image-proxy',
+          status: response.status,
+          imageUrl,
+        })
+      )
 
       return NextResponse.json({ error: 'Failed to fetch image' }, { status: 502 })
     }
@@ -112,20 +112,18 @@ export async function handleImageProxy(request: NextRequest) {
       },
     })
   } catch (error) {
+    console.error(
+      JSON.stringify({
+        level: 'error',
+        source: 'image-proxy',
+        imageUrl,
+        message: error instanceof Error ? error.message : String(error),
+      })
+    )
+
     clearTimeout(timeoutId)
 
-    const isAbortError = error instanceof Error && error.name === 'AbortError'
-
-    logServerEvent({
-      level: 'error',
-      source: 'image-proxy',
-      status: isAbortError ? 504 : 500,
-      errorName: error instanceof Error ? error.name : undefined,
-      imageUrl,
-      message: error instanceof Error ? error.message : String(error),
-    })
-
-    if (isAbortError) {
+    if (error instanceof Error && error.name === 'AbortError') {
       return NextResponse.json({ error: 'Request timeout' }, { status: 504 })
     }
 

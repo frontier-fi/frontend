@@ -1,4 +1,3 @@
-import { logServerEvent } from './server-log'
 import { mins } from './time'
 
 export enum SupportedCurrency {
@@ -67,14 +66,7 @@ export async function getFxRates(): Promise<FxRates | undefined> {
         const statusError = new Error(`FX rates request failed with status ${res.status}`)
 
         if (!isRetryableStatus(res.status)) {
-          logServerEvent({
-            level: 'error',
-            source: 'fx-rates',
-            category: 'fx_rates_fetch',
-            status: res.status,
-            message: `Unable to fetch FX rates: ${statusError.message}`,
-          })
-
+          console.error('Unable to fetch FX rates:', statusError.message)
           return undefined
         }
 
@@ -92,23 +84,10 @@ export async function getFxRates(): Promise<FxRates | undefined> {
     }
   }
 
-  const baseReason = lastError instanceof Error ? lastError.message : String(lastError)
-
-  const causeReason =
-    lastError instanceof Error && lastError.cause instanceof Error
-      ? lastError.cause.message
-      : undefined
-
-  const rawReason = causeReason ? `${baseReason} (${causeReason})` : baseReason
-  const reason = apiKey ? rawReason.replaceAll(apiKey, '[REDACTED]') : rawReason
-
-  logServerEvent({
-    level: 'error',
-    source: 'fx-rates',
-    category: 'fx_rates_fetch',
-    errorName: lastError instanceof Error ? lastError.name : undefined,
-    message: `Unable to fetch FX rates: ${reason}`,
-  })
+  console.error(
+    'Unable to fetch FX rates:',
+    lastError instanceof Error ? lastError.message : String(lastError)
+  )
 
   return undefined
 }

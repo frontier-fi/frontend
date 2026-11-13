@@ -59,12 +59,7 @@ export function shouldIgnore(message: string, stackTrace = ''): boolean {
   /*
     More info: https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
   */
-  if (
-    message.includes('ResizeObserver loop limit exceeded') ||
-    message.includes('ResizeObserver loop completed with undelivered notifications')
-  ) {
-    return true
-  }
+  if (message.includes('ResizeObserver loop limit exceeded')) return true
 
   /*
     Wallet Connect bug when switching certain networks.
@@ -88,20 +83,9 @@ export function shouldIgnore(message: string, stackTrace = ''): boolean {
   }
 
   /*
-    Multiple browser wallet extensions clash when injecting `window.ethereum` (or com.okex.wallet `inject.bundle.js`).
+    com.okex.wallet injects code that causes this error
   */
-  if (message.startsWith('Cannot redefine property: ethereum')) {
-    return true
-  }
-
   if (message.startsWith('Cannot redefine property:') && stackTrace.includes('inject.bundle.js')) {
-    return true
-  }
-
-  /*
-    Wallets that do not implement EIP-5792 reject `wallet_getCapabilities` — expected and handled as unsupported.
-  */
-  if (message.includes('wallet_getCapabilities')) {
     return true
   }
 
@@ -143,15 +127,6 @@ export function shouldIgnore(message: string, stackTrace = ''): boolean {
   }
 
   if (stackTrace.includes('extensionServiceWorker.js')) return true
-
-  if (
-    stackTrace.includes('chrome-extension://') ||
-    stackTrace.includes('moz-extension://') ||
-    stackTrace.includes('safari-web-extension://') ||
-    stackTrace.includes('safari-extension://')
-  ) {
-    return true
-  }
 
   if (isPausedErrorMessage(message)) return true
 

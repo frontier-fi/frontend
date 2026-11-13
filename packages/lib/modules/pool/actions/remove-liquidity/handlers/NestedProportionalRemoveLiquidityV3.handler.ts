@@ -7,7 +7,6 @@ import {
   RemoveLiquidityNestedV3,
   Slippage,
 } from '@balancer/sdk'
-import { isDev } from '@repo/lib/config/app.config'
 import { TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
 import { getRpcUrl } from '@repo/lib/modules/web3/transports'
 import { Address, Hex } from 'viem'
@@ -57,9 +56,7 @@ export class NestedProportionalRemoveLiquidityV3Handler implements RemoveLiquidi
       this.helpers.nestedPoolStateV3
     )
 
-    if (isDev) {
-      console.log('price simulation v3 result: ', { sdkQueryOutput })
-    }
+    console.log('price simulation v3 result: ', { sdkQueryOutput })
 
     return { amountsOut: sdkQueryOutput.amountsOut, sdkQueryOutput }
   }

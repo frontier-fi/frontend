@@ -25,7 +25,19 @@ export function hasValidPermit2(
   const amountInValid = (amountIn: TokenAmountIn) =>
     amountIn.amount === 0n || alreadyAllowed(amountIn)
 
-  return tokenAmountsIn.every(amountInValid)
+  const isValid = tokenAmountsIn.every(amountInValid)
+  /*
+   // Delete after debug:
+   if (tokenAmountsIn) {
+     const tokenAddress = tokenAmountsIn[0].address
+     const amountIn = tokenAmountsIn[0]
+     console.log({tokenAddress,
+       approvalExpired: approvalExpired(tokenAddress),
+       alreadyAllowed: alreadyAllowed(amountIn),
+     })
+   }
+  */
+  return isValid
 }
 
 type BasePermit2Params = {
