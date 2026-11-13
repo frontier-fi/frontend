@@ -423,6 +423,10 @@ export function resetClientErrorRateLimiter(): void {
 }
 
 function getClientIp(request: NextRequest): string {
+  // Set by the DigitalOcean App Platform edge; unlike x-forwarded-for it cannot be prefixed by the client
+  const connectingIp = request.headers.get('do-connecting-ip')?.trim()
+  if (connectingIp) return connectingIp
+
   const forwardedFor = request.headers.get('x-forwarded-for')
   const firstHop = forwardedFor?.split(',')[0]?.trim()
 

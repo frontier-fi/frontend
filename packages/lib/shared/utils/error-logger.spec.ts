@@ -448,6 +448,29 @@ describe('error-logger', () => {
       expect(otherIpRes.status).toBe(204)
     })
 
+    it('rate limits on do-connecting-ip even when x-forwarded-for is spoofed', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      const makeReq = (spoofedIp: string) =>
+        new NextRequest('http://localhost:3000/api/log', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'do-connecting-ip': '198.51.100.7',
+            'x-forwarded-for': `${spoofedIp}, 198.51.100.7`,
+          },
+          body: JSON.stringify({ category: 'window-error', message: 'boom' }),
+        })
+
+      for (let i = 0; i < 20; i++) {
+        const res = await handleClientErrorLogRequest(makeReq(`192.0.2.${i}`))
+        expect(res.status).toBe(204)
+      }
+
+      const limitedRes = await handleClientErrorLogRequest(makeReq('192.0.2.200'))
+      expect(limitedRes.status).toBe(429)
+    })
+
     it('keeps oversized 0x calldata queryKey logs <= 1,600 bytes with flow, severity, and source intact', async () => {
       const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       const hugeCalldata = `0xabcdef12${'00'.repeat(1500)}987654`
