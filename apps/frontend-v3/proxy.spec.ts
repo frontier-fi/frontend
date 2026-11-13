@@ -49,6 +49,31 @@ describe('proxy and instrumentation Server Action probe handling', () => {
         url: '/_next/static/chunks/main.js',
       })
     ).toBe(false)
+
+    for (const url of [
+      '/images/chains/MAINNET.svg',
+      '/images/background-noise.png',
+      '/favicon-dark.png',
+      '/pools/manifest.json',
+    ]) {
+      expect(unstable_doesMiddlewareMatch({ config, url })).toBe(false)
+    }
+
+    // Page routes nested under the same prefixes as public files still match
+    expect(
+      unstable_doesMiddlewareMatch({
+        config,
+        url: '/pools/ethereum/v3/0xabc',
+      })
+    ).toBe(true)
+
+    expect(
+      unstable_doesMiddlewareMatch({
+        config,
+        url: '/images/manifest.json',
+        headers: { 'next-action': 'y' },
+      })
+    ).toBe(true)
   })
 
   it('blocks Next-Action requests and form-encoded POSTs to page routes while passing normal GETs and API POSTs', async () => {

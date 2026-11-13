@@ -35,6 +35,7 @@ export const config = {
       source: '/:path*',
       has: [{ type: 'header', key: 'next-action' }],
     },
-    '/((?!api/|api$|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+    // Skip public/ files (images, manifests) so the proxy only runs for page routes
+    '/((?!api/|api$|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:avif|ico|jpe?g|json|png|svg|txt|webp|xml)$).*)',
   ],
 }
