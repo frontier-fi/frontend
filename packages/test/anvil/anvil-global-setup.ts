@@ -88,6 +88,12 @@ export async function setup() {
         forkUrl,
         forkBlockNumber: ANVIL_NETWORKS[chain.id].forkBlockNumber,
         mnemonic: 'have doctor foam invite bottom elevator cream bulb pigeon holiday razor castle',
+        // viem only re-checks a receipt when the block number changes, and anvil can report a new
+        // block number before its receipt is queryable. With automine alone no later block arrives,
+        // so receipt waits time out. Mixed mining still mines each tx immediately and adds a block
+        // every second. prool's types lack `mixedMining`; it is passed through as `--mixed-mining`.
+        blockTime: 1,
+        ...({ mixedMining: true } as object),
       }),
     })
 
