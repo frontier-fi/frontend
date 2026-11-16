@@ -168,11 +168,11 @@ catalogs:
       specifier: 4.3.4
       version: 4.3.4
     '@frontier-fi/maths':
+      specifier: 0.2.1
+      version: 0.2.1
+    '@frontier-fi/sdk':
       specifier: 0.2.0
       version: 0.2.0
-    '@frontier-fi/sdk':
-      specifier: github:frontier-fi/sdk#cfb793015cc5a3a223c85e8a220e3d5144c6ab81
-      version: https://codeload.github.com/frontier-fi/sdk/tar.gz/cfb793015cc5a3a223c85e8a220e3d5144c6ab81
 
 overrides:
   debug>supports-color: '-'
@@ -254,7 +254,7 @@ importers:
         version: 2.12.0(react@19.3.1)
       '@frontier-fi/sdk':
         specifier: 'catalog:'
-        version: https://codeload.github.com/frontier-fi/sdk/tar.gz/cfb793015cc5a3a223c85e8a220e3d5144c6ab81(typescript@6.0.3)(zod@4.6.7)
+        version: 0.2.0(typescript@6.0.3)(zod@4.6.7)
       '@nikolovlazar/chakra-ui-prose':
         specifier: ^1.2.1
         version: 1.2.1(@chakra-ui/react@2.10.10(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(framer-motion@14.0.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@chakra-ui/system@2.6.2(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(react@19.3.1))(react@19.3.1)
@@ -375,7 +375,7 @@ importers:
     devDependencies:
       '@frontier-fi/sdk':
         specifier: 'catalog:'
-        version: https://codeload.github.com/frontier-fi/sdk/tar.gz/cfb793015cc5a3a223c85e8a220e3d5144c6ab81(typescript@6.0.3)(zod@3.25.76)
+        version: 0.2.0(typescript@6.0.3)(zod@3.25.76)
       '@playwright/test':
         specifier: 1.64.1
         version: 1.64.1
@@ -474,10 +474,10 @@ importers:
         version: 11.14.0(@types/react@19.3.0)(react@19.3.1)
       '@frontier-fi/maths':
         specifier: 'catalog:'
-        version: 0.2.0
+        version: 0.2.1
       '@frontier-fi/sdk':
         specifier: 'catalog:'
-        version: https://codeload.github.com/frontier-fi/sdk/tar.gz/cfb793015cc5a3a223c85e8a220e3d5144c6ab81(typescript@6.0.3)(zod@4.6.7)
+        version: 0.2.0(typescript@6.0.3)(zod@4.6.7)
       '@nikolovlazar/chakra-ui-prose':
         specifier: ^1.2.1
         version: 1.2.1(@chakra-ui/react@2.10.10(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(framer-motion@14.0.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@chakra-ui/system@2.6.2(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(react@19.3.1))(react@19.3.1)
@@ -663,7 +663,7 @@ importers:
         version: 4.3.4(graphql-ws@6.4.0(crossws@0.3.5)(graphql@17.0.2)(ws@8.22.0))(graphql@17.0.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rxjs@7.8.2)
       '@frontier-fi/sdk':
         specifier: 'catalog:'
-        version: https://codeload.github.com/frontier-fi/sdk/tar.gz/cfb793015cc5a3a223c85e8a220e3d5144c6ab81(typescript@6.0.3)(zod@3.25.76)
+        version: 0.2.0(typescript@6.0.3)(zod@3.25.76)
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
@@ -1675,13 +1675,12 @@ packages:
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
 
-  '@frontier-fi/maths@0.2.0':
-    resolution: {integrity: sha512-CgGW6gKenCYBuJ2a53gpijMFOu4cySvr7dL/ozt8oOu2w3ly2sOkA4nlWvsPWR9sy0fsviteRWgdC8JtYuzEGQ==}
+  '@frontier-fi/maths@0.2.1':
+    resolution: {integrity: sha512-BSIOfhCSJE01Hjvz2drQRyBZm/iMTdqgcp6eg+d3pD9FI3QMCajlByu+EAr0liPGqtufmgTpyeqllnXNgdsa5A==}
     engines: {node: '>=18.x'}
 
-  '@frontier-fi/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/cfb793015cc5a3a223c85e8a220e3d5144c6ab81':
-    resolution: {gitHosted: true, integrity: sha512-92ZLLit2zJrYuvuq7g+wie5O1aub2dOErJ4GkAmQFHYbbVXo9deShU4b2V1RtxWKP+/ClKtXxberkngj2tbkQA==, tarball: https://codeload.github.com/frontier-fi/sdk/tar.gz/cfb793015cc5a3a223c85e8a220e3d5144c6ab81}
-    version: 0.1.0
+  '@frontier-fi/sdk@0.2.0':
+    resolution: {integrity: sha512-WfR+9hERx4ejgvKFQO7CLNKENuLUCiy2gsX+FSkoBGnM8WhjHZv4IqH/YICcMCNrGldrQGsSoGWaEOQb37vaUg==}
     engines: {node: '>=20.x'}
 
   '@graphql-codegen/add@7.1.1':
@@ -9500,11 +9499,11 @@ snapshots:
 
   '@floating-ui/utils@0.2.12': {}
 
-  '@frontier-fi/maths@0.2.0': {}
+  '@frontier-fi/maths@0.2.1': {}
 
-  '@frontier-fi/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/cfb793015cc5a3a223c85e8a220e3d5144c6ab81(typescript@6.0.3)(zod@3.25.76)':
+  '@frontier-fi/sdk@0.2.0(typescript@6.0.3)(zod@3.25.76)':
     dependencies:
-      '@frontier-fi/maths': 0.2.0
+      '@frontier-fi/maths': 0.2.1
       viem: 2.57.11(typescript@6.0.3)(zod@3.25.76)
     transitivePeerDependencies:
       - bufferutil
@@ -9512,9 +9511,9 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@frontier-fi/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/cfb793015cc5a3a223c85e8a220e3d5144c6ab81(typescript@6.0.3)(zod@4.6.7)':
+  '@frontier-fi/sdk@0.2.0(typescript@6.0.3)(zod@4.6.7)':
     dependencies:
-      '@frontier-fi/maths': 0.2.0
+      '@frontier-fi/maths': 0.2.1
       viem: 2.57.11(typescript@6.0.3)(zod@4.6.7)
     transitivePeerDependencies:
       - bufferutil
