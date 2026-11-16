@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "start": "cp -r public .next/standalone/apps/frontend-v3/ && cp -r .next/static .next/standalone/apps/frontend-v3/.next/ && node .next/standalone/apps/frontend-v3/server.js",
+    "start": "cp -r public .next/standalone/apps/frontend-v3/ && cp -r .next/static .next/standalone/apps/frontend-v3/.next/ && node --env-file-if-exists=.env.local .next/standalone/apps/frontend-v3/server.js",
     "build": "pnpm --filter @repo/lib graphql:gen && next build",
     "dev": "concurrently \"pnpm --filter @repo/lib graphql:gen --watch\" \"next dev\"",
     "dev:no-gen": "next dev",

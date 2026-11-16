@@ -1,11 +1,6 @@
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
-import {
-  createForbiddenResponse,
-  getAllowedOrigins,
-  isAllowedOrigin,
-} from '@repo/lib/shared/utils/internal-api/errors'
-import type { NextRequest } from 'next/server'
 import { postRpcCall } from '@repo/lib/shared/utils/internal-api/rpc'
+import type { NextRequest } from 'next/server'
 
 type Params = {
   params: Promise<{
@@ -14,14 +9,7 @@ type Params = {
 }
 
 export async function POST(request: NextRequest, props: Params) {
-  const allowedOrigins = getAllowedOrigins()
-
-  if (!isAllowedOrigin(request, allowedOrigins)) {
-    return createForbiddenResponse()
-  }
-
-  const params = await props.params
-  const { chain } = params
+  const { chain } = await props.params
 
   return postRpcCall(request, chain as GqlChain)
 }

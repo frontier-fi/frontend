@@ -1,120 +1,270 @@
 // @vitest-environment node
 import { NextRequest } from 'next/server'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GqlChain } from '../../services/api/generated/graphql'
-import { postRpcCall } from './rpc'
+import { postRpcCall, resetRpcRateLimiterForTests } from './rpc'
+
+const ALLOWED_ORIGIN = 'https://app.frontier.fi'
+
+function buildRpcRequest(
+  body: unknown,
+  headers: Record<string, string> = {},
+  chain = 'SEPOLIA'
+): NextRequest {
+  return new NextRequest(`https://app.frontier.fi/api/rpc/${chain}`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      origin: ALLOWED_ORIGIN,
+      ...headers,
+    },
+    body: typeof body === 'string' ? body : JSON.stringify(body),
+  })
+}
 
 describe('postRpcCall', () => {
-  afterEach(() => {
-    vi.restoreAllMocks()
-    vi.unstubAllEnvs()
+  beforeEach(() => {
+    process.env.ALLOWED_ORIGINS = ALLOWED_ORIGIN
+    vi.stubEnv('DRPC_API_KEY', 'secret-drpc-key')
   })
 
-  it('returns 400 Invalid chain without logging a 500 when probed with an invalid chain slug', async () => {
-    vi.stubEnv('DRPC_API_KEY', 'secret-drpc-key')
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+  afterEach(() => {
+    resetRpcRateLimiterForTests()
+    vi.restoreAllMocks()
+    vi.unstubAllEnvs()
+    delete process.env.ALLOWED_ORIGINS
+  })
 
-    const req = new NextRequest('https://app.frontier.fi/api/rpc/ethereum', {
+  it('rejects missing or mismatched Origin (and unset ALLOWED_ORIGINS) with 403', async () => {
+    const missingOriginReq = new NextRequest('https://app.frontier.fi/api/rpc/SEPOLIA', {
       method: 'POST',
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_chainId', params: [] }),
     })
 
-    const res = await postRpcCall(req, 'ethereum' as unknown as GqlChain)
-    expect(res.status).toBe(400)
-    expect(await res.json()).toEqual({ error: 'Invalid chain' })
+    expect((await postRpcCall(missingOriginReq, 'SEPOLIA' as GqlChain)).status).toBe(403)
+
+    const wrongOriginReq = buildRpcRequest(
+      { jsonrpc: '2.0', id: 1, method: 'eth_chainId', params: [] },
+      { origin: 'https://evil.example.com' }
+    )
+
+    expect((await postRpcCall(wrongOriginReq, 'SEPOLIA' as GqlChain)).status).toBe(403)
+
+    delete process.env.ALLOWED_ORIGINS
+
+    expect(
+      (
+        await postRpcCall(
+          buildRpcRequest({ jsonrpc: '2.0', id: 1, method: 'eth_chainId', params: [] }),
+          'SEPOLIA' as GqlChain
+        )
+      ).status
+    ).toBe(403)
+  })
+
+  it('rejects unknown, lowercase, or inactive chains (ethereum, POLYGON) with 400 and zero console.error noise', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+
+    for (const invalidChain of ['ethereum', 'POLYGON', 'NOT_A_CHAIN']) {
+      const req = buildRpcRequest(
+        { jsonrpc: '2.0', id: 1, method: 'eth_chainId', params: [] },
+        {},
+        invalidChain
+      )
+
+      const res = await postRpcCall(req, invalidChain as unknown as GqlChain)
+      expect(res.status).toBe(400)
+      expect(await res.json()).toEqual({ error: 'Unsupported chain' })
+    }
+
     expect(errorSpy).not.toHaveBeenCalled()
     expect(fetchSpy).not.toHaveBeenCalled()
   })
 
-  it('returns 500 and logs structured JSON when DRPC_API_KEY is missing on a valid chain', async () => {
-    vi.stubEnv('DRPC_API_KEY', '')
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  it('rejects non-JSON Content-Type with 415 and bodies > 64 KB with 413', async () => {
+    const plainReq = buildRpcRequest('plain-text', { 'content-type': 'text/plain' })
 
-    const req = new NextRequest('https://app.frontier.fi/api/rpc/SEPOLIA', {
+    expect((await postRpcCall(plainReq, 'SEPOLIA' as GqlChain)).status).toBe(415)
+
+    const chunk = new TextEncoder().encode('a'.repeat(36 * 1024))
+
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(chunk)
+        controller.enqueue(chunk)
+        controller.close()
+      },
+    })
+
+    const oversizedStreamReq = new NextRequest('https://app.frontier.fi/api/rpc/SEPOLIA', {
       method: 'POST',
-      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_blockNumber', params: [] }),
+      headers: {
+        'content-type': 'application/json',
+        origin: ALLOWED_ORIGIN,
+      },
+      body: stream,
+      duplex: 'half',
     })
 
-    const res = await postRpcCall(req, 'SEPOLIA' as GqlChain)
-    expect(res.status).toBe(500)
-    expect(errorSpy).toHaveBeenCalledOnce()
-
-    expect(JSON.parse(errorSpy.mock.calls[0]?.[0] as string)).toMatchObject({
-      level: 'error',
-      source: 'rpc-proxy',
-      status: 500,
-      chain: 'SEPOLIA',
-      message: 'DRPC_API_KEY is missing',
-    })
+    expect((await postRpcCall(oversizedStreamReq, 'SEPOLIA' as GqlChain)).status).toBe(413)
   })
 
-  it('returns 400 on malformed JSON request bodies', async () => {
-    vi.stubEnv('DRPC_API_KEY', 'secret-drpc-key')
-
-    const req = new NextRequest('https://app.frontier.fi/api/rpc/SEPOLIA', {
-      method: 'POST',
-      body: '{invalid-json',
-    })
-
-    const res = await postRpcCall(req, 'SEPOLIA' as GqlChain)
-    expect(res.status).toBe(400)
-    expect(await res.json()).toEqual({ error: 'Invalid JSON-RPC request body' })
-  })
-
-  it('logs rpcMethod on non-OK upstream responses and passes response through', async () => {
-    vi.stubEnv('DRPC_API_KEY', 'secret-drpc-key')
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ error: 'rate limited' }), { status: 429 })
+  it('rejects malformed JSON, empty batches, and batches > 25 items with 400', async () => {
+    expect((await postRpcCall(buildRpcRequest('{bad-json'), 'SEPOLIA' as GqlChain)).status).toBe(
+      400
     )
 
-    const req = new NextRequest('https://app.frontier.fi/api/rpc/SEPOLIA', {
-      method: 'POST',
-      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [] }),
-    })
+    expect((await postRpcCall(buildRpcRequest([]), 'SEPOLIA' as GqlChain)).status).toBe(400)
 
-    const res = await postRpcCall(req, 'SEPOLIA' as GqlChain)
-    expect(res.status).toBe(429)
-    expect(errorSpy).toHaveBeenCalledOnce()
+    const oversizedBatch = Array.from({ length: 26 }, (_, idx) => ({
+      jsonrpc: '2.0',
+      id: idx + 1,
+      method: 'eth_blockNumber',
+      params: [],
+    }))
 
-    expect(JSON.parse(errorSpy.mock.calls[0]?.[0] as string)).toMatchObject({
-      level: 'error',
-      source: 'rpc-proxy',
-      status: 429,
-      chain: 'SEPOLIA',
-      rpcMethod: 'eth_call',
-    })
+    expect((await postRpcCall(buildRpcRequest(oversizedBatch), 'SEPOLIA' as GqlChain)).status).toBe(
+      400
+    )
   })
 
-  it('returns 502 JSON without re-throwing and strips DRPC_API_KEY when upstream fetch fails', async () => {
-    vi.stubEnv('DRPC_API_KEY', 'secret-drpc-key')
+  it('rejects disallowed RPC methods (debug_traceTransaction, eth_getLogs, eth_sendRawTransaction) with 403 JSON-RPC -32601', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+
+    for (const disallowedMethod of [
+      'debug_traceTransaction',
+      'eth_getLogs',
+      'eth_sendRawTransaction',
+    ]) {
+      const req = buildRpcRequest({
+        jsonrpc: '2.0',
+        id: 42,
+        method: disallowedMethod,
+        params: [],
+      })
+
+      const res = await postRpcCall(req, 'SEPOLIA' as GqlChain)
+      expect(res.status).toBe(403)
+
+      const body = await res.json()
+
+      expect(body).toMatchObject({
+        jsonrpc: '2.0',
+        id: 42,
+        error: {
+          code: -32601,
+        },
+      })
+    }
+
+    const mixedBatch = [
+      { jsonrpc: '2.0', id: 1, method: 'eth_call', params: [] },
+      { jsonrpc: '2.0', id: 2, method: 'eth_getLogs', params: [] },
+    ]
+
+    expect((await postRpcCall(buildRpcRequest(mixedBatch), 'SEPOLIA' as GqlChain)).status).toBe(403)
+
+    expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('forwards valid single and batched eth_call / eth_estimateGas requests on active chain with 200', async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ jsonrpc: '2.0', id: 1, result: '0x01' }), { status: 200 })
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify([
+            { jsonrpc: '2.0', id: 1, result: '0x01' },
+            { jsonrpc: '2.0', id: 2, result: '0x5208' },
+          ]),
+          { status: 200 }
+        )
+      )
+
+    const singleRes = await postRpcCall(
+      buildRpcRequest({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [] }),
+      'SEPOLIA' as GqlChain
+    )
+
+    expect(singleRes.status).toBe(200)
+    expect(await singleRes.json()).toEqual({ jsonrpc: '2.0', id: 1, result: '0x01' })
+
+    const batchRes = await postRpcCall(
+      buildRpcRequest([
+        { jsonrpc: '2.0', id: 1, method: 'eth_call', params: [] },
+        { jsonrpc: '2.0', id: 2, method: 'eth_estimateGas', params: [] },
+      ]),
+      'SEPOLIA' as GqlChain
+    )
+
+    expect(batchRes.status).toBe(200)
+    expect(fetchSpy).toHaveBeenCalledTimes(2)
+    expect(fetchSpy.mock.calls[0]?.[1]?.signal).toBeDefined()
+  })
+
+  it('rate-limits per IP at 120 req/min with 429 and zero console.error noise', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      async () =>
+        new Response(JSON.stringify({ jsonrpc: '2.0', id: 1, result: '0x1' }), { status: 200 })
+    )
+
+    for (let i = 0; i < 120; i += 1) {
+      const res = await postRpcCall(
+        buildRpcRequest(
+          { jsonrpc: '2.0', id: i, method: 'eth_blockNumber', params: [] },
+          { 'do-connecting-ip': '203.0.113.44' }
+        ),
+        'SEPOLIA' as GqlChain
+      )
+
+      expect(res.status).toBe(200)
+    }
+
+    const limitedRes = await postRpcCall(
+      buildRpcRequest(
+        { jsonrpc: '2.0', id: 121, method: 'eth_blockNumber', params: [] },
+        { 'do-connecting-ip': '203.0.113.44' }
+      ),
+      'SEPOLIA' as GqlChain
+    )
+
+    expect(limitedRes.status).toBe(429)
+    expect(limitedRes.headers.get('Retry-After')).toBeTruthy()
+    expect(errorSpy).not.toHaveBeenCalled()
+  })
+
+  it('redacts DRPC_API_KEY and returns 502 JSON on upstream fetch failure without throwing', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(
       new Error('Fetch to https://lb.drpc.live/sepolia/secret-drpc-key timed out')
     )
 
-    const req = new NextRequest('https://app.frontier.fi/api/rpc/SEPOLIA', {
-      method: 'POST',
-      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_estimateGas', params: [] }),
-    })
+    const res = await postRpcCall(
+      buildRpcRequest({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [] }),
+      'SEPOLIA' as GqlChain
+    )
 
-    const res = await postRpcCall(req, 'SEPOLIA' as GqlChain)
     expect(res.status).toBe(502)
     expect(await res.json()).toEqual({ error: 'Upstream RPC request failed' })
     expect(errorSpy).toHaveBeenCalledOnce()
 
-    const rawLine = errorSpy.mock.calls[0]?.[0] as string
-    expect(rawLine).not.toContain('secret-drpc-key')
+    const logged = errorSpy.mock.calls[0]?.[0] as string
+    expect(logged).not.toContain('secret-drpc-key')
 
-    expect(JSON.parse(rawLine)).toMatchObject({
+    expect(JSON.parse(logged)).toMatchObject({
       level: 'error',
       source: 'rpc-proxy',
-      status: 502,
       chain: 'SEPOLIA',
-      rpcMethod: 'eth_estimateGas',
+      status: 502,
+      rpcMethod: 'eth_call',
+      message: 'Fetch to https://lb.drpc.live/sepolia/[REDACTED] timed out',
     })
   })
 })
