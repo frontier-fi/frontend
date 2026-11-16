@@ -1,5 +1,18 @@
-import { ExitPoolRequest, JoinPoolRequest } from '@balancer/sdk'
 import { Address, Hex } from 'viem'
+
+export type ExitPoolRequest = {
+  assets: Address[]
+  minAmountsOut: bigint[]
+  userData: Hex
+  toInternalBalance: boolean
+}
+
+export type JoinPoolRequest = {
+  assets: Address[]
+  maxAmountsIn: bigint[]
+  userData: Hex
+  fromInternalBalance: boolean
+}
 
 export type OutputReference = {
   index: bigint

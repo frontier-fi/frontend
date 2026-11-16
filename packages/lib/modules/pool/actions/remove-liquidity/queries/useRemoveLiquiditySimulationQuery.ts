@@ -3,7 +3,7 @@
 import { useUserSettings } from '@repo/lib/modules/user/settings/UserSettingsProvider'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { defaultDebounceMs, onlyExplicitRefetch } from '@repo/lib/shared/utils/queries'
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import { useDebounce } from 'use-debounce'
 import { useQuery } from '@tanstack/react-query'
 import { RemoveLiquidityHandler } from '../handlers/RemoveLiquidity.handler'

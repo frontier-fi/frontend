@@ -26,12 +26,12 @@
   },
   "dependencies": {
     "@apollo/client": "catalog:",
-    "@balancer/sdk": "github:frontier-fi/sdk#cd309ed8873386c00f5e65342bb73641e3503dc8",
     "@chakra-ui/clickable": "^2.1.0",
     "@chakra-ui/hooks": "2.4.2",
     "@chakra-ui/icons": "2.2.4",
     "@chakra-ui/react": "2.10.10",
     "@chakra-ui/styled-system": "2.12.0",
+    "@frontier-fi/sdk": "catalog:",
     "@nikolovlazar/chakra-ui-prose": "^1.2.1",
     "@repo/lib": "workspace:*",
     "@repo/test": "workspace:*",

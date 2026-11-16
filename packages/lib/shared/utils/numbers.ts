@@ -1,7 +1,7 @@
 'use client'
 
 import BigNumber from 'bignumber.js'
-import { MAX_UINT256 } from '@balancer/sdk'
+import { MAX_UINT256 } from '@frontier-fi/sdk'
 import { KeyboardEvent } from 'react'
 import { parseUnits } from 'viem'
 import { isNumber, toNumber } from 'lodash'

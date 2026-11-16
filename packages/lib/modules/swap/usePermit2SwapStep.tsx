@@ -1,4 +1,4 @@
-import { PublicWalletClient, SwapKind } from '@balancer/sdk'
+import { PublicWalletClient, SwapKind } from '@frontier-fi/sdk'
 import { useUserSettings } from '@repo/lib/modules/user/settings/UserSettingsProvider'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { Address } from 'viem'

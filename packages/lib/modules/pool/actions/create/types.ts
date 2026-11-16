@@ -5,7 +5,7 @@ import {
   CreatePoolV3WeightedInput,
   CreatePoolV3StableInput,
   CreatePoolGyroECLPInput,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { Address } from 'viem'
 import { ApiOrCustomToken } from '@repo/lib/modules/tokens/token.types'

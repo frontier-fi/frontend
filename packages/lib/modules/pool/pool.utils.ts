@@ -26,7 +26,7 @@ import {
   PoolCore,
 } from './pool.types'
 import { Pool } from './pool.types'
-import { isSameAddress } from '@balancer/sdk'
+import { isSameAddress } from '@frontier-fi/sdk'
 
 // URL slug for each chain
 export enum ChainSlug {

@@ -1,4 +1,4 @@
-import { PublicWalletClient } from '@balancer/sdk'
+import { PublicWalletClient } from '@frontier-fi/sdk'
 import { signPermit2Add } from '@repo/lib/modules/tokens/approvals/permit2/signPermit2Add'
 import { NoncesByTokenAddress } from '@repo/lib/modules/tokens/approvals/permit2/usePermit2Allowance'
 import { SignPermit2Fn as SignPermit2Fn } from '@repo/lib/modules/tokens/approvals/permit2/useSignPermit2'

@@ -4,7 +4,7 @@ import type {
 } from '@repo/lib/shared/services/api/graphql-derived-types'
 import { GetTokensQuery } from '@repo/lib/shared/services/api/generated/graphql'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
-import { Address, HumanAmount } from '@balancer/sdk'
+import { Address, HumanAmount } from '@frontier-fi/sdk'
 
 export type TokenBase = Pick<GqlToken, 'address' | 'name' | 'symbol' | 'decimals' | 'chainId'>
 

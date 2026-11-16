@@ -1,7 +1,7 @@
 import { SupportedChainId } from '@repo/lib/config/config.types'
 import { TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
 import { emptyAddress } from '@repo/lib/modules/web3/contracts/wagmi-helpers'
-import { Token, TokenAmount } from '@balancer/sdk'
+import { Token, TokenAmount } from '@frontier-fi/sdk'
 import { BuildAddLiquidityInput } from '../add-liquidity.types'
 import { AddLiquidityHandler } from './AddLiquidity.handler'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'

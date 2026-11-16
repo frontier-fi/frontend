@@ -1,5 +1,5 @@
 import { ApolloClient } from '@apollo/client'
-import { Path } from '@balancer/sdk'
+import { Path } from '@frontier-fi/sdk'
 import { SorGetSwapPathsDocument } from '@repo/lib/shared/services/api/generated/graphql'
 import { ProtocolVersion } from '../../pool/pool.types'
 import { SdkSimulateSwapResponse, SimulateSwapInputs } from '../swap.types'

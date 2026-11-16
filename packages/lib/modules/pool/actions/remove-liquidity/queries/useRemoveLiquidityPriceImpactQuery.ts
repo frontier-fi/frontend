@@ -7,7 +7,7 @@ import { useDebounce } from 'use-debounce'
 import { Address } from 'viem'
 import { RemoveLiquidityHandler } from '../handlers/RemoveLiquidity.handler'
 import { RemoveLiquidityParams, removeLiquidityKeys } from './remove-liquidity-keys'
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import { useQuery } from '@tanstack/react-query'
 import { usePool } from '../../../PoolProvider'
 

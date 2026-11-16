@@ -10,19 +10,14 @@ import {
   HumanAmount,
   InputAmount,
   MinimalToken,
-  NestedPoolState,
-  PoolGetPool,
   PoolState,
   PoolStateWithUnderlyings,
   PoolTokenWithUnderlying,
   Token,
   TokenAmount,
-  mapPoolToNestedPoolStateV2,
-  mapPoolToNestedPoolStateV3,
-  mapPoolType,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import BigNumber from 'bignumber.js'
-import { Address, Hex, formatUnits, parseUnits } from 'viem'
+import { Address, formatUnits, parseUnits } from 'viem'
 import {
   isNativeAsset,
   isNativeOrWrappedNative,
@@ -69,20 +64,6 @@ export class LiquidityActionHelpers {
     return toPoolState(this.pool)
   }
 
-  /* Used by default nested SDK handlers */
-  public get nestedPoolStateV2(): NestedPoolState {
-    const result = mapPoolToNestedPoolStateV2(this.pool as PoolGetPool)
-    result.protocolVersion = 2
-    return result
-  }
-
-  /* Used by default nested SDK handlers */
-  public get nestedPoolStateV3(): NestedPoolState {
-    const result = mapPoolToNestedPoolStateV3(this.pool as PoolGetPool)
-    result.protocolVersion = 3
-    return result
-  }
-
   /* Used by V3 boosted SDK handlers */
   public get boostedPoolState(): PoolStateWithUnderlyings & { totalShares: HumanAmount } {
     const poolTokensWithUnderlyings: PoolTokenWithUnderlying[] = this.pool.poolTokens.map(
@@ -103,7 +84,7 @@ export class LiquidityActionHelpers {
     )
 
     const state: PoolStateWithUnderlyings & { totalShares: HumanAmount } = {
-      id: this.pool.id as Hex,
+      id: this.pool.id as Address,
       address: this.pool.address as Address,
       protocolVersion: 3,
       type: this.pool.type,
@@ -330,17 +311,14 @@ export function isWeightedPool2Tokens(pool: Pool): boolean {
   return false
 }
 
-type ProtocolVersion = PoolState['protocolVersion']
-
 export function toPoolState(pool: Pool): PoolState {
   return {
-    id: pool.id as Hex,
+    id: pool.id as Address,
     address: pool.address as Address,
     // Destruct to avoid errors when the SDK tries to mutate the poolTokens (read-only from GraphQL)
     tokens: [...pool.poolTokens] as MinimalToken[],
-    // v3 pools do not require pool type mapping
-    type: isV3Pool(pool) ? pool.type : mapPoolType(pool.type),
-    protocolVersion: pool.protocolVersion as ProtocolVersion,
+    type: pool.type,
+    protocolVersion: 3,
   }
 }
 
@@ -424,12 +402,6 @@ export function injectNativeAsset(
 
 export function hasNoLiquidity(pool: Pool): boolean {
   return isZero(pool.dynamicData.totalShares)
-}
-
-// When the pool has version < v3, it adds extra buildCall params (sender and recipient) that must be present only in V1/V2
-export function formatBuildCallParams<T>(buildCallParams: T, account: Address) {
-  // sender and recipient must be defined only for v1 and v2 pools
-  return { ...buildCallParams, sender: account, recipient: account }
 }
 
 export function toTokenAmountsIn(

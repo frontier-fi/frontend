@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Address } from 'viem'
 import { erc20Abi } from 'viem'
-import { vaultExtensionAbi_V3 } from '@balancer/sdk'
+import { vaultExtensionAbi_V3 } from '@frontier-fi/sdk'
 import { useReadContracts, useReadContract } from 'wagmi'
 import {
   reClammPoolAbi,

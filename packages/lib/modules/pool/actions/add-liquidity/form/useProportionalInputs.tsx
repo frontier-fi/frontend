@@ -8,7 +8,7 @@ import {
   PoolStateWithUnderlyingBalances,
   calculateProportionalAmounts,
   calculateProportionalAmountsBoosted,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { swapWrappedWithNative } from '@repo/lib/modules/tokens/token.helpers'
 import { ApiToken, HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
 import { useTokenBalances } from '@repo/lib/modules/tokens/TokenBalancesProvider'

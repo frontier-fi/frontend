@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PoolType } from '@balancer/sdk'
+import { PoolType } from '@frontier-fi/sdk'
 import {
   validatePoolTokens,
   validatePoolSettings,
@@ -135,24 +135,24 @@ describe('validatePoolCreationForm', () => {
 
       it('does not throw for malformed token amounts', () => {
         expect(
-          validatePoolTokens.hasAmountError(mockToken({ amount: 'abc' }), PoolType.CowAmm)
+          validatePoolTokens.hasAmountError(mockToken({ amount: 'abc' }), PoolType.Weighted)
         ).toEqual({
           error: 'Amount must be greater than 0',
           possibleErrors: ['Amount must be greater than 0', 'Minimum amount is 1'],
         })
       })
 
-      it('enforces higher minimum for CowAmm tokens with low decimals', () => {
+      it('allows fractional positive amounts for low-decimal tokens on V3 pools', () => {
         const lowDecimalsToken = mockToken({ amount: '0.001', data: { decimals: 6 } as any })
 
-        expect(validatePoolTokens.hasAmountError(lowDecimalsToken, PoolType.CowAmm).error).toBe(
-          'Minimum amount is 1'
-        )
+        expect(
+          validatePoolTokens.hasAmountError(lowDecimalsToken, PoolType.Weighted).error
+        ).toBeUndefined()
 
         const sufficientToken = mockToken({ amount: '100', data: { decimals: 6 } as any })
 
         expect(
-          validatePoolTokens.hasAmountError(sufficientToken, PoolType.CowAmm).error
+          validatePoolTokens.hasAmountError(sufficientToken, PoolType.Stable).error
         ).toBeUndefined()
       })
     })

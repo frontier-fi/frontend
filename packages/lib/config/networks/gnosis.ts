@@ -3,8 +3,6 @@ import { NetworkConfig } from '../config.types'
 import { convertHexToLowerCase } from '@repo/lib/shared/utils/objects'
 import { CSP_ISSUE_POOL_IDS } from '@repo/lib/shared/data/csp-issue'
 import { PoolIssue } from '@repo/lib/modules/pool/alerts/pool-issues/PoolIssue.type'
-import { AddressProvider, PERMIT2 } from '@balancer/sdk'
-import { gnosis } from 'viem/chains'
 
 const networkConfig: NetworkConfig = {
   chainId: 100,
@@ -53,18 +51,12 @@ const networkConfig: NetworkConfig = {
     multicall2: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
     balancer: {
       vaultV2: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-      vaultV3: AddressProvider.Vault(gnosis.id),
       relayerV6: '0x2163c2FcD0940e84B8a68991bF926eDfB0Cd926C',
       minter: '0xA8920455934Da4D853faac1f94Fe7bEf72943eF1',
-      router: AddressProvider.Router(gnosis.id),
-      batchRouter: AddressProvider.BatchRouter(gnosis.id),
-      compositeLiquidityRouterBoosted: AddressProvider.CompositeLiquidityRouter(gnosis.id),
-      vaultAdminV3: AddressProvider.VaultAdmin(gnosis.id),
-      unbalancedAddViaSwapRouter: AddressProvider.UnbalancedAddViaSwapRouter(gnosis.id),
       bCoWFactory: '0x703Bd8115E6F21a37BB5Df97f78614ca72Ad7624',
     },
     veDelegationProxy: '0x7A2535f5fB47b8e44c02Ef5D9990588313fe8F05',
-    permit2: PERMIT2[gnosis.id],
+    permit2: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
   },
   pools: convertHexToLowerCase({
     issues: { [PoolIssue.CspPoolVulnWarning]: CSP_ISSUE_POOL_IDS[GqlChainValues.Gnosis] },

@@ -1,5 +1,5 @@
 import { usePoolCreationForm } from '../PoolCreationFormProvider'
-import { TokenType, CreatePoolV3BaseInput, PoolType } from '@balancer/sdk'
+import { TokenType, CreatePoolV3BaseInput, PoolType } from '@frontier-fi/sdk'
 import { zeroAddress } from 'viem'
 import { PERCENTAGE_DECIMALS, DEFAULT_DECIMALS } from '../constants'
 import { getNetworkConfig, getGqlChain, isDev } from '@repo/lib/config/app.config'

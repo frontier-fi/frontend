@@ -72,10 +72,11 @@ export default defineConfig(() => {
             name: 'veDelegationProxy',
             address: mainnetNetworkConfig.contracts.veDelegationProxy,
           },
-          {
-            name: 'VaultAdmin',
-            address: mainnetNetworkConfig.contracts.balancer.vaultAdminV3,
-          },
+          // Uncomment when Frontier VaultAdmin is deployed on Ethereum Mainnet
+          // {
+          //   name: 'VaultAdmin',
+          //   address: mainnetNetworkConfig.contracts.balancer.vaultAdminV3,
+          // },
           {
             name: 'GyroECLPPool',
             address: '0x2191Df821C198600499aA1f0031b1a7514D7A7D9',

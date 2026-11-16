@@ -1,6 +1,6 @@
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { usePoolCreationForm } from '../../PoolCreationFormProvider'
-import { PoolType } from '@balancer/sdk'
+import { PoolType } from '@frontier-fi/sdk'
 import { isGyroEllipticPool, isAutoRangePool } from '@repo/lib/modules/pool/actions/create/helpers'
 import { BalAlert } from '@repo/lib/shared/components/alerts/BalAlert'
 import { VStack, UnorderedList, ListItem } from '@chakra-ui/react'

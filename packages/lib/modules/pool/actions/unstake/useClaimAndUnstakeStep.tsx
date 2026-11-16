@@ -18,7 +18,7 @@ import { ManagedTransactionButton } from '@repo/lib/modules/transactions/transac
 import { isTransactionSuccess } from '@repo/lib/modules/transactions/transaction-steps/transaction.helper'
 import { useHasApprovedRelayer } from '@repo/lib/modules/relayer/useHasApprovedRelayer'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import { useRelayerMode } from '@repo/lib/modules/relayer/useRelayerMode'
 import { TransactionBatchButton } from '@repo/lib/modules/transactions/transaction-steps/TransactionBatchButton'
 import { buildBatchableTxCall } from '@repo/lib/modules/transactions/transaction-steps/tx-batch.helpers'

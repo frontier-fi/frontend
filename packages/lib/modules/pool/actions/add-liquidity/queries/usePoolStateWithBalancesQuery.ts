@@ -1,17 +1,12 @@
 'use client'
 
-import {
-  getBoostedPoolStateWithBalancesV3,
-  getPoolStateWithBalancesCowAmm,
-  getPoolStateWithBalancesV2,
-  getPoolStateWithBalancesV3,
-} from '@balancer/sdk'
+import { getBoostedPoolStateWithBalancesV3, getPoolStateWithBalancesV3 } from '@frontier-fi/sdk'
 import { getRpcUrl } from '@repo/lib/modules/web3/transports'
 import { onlyExplicitRefetch } from '@repo/lib/shared/utils/queries'
 import { useQuery } from '@tanstack/react-query'
 import { useBlockNumber } from 'wagmi'
 import { LiquidityActionHelpers } from '../../LiquidityActionHelpers'
-import { isBoosted, isCowAmmPool, isV2Pool, isV3Pool } from '../../../pool.helpers'
+import { isBoosted, isV3Pool } from '../../../pool.helpers'
 import { Pool } from '../../../pool.types'
 import { getChainId } from '@repo/lib/config/app.config'
 
@@ -33,14 +28,6 @@ export function usePoolStateWithBalancesQuery(pool: Pool) {
         return isBoosted(pool)
           ? await getBoostedPoolStateWithBalancesV3(helpers.boostedPoolState, chainId, rpcUrl)
           : await getPoolStateWithBalancesV3(helpers.poolState, chainId, rpcUrl)
-      }
-
-      if (isV2Pool(pool)) {
-        return await getPoolStateWithBalancesV2(helpers.poolState, chainId, rpcUrl)
-      }
-
-      if (isCowAmmPool(pool.type)) {
-        return await getPoolStateWithBalancesCowAmm(helpers.poolState, chainId, rpcUrl)
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)

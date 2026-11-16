@@ -1,7 +1,7 @@
 import type { GqlPoolUserBalance } from '@repo/lib/shared/services/api/graphql-derived-types'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import type BigNumber from 'bignumber.js'
 import { useEffect, useMemo, useCallback } from 'react'
 import { ReadContractsErrorType } from 'wagmi/actions'

@@ -1,6 +1,6 @@
 'use client'
 
-import { Path } from '@balancer/sdk'
+import { Path } from '@frontier-fi/sdk'
 import {
   Box,
   Divider,

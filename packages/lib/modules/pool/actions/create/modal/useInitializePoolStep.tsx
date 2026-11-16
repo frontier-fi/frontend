@@ -9,7 +9,7 @@ import { ManagedSendTransactionButton } from '@repo/lib/modules/transactions/tra
 import { DisabledTransactionButton } from '@repo/lib/modules/transactions/transaction-steps/TransactionStepButton'
 import { useInitializePoolBuildCall } from '@repo/lib/modules/pool/actions/initialize/useInitializePoolBuildCall'
 import { type Address } from 'viem'
-import { PoolType, InitPoolInputV3 } from '@balancer/sdk'
+import { PoolType, InitPoolInputV3 } from '@frontier-fi/sdk'
 import { getRpcUrl } from '@repo/lib/modules/web3/transports'
 import { useIsPoolInitialized } from '@repo/lib/modules/pool/queries/useIsPoolInitialized'
 import { TransactionBatchButton } from '@repo/lib/modules/transactions/transaction-steps/TransactionBatchButton'

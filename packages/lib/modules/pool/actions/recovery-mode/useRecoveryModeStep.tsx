@@ -10,7 +10,7 @@ import { ManagedSendTransactionButton } from '@repo/lib/modules/transactions/tra
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
 import { Address, encodeFunctionData, zeroAddress } from 'viem'
-import { vaultAdminAbi_V3 } from '@balancer/sdk'
+import { vaultAdminAbi_V3 } from '@frontier-fi/sdk'
 import { getNetworkConfig } from '@repo/lib/config/app.config'
 
 const STEP_ID = 'enable-recovery'

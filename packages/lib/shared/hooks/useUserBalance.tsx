@@ -1,6 +1,6 @@
 'use client'
 
-import { Address } from '@balancer/sdk'
+import { Address } from '@frontier-fi/sdk'
 import { useReadContracts } from 'wagmi'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { erc20Abi } from 'viem'

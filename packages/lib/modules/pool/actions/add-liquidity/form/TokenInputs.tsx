@@ -1,5 +1,5 @@
 import { TokenInput } from '@repo/lib/modules/tokens/TokenInput/TokenInput'
-import { HumanAmount, isSameAddress } from '@balancer/sdk'
+import { HumanAmount, isSameAddress } from '@frontier-fi/sdk'
 import { Address } from 'viem'
 import { useAddLiquidity } from '../AddLiquidityProvider'
 import { VStack } from '@chakra-ui/react'

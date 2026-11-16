@@ -1,4 +1,4 @@
-import { ExactInQueryOutput, ExactOutQueryOutput } from '@balancer/sdk'
+import { ExactInQueryOutput, ExactOutQueryOutput } from '@frontier-fi/sdk'
 import mainnetNetworkConfig from '@repo/lib/config/networks/mainnet'
 import sepoliaNetworkConfig from '@repo/lib/config/networks/sepolia'
 import { daiAddress, wETHAddress } from '@repo/lib/debug-helpers'

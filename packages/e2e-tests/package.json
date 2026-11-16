@@ -17,7 +17,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@balancer/sdk": "github:frontier-fi/sdk#cd309ed8873386c00f5e65342bb73641e3503dc8",
+    "@frontier-fi/sdk": "catalog:",
     "@playwright/test": "1.64.1",
     "@repo/lib": "workspace:*",
     "@repo/typescript-config": "workspace:*",

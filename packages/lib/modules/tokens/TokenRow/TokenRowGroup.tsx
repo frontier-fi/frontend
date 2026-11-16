@@ -6,7 +6,7 @@ import { HumanTokenAmount } from '../token.types'
 import { useTotalUsdValue } from '../useTotalUsdValue'
 import TokenRow from './TokenRow'
 import { ReactNode, useMemo } from 'react'
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import { Pool } from '@repo/lib/modules/pool/pool.types'
 import { bn, formatFalsyValueAsDash, isBnParseable } from '@repo/lib/shared/utils/numbers'
 

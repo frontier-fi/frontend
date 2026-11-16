@@ -4,7 +4,7 @@ import {
   RemoveLiquidityQueryOutput,
   RemoveLiquidityKind as SdkRemoveLiquidityKind,
   TokenAmount,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { Address } from 'viem'
 
 // There are other kinds but we only support two of them

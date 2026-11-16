@@ -13,7 +13,7 @@ import {
   balancerV2VaultAbi,
 } from '../../web3/contracts/abi/generated'
 import { isComposableStablePool } from '../pool.utils'
-import { vaultExtensionAbi_V3 } from '@balancer/sdk'
+import { vaultExtensionAbi_V3 } from '@frontier-fi/sdk'
 import { getCompositionTokens } from '../pool-tokens.utils'
 
 const totalSupplyAbi = parseAbi(['function totalSupply() view returns (uint256)'])

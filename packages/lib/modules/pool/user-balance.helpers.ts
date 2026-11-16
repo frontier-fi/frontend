@@ -3,7 +3,7 @@ import { Pool } from './pool.types'
 import { PoolListItem } from './pool.types'
 import { parseUnits } from 'viem'
 import { BPT_DECIMALS } from './pool.constants'
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import {
   GqlPoolStakingType,
   GqlPoolStakingTypeValues,

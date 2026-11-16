@@ -2,7 +2,7 @@
 
 import { useApolloClient, useReactiveVar } from '@apollo/client/react'
 import { ApolloClient } from '@apollo/client'
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import { useDisclosure } from '@chakra-ui/react'
 import { getNetworkConfig } from '@repo/lib/config/app.config'
 import { useNetworkConfig } from '@repo/lib/config/useNetworkConfig'
@@ -29,12 +29,11 @@ import { useTokens } from '../tokens/TokensProvider'
 import { useTransactionSteps } from '../transactions/transaction-steps/useTransactionSteps'
 import { emptyAddress } from '../web3/contracts/wagmi-helpers'
 import { useUserAccount } from '../web3/UserAccountProvider'
-import { AuraBalSwapHandler } from './handlers/AuraBalSwap.handler'
 import { DefaultSwapHandler } from './handlers/DefaultSwap.handler'
 import { NativeWrapHandler } from './handlers/NativeWrap.handler'
 import { SwapHandler } from './handlers/Swap.handler'
 import { useSimulateSwapQuery } from './queries/useSimulateSwapQuery'
-import { isAuraBalSwap, sanitizeSwapState } from './swap.helpers'
+import { sanitizeSwapState } from './swap.helpers'
 import {
   OSwapAction,
   SdkSimulateSwapResponse,
@@ -77,17 +76,15 @@ function selectSwapHandler(
   tokenInAddress: Address,
   tokenOutAddress: Address,
   chain: AppChain,
-  swapType: GqlSorSwapType,
+  _swapType: GqlSorSwapType,
   apolloClient: ApolloClient,
-  tokens: ApiToken[]
+  _tokens: ApiToken[]
 ): SwapHandler {
   if (isNativeWrap(tokenInAddress, tokenOutAddress, chain)) {
     return new NativeWrapHandler(apolloClient)
   } else if (isSupportedWrap(tokenInAddress, tokenOutAddress, chain)) {
     const WrapHandler = getWrapHandlerClass(tokenInAddress, tokenOutAddress, chain)
     return new WrapHandler()
-  } else if (isAuraBalSwap(tokenInAddress, tokenOutAddress, chain, swapType)) {
-    return new AuraBalSwapHandler(tokens)
   }
 
   return new DefaultSwapHandler(apolloClient)

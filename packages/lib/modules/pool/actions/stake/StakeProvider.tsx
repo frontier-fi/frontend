@@ -8,7 +8,7 @@ import { createContext, PropsWithChildren, useMemo } from 'react'
 import { usePool } from '../../PoolProvider'
 import { useStakeSteps } from './useStakeSteps'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import {
   getStakedBalance,
   getUserWalletBalance,

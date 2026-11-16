@@ -2,22 +2,19 @@ import { Pool } from '@repo/lib/modules/pool/pool.types'
 import { ensureError } from '@repo/lib/shared/utils/errors'
 import { get24HoursFromNowInSecs } from '@repo/lib/shared/utils/time'
 import {
-  AddLiquidityKind,
   AddLiquidityQueryOutput,
-  AddLiquidityUnbalancedViaSwapBuildCallInput,
-  AddLiquidityUnbalancedViaSwapQueryOutput,
   Address,
   Permit2,
   Permit2Helper,
   PublicWalletClient,
   TokenAmount,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { HumanTokenAmountWithSymbol } from '../../token.types'
 import { NoncesByTokenAddress } from './usePermit2Allowance'
 import { constructBaseBuildCallInput } from '@repo/lib/modules/pool/actions/add-liquidity/handlers/add-liquidity.utils'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { isWrappedNativeAsset } from '../../token.helpers'
-import { isBoosted, isV3WithNestedActionsPool } from '@repo/lib/modules/pool/pool.helpers'
+import { isBoosted } from '@repo/lib/modules/pool/pool.helpers'
 import { maximizeAmountsInForPermit2 } from './permit2.helpers'
 
 type SignPermit2AddParams = {
@@ -67,39 +64,13 @@ async function sign({
     pool,
   })
 
-  let filteredAmountsIn = filterWrappedNativeAsset({
+  const filteredAmountsIn = filterWrappedNativeAsset({
     wethIsEth,
     chain: pool.chain,
     amountsIn: sdkQueryOutput.amountsIn,
   })
 
-  if (sdkQueryOutput.addLiquidityKind === AddLiquidityKind.UnbalancedViaSwap) {
-    const unbalancedOutput = sdkQueryOutput as AddLiquidityUnbalancedViaSwapQueryOutput
-    const inputToken = unbalancedOutput.expectedAdjustableAmountIn.token
-
-    const buildCallInput: AddLiquidityUnbalancedViaSwapBuildCallInput = {
-      ...unbalancedOutput,
-      slippage: baseInput.slippage,
-      wethIsEth: baseInput.wethIsEth,
-      deadline: BigInt(Number.MAX_SAFE_INTEGER),
-    }
-
-    return Permit2Helper.signAddLiquidityUnbalancedViaSwapApproval({
-      ...buildCallInput,
-      client: sdkClient,
-      owner: account,
-      nonce: nonces[inputToken.address],
-      expiration: get24HoursFromNowInSecs(),
-    })
-  }
-
   function getSignFn() {
-    if (isV3WithNestedActionsPool(pool)) {
-      // this edge case fails if you provide an amountIn with zero amount
-      filteredAmountsIn = filteredAmountsIn.filter(a => a.amount > 0n)
-      return Permit2Helper.signAddLiquidityNestedApproval
-    }
-
     if (isBoosted(pool)) {
       return Permit2Helper.signAddLiquidityBoostedApproval
     }

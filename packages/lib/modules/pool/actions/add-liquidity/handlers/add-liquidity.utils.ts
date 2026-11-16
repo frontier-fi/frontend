@@ -10,7 +10,7 @@ import {
   RemoveLiquidityBaseBuildCallInput,
   RemoveLiquidityQueryOutput,
   Slippage,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { Pool } from '../../../pool.types'
 import { getSender, LiquidityActionHelpers } from '../../LiquidityActionHelpers'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'

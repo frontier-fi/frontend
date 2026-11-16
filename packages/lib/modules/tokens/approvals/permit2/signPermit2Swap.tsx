@@ -7,7 +7,7 @@ import {
   PublicWalletClient,
   Slippage,
   SwapKind,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { ensureError } from '@repo/lib/shared/utils/errors'
 import { get24HoursFromNowInSecs } from '@repo/lib/shared/utils/time'
 import { NoncesByTokenAddress } from './usePermit2Allowance'

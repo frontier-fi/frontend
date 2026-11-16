@@ -40,7 +40,7 @@ import {
   isGyroEllipticPool,
   isCowPool,
 } from '../../helpers'
-import { PoolType } from '@balancer/sdk'
+import { PoolType } from '@frontier-fi/sdk'
 import { ChoosePoolTokensAlert } from './ChoosePoolTokensAlert'
 import { useFormState, useWatch } from 'react-hook-form'
 import { TooltipWithTouch } from '@repo/lib/shared/components/tooltips/TooltipWithTouch'
