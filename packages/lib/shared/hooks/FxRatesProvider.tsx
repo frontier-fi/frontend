@@ -1,17 +1,26 @@
 'use client'
 
-import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
-import { createContext, PropsWithChildren } from 'react'
-import { FxRates, SupportedCurrency } from '../utils/currencies'
+import { createContext, PropsWithChildren, useContext } from 'react'
+import {
+  FxRates,
+  hasValidFxRates,
+  isFxRatesDisabledInEnv,
+  SupportedCurrency,
+} from '../utils/currencies'
 
 export type UseFxRatesResult = ReturnType<typeof useFxRatesLogic>
 export const FxRatesContext = createContext<UseFxRatesResult | null>(null)
 
+const DEFAULT_FX_RATES: UseFxRatesResult = {
+  hasFxRates: false,
+  getFxRate: () => 1,
+}
+
 export function useFxRatesLogic(rates: FxRates | undefined) {
-  const hasFxRates = !!rates
+  const hasFxRates = !isFxRatesDisabledInEnv() && hasValidFxRates(rates)
 
   function getFxRate(currency: SupportedCurrency): number {
-    if (!rates) return 1
+    if (!hasFxRates || !rates) return 1
     return rates[currency]?.value || 1
   }
 
@@ -26,4 +35,4 @@ export function FiatFxRatesProvider({
   return <FxRatesContext.Provider value={hook}>{children}</FxRatesContext.Provider>
 }
 
-export const useFxRates = (): UseFxRatesResult => useMandatoryContext(FxRatesContext, 'FxRates')
+export const useFxRates = (): UseFxRatesResult => useContext(FxRatesContext) ?? DEFAULT_FX_RATES

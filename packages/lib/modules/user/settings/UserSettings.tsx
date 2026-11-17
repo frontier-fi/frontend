@@ -25,6 +25,7 @@ import { ColorModePreference } from './color-mode'
 import { CurrencySelect } from './CurrencySelect'
 import { EnableTxBundleSetting } from './EnableTxBundlesSetting'
 import { hasTestnetNetworks } from '../../chains/chain.utils'
+import { useFxRates } from '@repo/lib/shared/hooks/FxRatesProvider'
 import { useEffect, useRef, useState } from 'react'
 
 interface SlippageInputProps {
@@ -188,6 +189,7 @@ export function ColorModeSelect() {
 
 export function UserSettings() {
   const { slippage, setSlippage } = useUserSettings()
+  const { hasFxRates } = useFxRates()
 
   return (
     <Popover isLazy>
@@ -213,12 +215,14 @@ export function UserSettings() {
               </Heading>
               <ColorModeSelect />
             </Box>
-            <Box w="full">
-              <Heading pb="2" size="sm">
-                Currency
-              </Heading>
-              <CurrencySelect id="user-settings-currency-select" />
-            </Box>
+            {hasFxRates && (
+              <Box w="full">
+                <Heading pb="2" size="sm">
+                  Currency
+                </Heading>
+                <CurrencySelect id="user-settings-currency-select" />
+              </Box>
+            )}
             <Box w="full">
               <Heading pb="2" size="sm">
                 Slippage
