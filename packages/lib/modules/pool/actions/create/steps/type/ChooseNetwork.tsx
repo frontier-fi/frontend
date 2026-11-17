@@ -3,7 +3,7 @@ import { PoolCreationForm } from '../../types'
 import { VStack, Text, HStack } from '@chakra-ui/react'
 import { Controller } from 'react-hook-form'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
-import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { useSupportedNetworks } from '@repo/lib/modules/chains/useSupportedNetworks'
 import { usePoolCreationForm } from '../../PoolCreationFormProvider'
 import { getChainShortName } from '@repo/lib/config/app.config'
 import { NetworkIcon } from '@repo/lib/shared/components/icons/NetworkIcon'
@@ -12,13 +12,26 @@ import {
   type RadioCardOption,
 } from '@repo/lib/shared/components/inputs/RadioCardGroup'
 import { INITIAL_POOL_CREATION_FORM } from '../../constants'
+import { useEffect } from 'react'
 import { useWatch } from 'react-hook-form'
 
 export function ChooseNetwork({ control }: { control: Control<PoolCreationForm> }) {
   const { poolCreationForm } = usePoolCreationForm()
 
-  const [protocol, poolType] = useWatch({ control, name: ['protocol', 'poolType'] })
-  const { supportedNetworks } = PROJECT_CONFIG
+  const [protocol, poolType, selectedNetwork] = useWatch({
+    control,
+    name: ['protocol', 'poolType', 'network'],
+  })
+
+  const supportedNetworks = useSupportedNetworks()
+
+  useEffect(() => {
+    const fallbackNetwork = supportedNetworks[0]
+
+    if (fallbackNetwork && !supportedNetworks.includes(selectedNetwork)) {
+      poolCreationForm.setValue('network', fallbackNetwork)
+    }
+  }, [poolCreationForm, selectedNetwork, supportedNetworks])
 
   const networkOptions: RadioCardOption<GqlChain>[] = supportedNetworks.map(network => ({
     value: network,

@@ -8,6 +8,7 @@ export const LS_KEYS = {
     PoolListView: 'userSettings.PoolListView',
     AcceptedPolicies: 'userSettings.AcceptedPolicies',
     EnableTxBundling: 'userSettings.EnableTxBundling',
+    EnableTestnets: 'userSettings.EnableTestnets',
   },
   CrossChainSync: {
     TempSyncingNetworks: 'сrossChainSync.tempSyncingNetworks',

@@ -24,6 +24,8 @@ import { Percent, Settings } from 'lucide-react'
 import { ColorModePreference } from './color-mode'
 import { CurrencySelect } from './CurrencySelect'
 import { EnableTxBundleSetting } from './EnableTxBundlesSetting'
+import { hasTestnetNetworks } from '../../chains/chain.utils'
+import { useFxRates } from '@repo/lib/shared/hooks/FxRatesProvider'
 import { useEffect, useRef, useState } from 'react'
 
 interface SlippageInputProps {
@@ -144,6 +146,22 @@ export function EnableSignaturesSelect() {
   return <Switch isChecked={enableSignatures === 'yes'} onChange={handleChange} />
 }
 
+export function EnableTestnetsSelect() {
+  const { enableTestnets, setEnableTestnets } = useUserSettings()
+
+  const handleChange = () => {
+    setEnableTestnets(enableTestnets === 'yes' ? 'no' : 'yes')
+  }
+
+  return (
+    <Switch
+      aria-label="Enable Sepolia testnet"
+      isChecked={enableTestnets === 'yes'}
+      onChange={handleChange}
+    />
+  )
+}
+
 const COLOR_MODE_OPTIONS: { value: ColorModePreference; label: string }[] = [
   { value: 'system', label: 'System' },
   { value: 'light', label: 'Light' },
@@ -171,6 +189,7 @@ export function ColorModeSelect() {
 
 export function UserSettings() {
   const { slippage, setSlippage } = useUserSettings()
+  const { hasFxRates } = useFxRates()
 
   return (
     <Popover isLazy>
@@ -196,12 +215,14 @@ export function UserSettings() {
               </Heading>
               <ColorModeSelect />
             </Box>
-            <Box w="full">
-              <Heading pb="2" size="sm">
-                Currency
-              </Heading>
-              <CurrencySelect id="user-settings-currency-select" />
-            </Box>
+            {hasFxRates && (
+              <Box w="full">
+                <Heading pb="2" size="sm">
+                  Currency
+                </Heading>
+                <CurrencySelect id="user-settings-currency-select" />
+              </Box>
+            )}
             <Box w="full">
               <Heading pb="2" size="sm">
                 Slippage
@@ -219,6 +240,18 @@ export function UserSettings() {
               <EnableSignaturesSelect />
             </Box>
             <EnableTxBundleSetting />
+            {hasTestnetNetworks() && (
+              <Box w="full">
+                <Heading pb="xs" size="sm">
+                  Sepolia Testnet
+                </Heading>
+                <Text color="font.secondary" fontSize="sm" pb="sm">
+                  Include Sepolia testnet in wallet network selection, filters, pools, and protocol
+                  stats.
+                </Text>
+                <EnableTestnetsSelect />
+              </Box>
+            )}
           </VStack>
         </PopoverBody>
       </PopoverContent>

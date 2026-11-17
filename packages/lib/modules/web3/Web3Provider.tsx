@@ -2,12 +2,11 @@
 
 import '@rainbow-me/rainbowkit/styles.css'
 import { RainbowKitProvider, Theme, darkTheme, lightTheme } from '@rainbow-me/rainbowkit'
-import { WagmiProvider } from 'wagmi'
+import { WagmiProvider, useChains } from 'wagmi'
 import { ReactQueryClientProvider } from '@repo/lib/shared/app/react-query.provider'
 import { useColorMode, useTheme } from '@chakra-ui/react'
 import { readThemeToken, ThemeColorMode } from '@repo/lib/shared/services/chakra/read-theme-token'
 import { merge } from 'lodash'
-import { UserSettingsProvider } from '../user/settings/UserSettingsProvider'
 import { BlockedAddressModal } from './BlockedAddressModal'
 import { CustomAvatar } from './CustomAvatar'
 import { UserAccountProvider } from './UserAccountProvider'
@@ -56,20 +55,14 @@ function useRainbowKitTheme() {
 /** Theme updates stay under WagmiProvider so they do not re-render its Hydrate boundary. */
 function RainbowKitThemedProvider({ children }: PropsWithChildren) {
   const customTheme = useRainbowKitTheme()
+  // Subscribe to dynamic Wagmi chain updates (e.g. toggling Sepolia testnet) so RainbowKitProvider refreshes its chain modal.
+  useChains()
 
   return (
     <RainbowKitProvider avatar={CustomAvatar} theme={customTheme}>
       <UserAccountProvider>
-        <UserSettingsProvider
-          initAcceptedPolicies={undefined}
-          initCurrency={undefined}
-          initEnableSignatures={undefined}
-          initPoolListView={undefined}
-          initSlippage={undefined}
-        >
-          {children}
-          <BlockedAddressModal />
-        </UserSettingsProvider>
+        {children}
+        <BlockedAddressModal />
       </UserAccountProvider>
     </RainbowKitProvider>
   )

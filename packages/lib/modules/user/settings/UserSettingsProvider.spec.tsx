@@ -62,4 +62,19 @@ describe('useUserSettingsLogic', () => {
     expect(result.current.slippage).toBe('0.5')
     expect(window.localStorage.getItem(LS_KEYS.UserSettings.Slippage)).toBe('"0.5"')
   })
+
+  test('disables testnets by default and persists toggling enableTestnets', () => {
+    const { result } = renderHook(() => useUserSettingsLogic(initialSettings))
+
+    expect(result.current.enableTestnets).toBe('no')
+    expect(result.current.shouldEnableTestnets).toBe(false)
+
+    act(() => {
+      result.current.setEnableTestnets('yes')
+    })
+
+    expect(result.current.enableTestnets).toBe('yes')
+    expect(result.current.shouldEnableTestnets).toBe(true)
+    expect(window.localStorage.getItem(LS_KEYS.UserSettings.EnableTestnets)).toBe('"yes"')
+  })
 })

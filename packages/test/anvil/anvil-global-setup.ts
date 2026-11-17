@@ -30,7 +30,6 @@ function loadEnvFileIfExists(path: string) {
 }
 
 loadEnvFileIfExists(resolve(currentDir, '../../../.env.local'))
-loadEnvFileIfExists(resolve(currentDir, '../../lib/.env.local'))
 loadEnvFileIfExists(resolve(currentDir, '../../../apps/frontend-v3/.env.local'))
 
 async function sleep(time: number) {

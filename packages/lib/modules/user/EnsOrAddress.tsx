@@ -2,7 +2,7 @@ import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 
 import { abbreviateAddress } from '@repo/lib/shared/utils/addresses'
-import { useEnsAvatar, useEnsName } from 'wagmi'
+import { useChains, useEnsAvatar, useEnsName } from 'wagmi'
 import { getChainId } from '@repo/lib/config/app.config'
 import { Avatar, Style } from '@dicebear/core'
 import identicon from '@dicebear/styles/identicon.json'
@@ -20,11 +20,19 @@ export function EnsOrAddress({
   chain: AppChain
 }) {
   const chainId = getChainId(PROJECT_CONFIG.ensNetwork) // perform ENS lookup through ensNetwork
-  const { data: name } = useEnsName({ address: userAddress, chainId })
+  const configuredChains = useChains()
+  const isEnsChainEnabled = configuredChains.some(c => c.id === chainId)
+
+  const { data: name } = useEnsName({
+    address: userAddress,
+    chainId,
+    query: { enabled: isEnsChainEnabled },
+  })
 
   const { data: ensAvatar } = useEnsAvatar({
     name: name as string,
     chainId,
+    query: { enabled: isEnsChainEnabled && Boolean(name) },
   })
 
   const fallbackSVG = new Avatar(identiconStyle, {

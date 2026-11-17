@@ -22,6 +22,7 @@ import { getErc4626Metadata } from '@repo/lib/modules/pool/metadata/getErc4626Me
 import { PoolsMetadataProvider } from '@repo/lib/modules/pool/metadata/PoolsMetadataProvider'
 import { getPoolsMetadata } from '@repo/lib/modules/pool/metadata/getPoolsMetadata'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { getActiveSupportedNetworks } from '@repo/lib/modules/chains/chain.utils'
 import { ProtocolStatsProvider } from '@repo/lib/modules/protocol/ProtocolStatsProvider'
 import { FeeManagersProvider } from '@repo/lib/modules/fee-managers/FeeManagersProvider'
 import { getFeeManagersMetadata } from '@repo/lib/modules/fee-managers/getFeeManagersMetadata'
@@ -40,7 +41,7 @@ async function fetchProtocolStats(): Promise<GetProtocolStatsQuery | undefined> 
     const { data } = await client.query({
       query: GetProtocolStatsDocument,
       variables: {
-        chains: PROJECT_CONFIG.networksForProtocolStats || PROJECT_CONFIG.supportedNetworks,
+        chains: PROJECT_CONFIG.networksForProtocolStats || getActiveSupportedNetworks(false),
       },
       context: {
         fetchOptions: {
