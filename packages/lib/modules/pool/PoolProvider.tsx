@@ -39,7 +39,7 @@ export function usePoolLogic({
   useInvalidVariantRedirect(initialData.pool as Pool)
 
   const { data } = useQuery(GetPoolDocument, {
-    variables: { id, chain, userAddress: userAddress.toLowerCase() },
+    variables: { id, chain, userAddress: userAddress ? userAddress.toLowerCase() : undefined },
   })
 
   const poolData = removeHookDataFromPoolIfNecessary((data?.pool || initialData.pool) as Pool)

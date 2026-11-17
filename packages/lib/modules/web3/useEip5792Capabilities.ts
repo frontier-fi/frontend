@@ -26,6 +26,7 @@ export function useEip5792AtomicCapability(): {
     chainId,
     query: {
       enabled: !!userAddress && !!chainId,
+      retry: false,
     },
   })
 
