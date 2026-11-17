@@ -15,9 +15,10 @@ import { setClientErrorContext } from '@repo/lib/shared/utils/error-logger'
 async function isAuthorizedAddress(address: Address): Promise<boolean> {
   try {
     const res = await fetch(`/api/wallet-check/${address}`, { cache: 'no-store' })
+    if (!res.ok) return true
     const data = await res.json()
 
-    return data?.isAuthorized
+    return data?.isAuthorized !== false
   } catch {
     return true
   }
