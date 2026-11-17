@@ -7,7 +7,7 @@ import {
 } from './token.helpers'
 import { HumanTokenAmountWithSymbol } from './token.types'
 import { ethAddress, wETHAddress } from '@repo/lib/debug-helpers'
-import { InputAmount } from '@balancer/sdk'
+import { InputAmount } from '@frontier-fi/sdk'
 import { v3SepoliaNestedBoostedMock } from '../pool/__mocks__/api-mocks/v3SepoliaNestedBoostedMock'
 import { PoolToken } from '../pool/pool.types'
 

@@ -1,5 +1,5 @@
 import { TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
-import { RemoveLiquidity, RemoveLiquidityV3BuildCallInput, Slippage } from '@balancer/sdk'
+import { RemoveLiquidity, RemoveLiquidityV3BuildCallInput, Slippage } from '@frontier-fi/sdk'
 import { SdkBuildRemoveLiquidityInput } from '../remove-liquidity.types'
 import { BaseProportionalRemoveLiquidityHandler } from './BaseProportionalRemoveLiquidity.handler'
 

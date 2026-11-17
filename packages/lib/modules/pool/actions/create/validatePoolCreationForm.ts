@@ -10,7 +10,7 @@ import {
 import { getMinSwapFeePercentage, isWeightedPool, isCowPool } from './helpers'
 import { PoolCreationToken, SupportedPoolTypes } from './types'
 import { parseUnits, isAddress } from 'viem'
-import { PoolType } from '@balancer/sdk'
+import { PoolType } from '@frontier-fi/sdk'
 
 const LESS_THAN_0_ERROR = 'Amount must be greater than 0'
 const LESS_THAN_1_ERROR = 'Minimum amount is 1'

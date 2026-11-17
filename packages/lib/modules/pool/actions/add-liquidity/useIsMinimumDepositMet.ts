@@ -1,6 +1,6 @@
 'use client'
 
-import { HumanAmount, isSameAddress } from '@balancer/sdk'
+import { HumanAmount, isSameAddress } from '@frontier-fi/sdk'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
 import { useTokens } from '@repo/lib/modules/tokens/TokensProvider'
 import { useGetMinimumWrapAmount } from '@repo/lib/shared/hooks/useGetMinimumWrapAmount'

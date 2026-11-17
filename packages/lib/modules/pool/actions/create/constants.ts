@@ -1,4 +1,4 @@
-import { PoolType, STABLE_POOL_CONSTRAINTS } from '@balancer/sdk'
+import { PoolType, STABLE_POOL_CONSTRAINTS } from '@frontier-fi/sdk'
 import { zeroAddress, Address } from 'viem'
 import {
   SupportedPoolTypes,

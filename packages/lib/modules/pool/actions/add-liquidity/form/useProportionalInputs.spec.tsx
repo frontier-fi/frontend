@@ -1,16 +1,15 @@
 import {
   HumanAmount,
-  mapPoolType,
   PoolStateWithBalances,
   PoolStateWithUnderlyingBalances,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { ApiToken } from '@repo/lib/modules/tokens/token.types'
 import { bn } from '@repo/lib/shared/utils/numbers'
-import { Address, Hex } from 'viem'
+import { Address } from 'viem'
 import { getApiPoolMock } from '../../../__mocks__/api-mocks/api-mocks'
 import { partialBoosted } from '../../../__mocks__/pool-examples/boosted'
 import { isBoosted } from '../../../pool.helpers'
-import { Pool, ProtocolVersion } from '../../../pool.types'
+import { Pool } from '../../../pool.types'
 import { LiquidityActionHelpers } from '../../LiquidityActionHelpers'
 import { _calculateProportionalHumanAmountsIn } from './useProportionalInputs'
 
@@ -127,9 +126,9 @@ function mockPoolStateWithBalances(pool: Pool): PoolStateWithBalances {
 
 function getMockedPoolStateWithBalances(pool: Pool): PoolStateWithBalances {
   return {
-    id: pool.id as Hex,
+    id: pool.id as Address,
     address: pool.address as Address,
-    type: mapPoolType(pool.type),
+    type: pool.type,
     tokens: pool.poolTokens.map(t => ({
       index: t.index,
       address: t.address as Address,
@@ -137,7 +136,7 @@ function getMockedPoolStateWithBalances(pool: Pool): PoolStateWithBalances {
       decimals: t.decimals,
     })),
     totalShares: pool.dynamicData.totalShares as HumanAmount,
-    protocolVersion: pool.protocolVersion as ProtocolVersion,
+    protocolVersion: 3,
   }
 }
 

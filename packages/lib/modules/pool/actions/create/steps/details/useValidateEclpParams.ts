@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { GyroECLPMath } from '@frontier-fi/maths'
-import { computeDerivedEclpParams, PoolType } from '@balancer/sdk'
+import { computeDerivedEclpParams, PoolType } from '@frontier-fi/sdk'
 import { usePoolCreationForm } from '../../PoolCreationFormProvider'
 import { DEFAULT_DECIMALS } from '../../constants'
 import { useWatch } from 'react-hook-form'

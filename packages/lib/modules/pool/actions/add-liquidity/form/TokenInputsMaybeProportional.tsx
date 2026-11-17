@@ -18,7 +18,7 @@ import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { useTokens } from '@repo/lib/modules/tokens/TokensProvider'
 import { bn } from '@repo/lib/shared/utils/numbers'
 import { isSameAddress } from '@repo/lib/shared/utils/addresses'
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import { AddableTokensSummary } from './AddableTokensSummary'
 import { UnbalancedTokenInput } from './UnbalancedTokenInput'
 

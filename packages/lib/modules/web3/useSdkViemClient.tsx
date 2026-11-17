@@ -1,6 +1,6 @@
 import { publicActions, SignableMessage, TypedDataDomain } from 'viem'
 import { useWalletClient } from 'wagmi'
-import { PublicWalletClient } from '@balancer/sdk'
+import { PublicWalletClient } from '@frontier-fi/sdk'
 import { shouldUseAnvilFork } from '@repo/lib/config/app.config'
 import { privateKeyToAccount } from 'viem/accounts'
 

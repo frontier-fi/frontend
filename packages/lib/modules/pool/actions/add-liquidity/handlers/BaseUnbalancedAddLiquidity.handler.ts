@@ -8,7 +8,7 @@ import {
   Address,
   PriceImpact,
   PriceImpactAmount,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { Pool } from '../../../pool.types'
 import { LiquidityActionHelpers, areEmptyAmounts, getSender } from '../../LiquidityActionHelpers'
 import { SdkBuildAddLiquidityInput, SdkQueryAddLiquidityOutput } from '../add-liquidity.types'

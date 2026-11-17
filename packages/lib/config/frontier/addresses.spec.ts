@@ -1,25 +1,26 @@
-import { AddressProvider } from '@balancer/sdk'
-import { FRONTIER_SEPOLIA, FRONTIER_VAULT, registerFrontierChain } from './addresses'
+import { AddressProvider } from '@frontier-fi/sdk'
+import { FRONTIER_BASE, FRONTIER_SEPOLIA, FRONTIER_VAULT, registerFrontierChain } from './addresses'
 
 describe('Frontier SDK address overrides', () => {
-  it('maps Sepolia AddressProvider vault/router/factories to Frontier deployments', () => {
-    const id = FRONTIER_SEPOLIA.chainId
+  it.each([
+    ['Sepolia', FRONTIER_SEPOLIA],
+    ['Base', FRONTIER_BASE],
+  ])('maps %s AddressProvider vault/router/factories to Frontier deployments', (_label, config) => {
+    const id = config.chainId
 
     expect(AddressProvider.Vault(id)).toBe(FRONTIER_VAULT)
-    expect(AddressProvider.Vault(id)).toBe(FRONTIER_SEPOLIA.vault)
-    expect(AddressProvider.VaultAdmin(id)).toBe(FRONTIER_SEPOLIA.vaultAdmin)
-    expect(AddressProvider.VaultExtension(id)).toBe(FRONTIER_SEPOLIA.vaultExtension)
-    expect(AddressProvider.Router(id)).toBe(FRONTIER_SEPOLIA.router)
-    expect(AddressProvider.BatchRouter(id)).toBe(FRONTIER_SEPOLIA.batchRouter)
-    expect(AddressProvider.BufferRouter(id)).toBe(FRONTIER_SEPOLIA.bufferRouter)
+    expect(AddressProvider.Vault(id)).toBe(config.vault)
+    expect(AddressProvider.VaultAdmin(id)).toBe(config.vaultAdmin)
+    expect(AddressProvider.VaultExtension(id)).toBe(config.vaultExtension)
+    expect(AddressProvider.Router(id)).toBe(config.router)
+    expect(AddressProvider.BatchRouter(id)).toBe(config.batchRouter)
+    expect(AddressProvider.BufferRouter(id)).toBe(config.bufferRouter)
 
-    expect(AddressProvider.CompositeLiquidityRouter(id)).toBe(
-      FRONTIER_SEPOLIA.compositeLiquidityRouter
-    )
+    expect(AddressProvider.CompositeLiquidityRouter(id)).toBe(config.compositeLiquidityRouter)
 
-    expect(AddressProvider.StablePoolFactory(id)).toBe(FRONTIER_SEPOLIA.stablePoolFactory)
-    expect(AddressProvider.WeightedPoolFactory(id)).toBe(FRONTIER_SEPOLIA.weightedPoolFactory)
-    expect(AddressProvider.GyroECLPPoolFactory(id)).toBe(FRONTIER_SEPOLIA.gyroEclpPoolFactory)
+    expect(AddressProvider.StablePoolFactory(id)).toBe(config.stablePoolFactory)
+    expect(AddressProvider.WeightedPoolFactory(id)).toBe(config.weightedPoolFactory)
+    expect(AddressProvider.GyroECLPPoolFactory(id)).toBe(config.gyroEclpPoolFactory)
   })
 
   it('keeps the same vault address when registering another chain', () => {

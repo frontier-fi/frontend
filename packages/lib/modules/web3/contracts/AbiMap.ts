@@ -15,7 +15,7 @@ import {
 } from './abi/generated'
 import { VeDelegationProxyL2Abi } from './abi/veDelegationProxyL2'
 import { LiquidityGaugeV5Abi } from './abi/LiquidityGaugeV5Abi'
-import { permit2Abi } from '@balancer/sdk'
+import { permit2Abi } from '@frontier-fi/sdk'
 import { merklClaimsAbi } from './abi/merklClaimsAbi'
 
 export const AbiMap = {

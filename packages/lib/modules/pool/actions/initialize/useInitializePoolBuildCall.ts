@@ -1,6 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
-import { InitPool, type InitPoolInputV3, type PoolType, InitPoolDataProvider } from '@balancer/sdk'
+import {
+  InitPool,
+  type InitPoolInputV3,
+  type PoolType,
+  InitPoolDataProvider,
+} from '@frontier-fi/sdk'
 import { type Address } from 'viem'
 import { type TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
 import { usePermit2Signature } from '@repo/lib/modules/tokens/approvals/permit2/Permit2SignatureProvider'

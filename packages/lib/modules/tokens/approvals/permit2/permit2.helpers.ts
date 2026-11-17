@@ -6,7 +6,7 @@ import { AllowedAmountsByTokenAddress, ExpirationByTokenAddress } from './usePer
 import { TokenAmountIn } from './useSignPermit2'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { isNativeAsset, isWrappedNativeAsset } from '../../token.helpers'
-import { TokenAmount } from '@balancer/sdk'
+import { TokenAmount } from '@frontier-fi/sdk'
 
 export function hasValidPermit2(
   tokenAmountsIn?: TokenAmountIn[],

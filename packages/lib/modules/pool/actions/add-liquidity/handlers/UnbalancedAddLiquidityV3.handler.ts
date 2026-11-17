@@ -1,5 +1,5 @@
 import { TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
-import { AddLiquidity, AddLiquidityV3BuildCallInput } from '@balancer/sdk'
+import { AddLiquidity, AddLiquidityV3BuildCallInput } from '@frontier-fi/sdk'
 import { SdkBuildAddLiquidityInput } from '../add-liquidity.types'
 import { BaseUnbalancedAddLiquidityHandler } from './BaseUnbalancedAddLiquidity.handler'
 import { constructBaseBuildCallInput } from './add-liquidity.utils'

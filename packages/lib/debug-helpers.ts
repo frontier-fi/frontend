@@ -51,11 +51,8 @@ export const poolId = '0x68e3266c9c8bbd44ad9dca5afbfe629022aee9fe000200000000000
 export const poolId2 = '0x3de27efa2f1aa663ae5d458857e731c129069f29000200000000000000000588' as const // Balancer Weighted 20wstETH-80AAVE
 
 export const sepoliaRouter = sepoliaNetworkConfig.contracts.balancer.router
-export const mainnetRouter = mainnetNetworkConfig.contracts.balancer.router
 export const sepoliaCompositeRouterBoosted =
   sepoliaNetworkConfig.contracts.balancer.compositeLiquidityRouterBoosted
-export const mainnetCompositeRouterBoosted =
-  mainnetNetworkConfig.contracts.balancer.compositeLiquidityRouterBoosted
 
 /*
   Used to pretty print objects when debugging

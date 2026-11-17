@@ -1,6 +1,6 @@
 import { useReadContract } from '@repo/lib/shared/utils/wagmi'
 import { Address, parseAbi } from 'viem'
-import { PoolType } from '@balancer/sdk'
+import { PoolType } from '@frontier-fi/sdk'
 import { getVaultV3Address } from '@repo/lib/config/app.config'
 
 type Params = {

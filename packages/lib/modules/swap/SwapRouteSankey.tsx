@@ -1,6 +1,6 @@
 'use client'
 
-import { Path } from '@balancer/sdk'
+import { Path } from '@frontier-fi/sdk'
 import { Box, useColorModeValue, useTheme } from '@chakra-ui/react'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { fNum } from '@repo/lib/shared/utils/numbers'

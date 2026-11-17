@@ -3,7 +3,7 @@ import { Pool } from '../../../pool.types'
 import { addLiquidityKeys } from './add-liquidity-keys'
 import { defaultTestUserAccount } from '@repo/test/anvil/anvil-setup'
 import { aWjAuraWethPoolElementMock } from '@repo/lib/test/msw/builders/gqlPoolElement.builders'
-import { UnbalancedAddLiquidityV2Handler } from '../handlers/UnbalancedAddLiquidityV2.handler'
+import { UnbalancedAddLiquidityV3Handler } from '../handlers/UnbalancedAddLiquidityV3.handler'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
 
 function testGenerateLiquidityKeys(pool: Pool) {
@@ -21,7 +21,7 @@ function testGenerateLiquidityKeys(pool: Pool) {
   ]
 
   return addLiquidityKeys.priceImpact({
-    handler: new UnbalancedAddLiquidityV2Handler(aWjAuraWethPoolElementMock()),
+    handler: new UnbalancedAddLiquidityV3Handler(aWjAuraWethPoolElementMock()),
     userAddress: defaultTestUserAccount,
     pool,
     slippage: '0.2',
@@ -37,7 +37,7 @@ describe('Generates expected query keys', () => {
       [
         "add-liquidity",
         "price-impact",
-        "UnbalancedAddLiquidityV2Handler:0x3B7D260597A3e3f90274563a9e481618C6B951Eb:0x68e3266c9c8bbd44ad9dca5afbfe629022aee9fe000200000000000000000512:0.2:[{"tokenAddress":"0x198d7387Fa97A73F05b8578CdEFf8F2A1f34Cd1F","humanAmount":"0","symbol":"wjAura"},{"tokenAddress":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2","humanAmount":"0","symbol":"WETH"}]no-permit2",
+        "UnbalancedAddLiquidityV3Handler:0x3B7D260597A3e3f90274563a9e481618C6B951Eb:0x68e3266c9c8bbd44ad9dca5afbfe629022aee9fe000200000000000000000512:0.2:[{"tokenAddress":"0x198d7387Fa97A73F05b8578CdEFf8F2A1f34Cd1F","humanAmount":"0","symbol":"wjAura"},{"tokenAddress":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2","humanAmount":"0","symbol":"WETH"}]no-permit2",
       ]
     `)
   })
@@ -50,7 +50,7 @@ describe('Generates expected query keys', () => {
       [
         "add-liquidity",
         "price-impact",
-        "UnbalancedAddLiquidityV2Handler:0x3B7D260597A3e3f90274563a9e481618C6B951Eb:0xdac42eeb17758daa38caf9a3540c808247527ae3000200000000000000000a2b:0.2:{"tokenAddress":"0x198d7387Fa97A73F05b8578CdEFf8F2A1f34Cd1F","humanAmount":"0","symbol":"wjAura"}no-permit2",
+        "UnbalancedAddLiquidityV3Handler:0x3B7D260597A3e3f90274563a9e481618C6B951Eb:0xdac42eeb17758daa38caf9a3540c808247527ae3000200000000000000000a2b:0.2:{"tokenAddress":"0x198d7387Fa97A73F05b8578CdEFf8F2A1f34Cd1F","humanAmount":"0","symbol":"wjAura"}no-permit2",
       ]
     `)
   })

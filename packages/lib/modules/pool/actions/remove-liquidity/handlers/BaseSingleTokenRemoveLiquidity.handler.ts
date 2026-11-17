@@ -7,7 +7,7 @@ import {
   RemoveLiquidity,
   RemoveLiquidityKind,
   RemoveLiquiditySingleTokenExactInInput,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { Address } from 'viem'
 import { Pool } from '../../../pool.types'
 import { BPT_DECIMALS } from '../../../pool.constants'

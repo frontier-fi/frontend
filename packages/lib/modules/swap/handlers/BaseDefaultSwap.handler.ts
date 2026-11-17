@@ -1,4 +1,4 @@
-import { Path, Slippage, Swap, SwapKind, TokenAmount } from '@balancer/sdk'
+import { Path, Slippage, Swap, SwapKind, TokenAmount } from '@frontier-fi/sdk'
 import { getChainId } from '@repo/lib/config/app.config'
 import type { GqlSorSwapType } from '@repo/lib/shared/services/api/generated/graphql'
 import { GqlSorSwapTypeValues } from '@repo/lib/shared/services/api/graphql-enums'

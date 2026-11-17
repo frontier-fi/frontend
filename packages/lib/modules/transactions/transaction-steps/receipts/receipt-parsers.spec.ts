@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { encodeAbiParameters, encodeEventTopics, parseAbi, Log } from 'viem'
-import { vaultExtensionAbi_V3 } from '@balancer/sdk'
+import { vaultExtensionAbi_V3 } from '@frontier-fi/sdk'
 import { getNetworkConfig } from '@repo/lib/config/app.config'
 import { parsePoolCreationReceipt, parseSwapReceipt } from './receipt-parsers'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'

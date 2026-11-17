@@ -7,7 +7,7 @@ import {
   RemoveLiquidityKind,
   RemoveLiquidityRecoveryInput,
   Slippage,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { Pool } from '../../../pool.types'
 import {
   QueryRemoveLiquidityInput,

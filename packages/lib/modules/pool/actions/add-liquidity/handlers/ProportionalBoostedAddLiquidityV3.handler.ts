@@ -7,7 +7,7 @@ import {
   Hex,
   InputAmount,
   isSameAddress,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
 import { TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
 import { getRpcUrl } from '@repo/lib/modules/web3/transports'

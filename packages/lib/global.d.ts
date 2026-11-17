@@ -1,5 +1,5 @@
 /// <reference types="next" />
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import React from 'react'
 
 /*

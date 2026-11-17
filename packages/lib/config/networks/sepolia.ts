@@ -2,7 +2,7 @@ import '@repo/lib/config/frontier/addresses'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { NetworkConfig } from '../config.types'
 import { convertHexToLowerCase } from '@repo/lib/shared/utils/objects'
-import { AddressProvider, ChainId, PERMIT2 } from '@balancer/sdk'
+import { AddressProvider, ChainId, PERMIT2 } from '@frontier-fi/sdk'
 import { sepolia } from 'viem/chains'
 
 const chainId = ChainId.SEPOLIA
@@ -47,8 +47,6 @@ const networkConfig: NetworkConfig = {
       relayerV6: '0x7852fB9d0895e6e8b3EedA553c03F6e2F9124dF9',
       minter: '0x1783Cd84b3d01854A96B4eD5843753C2CcbD574A',
       vaultAdminV3: AddressProvider.VaultAdmin(chainId),
-      // Not deployed on Frontier Sepolia (AddressProvider throws if called).
-      unbalancedAddViaSwapRouter: undefined,
       bCoWFactory: undefined,
     },
     permit2: PERMIT2[chainId],

@@ -1,14 +1,6 @@
 import type { GqlPoolElement } from '@repo/lib/shared/services/api/graphql-derived-types'
 import { isSameAddress } from '@repo/lib/shared/utils/addresses'
-import {
-  VAULT_V2,
-  ChainId,
-  HumanAmount,
-  MAX_UINT256,
-  Token,
-  ZERO_ADDRESS,
-  replaceWrapped,
-} from '@balancer/sdk'
+import { ChainId, HumanAmount, Token, ZERO_ADDRESS } from '@frontier-fi/sdk'
 import {
   Address,
   Client,
@@ -23,6 +15,7 @@ import {
   getAbiItem,
   hexToBigInt,
   keccak256,
+  maxUint256,
   pad,
   parseUnits,
   toBytes,
@@ -34,6 +27,7 @@ import { aWjAuraWethPoolElementMock } from '../msw/builders/gqlPoolElement.build
 import { mainnet } from 'viem/chains'
 import mainnetNetworkConfig from '@repo/lib/config/networks/mainnet'
 import { getNetworkConfig } from '@repo/lib/config/app.config'
+import type { SupportedChainId } from '@repo/lib/config/config.types'
 import { mainnetTestPublicClient } from '@repo/test/utils/wagmi/wagmi-test-clients'
 import { defaultTestUserAccount } from '@repo/test/anvil/anvil-setup'
 
@@ -45,13 +39,13 @@ import { defaultTestUserAccount } from '@repo/test/anvil/anvil-setup'
 */
 export async function getSdkTestUtils({
   client = mainnetTestPublicClient,
-  chainId = ChainId.MAINNET,
+  chainId = mainnet.id,
   account = defaultTestUserAccount,
   pool = aWjAuraWethPoolElementMock(),
 }: {
   client?: Client & PublicActions & WalletActions & TestActions
   account?: Address
-  chainId?: ChainId
+  chainId?: number
   pool: GqlPoolElement
 }) {
   return {
@@ -67,8 +61,13 @@ export async function getSdkTestUtils({
   async function approveToken(
     account: Address,
     token: Address,
-    amount = MAX_UINT256 // approve max by default
+    amount = maxUint256 // approve max by default
   ): Promise<boolean> {
+    const targetChainId = (client?.chain?.id || mainnet.id) as SupportedChainId
+
+    const vaultV2Address =
+      getNetworkConfig(targetChainId)?.contracts.balancer.vaultV2 || ZERO_ADDRESS
+
     // approve token on the vault
     const hash = await client.writeContract({
       account,
@@ -76,7 +75,7 @@ export async function getSdkTestUtils({
       address: token,
       abi: erc20Abi,
       functionName: 'approve',
-      args: [VAULT_V2[client?.chain?.id || mainnet.id] || ZERO_ADDRESS, amount],
+      args: [vaultV2Address, amount],
     })
 
     const txReceipt = await client.waitForTransactionReceipt({
@@ -122,9 +121,14 @@ export async function getSdkTestUtils({
   function getTokensForBalanceCheck(checkNativeBalance = true) {
     const poolTokens = getPoolTokens()
 
-    // Replace with native asset if required
+    const wNativeAsset = getNetworkConfig(chainId as SupportedChainId)?.tokens.addresses
+      .wNativeAsset
+
+    // Replace wrapped native asset with ZERO_ADDRESS for native ETH balance checks
     const poolTokensAddr = checkNativeBalance
-      ? replaceWrapped(poolTokens, chainId).map(t => t.address)
+      ? poolTokens.map(t =>
+          wNativeAsset && isSameAddress(t.address, wNativeAsset) ? ZERO_ADDRESS : t.address
+        )
       : poolTokens.map(t => t.address)
 
     return [...poolTokensAddr, pool.address]
@@ -416,7 +420,7 @@ export async function approveToken({
   account,
   token,
   spender,
-  amount = MAX_UINT256,
+  amount = maxUint256,
 }: ApproveTokenParams) {
   const hash = await client.writeContract({
     account,

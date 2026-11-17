@@ -3,11 +3,12 @@ import {
   AddLiquidity,
   AddLiquidityKind,
   AddLiquidityProportionalInput,
+  AddLiquidityQueryOutput,
   Address,
   HumanAmount,
   InputAmount,
   Slippage,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { Pool } from '../../../pool.types'
 import { getSender, LiquidityActionHelpers } from '../../LiquidityActionHelpers'
 import { SdkBuildAddLiquidityInput, SdkQueryAddLiquidityOutput } from '../add-liquidity.types'
@@ -62,11 +63,10 @@ export abstract class BaseProportionalAddLiquidityHandler implements AddLiquidit
     const addLiquidity = new AddLiquidity()
 
     const { callData, to, value } = addLiquidity.buildCall({
-      ...queryOutput.sdkQueryOutput,
+      ...(queryOutput.sdkQueryOutput as AddLiquidityQueryOutput),
       slippage: Slippage.fromPercentage(slippagePercent as HumanAmount),
-      sender: account,
-      recipient: account,
       wethIsEth: this.helpers.isNativeAssetIn(humanAmountsIn),
+      userData: '0x',
     })
 
     return {

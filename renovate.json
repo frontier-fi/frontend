@@ -6,7 +6,7 @@
   "labels": ["dependencies"],
   "prConcurrentLimit": 5,
   "automerge": false,
-  "ignoreDeps": ["viem", "@balancer/sdk"],
+  "ignoreDeps": ["viem"],
   "packageRules": [
     {
       "matchUpdateTypes": ["patch", "minor"],
@@ -21,6 +21,13 @@
       "groupName": "Other devDependencies",
       "matchManagers": ["npm"],
       "matchDepTypes": ["devDependencies"]
+    },
+    {
+      "description": "Group internal @frontier-fi packages and open PRs immediately without waiting for minimumReleaseAge or the weekly schedule.",
+      "groupName": "Frontier SDK & Maths",
+      "matchPackageNames": ["@frontier-fi/**"],
+      "minimumReleaseAge": null,
+      "schedule": ["at any time"]
     },
     {
       "description": "Chakra v2 requires @emotion as a peer dep \u2014 a version split may cause style failures.",

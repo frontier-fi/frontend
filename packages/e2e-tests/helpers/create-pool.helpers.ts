@@ -8,7 +8,7 @@ import {
 import { expect, Page } from '@playwright/test'
 import { POOL_CREATION_FORM_STEPS } from '@repo/lib/modules/pool/actions/create/constants'
 import { POOL_TYPES } from '@repo/lib/modules/pool/actions/create/constants'
-import { PoolType } from '@balancer/sdk'
+import { PoolType } from '@frontier-fi/sdk'
 import { isPoolCreatorEnabled } from '@repo/lib/modules/pool/actions/create/helpers'
 import { SupportedPoolTypes } from '@repo/lib/modules/pool/actions/create/types'
 
@@ -69,7 +69,7 @@ export class CreatePoolPage {
   }
 
   get isStableSurge() {
-    return (this.config.type as PoolType) === PoolType.StableSurge
+    return false
   }
 
   get isWeighted() {
@@ -81,11 +81,11 @@ export class CreatePoolPage {
   }
 
   get isAutoRange() {
-    return (this.config.type as PoolType) === PoolType.ReClamm
+    return false
   }
 
   get isCowAmm() {
-    return (this.config.type as PoolType) === PoolType.CowAmm
+    return false
   }
 
   async goToPage() {

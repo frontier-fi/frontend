@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { Path } from '@balancer/sdk'
+import { Path } from '@frontier-fi/sdk'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { buildSwapRouteSankey } from './buildSwapRouteSankey'
 import { ApiToken } from '../tokens/token.types'

@@ -6,6 +6,7 @@ import {
   avalanche,
   base,
   gnosis,
+  hyperEvm,
   mainnet,
   optimism,
   polygon,
@@ -20,7 +21,6 @@ import { shouldUseAnvilFork } from '@repo/lib/config/app.config'
 import { defaultAnvilForkRpcUrl } from '@repo/lib/test/utils/wagmi/fork.helpers'
 import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
-import { hyperEVM } from '@balancer/sdk'
 
 /* If a request with the default rpc fails, it will fall back to the next one in the list.
   https://viem.sh/docs/clients/transports/fallback#fallback-transport
@@ -72,7 +72,7 @@ const gqlChainToWagmiChainMap: Partial<Record<AppChain, Chain>> = {
   [GqlChainValues.Optimism]: { iconUrl: '/images/chains/OPTIMISM.svg', ...optimism },
   [GqlChainValues.Polygon]: { iconUrl: '/images/chains/POLYGON.svg', ...polygon },
   [GqlChainValues.Sepolia]: { iconUrl: '/images/chains/SEPOLIA.svg', ...sepolia },
-  [GqlChainValues.Hyperevm]: { iconUrl: '/images/chains/HYPEREVM.svg', ...(hyperEVM as Chain) }, // TODO: fix type when rainbowkit is updated
+  [GqlChainValues.Hyperevm]: { iconUrl: '/images/chains/HYPEREVM.svg', ...hyperEvm },
   [GqlChainValues.Plasma]: { iconUrl: '/images/chains/PLASMA.svg', ...plasma },
   [GqlChainValues.Monad]: { iconUrl: '/images/chains/MONAD.svg', ...monad },
 } as const

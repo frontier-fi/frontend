@@ -2,7 +2,7 @@
 
 import { TokenInput } from '@repo/lib/modules/tokens/TokenInput/TokenInput'
 import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
-import { HumanAmount, Path } from '@balancer/sdk'
+import { HumanAmount, Path } from '@frontier-fi/sdk'
 import {
   Card,
   Center,

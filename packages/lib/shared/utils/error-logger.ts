@@ -1,10 +1,9 @@
 import type { NextRequest } from 'next/server'
 import {
-  balancerBatchRouterAbiExtended,
-  balancerCompositeLiquidityRouterBoostedAbiExtended,
-  balancerCompositeLiquidityRouterNestedAbiExtended,
-  balancerRouterAbiExtended,
-} from '@balancer/sdk'
+  frontierBatchRouterAbiExtended,
+  frontierCompositeLiquidityRouterBoostedAbiExtended,
+  frontierRouterAbiExtended,
+} from '@frontier-fi/sdk'
 import { isSwapWithNoPathsError } from './error-filters'
 import {
   createBadRequestResponse,
@@ -24,10 +23,9 @@ const GLOBAL_RATE_LIMIT_MAX = 120
 const MAX_RATE_LIMIT_ENTRIES = 5_000
 
 export const megazordBalancerAbi = [
-  ...balancerRouterAbiExtended,
-  ...balancerBatchRouterAbiExtended,
-  ...balancerCompositeLiquidityRouterBoostedAbiExtended,
-  ...balancerCompositeLiquidityRouterNestedAbiExtended,
+  ...frontierRouterAbiExtended,
+  ...frontierBatchRouterAbiExtended,
+  ...frontierCompositeLiquidityRouterBoostedAbiExtended,
 ]
 
 const BALANCER_V3_CUSTOM_ERROR_NAMES = Array.from(

@@ -1,6 +1,6 @@
 import { Pool } from '../pool.types'
 import { Address } from 'viem'
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 
 export const migrateStakeTooltipLabel = `veBAL gauges are the mechanism to distribute BAL liquidity incentives following community voting.
 The gauge where you have staked your LP tokens has been deprecated.

@@ -53,12 +53,10 @@ export interface ContractsConfig {
     router?: Address
     batchRouter?: Address
     compositeLiquidityRouterBoosted?: Address
-    compositeLiquidityRouterNested?: Address
     relayerV6: Address
     minter: Address
     WeightedPool2TokensFactory?: Address
     bCoWFactory?: Address
-    unbalancedAddViaSwapRouter?: Address
   }
   merkl?: {
     claims: Address

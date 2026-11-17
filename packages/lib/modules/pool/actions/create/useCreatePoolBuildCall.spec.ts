@@ -5,8 +5,8 @@ import { defaultTestUserAccount } from '@repo/test/anvil/anvil-setup'
 import { waitFor } from '@testing-library/react'
 import { encodeFunctionData, parseAbi } from 'viem'
 
-vi.mock('@balancer/sdk', async () => {
-  const actual = await vi.importActual<typeof import('@balancer/sdk')>('@balancer/sdk')
+vi.mock('@frontier-fi/sdk', async () => {
+  const actual = await vi.importActual<typeof import('@frontier-fi/sdk')>('@frontier-fi/sdk')
   return {
     ...actual,
     CreatePool: vi.fn().mockImplementation(function () {
@@ -56,7 +56,7 @@ describe('useCreatePoolBuildCall', () => {
   const bCowFactory = '0x1234567890123456789012345678901234567890'
 
   async function setupV3Mocks() {
-    const { CreatePool } = await import('@balancer/sdk')
+    const { CreatePool } = await import('@frontier-fi/sdk')
     const { useUserAccount } = await import('@repo/lib/modules/web3/UserAccountProvider')
     const { useBlockNumber } = await import('wagmi')
 
@@ -147,7 +147,7 @@ describe('useCreatePoolBuildCall', () => {
   })
 
   it('does not execute query when disabled', async () => {
-    const { CreatePool } = await import('@balancer/sdk')
+    const { CreatePool } = await import('@frontier-fi/sdk')
 
     const mockInstance = { buildCall: vi.fn() }
 

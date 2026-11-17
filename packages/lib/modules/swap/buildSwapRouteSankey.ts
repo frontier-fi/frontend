@@ -1,4 +1,4 @@
-import { Path } from '@balancer/sdk'
+import { Path } from '@frontier-fi/sdk'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { getTokenColor } from '@repo/lib/styles/token-colors'
 import { Address, formatUnits } from 'viem'

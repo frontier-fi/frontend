@@ -16,8 +16,11 @@ import type {
   GqlPoolWeighted,
 } from '@repo/lib/shared/services/api/graphql-derived-types'
 import { GqlChainValues, GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
-import { getPoolAddress } from '@balancer/sdk'
 import { Address, Hex } from 'viem'
+
+function getPoolAddress(poolId: string): Address {
+  return poolId.slice(0, 42) as Address
+}
 
 function baseWeightedPool(overrides: Partial<GqlPoolWeighted> = {}): GqlPoolWeighted {
   return {

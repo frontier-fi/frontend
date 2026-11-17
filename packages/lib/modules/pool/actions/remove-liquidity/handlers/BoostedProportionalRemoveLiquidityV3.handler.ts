@@ -3,7 +3,7 @@ import {
   RemoveLiquidityBoostedV3,
   RemoveLiquidityKind,
   Slippage,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
 import {
   QueryRemoveLiquidityInput,

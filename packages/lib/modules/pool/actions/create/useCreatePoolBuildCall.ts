@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
-import { CreatePool } from '@balancer/sdk'
+import { CreatePool } from '@frontier-fi/sdk'
 import { CreatePoolInput } from './types'
 import { type TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
 import { getGqlChain, getNetworkConfig } from '@repo/lib/config/app.config'

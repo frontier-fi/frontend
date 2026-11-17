@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { ApolloClient } from '@apollo/client'
-import type { Permit2 } from '@balancer/sdk'
+import type { Permit2 } from '@frontier-fi/sdk'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { DefaultSwapHandler } from './DefaultSwap.handler'
 import { BaseDefaultSwapHandler } from './BaseDefaultSwap.handler'
@@ -88,7 +88,7 @@ vi.mock('@repo/lib/shared/utils/numbers', () => ({
   })),
 }))
 
-vi.mock('@balancer/sdk', () => ({
+vi.mock('@frontier-fi/sdk', () => ({
   Slippage: {
     fromPercentage: vi.fn((pct: string) => ({ value: Number(pct) / 100 })),
   },

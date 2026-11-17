@@ -5,7 +5,7 @@ import {
   Hex,
   PriceImpact,
   PriceImpactAmount,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
 import { TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
 import { SdkBuildAddLiquidityInput, SdkQueryAddLiquidityOutput } from '../add-liquidity.types'

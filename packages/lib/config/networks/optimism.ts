@@ -3,8 +3,6 @@ import { NetworkConfig } from '../config.types'
 import { convertHexToLowerCase } from '@repo/lib/shared/utils/objects'
 import { CSP_ISSUE_POOL_IDS } from '@repo/lib/shared/data/csp-issue'
 import { PoolIssue } from '@repo/lib/modules/pool/alerts/pool-issues/PoolIssue.type'
-import { AddressProvider, PERMIT2 } from '@balancer/sdk'
-import { optimism } from 'viem/chains'
 
 const networkConfig: NetworkConfig = {
   chainId: 10,
@@ -51,18 +49,12 @@ const networkConfig: NetworkConfig = {
     multicall3: '0xcA11bde05977b3631167028862bE2a173976CA11',
     balancer: {
       vaultV2: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-      vaultV3: AddressProvider.Vault(optimism.id),
       relayerV6: '0x015ACA20a1422F3c729086c17f15F10e0CfbC75A',
       minter: '0x4fb47126Fa83A8734991E41B942Ac29A3266C968',
       WeightedPool2TokensFactory: '0x0F3e0c4218b7b0108a3643cFe9D3ec0d4F57c54e',
-      router: AddressProvider.Router(optimism.id),
-      batchRouter: AddressProvider.BatchRouter(optimism.id),
-      compositeLiquidityRouterBoosted: AddressProvider.CompositeLiquidityRouter(optimism.id),
-      vaultAdminV3: AddressProvider.VaultAdmin(optimism.id),
-      unbalancedAddViaSwapRouter: AddressProvider.UnbalancedAddViaSwapRouter(optimism.id),
     },
     veDelegationProxy: '0x9dA18982a33FD0c7051B19F0d7C76F2d5E7e017c',
-    permit2: PERMIT2[optimism.id],
+    permit2: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
     merkl: {
       claims: '0x3Ef3D8bA38EBe18DB133cEc108f4D14CE00Dd9Ae',
     },

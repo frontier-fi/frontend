@@ -1,14 +1,23 @@
 import { selectAddLiquidityHandler } from './selectAddLiquidityHandler'
 import { getApiPoolMock } from '../../../__mocks__/api-mocks/api-mocks'
 import { balWeth8020, v3StableNonBoosted } from '../../../__mocks__/pool-examples/flat'
-import { nestedPoolMock } from '../../../__mocks__/nestedPoolMock'
+import { usdcUsdtAaveBoosted } from '../../../__mocks__/pool-examples/boosted'
 
 describe('selectAddLiquidityHandler', () => {
-  it('returns NestedAddLiquidityV2Handler for nested pools with nested BPT in pool tokens (V2)', () => {
-    // nestedPoolMock has protocolVersion 2 with nested structure
-    const handler = selectAddLiquidityHandler(nestedPoolMock)
+  it('returns ProportionalBoostedAddLiquidityV3 for boosted pools with wantsProportional', () => {
+    const boostedPool = getApiPoolMock(usdcUsdtAaveBoosted)
+
+    const handler = selectAddLiquidityHandler(boostedPool, true)
     expect(handler).toBeDefined()
-    expect(handler.constructor.name).toBe('NestedAddLiquidityV2Handler')
+    expect(handler.constructor.name).toBe('ProportionalBoostedAddLiquidityV3')
+  })
+
+  it('returns BoostedUnbalancedAddLiquidityV3Handler for boosted pools without wantsProportional', () => {
+    const boostedPool = getApiPoolMock(usdcUsdtAaveBoosted)
+
+    const handler = selectAddLiquidityHandler(boostedPool, false)
+    expect(handler).toBeDefined()
+    expect(handler.constructor.name).toBe('BoostedUnbalancedAddLiquidityV3Handler')
   })
 
   it('returns ProportionalAddLiquidityHandlerV3 for V3 pools with wantsProportional', () => {
@@ -27,24 +36,6 @@ describe('selectAddLiquidityHandler', () => {
     const handler = selectAddLiquidityHandler(v3Pool, false)
     expect(handler).toBeDefined()
     expect(handler.constructor.name).toBe('UnbalancedAddLiquidityV3Handler')
-  })
-
-  it('returns ProportionalAddLiquidityHandler for V2 pools with wantsProportional', () => {
-    const v2Pool = getApiPoolMock(balWeth8020)
-    v2Pool.protocolVersion = 2
-
-    const handler = selectAddLiquidityHandler(v2Pool, true)
-    expect(handler).toBeDefined()
-    expect(handler.constructor.name).toBe('ProportionalAddLiquidityHandler')
-  })
-
-  it('returns UnbalancedAddLiquidityV2Handler for V2 pools without wantsProportional', () => {
-    const v2Pool = getApiPoolMock(balWeth8020)
-    v2Pool.protocolVersion = 2
-
-    const handler = selectAddLiquidityHandler(v2Pool, false)
-    expect(handler).toBeDefined()
-    expect(handler.constructor.name).toBe('UnbalancedAddLiquidityV2Handler')
   })
 
   it('returns TwammAddLiquidityHandler for TWAMM example pool', () => {
