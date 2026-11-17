@@ -89,6 +89,7 @@ export interface NetworkConfig {
   shortName: string
   /** App chain id (network configs). Superset of Frontier API `GqlChain`. */
   chain: AppChain
+  isTestnet?: boolean
   iconPath: string
   rpcUrl?: string
   blockExplorer: BlockExplorerConfig

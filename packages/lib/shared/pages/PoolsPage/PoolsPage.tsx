@@ -9,6 +9,7 @@ import Noise from '@repo/lib/shared/components/layout/Noise'
 import { PoolPageStats } from './PoolPageStats'
 import { FeaturedPartners } from './FeaturedPartners'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { useSupportedNetworks } from '@repo/lib/modules/chains/useSupportedNetworks'
 import { fNumCustom } from '../../utils/numbers'
 import { useProtocolStats } from '@repo/lib/modules/protocol/ProtocolStatsProvider'
 import { useQuery } from '@apollo/client/react'
@@ -20,7 +21,7 @@ type PoolsPageProps = PropsWithChildren & {
 }
 
 export function PoolsPage({ children, rewardsClaimed24h }: PoolsPageProps) {
-  const { supportedNetworks } = PROJECT_CONFIG
+  const supportedNetworks = useSupportedNetworks()
 
   const { data: featuredPoolsData, loading: featuredPoolsLoading } = useQuery(
     GetFeaturedPoolsDocument,

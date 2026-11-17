@@ -27,6 +27,7 @@ const DEFAULT_SLIPPAGE = '0.5' // 0.5%
 const DEFAULT_ENABLE_SIGNATURES: YesNo = 'yes'
 const DEFAULT_ACCEPTED_POLICIES: string[] = []
 const DEFAULT_ENABLE_TX_BUNDLING: YesNo = 'yes'
+const DEFAULT_ENABLE_TESTNETS: YesNo = 'no'
 
 const MAX_SLIPPAGE_PERCENT = 50
 
@@ -43,12 +44,14 @@ export function useUserSettingsLogic({
   initEnableSignatures,
   initAcceptedPolicies,
   initEnableTxBundling,
+  initEnableTestnets = DEFAULT_ENABLE_TESTNETS,
 }: {
   initCurrency: SupportedCurrency
   initSlippage: string
   initEnableSignatures: YesNo
   initAcceptedPolicies: string[]
   initEnableTxBundling: YesNo
+  initEnableTestnets?: YesNo
 }) {
   const isMounted = useIsMounted()
 
@@ -126,6 +129,14 @@ export function useUserSettingsLogic({
   const enableTxBundling = isMounted ? _enableTxBundling : initEnableTxBundling
   const shouldUseTxBundling = enableTxBundling === 'yes'
 
+  const [_enableTestnets, setEnableTestnets] = useLocalStorage<YesNo>(
+    LS_KEYS.UserSettings.EnableTestnets,
+    initEnableTestnets
+  )
+
+  const enableTestnets = isMounted ? _enableTestnets : initEnableTestnets
+  const shouldEnableTestnets = enableTestnets === 'yes'
+
   const [_colorModePreference, setColorModePreference] = useLocalStorage<ColorModePreference>(
     LS_KEYS.UserSettings.ColorMode,
     DEFAULT_COLOR_MODE_PREFERENCE
@@ -147,12 +158,15 @@ export function useUserSettingsLogic({
     acceptedPolicies,
     enableTxBundling,
     shouldUseTxBundling,
+    enableTestnets,
+    shouldEnableTestnets,
     colorModePreference,
     setCurrency,
     setSlippage,
     setEnableSignatures,
     setAcceptedPolicies,
     setEnableTxBundling,
+    setEnableTestnets,
     setColorModePreference,
   }
 }
@@ -164,6 +178,7 @@ type ProviderProps = PropsWithChildren<{
   initEnableSignatures?: string
   initAcceptedPolicies?: string[]
   initEnableTxBundling?: string
+  initEnableTestnets?: string
 }>
 
 export function UserSettingsProvider({
@@ -172,6 +187,7 @@ export function UserSettingsProvider({
   initEnableSignatures,
   initAcceptedPolicies,
   initEnableTxBundling,
+  initEnableTestnets,
   children,
 }: ProviderProps) {
   const _initCurrency = (initCurrency as SupportedCurrency) || DEFAULT_CURRENCY
@@ -179,6 +195,7 @@ export function UserSettingsProvider({
   const _initEnableSignatures = (initEnableSignatures as YesNo) || DEFAULT_ENABLE_SIGNATURES
   const _initAcceptedPolicies = initAcceptedPolicies || DEFAULT_ACCEPTED_POLICIES
   const _initEnableTxBundling = (initEnableTxBundling as YesNo) || DEFAULT_ENABLE_TX_BUNDLING
+  const _initEnableTestnets = (initEnableTestnets as YesNo) || DEFAULT_ENABLE_TESTNETS
 
   const hook = useUserSettingsLogic({
     initCurrency: _initCurrency,
@@ -186,6 +203,7 @@ export function UserSettingsProvider({
     initEnableSignatures: _initEnableSignatures,
     initAcceptedPolicies: _initAcceptedPolicies,
     initEnableTxBundling: _initEnableTxBundling,
+    initEnableTestnets: _initEnableTestnets,
   })
 
   return <UserSettingsContext.Provider value={hook}>{children}</UserSettingsContext.Provider>

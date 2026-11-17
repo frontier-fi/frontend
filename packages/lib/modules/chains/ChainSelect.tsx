@@ -12,7 +12,7 @@ import {
 import { ChevronDown } from 'lucide-react'
 import { motion } from 'motion/react'
 import { pulseOnceWithDelay } from '@repo/lib/shared/utils/animations'
-import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { useSupportedNetworks } from './useSupportedNetworks'
 import { SelectInput, SelectOption } from '@repo/lib/shared/components/inputs/SelectInput'
 import { NativeTokenBalance } from './NativeTokenBalance'
 import { useHasNativeBalance, useNativeTokenBalances } from './useNativeTokenBalances'
@@ -75,12 +75,14 @@ function Option({ children, ...props }: OptionProps<ChainOption, false, GroupBas
   )
 }
 
-export function ChainSelect({ value, onChange, chains = PROJECT_CONFIG.supportedNetworks }: Props) {
+export function ChainSelect({ value, onChange, chains }: Props) {
+  const supportedNetworks = useSupportedNetworks()
+  const effectiveChains = chains ?? supportedNetworks
   const { chainId } = useUserAccount()
   const connectedChain = chainId ? getGqlChain(chainId) : undefined
-  const nativeBalances = useNativeTokenBalances(chains)
+  const nativeBalances = useNativeTokenBalances(effectiveChains)
 
-  const sortedChains = [...chains].sort((a, b) => nativeBalances[b]! - nativeBalances[a]!)
+  const sortedChains = [...effectiveChains].sort((a, b) => nativeBalances[b]! - nativeBalances[a]!)
   const firstChainWithoutBalance = sortedChains.find(chain => nativeBalances[chain] === 0)
   const hasChainsWithBalance = sortedChains.find(chain => nativeBalances[chain] !== 0) !== undefined
 

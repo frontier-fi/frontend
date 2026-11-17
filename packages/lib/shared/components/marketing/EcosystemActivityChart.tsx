@@ -22,7 +22,7 @@ import {
   gradientMap,
   useEcosystemPoolActivityChart,
 } from '@repo/lib/modules/marketing/useEcosystemPoolActivity'
-import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { useSupportedNetworks } from '@repo/lib/modules/chains/useSupportedNetworks'
 
 function AnimateOpacity({ children }: PropsWithChildren) {
   return (
@@ -35,6 +35,7 @@ function AnimateOpacity({ children }: PropsWithChildren) {
 export function EcosystemActivityChart() {
   const chartHeight = 500
   const isLoading = false
+  const supportedNetworks = useSupportedNetworks()
 
   const {
     chartOption,
@@ -47,7 +48,7 @@ export function EcosystemActivityChart() {
     eChartsRef,
   } = useEcosystemPoolActivityChart()
 
-  const legendTabs = PROJECT_CONFIG.supportedNetworks.map(key => {
+  const legendTabs = supportedNetworks.map(key => {
     return {
       label: getChainShortName(key),
       color: `linear-gradient(to bottom, ${gradientMap[key]?.from || '#F7F7F7'}, ${gradientMap[key]?.to || '#A4C6EE'})`,

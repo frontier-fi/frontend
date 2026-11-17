@@ -57,6 +57,7 @@ import { getChildTokens } from '../pool/pool-tokens.utils'
 import { supportsNestedActions } from '../pool/actions/LiquidityActionHelpers'
 import { ProtocolVersion } from '../pool/pool.types'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { useSupportedNetworks } from '../chains/useSupportedNetworks'
 import { ApiToken } from '../tokens/token.types'
 
 export type UseSwapResponse = ReturnType<typeof useSwapLogic>
@@ -129,6 +130,7 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
 
   const { isConnected } = useUserAccount()
   const { chain: walletChain } = useNetworkConfig()
+  const supportedNetworks = useSupportedNetworks()
   const { getToken, getTokensByChain, usdValueForToken, isLoadingTokens } = useTokens()
   const { tokens, setTokens } = useTokenBalances()
   const { hasValidationErrors, resetValidationErrors } = useTokenInputsValidation()
@@ -139,6 +141,7 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
   const needsToAcceptHighPI = hasToAcceptHighPriceImpact && !acceptPriceImpactRisk
 
   const selectedChain = isPoolSwap ? pool.chain : swapState.selectedChain
+  const isSelectedChainEnabled = supportedNetworks.some(chain => chain === selectedChain)
   const selectedChainRef = useRef(selectedChain)
   const previewModalDisclosure = useDisclosure()
 
@@ -163,6 +166,7 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
 
   if (
     !isLoadingTokens &&
+    isSelectedChainEnabled &&
     ((isTokenInSet && !tokenInInfo && !isPoolSwap) ||
       (isTokenOutSet && !tokenOutInfo && !isPoolSwap))
   ) {
@@ -641,6 +645,12 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
     selectedChainRef.current = selectedChain
   }, [selectedChain])
 
+  useEffect(() => {
+    if (!isPoolSwap && !isSelectedChainEnabled) {
+      setSelectedChain(supportedNetworks[0] ?? PROJECT_CONFIG.defaultNetwork)
+    }
+  }, [isPoolSwap, isSelectedChainEnabled, supportedNetworks])
+
   // When wallet chain changes, update the swap form chain
   useEffect(() => {
     const action = getWalletChainSyncAction(
@@ -652,13 +662,13 @@ export function useSwapLogic({ poolActionableTokens, pool, pathParams }: SwapPro
 
     if (action === 'reset') {
       hasInitializedUserChain.current = false
-    } else if (action === 'sync') {
+    } else if (action === 'sync' && supportedNetworks.some(chain => chain === walletChain)) {
       setSelectedChain(walletChain)
       hasInitializedUserChain.current = true
     } else {
       hasInitializedUserChain.current = true
     }
-  }, [isConnected, walletChain])
+  }, [isConnected, supportedNetworks, walletChain])
 
   // When a new simulation is triggered, update the state
   useEffect(() => {

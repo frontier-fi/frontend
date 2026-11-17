@@ -20,7 +20,7 @@ import {
   getBlockExplorerAddressUrl,
   getBlockExplorerTxUrl,
 } from '@repo/lib/shared/utils/blockExplorer'
-import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { useSupportedNetworks } from '../chains/useSupportedNetworks'
 import { useCurrentDate } from '@repo/lib/shared/hooks/date.hooks'
 import { escapeHtml, toSafeHttpsOrRelativeUrl } from '@repo/lib/shared/utils/strings'
 
@@ -328,29 +328,48 @@ export function useEcosystemPoolActivityChart() {
   useColorMode()
   const now = useCurrentDate()
 
-  const { supportedNetworks } = PROJECT_CONFIG
+  const supportedNetworks = useSupportedNetworks()
+  const includeSepolia = supportedNetworks.includes(GqlChainValues.Sepolia)
+  const includeBase = supportedNetworks.includes(GqlChainValues.Base)
 
-  const { loading: loadingSepolia, data: sepoliaResponse } = usePoolEvents({
-    first: 500,
-    chainIn: [GqlChainValues.Sepolia],
-  })
+  useEffect(() => {
+    if (activeNetwork !== 'all' && !supportedNetworks.some(chain => chain === activeNetwork)) {
+      setActiveNetwork('all')
+    }
+  }, [activeNetwork, supportedNetworks])
 
-  const { loading: loadingBase, data: baseResponse } = usePoolEvents({
-    first: 500,
-    chainIn: [GqlChainValues.Base],
-  })
+  const { loading: loadingSepolia, data: sepoliaResponse } = usePoolEvents(
+    {
+      first: 500,
+      chainIn: [GqlChainValues.Sepolia],
+    },
+    {
+      skip: !includeSepolia,
+    }
+  )
 
-  const loading = loadingSepolia || loadingBase
+  const { loading: loadingBase, data: baseResponse } = usePoolEvents(
+    {
+      first: 500,
+      chainIn: [GqlChainValues.Base],
+    },
+    {
+      skip: !includeBase,
+    }
+  )
+
+  const loading = (includeSepolia && loadingSepolia) || (includeBase && loadingBase)
 
   const response = useMemo(() => {
+    const sepoliaEvents = includeSepolia ? sepoliaResponse?.poolEvents || [] : []
+    const baseEvents = includeBase ? baseResponse?.poolEvents || [] : []
+
     if (!sepoliaResponse && !baseResponse) return undefined
+
     return {
-      poolEvents: [
-        ...(sepoliaResponse?.poolEvents || []),
-        ...(baseResponse?.poolEvents || []),
-      ].sort((a, b) => b.timestamp - a.timestamp),
+      poolEvents: [...sepoliaEvents, ...baseEvents].sort((a, b) => b.timestamp - a.timestamp),
     }
-  }, [sepoliaResponse, baseResponse])
+  }, [includeBase, includeSepolia, sepoliaResponse, baseResponse])
 
   const chartData = useMemo(() => {
     if (!response) return getDefaultChainMeta()

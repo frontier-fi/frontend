@@ -49,6 +49,7 @@ import ButtonGroup, {
   ButtonGroupOption,
 } from '@repo/lib/shared/components/btns/button-group/ButtonGroup'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { useSupportedNetworks } from '../../chains/useSupportedNetworks'
 import { poolTypeLabel } from '../pool.helpers'
 import { hasMultipleNetworks } from '../pool.utils'
 import { AnimatedTag } from '@repo/lib/shared/components/other/AnimatedTag'
@@ -217,7 +218,7 @@ export function PoolNetworkFilters({
   toggleNetwork,
   setNetworks,
 }: PoolNetworkFiltersArgs) {
-  const { supportedNetworks } = PROJECT_CONFIG
+  const supportedNetworks = useSupportedNetworks()
 
   // const sortedNetworks = [supportedNetworks[0], ...supportedNetworks.slice(1).sort()] // Alphabetical order after Mainnet
   const sortedNetworks = supportedNetworks
@@ -502,7 +503,8 @@ export function PoolListFilters() {
     resetFilters()
   }
 
-  const { options, supportedNetworks } = PROJECT_CONFIG
+  const { options } = PROJECT_CONFIG
+  const supportedNetworks = useSupportedNetworks()
   const showNetworkFilters = hasMultipleNetworks(supportedNetworks)
 
   return (

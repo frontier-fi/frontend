@@ -1,9 +1,10 @@
 'use client'
 
-import { createContext, useMemo, useState } from 'react'
+import { createContext, useEffect, useMemo, useState } from 'react'
 import type { GqlChain, GqlPoolType } from '@repo/lib/shared/services/api/generated/graphql'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
 import { uniq } from 'lodash'
+import { useSupportedNetworks } from '../../chains/useSupportedNetworks'
 import { POOL_TYPE_MAP, PoolFilterType } from '../../pool/pool.types'
 import {
   ExpandedPoolType,
@@ -22,11 +23,19 @@ import { removeHookDataFromPoolIfNecessary } from '@repo/lib/modules/pool/pool.u
 export type UsePortfolioFiltersResult = ReturnType<typeof usePortfolioFiltersLogic>
 
 export function usePortfolioFiltersLogic() {
+  const supportedNetworks = useSupportedNetworks()
   const [selectedNetworks, setSelectedNetworks] = useState<GqlChain[]>([])
   const [selectedPoolTypes, setSelectedPoolTypes] = useState<PoolFilterType[]>([])
   const [selectedStakingTypes, setSelectedStakingTypes] = useState<StakingFilterKeyType[]>([])
   const [shouldFilterTinyBalances, setShouldFilterTinyBalances] = useState(true)
   const { portfolioData } = usePortfolio()
+
+  useEffect(() => {
+    setSelectedNetworks(current => {
+      const next = current.filter(chain => supportedNetworks.includes(chain))
+      return next.length === current.length ? current : next
+    })
+  }, [supportedNetworks])
 
   // Filter out pools with tiny balances (<0.01 USD)
   const minUsdBalance = 0.01

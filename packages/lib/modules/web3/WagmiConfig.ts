@@ -10,7 +10,8 @@ import {
 } from '@rainbow-me/rainbowkit/wallets'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { createConfig } from 'wagmi'
-import { chains } from './ChainConfig'
+import { getActiveSupportedNetworks } from '../chains/chain.utils'
+import { chains, getChainsForNetworks } from './ChainConfig'
 import { transports } from './transports'
 import { createWalletConnectConnector } from './wallet-connect/createWalletConnectConnector'
 import { isConnectedToWC } from './wallet-connect/useWCConnectionLocalStorage'
@@ -74,7 +75,7 @@ if (isBrowser()) {
 
 export type WagmiConfig = ReturnType<typeof createConfig>
 export const wagmiConfig = createConfig({
-  chains,
+  chains: getChainsForNetworks(getActiveSupportedNetworks(false)),
   transports,
   connectors,
 })

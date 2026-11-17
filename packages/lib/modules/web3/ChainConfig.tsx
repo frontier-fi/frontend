@@ -19,6 +19,7 @@ import { getBaseUrl } from '@repo/lib/shared/utils/urls'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { shouldUseAnvilFork } from '@repo/lib/config/app.config'
 import { defaultAnvilForkRpcUrl } from '@repo/lib/test/utils/wagmi/fork.helpers'
+import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 
@@ -90,6 +91,15 @@ export const chains: readonly [Chain, ...Chain[]] = [
 ]
 
 export const chainsByKey = keyBy(chains, 'id')
+
+export function getChainsForNetworks(networks: readonly GqlChain[]): readonly [Chain, ...Chain[]] {
+  const mapped = networks
+    .map(gqlChain => gqlChainToWagmiChainMap[gqlChain])
+    .filter((chain): chain is Chain => Boolean(chain))
+
+  const primary = mapped[0] ?? customChain!
+  return [primary, ...mapped.filter(chain => chain.id !== primary.id)]
+}
 
 export function getDefaultRpcUrl(chainId: number) {
   return chainsByKey[chainId]!.rpcUrls.default.http[0]!

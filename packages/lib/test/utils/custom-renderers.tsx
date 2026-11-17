@@ -67,17 +67,18 @@ function GlobalProviders({ children }: PropsWithChildren) {
         <AppRouterContextProviderMock router={defaultRouterOptions}>
           <ApolloProvider client={apolloTestClient}>
             <UserAccountProvider>
-              <TokensProvider>
-                <UserSettingsProvider
-                  initAcceptedPolicies={undefined}
-                  initCurrency="USD"
-                  initEnableSignatures="yes"
-                  initPoolListView="list"
-                  initSlippage="0.2"
-                >
+              <UserSettingsProvider
+                initAcceptedPolicies={undefined}
+                initCurrency="USD"
+                initEnableSignatures="yes"
+                initEnableTestnets="yes"
+                initPoolListView="list"
+                initSlippage="0.2"
+              >
+                <TokensProvider>
                   <RecentTransactionsProvider>{children}</RecentTransactionsProvider>
-                </UserSettingsProvider>
-              </TokensProvider>
+                </TokensProvider>
+              </UserSettingsProvider>
             </UserAccountProvider>
           </ApolloProvider>
         </AppRouterContextProviderMock>

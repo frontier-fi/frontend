@@ -22,7 +22,7 @@ import { mins } from '@repo/lib/shared/utils/time'
 import mainnetNetworkConfig from '@repo/lib/config/networks/mainnet'
 import { PoolToken } from '../pool/pool.types'
 import { ApiToken, ApiOrCustomToken } from './token.types'
-import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { useSupportedNetworks } from '../chains/useSupportedNetworks'
 
 export type UseTokensResult = ReturnType<typeof useTokensLogic>
 export const TokensContext = createContext<UseTokensResult | null>(null)
@@ -31,13 +31,12 @@ export type GetTokenFn = (address: string, chain: AppChain) => ApiToken | undefi
 
 const POLL_INTERVAL = mins(3).toMs()
 
-const SUPPORTED_CHAINS = {
-  chains: PROJECT_CONFIG.supportedNetworks,
-}
-
 export function useTokensLogic() {
+  const supportedNetworks = useSupportedNetworks()
+  const supportedChainsVariables = { chains: supportedNetworks }
+
   const { data: tokensData, loading: isLoadingTokens } = useQuery(GetTokensDocument, {
-    variables: SUPPORTED_CHAINS,
+    variables: supportedChainsVariables,
   })
 
   const tokens = tokensData?.tokens || []
@@ -48,7 +47,7 @@ export function useTokensLogic() {
     startPolling,
     stopPolling,
   } = useQuery(GetTokenPricesDocument, {
-    variables: SUPPORTED_CHAINS,
+    variables: supportedChainsVariables,
     /*
       FIXME: if we use initialFetchPolicy: no-cache in development, the query never finishes (isLoadingTokenPrices is always true)
 
