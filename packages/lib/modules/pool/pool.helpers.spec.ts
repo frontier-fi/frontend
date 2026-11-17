@@ -63,6 +63,13 @@ it('supportsNestedActions', () => {
   ).toBeFalsy()
 })
 
+it('disables nested liquidity actions on Frontier Base and Sepolia', () => {
+  const nested = fakeNestedPool('0x12345')
+  expect(supportsNestedActions({ ...nested, chain: GqlChainValues.Base })).toBe(false)
+  expect(supportsNestedActions({ ...nested, chain: GqlChainValues.Sepolia })).toBe(false)
+  expect(supportsNestedActions({ ...nested, chain: GqlChainValues.Mainnet })).toBe(true)
+})
+
 function fakeNestedPool(poolId: string): Pool {
   return {
     id: poolId, // Balancer 80 BAL 20 WETH auraBAL',
@@ -79,17 +86,15 @@ describe('pool helper', async () => {
   const pool = v3SepoliaNestedBoostedMock // Sepolia 50% WETH - 50% boosted USDC/USDT
 
   const wethAddress = '0x7b79995e5f793a07bc00c21412e50ecae098e7f9' // root token
-  const stataEthUSDCAddress = '0x8a88124522dbbf1e56352ba3de1d9f78c143751e' // Wrapping token with useUnderlyingForAddRemove == false
   const usdcSepoliaAddress = '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8' // underlying token
   const usdtSepoliaAddress = '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0' // underlying token
 
-  it('poolActionableTokens', async () => {
+  it('uses root tokens when nested actions are unavailable on Sepolia', async () => {
     const poolActionableTokens = getPoolActionableTokens(pool)
 
     expect(poolActionableTokens.map(t => t.address).sort()).toEqual([
+      '0x59fa488dda749cdd41772bb068bb23ee955a6d7a',
       wethAddress,
-      stataEthUSDCAddress,
-      usdtSepoliaAddress,
     ])
   })
 

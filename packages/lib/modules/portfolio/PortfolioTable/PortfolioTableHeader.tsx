@@ -29,9 +29,9 @@ export function PortfolioTableHeader({ currentSortingObj, setCurrentSortingObj, 
           Details
         </Text>
       </GridItem>
-      {portfolioOrderBy.map((orderByItem, index) => (
+      {portfolioOrderBy.map(orderByItem => (
         <SortableHeader
-          align={index === 0 ? 'left' : 'right'}
+          align="right"
           isSorted={orderByItem.id === currentSortingObj.id}
           key={orderByItem.id}
           label={orderByItem.title}

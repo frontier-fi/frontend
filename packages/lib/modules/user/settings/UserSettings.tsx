@@ -32,7 +32,7 @@ interface SlippageInputProps {
 }
 
 export function SlippageInput({ slippage, setSlippage }: SlippageInputProps) {
-  const presetOpts = ['0.5', '1', '2']
+  const presetOpts = ['0.1', '0.5', '1', '2']
   const [inputSlippage, setInputSlippage] = useState(slippage)
   const [previousSlippage, setPreviousSlippage] = useState(slippage)
   const inputSlippageRef = useRef(slippage)

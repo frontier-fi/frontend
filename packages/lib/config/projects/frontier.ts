@@ -17,8 +17,7 @@ export const ProjectConfigFrontier: ProjectConfig = {
   appUrl: 'https://app.frontier.fi',
   projectLogo: '/images/icons/0xff.png',
   acceptedPoliciesVersion: undefined,
-  // Frontier API is Sepolia-only for now (api.frontier.fi).
-  supportedNetworks: [GqlChainValues.Sepolia],
+  supportedNetworks: [GqlChainValues.Sepolia, GqlChainValues.Base],
   variantConfig: {
     [PartnerVariant.cow]: {
       banners: {
