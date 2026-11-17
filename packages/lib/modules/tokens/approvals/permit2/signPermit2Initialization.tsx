@@ -1,5 +1,11 @@
 import { ensureError } from '@repo/lib/shared/utils/errors'
-import { Address, Permit2, Permit2Helper, PublicWalletClient, InitPoolInputV3 } from '@balancer/sdk'
+import {
+  Address,
+  Permit2,
+  Permit2Helper,
+  PublicWalletClient,
+  InitPoolInputV3,
+} from '@frontier-fi/sdk'
 
 type SignPermit2InitParams = {
   sdkClient?: PublicWalletClient

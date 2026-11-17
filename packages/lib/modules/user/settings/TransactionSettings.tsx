@@ -20,9 +20,11 @@ import { Settings } from 'lucide-react'
 import { CurrencySelect } from './CurrencySelect'
 import { EnableSignaturesSelect, SlippageInput } from './UserSettings'
 import { EnableTxBundleSetting } from './EnableTxBundlesSetting'
+import { useFxRates } from '@repo/lib/shared/hooks/FxRatesProvider'
 
 export function TransactionSettings(props: ButtonProps) {
   const { slippage, setSlippage } = useUserSettings()
+  const { hasFxRates } = useFxRates()
 
   return (
     <Popover isLazy placement="bottom-end">
@@ -44,10 +46,12 @@ export function TransactionSettings(props: ButtonProps) {
         </PopoverHeader>
         <PopoverBody p="md">
           <VStack align="start" spacing="lg" w="full">
-            <VStack align="start" w="full">
-              <Heading size="sm">Currency</Heading>
-              <CurrencySelect id="transaction-settings-currency-select" />
-            </VStack>
+            {hasFxRates && (
+              <VStack align="start" w="full">
+                <Heading size="sm">Currency</Heading>
+                <CurrencySelect id="transaction-settings-currency-select" />
+              </VStack>
+            )}
             <VStack align="start" w="full">
               <Heading size="sm">Slippage</Heading>
               <SlippageInput setSlippage={setSlippage} slippage={slippage} />

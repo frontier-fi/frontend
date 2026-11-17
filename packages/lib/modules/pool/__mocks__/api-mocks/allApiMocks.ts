@@ -39,4 +39,3 @@ export const allApiMocks: Pool[] = [
   staBAL3_WETH_WBTC_BPTMock,
   b_auraBAL_STABLEMock,
 ]
- 

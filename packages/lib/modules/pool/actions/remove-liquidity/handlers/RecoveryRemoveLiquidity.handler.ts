@@ -7,7 +7,7 @@ import {
   RemoveLiquidityKind,
   RemoveLiquidityRecoveryInput,
   Slippage,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { Pool } from '../../../pool.types'
 import {
   QueryRemoveLiquidityInput,
@@ -17,7 +17,7 @@ import {
 import { TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
 import { BPT_DECIMALS } from '../../../pool.constants'
 import { getSender, LiquidityActionHelpers } from '../../LiquidityActionHelpers'
-import { getRpcUrl } from '@repo/lib/modules/web3/transports'
+import { getRpcUrl, withSdkRpcFallback } from '@repo/lib/modules/web3/transports'
 import { parseAmount } from '@repo/lib/shared/utils/numbers'
 
 /*
@@ -42,12 +42,12 @@ export class RecoveryRemoveLiquidityHandler {
   }: QueryRemoveLiquidityInput): Promise<SdkQueryRemoveLiquidityOutput> {
     const removeLiquidity = new RemoveLiquidity()
 
-    const removeLiquidityInput: RemoveLiquidityRecoveryInput = this.constructSdkInput(
-      bptIn,
-      userAddress
+    const sdkQueryOutput = await withSdkRpcFallback(this.helpers.chainId, rpcUrl =>
+      removeLiquidity.query(
+        this.constructSdkInput(bptIn, userAddress, rpcUrl),
+        this.helpers.poolState
+      )
     )
-
-    const sdkQueryOutput = await removeLiquidity.query(removeLiquidityInput, this.helpers.poolState)
 
     return { amountsOut: sdkQueryOutput.amountsOut.filter(a => a.amount > 0n), sdkQueryOutput }
   }
@@ -92,7 +92,8 @@ export class RecoveryRemoveLiquidityHandler {
    */
   protected constructSdkInput(
     humanBptIn: HumanAmount,
-    userAddress: Address
+    userAddress: Address,
+    rpcUrl = getRpcUrl(this.helpers.chainId)
   ): RemoveLiquidityRecoveryInput {
     const bptIn: InputAmount = {
       rawAmount: parseAmount(humanBptIn, 18),
@@ -102,7 +103,7 @@ export class RecoveryRemoveLiquidityHandler {
 
     return {
       chainId: this.helpers.chainId,
-      rpcUrl: getRpcUrl(this.helpers.chainId),
+      rpcUrl,
       bptIn,
       kind: RemoveLiquidityKind.Recovery,
       sender: getSender(userAddress),

@@ -167,10 +167,14 @@ catalogs:
     '@apollo/client':
       specifier: 4.3.4
       version: 4.3.4
+    '@frontier-fi/maths':
+      specifier: 0.2.1
+      version: 0.2.1
+    '@frontier-fi/sdk':
+      specifier: 0.2.0
+      version: 0.2.0
 
 overrides:
-  '@balancer/sdk': github:frontier-fi/sdk#cd309ed8873386c00f5e65342bb73641e3503dc8
-  '@balancer-labs/balancer-maths': npm:@frontier-fi/maths@0.1.1
   debug>supports-color: '-'
   '@types/react': '19.3'
   '@types/react-dom': '19.3'
@@ -233,9 +237,6 @@ importers:
       '@apollo/client':
         specifier: 'catalog:'
         version: 4.3.4(graphql-ws@6.4.0(crossws@0.3.5)(graphql@17.0.2)(ws@8.21.0))(graphql@17.0.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rxjs@7.8.2)
-      '@balancer/sdk':
-        specifier: github:frontier-fi/sdk#cd309ed8873386c00f5e65342bb73641e3503dc8
-        version: https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8(typescript@6.0.3)(zod@4.6.7)
       '@chakra-ui/clickable':
         specifier: ^2.1.0
         version: 2.1.0(react@19.3.1)
@@ -251,6 +252,9 @@ importers:
       '@chakra-ui/styled-system':
         specifier: 2.12.0
         version: 2.12.0(react@19.3.1)
+      '@frontier-fi/sdk':
+        specifier: 'catalog:'
+        version: 0.2.0(typescript@6.0.3)(zod@4.6.7)
       '@nikolovlazar/chakra-ui-prose':
         specifier: ^1.2.1
         version: 1.2.1(@chakra-ui/react@2.10.10(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(framer-motion@14.0.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@chakra-ui/system@2.6.2(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(react@19.3.1))(react@19.3.1)
@@ -369,9 +373,9 @@ importers:
 
   packages/e2e-tests:
     devDependencies:
-      '@balancer/sdk':
-        specifier: github:frontier-fi/sdk#cd309ed8873386c00f5e65342bb73641e3503dc8
-        version: https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8(typescript@6.0.3)(zod@3.25.76)
+      '@frontier-fi/sdk':
+        specifier: 'catalog:'
+        version: 0.2.0(typescript@6.0.3)(zod@3.25.76)
       '@playwright/test':
         specifier: 1.64.1
         version: 1.64.1
@@ -444,9 +448,6 @@ importers:
       '@apollo/client':
         specifier: 'catalog:'
         version: 4.3.4(graphql-ws@6.4.0(crossws@0.3.5)(graphql@17.0.2)(ws@8.22.0))(graphql@17.0.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rxjs@7.8.2)
-      '@balancer/sdk':
-        specifier: github:frontier-fi/sdk#cd309ed8873386c00f5e65342bb73641e3503dc8
-        version: https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8(typescript@6.0.3)(zod@4.6.7)
       '@chakra-ui/anatomy':
         specifier: ^2.2.2
         version: 2.3.4
@@ -472,8 +473,11 @@ importers:
         specifier: 11.14.0
         version: 11.14.0(@types/react@19.3.0)(react@19.3.1)
       '@frontier-fi/maths':
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: 'catalog:'
+        version: 0.2.1
+      '@frontier-fi/sdk':
+        specifier: 'catalog:'
+        version: 0.2.0(typescript@6.0.3)(zod@4.6.7)
       '@nikolovlazar/chakra-ui-prose':
         specifier: ^1.2.1
         version: 1.2.1(@chakra-ui/react@2.10.10(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(framer-motion@14.0.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@chakra-ui/system@2.6.2(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(react@19.3.1))(react@19.3.1)
@@ -657,9 +661,9 @@ importers:
       '@apollo/client':
         specifier: 'catalog:'
         version: 4.3.4(graphql-ws@6.4.0(crossws@0.3.5)(graphql@17.0.2)(ws@8.22.0))(graphql@17.0.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rxjs@7.8.2)
-      '@balancer/sdk':
-        specifier: github:frontier-fi/sdk#cd309ed8873386c00f5e65342bb73641e3503dc8
-        version: https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8(typescript@6.0.3)(zod@3.25.76)
+      '@frontier-fi/sdk':
+        specifier: 'catalog:'
+        version: 0.2.0(typescript@6.0.3)(zod@3.25.76)
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
@@ -861,11 +865,6 @@ packages:
   '@babel/types@7.29.8':
     resolution: {integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==}
     engines: {node: '>=6.9.0'}
-
-  '@balancer/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8':
-    resolution: {gitHosted: true, integrity: sha512-j3TYQC2ppxwRbT72I4PLQSikKPqcc/z9orqbBQoPWO/yA8MlzMgiPciZyWEYNv/Tbcob1seUzjYkYXyCoPh2ow==, tarball: https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8}
-    version: 6.2.1
-    engines: {node: '>=20.x'}
 
   '@base-org/account@2.4.0':
     resolution: {integrity: sha512-A4Umpi8B9/pqR78D1Yoze4xHyQaujioVRqqO3d6xuDFw9VRtjg6tK3bPlwE0aW+nVH/ntllCpPa2PbI8Rnjcug==}
@@ -1676,9 +1675,13 @@ packages:
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
 
-  '@frontier-fi/maths@0.1.1':
-    resolution: {integrity: sha512-9VwvJTCd+QuGiAq2LlYpyhZPTt/HLJZKil+QlOhEPK86NckhBr7SOKiwoZARyZhjOf06dQoxgzXGHCyyJ9wWBQ==}
+  '@frontier-fi/maths@0.2.1':
+    resolution: {integrity: sha512-BSIOfhCSJE01Hjvz2drQRyBZm/iMTdqgcp6eg+d3pD9FI3QMCajlByu+EAr0liPGqtufmgTpyeqllnXNgdsa5A==}
     engines: {node: '>=18.x'}
+
+  '@frontier-fi/sdk@0.2.0':
+    resolution: {integrity: sha512-WfR+9hERx4ejgvKFQO7CLNKENuLUCiy2gsX+FSkoBGnM8WhjHZv4IqH/YICcMCNrGldrQGsSoGWaEOQb37vaUg==}
+    engines: {node: '>=20.x'}
 
   '@graphql-codegen/add@7.1.1':
     resolution: {integrity: sha512-xN4za/V9e1NentxtKQYKKWzSoWNs3x72vqUZ4YGIzFLLGOJOCNVrR9lXDDQHDPrtcPZaj06zksdrfuJ7qutNCA==}
@@ -8598,26 +8601,6 @@ snapshots:
       '@babel/helper-string-parser': 7.29.11
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@balancer/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8(typescript@6.0.3)(zod@3.25.76)':
-    dependencies:
-      '@balancer-labs/balancer-maths': '@frontier-fi/maths@0.1.1'
-      viem: 2.57.11(typescript@6.0.3)(zod@3.25.76)
-    transitivePeerDependencies:
-      - bufferutil
-      - typescript
-      - utf-8-validate
-      - zod
-
-  '@balancer/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8(typescript@6.0.3)(zod@4.6.7)':
-    dependencies:
-      '@balancer-labs/balancer-maths': '@frontier-fi/maths@0.1.1'
-      viem: 2.57.11(typescript@6.0.3)(zod@4.6.7)
-    transitivePeerDependencies:
-      - bufferutil
-      - typescript
-      - utf-8-validate
-      - zod
-
   '@base-org/account@2.4.0(@types/react@19.3.0)(@x402/core@2.28.0)(@x402/evm@2.28.0(typescript@6.0.3))(@x402/extensions@2.28.0(typescript@6.0.3))(@x402/svm@2.28.0(@solana/kit@5.5.1(typescript@6.0.3))(@solana/sysvars@5.5.1(typescript@6.0.3))(typescript@6.0.3))(debug@4.4.3)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.3.1))(zod@3.25.76)':
     dependencies:
       '@coinbase/cdp-sdk': 1.58.0(@x402/core@2.28.0)(@x402/evm@2.28.0(typescript@6.0.3))(@x402/extensions@2.28.0(typescript@6.0.3))(@x402/svm@2.28.0(@solana/kit@5.5.1(typescript@6.0.3))(@solana/sysvars@5.5.1(typescript@6.0.3))(typescript@6.0.3))(debug@4.4.3)(typescript@6.0.3)
@@ -9516,7 +9499,27 @@ snapshots:
 
   '@floating-ui/utils@0.2.12': {}
 
-  '@frontier-fi/maths@0.1.1': {}
+  '@frontier-fi/maths@0.2.1': {}
+
+  '@frontier-fi/sdk@0.2.0(typescript@6.0.3)(zod@3.25.76)':
+    dependencies:
+      '@frontier-fi/maths': 0.2.1
+      viem: 2.57.11(typescript@6.0.3)(zod@3.25.76)
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+      - zod
+
+  '@frontier-fi/sdk@0.2.0(typescript@6.0.3)(zod@4.6.7)':
+    dependencies:
+      '@frontier-fi/maths': 0.2.1
+      viem: 2.57.11(typescript@6.0.3)(zod@4.6.7)
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+      - zod
 
   '@graphql-codegen/add@7.1.1(graphql@17.0.2)':
     dependencies:

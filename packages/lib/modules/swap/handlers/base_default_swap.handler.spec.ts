@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { ApolloClient } from '@apollo/client'
-import type { Permit2 } from '@balancer/sdk'
+import type { Permit2 } from '@frontier-fi/sdk'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { DefaultSwapHandler } from './DefaultSwap.handler'
 import { BaseDefaultSwapHandler } from './BaseDefaultSwap.handler'
@@ -88,7 +88,7 @@ vi.mock('@repo/lib/shared/utils/numbers', () => ({
   })),
 }))
 
-vi.mock('@balancer/sdk', () => ({
+vi.mock('@frontier-fi/sdk', () => ({
   Slippage: {
     fromPercentage: vi.fn((pct: string) => ({ value: Number(pct) / 100 })),
   },
@@ -122,6 +122,9 @@ vi.mock('@repo/lib/shared/services/viem/viem.client', () => ({
 
 vi.mock('@repo/lib/modules/web3/transports', () => ({
   getRpcUrl: vi.fn(() => 'https://mainnet.infura.io/v3/test'),
+  withSdkRpcFallback: vi.fn((_chainId: number, fn: (rpcUrl: string) => unknown) =>
+    fn('https://mainnet.infura.io/v3/test')
+  ),
 }))
 
 class TestableBaseDefaultSwapHandler extends BaseDefaultSwapHandler {

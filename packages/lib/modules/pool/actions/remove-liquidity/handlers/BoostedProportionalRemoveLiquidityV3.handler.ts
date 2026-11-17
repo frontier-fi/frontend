@@ -3,8 +3,9 @@ import {
   RemoveLiquidityBoostedV3,
   RemoveLiquidityKind,
   Slippage,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
+import { withSdkRpcFallback } from '@repo/lib/modules/web3/transports'
 import {
   QueryRemoveLiquidityInput,
   SdkBuildRemoveLiquidityInput,
@@ -20,11 +21,12 @@ export class BoostedProportionalRemoveLiquidityV3Handler extends BaseProportiona
   }: QueryRemoveLiquidityInput): Promise<SdkQueryRemoveLiquidityOutput> {
     const removeLiquidity = new RemoveLiquidityBoostedV3()
     if (!tokensOut) throw new Error('tokensOut is required for boosted remove liquidity')
-    const removeLiquidityInput = { ...this.constructSdkInput(bptIn, userAddress), tokensOut }
 
-    const sdkQueryOutput = await removeLiquidity.query(
-      removeLiquidityInput,
-      this.helpers.boostedPoolState
+    const sdkQueryOutput = await withSdkRpcFallback(this.helpers.chainId, rpcUrl =>
+      removeLiquidity.query(
+        { ...this.constructSdkInput(bptIn, userAddress, rpcUrl), tokensOut },
+        this.helpers.boostedPoolState
+      )
     )
 
     return {

@@ -26,6 +26,7 @@ import { PermitSignatureProvider } from '@repo/lib/modules/tokens/approvals/perm
 import { sleep } from '@repo/lib/shared/utils/sleep'
 import { ApolloProvider } from '@apollo/client/react'
 import { PriceImpactProvider } from '@repo/lib/modules/price-impact/PriceImpactProvider'
+import { FiatFxRatesProvider } from '@repo/lib/shared/hooks/FxRatesProvider'
 
 export type Wrapper = ({ children }: PropsWithChildren) => ReactNode
 
@@ -67,17 +68,20 @@ function GlobalProviders({ children }: PropsWithChildren) {
         <AppRouterContextProviderMock router={defaultRouterOptions}>
           <ApolloProvider client={apolloTestClient}>
             <UserAccountProvider>
-              <TokensProvider>
-                <UserSettingsProvider
-                  initAcceptedPolicies={undefined}
-                  initCurrency="USD"
-                  initEnableSignatures="yes"
-                  initPoolListView="list"
-                  initSlippage="0.2"
-                >
-                  <RecentTransactionsProvider>{children}</RecentTransactionsProvider>
-                </UserSettingsProvider>
-              </TokensProvider>
+              <UserSettingsProvider
+                initAcceptedPolicies={undefined}
+                initCurrency="USD"
+                initEnableSignatures="yes"
+                initEnableTestnets="yes"
+                initPoolListView="list"
+                initSlippage="0.2"
+              >
+                <FiatFxRatesProvider data={undefined}>
+                  <TokensProvider>
+                    <RecentTransactionsProvider>{children}</RecentTransactionsProvider>
+                  </TokensProvider>
+                </FiatFxRatesProvider>
+              </UserSettingsProvider>
             </UserAccountProvider>
           </ApolloProvider>
         </AppRouterContextProviderMock>

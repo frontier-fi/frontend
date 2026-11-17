@@ -1,7 +1,7 @@
 import { testHook } from '@repo/lib/test/utils/custom-renderers'
 import { act } from '@testing-library/react'
 import { withNuqsTestingAdapter } from 'nuqs/adapters/testing'
-import { usePoolListQueryState } from './usePoolListQueryState'
+import { DEFAULT_MIN_TVL, usePoolListQueryState } from './usePoolListQueryState'
 
 const testAddress = '0x000000000000000000000000000000000000dEaD'
 
@@ -12,6 +12,7 @@ describe('Pool list state query', () => {
     })
 
     expect(result.current.joinablePools).toBe(false)
+    expect(result.current.minTvl).toBe(DEFAULT_MIN_TVL)
     expect(result.current.totalFilterCount).toBe(0)
     expect(result.current.pagination.pageSize).toBe(20)
     expect(result.current.pagination.pageIndex).toBe(0)
@@ -61,29 +62,36 @@ describe('Pool list state query', () => {
     expect(result.current.joinablePools).toBe(true)
   })
 
-  it('resetFilters clears joinablePools', () => {
+  it('resetFilters clears joinablePools and restores minTvl to $100 default', () => {
     const { result } = testHook(() => usePoolListQueryState(), {
       wrapper: withNuqsTestingAdapter(),
     })
 
     act(() => {
       result.current.toggleJoinablePools(true)
+      result.current.setMinTvl(1)
     })
 
     expect(result.current.joinablePools).toBe(true)
+    expect(result.current.minTvl).toBe(1)
+    expect(result.current.totalFilterCount).toBe(2)
 
     act(() => {
       result.current.resetFilters()
     })
 
     expect(result.current.joinablePools).toBe(false)
+    expect(result.current.minTvl).toBe(DEFAULT_MIN_TVL)
+    expect(result.current.totalFilterCount).toBe(0)
   })
 
-  it('returns zero totalFilterCount with no filters', () => {
+  it('returns zero totalFilterCount with default filters', () => {
     const { result } = testHook(() => usePoolListQueryState(), {
       wrapper: withNuqsTestingAdapter(),
     })
 
+    expect(result.current.minTvl).toBe(DEFAULT_MIN_TVL)
+    expect(result.current.queryVariables.where.minTvl).toBe(DEFAULT_MIN_TVL)
     expect(result.current.totalFilterCount).toBe(0)
   })
 })

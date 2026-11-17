@@ -1,5 +1,5 @@
 import { balAddress } from '@repo/lib/debug-helpers'
-import { TokenAmount, Token, HumanAmount } from '@balancer/sdk'
+import { TokenAmount, Token, HumanAmount } from '@frontier-fi/sdk'
 import { Address, parseUnits } from 'viem'
 import { mock } from 'vitest-mock-extended'
 

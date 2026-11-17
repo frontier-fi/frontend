@@ -20,7 +20,7 @@ import {
   getBlockExplorerAddressUrl,
   getBlockExplorerTxUrl,
 } from '@repo/lib/shared/utils/blockExplorer'
-import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { useSupportedNetworks } from '../chains/useSupportedNetworks'
 import { useCurrentDate } from '@repo/lib/shared/hooks/date.hooks'
 import { escapeHtml, toSafeHttpsOrRelativeUrl } from '@repo/lib/shared/utils/strings'
 
@@ -208,10 +208,10 @@ const getDefaultPoolActivityChartOptions = (
               <span>&nbsp;${escapeHtml(currencyFormatter(metaData.usdValue))}&nbsp;</span>
               <span>on ${escapeHtml(getChainShortName(metaData.chain))}</span>
             </div>
-            <div style="display:flex;flex-direction:column;justify-content:flex-start;gap:0;margin-top:4px">
+            <div style="display:flex;flex-direction:column;justify-content:flex-start;gap:2px;margin-top:4px;margin-bottom:4px">
               ${
                 tokens
-                  ?.map((token, index) => {
+                  ?.map(token => {
                     const logoSrc = toSafeHttpsOrRelativeUrl(token.token?.logoURI)
 
                     const amountLabel = escapeHtml(
@@ -222,14 +222,12 @@ const getDefaultPoolActivityChartOptions = (
                     return `
                   <div style="color: ${
                     toolTipTheme.text
-                  }; display:flex;justify-content:start;align-items:center;gap:6px; margin-bottom:${
-                    index === tokens.length - 1 ? `4px` : `-20px`
-                  }">
+                  }; display:flex;justify-content:start;align-items:center;gap:6px">
                     ${
                       logoSrc
                         ? `<img src="${escapeHtml(
                             logoSrc
-                          )}" style="width: 16px; height: 16px; border-radius: 50%; margin-right;letter-spacing:-0.1px" />`
+                          )}" style="width: 16px; height: 16px; border-radius: 50%; letter-spacing:-0.1px" />`
                         : ''
                     }
                     <div style="text-align:left">
@@ -330,12 +328,48 @@ export function useEcosystemPoolActivityChart() {
   useColorMode()
   const now = useCurrentDate()
 
-  const { supportedNetworks } = PROJECT_CONFIG
+  const supportedNetworks = useSupportedNetworks()
+  const includeSepolia = supportedNetworks.includes(GqlChainValues.Sepolia)
+  const includeBase = supportedNetworks.includes(GqlChainValues.Base)
 
-  const { loading, data: response } = usePoolEvents({
-    first: 500,
-    chainIn: supportedNetworks,
-  })
+  useEffect(() => {
+    if (activeNetwork !== 'all' && !supportedNetworks.some(chain => chain === activeNetwork)) {
+      setActiveNetwork('all')
+    }
+  }, [activeNetwork, supportedNetworks])
+
+  const { loading: loadingSepolia, data: sepoliaResponse } = usePoolEvents(
+    {
+      first: 500,
+      chainIn: [GqlChainValues.Sepolia],
+    },
+    {
+      skip: !includeSepolia,
+    }
+  )
+
+  const { loading: loadingBase, data: baseResponse } = usePoolEvents(
+    {
+      first: 500,
+      chainIn: [GqlChainValues.Base],
+    },
+    {
+      skip: !includeBase,
+    }
+  )
+
+  const loading = (includeSepolia && loadingSepolia) || (includeBase && loadingBase)
+
+  const response = useMemo(() => {
+    const sepoliaEvents = includeSepolia ? sepoliaResponse?.poolEvents || [] : []
+    const baseEvents = includeBase ? baseResponse?.poolEvents || [] : []
+
+    if (!sepoliaResponse && !baseResponse) return undefined
+
+    return {
+      poolEvents: [...sepoliaEvents, ...baseEvents].sort((a, b) => b.timestamp - a.timestamp),
+    }
+  }, [includeBase, includeSepolia, sepoliaResponse, baseResponse])
 
   const chartData = useMemo(() => {
     if (!response) return getDefaultChainMeta()
@@ -408,7 +442,7 @@ export function useEcosystemPoolActivityChart() {
   }, [response, activeNetwork, activeTab, getToken])
 
   const headerInfo = useMemo(() => {
-    if (!response) return { total: 0, elapsedMinutes: 0 }
+    if (!response?.poolEvents.length) return { total: 0, elapsedMinutes: 0 }
 
     const elapsedMinutes = Math.floor(
       secondsToMinutes(

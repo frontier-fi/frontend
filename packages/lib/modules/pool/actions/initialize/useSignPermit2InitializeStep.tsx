@@ -1,4 +1,4 @@
-import { PublicWalletClient } from '@balancer/sdk'
+import { PublicWalletClient } from '@frontier-fi/sdk'
 import { signPermit2Initialization } from '@repo/lib/modules/tokens/approvals/permit2/signPermit2Initialization'
 import { SignPermit2Fn as SignPermit2Fn } from '@repo/lib/modules/tokens/approvals/permit2/useSignPermit2'
 import { useSignPermit2Step } from '@repo/lib/modules/transactions/transaction-steps/useSignPermit2Step'

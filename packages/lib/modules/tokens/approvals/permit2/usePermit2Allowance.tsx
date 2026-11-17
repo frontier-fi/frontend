@@ -1,5 +1,5 @@
 import { getGqlChain, getNetworkConfig } from '@repo/lib/config/app.config'
-import { permit2Abi } from '@balancer/sdk'
+import { permit2Abi } from '@frontier-fi/sdk'
 import { zipObject } from 'lodash'
 import { Address } from 'viem'
 import { useReadContracts } from 'wagmi'

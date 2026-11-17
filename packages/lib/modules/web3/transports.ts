@@ -25,8 +25,8 @@ export function getTransports(chain: Chain) {
   if (overrideRpcUrl) {
     return fallback(
       fallbackRpcUrl
-        ? [http(overrideRpcUrl), http(fallbackRpcUrl), http()]
-        : [http(overrideRpcUrl), http()]
+        ? [http(fallbackRpcUrl), http(overrideRpcUrl, { retryCount: 0 }), http()]
+        : [http(overrideRpcUrl, { retryCount: 0 }), http()]
     )
   }
 
@@ -42,4 +42,54 @@ export function getRpcUrl(chainId: number): string {
   if (shouldUseAnvilFork) return defaultAnvilForkRpcUrl
   const gqlChain = getGqlChain(chainId)
   return rpcOverrides[gqlChain] || rpcFallbacks[gqlChain] || getDefaultRpcUrl(chainId)
+}
+
+export function getSdkRpcUrls(chainId: number): string[] {
+  if (shouldUseAnvilFork) return [defaultAnvilForkRpcUrl]
+  const gqlChain = getGqlChain(chainId)
+  const defaultUrl = chains.find(chain => chain.id === chainId)?.rpcUrls.default.http[0]
+
+  const candidates = [rpcOverrides[gqlChain], rpcFallbacks[gqlChain], defaultUrl].filter(
+    (url): url is string => Boolean(url)
+  )
+
+  return [...new Set(candidates)]
+}
+
+function isDeterministicContractRevert(error: unknown): boolean {
+  let current: unknown = error
+  const seen = new Set<unknown>()
+
+  while (current && typeof current === 'object' && !seen.has(current)) {
+    seen.add(current)
+    const err = current as { name?: string; cause?: unknown }
+    if (err.name === 'ContractFunctionRevertedError') return true
+    current = err.cause
+  }
+
+  return false
+}
+
+export async function withSdkRpcFallback<T>(
+  chainId: number,
+  fn: (rpcUrl: string) => Promise<T>
+): Promise<T> {
+  const urls = getSdkRpcUrls(chainId)
+  if (urls.length === 0) throw new Error(`No RPC URL configured for chain ${chainId}`)
+
+  let lastError: unknown
+
+  for (let i = 0; i < urls.length; i++) {
+    try {
+      return await fn(urls[i]!)
+    } catch (error) {
+      lastError = error
+
+      if (isDeterministicContractRevert(error) || i === urls.length - 1) {
+        throw error
+      }
+    }
+  }
+
+  throw lastError
 }

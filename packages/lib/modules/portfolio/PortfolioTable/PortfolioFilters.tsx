@@ -33,7 +33,6 @@ import { usePortfolioFilters } from './PortfolioFiltersProvider'
 import { PoolFilterType } from '../../pool/pool.types'
 import { poolTypeLabel } from '../../pool/pool.helpers'
 import { AnimatedTag } from '@repo/lib/shared/components/other/AnimatedTag'
-import { StakingFilterKeyType, STAKING_LABEL_MAP } from './useExpandedPools'
 
 export interface PortfolioNetworkFiltersArgs {
   toggledNetworks: GqlChain[]
@@ -124,33 +123,10 @@ export function PoolTypeFilters({
   )
 }
 
-export interface PortfolioStakingTypeFiltersArgs {
-  availableStakingTypes: StakingFilterKeyType[]
-  stakingTypes: StakingFilterKeyType[]
-  toggleStakingType: (checked: boolean, value: StakingFilterKeyType) => void
-}
-
-export function StakingTypeFilters({
-  availableStakingTypes,
-  stakingTypes,
-  toggleStakingType,
-}: PortfolioStakingTypeFiltersArgs) {
-  return (
-    <CheckboxFilterList
-      availableItems={availableStakingTypes}
-      getItemLabel={item => STAKING_LABEL_MAP[item]}
-      selectedItems={stakingTypes}
-      toggleItem={toggleStakingType}
-    />
-  )
-}
-
 export function usePortfolioFilterTagsVisible() {
-  const { selectedNetworks, selectedPoolTypes, selectedStakingTypes } = usePortfolioFilters()
+  const { selectedNetworks, selectedPoolTypes } = usePortfolioFilters()
 
-  return (
-    selectedNetworks.length > 0 || selectedPoolTypes.length > 0 || selectedStakingTypes.length > 0
-  )
+  return selectedNetworks.length > 0 || selectedPoolTypes.length > 0
 }
 
 export interface PortfolioFilterTagsPops {
@@ -158,8 +134,6 @@ export interface PortfolioFilterTagsPops {
   toggleNetwork: (checked: boolean, value: GqlChain) => void
   poolTypes: PoolFilterType[]
   togglePoolType: (checked: boolean, value: PoolFilterType) => void
-  stakingTypes: StakingFilterKeyType[]
-  toggleStakingType: (checked: boolean, value: StakingFilterKeyType) => void
 }
 
 export function PortfolioFilterTags({
@@ -167,11 +141,9 @@ export function PortfolioFilterTags({
   toggleNetwork,
   poolTypes,
   togglePoolType,
-  stakingTypes,
-  toggleStakingType,
 }: PortfolioFilterTagsPops) {
   // prevents layout shift in mobile view
-  if (networks.length === 0 && poolTypes.length === 0 && stakingTypes.length === 0) {
+  if (networks.length === 0 && poolTypes.length === 0) {
     return <Box display={{ base: 'flex', md: 'none' }} minHeight="32px" />
   }
 
@@ -190,13 +162,6 @@ export function PortfolioFilterTags({
             key={network}
             label={getChainShortName(network)}
             onClose={() => toggleNetwork(false, network)}
-          />
-        ))}
-        {stakingTypes.map((stakingTypeKey: StakingFilterKeyType) => (
-          <AnimatedTag
-            key={stakingTypeKey}
-            label={STAKING_LABEL_MAP[stakingTypeKey]}
-            onClose={() => toggleStakingType(false, stakingTypeKey)}
           />
         ))}
       </AnimatePresence>
@@ -254,18 +219,12 @@ export function PortfolioFilters({
     setSelectedPoolTypes,
     togglePoolType,
     availablePoolTypes,
-    selectedStakingTypes,
-    toggleStakingType,
-    availableStakingTypes,
   } = usePortfolioFilters()
 
   const effectiveSelectedNetworks = selectedNetworks || hookSelectedNetworks
   const effectiveSelectedPoolTypes = selectedPoolTypes || hookSelectedPoolTypes
 
-  const isDisabled =
-    availableNetworks.length === 0 &&
-    availablePoolTypes.length === 0 &&
-    availableStakingTypes.length === 0
+  const isDisabled = availableNetworks.length === 0 && availablePoolTypes.length === 0
 
   return (
     <VStack w="full">
@@ -336,16 +295,6 @@ export function PortfolioFilters({
                           poolTypes={effectiveSelectedPoolTypes}
                           setPoolTypes={setSelectedPoolTypes}
                           togglePoolType={togglePoolType}
-                        />
-                      </Box>
-                      <Box as={motion.div} variants={staggeredFadeInUp}>
-                        <Heading as="h3" mb="sm" size="sm">
-                          Staking types
-                        </Heading>
-                        <StakingTypeFilters
-                          availableStakingTypes={availableStakingTypes}
-                          stakingTypes={selectedStakingTypes}
-                          toggleStakingType={toggleStakingType}
                         />
                       </Box>
                     </VStack>

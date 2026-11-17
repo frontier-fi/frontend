@@ -3,9 +3,6 @@ packages:
   - "packages/*"
 
 allowBuilds:
-  # Git-hosted Frontier fork — prepare runs tsup to produce dist/
-  "@balancer/sdk": true
-  "@balancer/sdk@https://codeload.github.com/frontier-fi/sdk/tar.gz/cd309ed8873386c00f5e65342bb73641e3503dc8": true
   "@parcel/watcher": true
   "@reown/appkit": true
   bufferutil: true
@@ -17,6 +14,8 @@ allowBuilds:
 
 catalog:
   "@apollo/client": "4.3.4"
+  "@frontier-fi/maths": "0.2.1"
+  "@frontier-fi/sdk": "0.2.0"
 
 packageExtensions:
   # debug declares only optional peer metadata. Declare the peer explicitly so
@@ -35,9 +34,6 @@ peerDependencyRules:
     msw: ">=2.4.9"
 
 overrides:
-  # Frontier fork until published to npm (Sepolia vault/router addresses).
-  "@balancer/sdk": "github:frontier-fi/sdk#cd309ed8873386c00f5e65342bb73641e3503dc8"
-  "@balancer-labs/balancer-maths": "npm:@frontier-fi/maths@0.1.1"
   # Remove debug's optional color peer so every app shares the same
   # Chakra/Emotion/Next instances (see PR #2883). Keep this declarative:
   # Renovate disables pnpmfile hooks when generating lockfiles.
@@ -54,5 +50,4 @@ publicHoistPattern:
 minimumReleaseAge: 10080
 
 minimumReleaseAgeExclude:
-  - "@balancer/sdk"
   - "@frontier-fi/*"

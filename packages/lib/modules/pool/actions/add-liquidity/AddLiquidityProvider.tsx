@@ -2,7 +2,7 @@
 
 import { useTokens } from '@repo/lib/modules/tokens/TokensProvider'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
-import { HumanAmount, isSameAddress } from '@balancer/sdk'
+import { HumanAmount, isSameAddress } from '@frontier-fi/sdk'
 import { PropsWithChildren, createContext, useMemo, useState } from 'react'
 import { Address, Hash } from 'viem'
 import { usePool } from '../../PoolProvider'

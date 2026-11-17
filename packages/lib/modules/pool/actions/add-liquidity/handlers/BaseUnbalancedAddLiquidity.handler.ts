@@ -1,6 +1,6 @@
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
 import { TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
-import { getRpcUrl } from '@repo/lib/modules/web3/transports'
+import { getRpcUrl, withSdkRpcFallback } from '@repo/lib/modules/web3/transports'
 import {
   AddLiquidity,
   AddLiquidityKind,
@@ -8,7 +8,7 @@ import {
   Address,
   PriceImpact,
   PriceImpactAmount,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { Pool } from '../../../pool.types'
 import { LiquidityActionHelpers, areEmptyAmounts, getSender } from '../../LiquidityActionHelpers'
 import { SdkBuildAddLiquidityInput, SdkQueryAddLiquidityOutput } from '../add-liquidity.types'
@@ -29,9 +29,13 @@ export abstract class BaseUnbalancedAddLiquidityHandler implements AddLiquidityH
     userAddress: Address
   ): Promise<SdkQueryAddLiquidityOutput> {
     const addLiquidity = new AddLiquidity()
-    const addLiquidityInput = this.constructSdkInput(humanAmountsIn, userAddress)
 
-    const sdkQueryOutput = await addLiquidity.query(addLiquidityInput, this.helpers.poolState)
+    const sdkQueryOutput = await withSdkRpcFallback(this.helpers.chainId, rpcUrl =>
+      addLiquidity.query(
+        this.constructSdkInput(humanAmountsIn, userAddress, rpcUrl),
+        this.helpers.poolState
+      )
+    )
 
     return { bptOut: sdkQueryOutput.bptOut, to: sdkQueryOutput.to, sdkQueryOutput }
   }
@@ -42,11 +46,13 @@ export abstract class BaseUnbalancedAddLiquidityHandler implements AddLiquidityH
       return 0
     }
 
-    const addLiquidityInput = this.constructSdkInput(humanAmountsIn)
-
-    const priceImpactABA: PriceImpactAmount = await PriceImpact.addLiquidityUnbalanced(
-      addLiquidityInput,
-      this.helpers.poolState
+    const priceImpactABA: PriceImpactAmount = await withSdkRpcFallback(
+      this.helpers.chainId,
+      rpcUrl =>
+        PriceImpact.addLiquidityUnbalanced(
+          this.constructSdkInput(humanAmountsIn, undefined, rpcUrl),
+          this.helpers.poolState
+        )
     )
 
     return priceImpactABA.decimal
@@ -59,13 +65,14 @@ export abstract class BaseUnbalancedAddLiquidityHandler implements AddLiquidityH
    */
   protected constructSdkInput(
     humanAmountsIn: HumanTokenAmountWithSymbol[],
-    userAddress?: Address
+    userAddress?: Address,
+    rpcUrl = getRpcUrl(this.helpers.chainId)
   ): AddLiquidityUnbalancedInput {
     const amountsIn = this.helpers.toSdkInputAmounts(humanAmountsIn)
 
     return {
       chainId: this.helpers.chainId,
-      rpcUrl: getRpcUrl(this.helpers.chainId),
+      rpcUrl,
       amountsIn,
       kind: AddLiquidityKind.Unbalanced,
       sender: getSender(userAddress),

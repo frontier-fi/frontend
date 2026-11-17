@@ -6,6 +6,7 @@ import {
   avalanche,
   base,
   gnosis,
+  hyperEvm,
   mainnet,
   optimism,
   polygon,
@@ -18,9 +19,9 @@ import { getBaseUrl } from '@repo/lib/shared/utils/urls'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { shouldUseAnvilFork } from '@repo/lib/config/app.config'
 import { defaultAnvilForkRpcUrl } from '@repo/lib/test/utils/wagmi/fork.helpers'
+import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
-import { hyperEVM } from '@balancer/sdk'
 
 /* If a request with the default rpc fails, it will fall back to the next one in the list.
   https://viem.sh/docs/clients/transports/fallback#fallback-transport
@@ -28,7 +29,7 @@ import { hyperEVM } from '@balancer/sdk'
 export const rpcFallbacks: Partial<Record<AppChain, string | undefined>> = {
   [GqlChainValues.Mainnet]: 'https://1rpc.io/eth',
   [GqlChainValues.Arbitrum]: 'https://1rpc.io/arb',
-  [GqlChainValues.Base]: 'https://1rpc.io/base',
+  [GqlChainValues.Base]: 'https://mainnet.base.org',
   [GqlChainValues.Avalanche]: 'https://1rpc.io/avax/c',
   [GqlChainValues.Gnosis]: 'https://1rpc.io/gnosis',
   [GqlChainValues.Optimism]: 'https://1rpc.io/op',
@@ -72,7 +73,7 @@ const gqlChainToWagmiChainMap: Partial<Record<AppChain, Chain>> = {
   [GqlChainValues.Optimism]: { iconUrl: '/images/chains/OPTIMISM.svg', ...optimism },
   [GqlChainValues.Polygon]: { iconUrl: '/images/chains/POLYGON.svg', ...polygon },
   [GqlChainValues.Sepolia]: { iconUrl: '/images/chains/SEPOLIA.svg', ...sepolia },
-  [GqlChainValues.Hyperevm]: { iconUrl: '/images/chains/HYPEREVM.svg', ...(hyperEVM as Chain) }, // TODO: fix type when rainbowkit is updated
+  [GqlChainValues.Hyperevm]: { iconUrl: '/images/chains/HYPEREVM.svg', ...hyperEvm },
   [GqlChainValues.Plasma]: { iconUrl: '/images/chains/PLASMA.svg', ...plasma },
   [GqlChainValues.Monad]: { iconUrl: '/images/chains/MONAD.svg', ...monad },
 } as const
@@ -90,6 +91,15 @@ export const chains: readonly [Chain, ...Chain[]] = [
 ]
 
 export const chainsByKey = keyBy(chains, 'id')
+
+export function getChainsForNetworks(networks: readonly GqlChain[]): readonly [Chain, ...Chain[]] {
+  const mapped = networks
+    .map(gqlChain => gqlChainToWagmiChainMap[gqlChain])
+    .filter((chain): chain is Chain => Boolean(chain))
+
+  const primary = mapped[0] ?? customChain!
+  return [primary, ...mapped.filter(chain => chain.id !== primary.id)]
+}
 
 export function getDefaultRpcUrl(chainId: number) {
   return chainsByKey[chainId]!.rpcUrls.default.http[0]!

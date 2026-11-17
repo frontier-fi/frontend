@@ -10,18 +10,18 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app'
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <WagmiConfigProvider>
-      <Web3Provider>
-        <ApolloClientProvider>
-          <ApolloGlobalDataProvider>
-            <UserSettingsProvider>
+    <UserSettingsProvider>
+      <WagmiConfigProvider>
+        <Web3Provider>
+          <ApolloClientProvider>
+            <ApolloGlobalDataProvider>
               <RecentTransactionsProvider>
                 <NuqsAdapter>{children}</NuqsAdapter>
               </RecentTransactionsProvider>
-            </UserSettingsProvider>
-          </ApolloGlobalDataProvider>
-        </ApolloClientProvider>
-      </Web3Provider>
-    </WagmiConfigProvider>
+            </ApolloGlobalDataProvider>
+          </ApolloClientProvider>
+        </Web3Provider>
+      </WagmiConfigProvider>
+    </UserSettingsProvider>
   )
 }

@@ -30,6 +30,9 @@ export function useCurrency() {
   }
 
   function parseCurrency(value: string) {
+    const symbol = hasFxRates ? symbolForCurrency(currency) : '$'
+    if (value.startsWith(symbol)) return value.slice(symbol.length)
+
     return value.replace(/^\$/, '')
   }
 

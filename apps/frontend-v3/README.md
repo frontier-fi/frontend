@@ -19,12 +19,6 @@ Copy the `.env.template` file to `.env.local`:
 cp .env.template .env.local
 ```
 
-Copy the `.env.local` file to `../../packages/lib`:
-
-```bash
-cp .env.local ../../packages/lib
-```
-
 Next, install dependencies:
 
 ```bash
@@ -35,10 +29,21 @@ pnpm install
 Then, run the development server:
 
 ```bash
-pnpm dev:bal
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+To build for production and run the production server (from the repo root):
+
+```bash
+pnpm build
+pnpm start
+```
+
+Root scripts like `pnpm build`, `pnpm start`, and `pnpm dev` do not need `--filter` — Turborepo runs
+the matching task across the workspace. Use `--filter` when you need to target a specific workspace
+package (for example installing a dependency into this app or skipping GraphQL codegen below).
 
 If you don't need to edit GraphQL files you can skip GraphQL code generation which runs much faster
 on older machines:

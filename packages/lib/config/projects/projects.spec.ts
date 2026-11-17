@@ -15,5 +15,6 @@ describe('Project configs', () => {
     expect(ProjectConfigFrontier.options.allowCreateWallet).toBe(true)
     expect(ProjectConfigFrontier.options.isOnSafeAppList).toBe(true)
     expect(ProjectConfigFrontier.supportedNetworks).toContain('SEPOLIA')
+    expect(ProjectConfigFrontier.supportedNetworks).toContain('BASE')
   })
 })

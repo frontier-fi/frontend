@@ -1,18 +1,42 @@
+// @vitest-environment node
 import { NextRequest } from 'next/server'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   getClientErrorContext,
   getCriticalFlow,
   getErrorFingerprint,
   handleClientErrorLogRequest,
   reportClientError,
+  resetErrorLoggerStateForTests,
   safeJsonStringify,
   setClientErrorContext,
 } from './error-logger'
+import { MAX_SERVER_LOG_BYTES } from './server-log'
+
+const ALLOWED_ORIGIN = 'https://app.frontier.fi'
+
+function createValidLogRequest(body: unknown, headers: Record<string, string> = {}): NextRequest {
+  return new NextRequest('https://app.frontier.fi/api/log', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      origin: ALLOWED_ORIGIN,
+      ...headers,
+    },
+    body: typeof body === 'string' ? body : JSON.stringify(body),
+  })
+}
 
 describe('error-logger', () => {
+  beforeEach(() => {
+    vi.stubGlobal('window', { location: { href: 'https://app.frontier.fi/pools' } })
+  })
+
   afterEach(() => {
+    resetErrorLoggerStateForTests()
+    vi.useRealTimers()
     vi.restoreAllMocks()
+    vi.unstubAllGlobals()
     vi.unstubAllEnvs()
     delete process.env.ALLOWED_ORIGINS
 
@@ -161,28 +185,53 @@ describe('error-logger', () => {
       expect(body.severity).toBe('error')
       expect(body.flow).toBe('swap')
     })
+
+    it('deduplicates identical category|errorName|message|url payloads within 30s and caps keepalive body <= 12 KB', () => {
+      vi.useFakeTimers()
+      vi.stubEnv('NODE_ENV', 'production')
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null))
+
+      const payload = {
+        category: 'react-query' as const,
+        errorName: 'EstimateGasExecutionError',
+        message: 'Execution reverted',
+        url: 'https://app.frontier.fi/swap/sepolia',
+        variables: { huge: 'a'.repeat(16 * 1024) },
+      }
+
+      reportClientError(payload)
+      reportClientError(payload)
+
+      expect(fetchSpy).toHaveBeenCalledOnce()
+      const sentBody = fetchSpy.mock.calls[0]?.[1]?.body as string
+      expect(new TextEncoder().encode(sentBody).byteLength).toBeLessThanOrEqual(12 * 1024)
+
+      vi.advanceTimersByTime(30_001)
+      reportClientError(payload)
+      expect(fetchSpy).toHaveBeenCalledTimes(2)
+    })
   })
 
   describe('handleClientErrorLogRequest', () => {
-    it('logs structured JSON to console.error and returns 204', async () => {
+    it('logs compact single-line JSON <= 1,600 bytes to console.error and returns 204', async () => {
+      process.env.ALLOWED_ORIGINS = ALLOWED_ORIGIN
       const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
-      const req = new NextRequest('http://localhost:3000/api/log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          category: 'react-query',
-          errorName: 'ContractFunctionExecutionError',
-          message: 'Execution reverted',
-          queryKey: ['estimateGas', { chainId: 1 }],
-        }),
+      const req = createValidLogRequest({
+        category: 'react-query',
+        errorName: 'ContractFunctionExecutionError',
+        message: 'Execution reverted',
+        queryKey: ['estimateGas', { chainId: 1 }],
       })
 
       const res = await handleClientErrorLogRequest(req)
       expect(res.status).toBe(204)
       expect(errorSpy).toHaveBeenCalledOnce()
 
-      const logged = JSON.parse(errorSpy.mock.calls[0]?.[0] as string)
+      const rawLine = errorSpy.mock.calls[0]?.[0] as string
+      expect(new TextEncoder().encode(rawLine).byteLength).toBeLessThanOrEqual(MAX_SERVER_LOG_BYTES)
+
+      const logged = JSON.parse(rawLine)
 
       expect(logged).toMatchObject({
         level: 'error',
@@ -194,44 +243,142 @@ describe('error-logger', () => {
       })
     })
 
-    it('rejects disallowed origins when ALLOWED_ORIGINS is set', async () => {
-      process.env.ALLOWED_ORIGINS = 'https://app.frontier.fi'
+    it('enforces Origin unconditionally (rejects missing Origin, mismatched Origin, or unset ALLOWED_ORIGINS with 403)', async () => {
       const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      const unsetEnvReq = createValidLogRequest({ category: 'error-boundary', message: 'boom' })
+      expect((await handleClientErrorLogRequest(unsetEnvReq)).status).toBe(403)
+
+      process.env.ALLOWED_ORIGINS = ALLOWED_ORIGIN
+
+      const missingOriginReq = new NextRequest('https://app.frontier.fi/api/log', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ category: 'error-boundary', message: 'boom' }),
+      })
+
+      expect((await handleClientErrorLogRequest(missingOriginReq)).status).toBe(403)
+
+      const mismatchedOriginReq = createValidLogRequest(
+        { category: 'error-boundary', message: 'boom' },
+        { origin: 'https://evil.example.com' }
+      )
+
+      expect((await handleClientErrorLogRequest(mismatchedOriginReq)).status).toBe(403)
+      expect(errorSpy).not.toHaveBeenCalled()
+    })
+
+    it('drops unknown top-level keys, __proto__, Syslog keys, and object-typed flow/severity/category', async () => {
+      process.env.ALLOWED_ORIGINS = ALLOWED_ORIGIN
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      const rawJson =
+        '{"category":{"bad":1},"severity":{"bad":1},"flow":["swap"],"message":"Real error","__proto__":{"polluted":true},"syslog":"spoof","arbitraryTopLevel":"dropMe"}'
+
+      const res = await handleClientErrorLogRequest(createValidLogRequest(rawJson))
+      expect(res.status).toBe(204)
+
+      const logged = JSON.parse(errorSpy.mock.calls[0]?.[0] as string) as Record<string, unknown>
+      expect(logged.message).toBe('Real error')
+      expect(logged.category).toBeUndefined()
+      expect(logged.severity).toBeUndefined()
+      expect(logged.flow).toBeUndefined()
+      expect(logged.syslog).toBeUndefined()
+      expect(logged.arbitraryTopLevel).toBeUndefined()
+      expect(Object.prototype.hasOwnProperty.call(logged, 'polluted')).toBe(false)
+    })
+
+    it('stream-caps bodies exceeding 16 KB even without Content-Length', async () => {
+      process.env.ALLOWED_ORIGINS = ALLOWED_ORIGIN
+
+      const chunk = new TextEncoder().encode('x'.repeat(9 * 1024))
+
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(chunk)
+          controller.enqueue(chunk)
+          controller.close()
+        },
+      })
 
       const req = new NextRequest('https://app.frontier.fi/api/log', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          referer: 'https://evil.example.com',
+          origin: ALLOWED_ORIGIN,
         },
-        body: JSON.stringify({ category: 'error-boundary', message: 'boom' }),
-      })
-
-      const res = await handleClientErrorLogRequest(req)
-      expect(res.status).toBe(403)
-      expect(errorSpy).not.toHaveBeenCalled()
-    })
-
-    it('rejects payloads exceeding 16KB', async () => {
-      const req = new NextRequest('http://localhost:3000/api/log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: 'x'.repeat(17 * 1024) }),
+        body: stream,
+        duplex: 'half',
       })
 
       const res = await handleClientErrorLogRequest(req)
       expect(res.status).toBe(400)
     })
 
-    it('returns 400 on malformed JSON', async () => {
-      const req = new NextRequest('http://localhost:3000/api/log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: '{not-valid-json',
-      })
+    it('returns 400 on malformed JSON or empty unallowlisted objects', async () => {
+      process.env.ALLOWED_ORIGINS = ALLOWED_ORIGIN
 
-      const res = await handleClientErrorLogRequest(req)
-      expect(res.status).toBe(400)
+      expect(
+        (await handleClientErrorLogRequest(createValidLogRequest('{not-valid-json'))).status
+      ).toBe(400)
+
+      expect(
+        (await handleClientErrorLogRequest(createValidLogRequest({ foo: 'bar' }))).status
+      ).toBe(400)
+    })
+
+    it('rate-limits per IP (preferring do-connecting-ip) and enforces the 120/min global cap', async () => {
+      process.env.ALLOWED_ORIGINS = ALLOWED_ORIGIN
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      for (let i = 0; i < 20; i += 1) {
+        const res = await handleClientErrorLogRequest(
+          createValidLogRequest(
+            { category: 'window-error', message: `err-${i}` },
+            {
+              'do-connecting-ip': '203.0.113.10',
+              'x-forwarded-for': `198.51.100.${i}`,
+            }
+          )
+        )
+
+        expect(res.status).toBe(204)
+      }
+
+      const ipLimited = await handleClientErrorLogRequest(
+        createValidLogRequest(
+          { category: 'window-error', message: 'err-21' },
+          {
+            'do-connecting-ip': '203.0.113.10',
+            'x-forwarded-for': '198.51.100.99',
+          }
+        )
+      )
+
+      expect(ipLimited.status).toBe(429)
+      expect(ipLimited.headers.get('Retry-After')).toBeTruthy()
+
+      for (let i = 0; i < 100; i += 1) {
+        const res = await handleClientErrorLogRequest(
+          createValidLogRequest(
+            { category: 'window-error', message: `global-${i}` },
+            { 'do-connecting-ip': `192.0.2.${i}` }
+          )
+        )
+
+        expect(res.status).toBe(204)
+      }
+
+      const globalLimited = await handleClientErrorLogRequest(
+        createValidLogRequest(
+          { category: 'window-error', message: 'global-overflow' },
+          { 'do-connecting-ip': '198.18.0.1' }
+        )
+      )
+
+      expect(globalLimited.status).toBe(429)
     })
   })
 })

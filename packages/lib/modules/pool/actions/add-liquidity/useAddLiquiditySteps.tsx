@@ -15,7 +15,6 @@ import { TransactionStep } from '@repo/lib/modules/transactions/transaction-step
 import { usePermit2ApprovalSteps } from '@repo/lib/modules/tokens/approvals/permit2/usePermit2ApprovalSteps'
 import { useUserSettings } from '@repo/lib/modules/user/settings/UserSettingsProvider'
 import { getNetworkConfig } from '@repo/lib/config/app.config'
-import { UnbalancedAddLiquidityViaSwapV3Handler } from './handlers/UnbalancedAddLiquidityViaSwapV3.handler'
 import { hasSomePendingNestedTxInBatch } from '@repo/lib/modules/transactions/transaction-steps/tx-batch.helpers'
 
 export type AddLiquidityStepsParams = AddLiquidityStepParams & {
@@ -78,13 +77,7 @@ export function useAddLiquiditySteps({
     ? networkConfig.contracts.balancer.compositeLiquidityRouterBoosted
     : networkConfig.contracts.balancer.router
 
-  const isUnbalancedViaSwapHandler = handler instanceof UnbalancedAddLiquidityViaSwapV3Handler
-  const unbalancedViaSwapRouter = networkConfig.contracts.balancer.unbalancedAddViaSwapRouter
-
-  const router =
-    isUnbalancedViaSwapHandler && unbalancedViaSwapRouter
-      ? unbalancedViaSwapRouter
-      : simulationQuery.data?.to || defaultRouter
+  const router = simulationQuery.data?.to || defaultRouter
 
   const { steps: permit2ApprovalSteps, isLoading: isLoadingPermit2ApprovalSteps } =
     usePermit2ApprovalSteps({

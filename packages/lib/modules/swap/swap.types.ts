@@ -3,14 +3,7 @@ import {
   GqlSorSwapType,
 } from '@repo/lib/shared/services/api/generated/graphql'
 import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
-import {
-  AuraBalSwapQueryOutput,
-  ExactInQueryOutput,
-  ExactOutQueryOutput,
-  Path,
-  Permit2,
-  Swap,
-} from '@balancer/sdk'
+import { ExactInQueryOutput, ExactOutQueryOutput, Path, Permit2, Swap } from '@frontier-fi/sdk'
 import { Address, Hex } from 'viem'
 
 export type SwapTokenInput = {
@@ -57,10 +50,6 @@ export interface SimulateSinglePoolSwapResponse extends SimulateSwapResponse {
   queryOutput: ExactInQueryOutput | ExactOutQueryOutput
 }
 
-export interface AuraBalSimulateSwapResponse extends SimulateSwapResponse {
-  queryOutput: AuraBalSwapQueryOutput
-}
-
 export interface BuildSwapInputs extends SwapState {
   account: Address
   slippagePercent: string
@@ -73,10 +62,6 @@ export interface BuildSwapInputs extends SwapState {
 
 export interface SdkBuildSwapInputs extends BuildSwapInputs {
   simulateResponse: SdkSimulateSwapResponse
-}
-
-export interface AuraBalBuildSwapInputs extends BuildSwapInputs {
-  simulateResponse: AuraBalSimulateSwapResponse
 }
 
 export enum SupportedWrapHandler {

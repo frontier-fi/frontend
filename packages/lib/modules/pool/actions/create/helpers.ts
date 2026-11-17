@@ -1,4 +1,4 @@
-import { PoolType } from '@balancer/sdk'
+import { PoolType } from '@frontier-fi/sdk'
 import { isDev } from '@repo/lib/config/app.config'
 import { bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import type { GqlPoolType } from '@repo/lib/shared/services/api/generated/graphql'
@@ -29,9 +29,7 @@ export function getGqlPoolType(poolType: PoolType): GqlPoolType {
 export function getSwapFeePercentageOptions(
   poolType: PoolType
 ): [SwapFeePercentageOption, SwapFeePercentageOption] {
-  const isStablePool = poolType === PoolType.Stable || poolType === PoolType.StableSurge
-
-  if (isStablePool) {
+  if (poolType === PoolType.Stable) {
     return [
       { value: '0.01', tip: 'Best for super stable pairs' },
       { value: '0.05', tip: 'Best for stable-ish pairs' },
@@ -55,7 +53,7 @@ export function getSwapFeePercentageOptions(
 }
 
 export function getMinSwapFeePercentage(poolType: PoolType): number {
-  if (poolType === PoolType.Stable || poolType === PoolType.StableSurge) {
+  if (poolType === PoolType.Stable) {
     return 0.0001
   } else {
     return 0.001
@@ -83,11 +81,11 @@ export const formatNumber = (value: string) => {
 }
 
 export function isStablePool(poolType: PoolType): boolean {
-  return poolType === PoolType.Stable || poolType === PoolType.StableSurge
+  return poolType === PoolType.Stable
 }
 
-export function isStableSurgePool(poolType: PoolType): boolean {
-  return poolType === PoolType.StableSurge
+export function isStableSurgePool(_poolType: PoolType): boolean {
+  return false
 }
 
 export function isWeightedPool(poolType: PoolType): boolean {
@@ -101,8 +99,8 @@ export function isCustomWeightedPool(
   return poolType === PoolType.Weighted && weightedPoolStructure === WeightedPoolStructure.Custom
 }
 
-export function isAutoRangePool(poolType: PoolType): boolean {
-  return poolType === PoolType.ReClamm
+export function isAutoRangePool(_poolType: PoolType): boolean {
+  return false
 }
 
 export function isGyroEllipticPool(poolType: PoolType): boolean {
@@ -113,8 +111,8 @@ export function isEclpCreationDisabled(poolType: PoolType, isDevEnv = isDev): bo
   return !isDevEnv && isGyroEllipticPool(poolType)
 }
 
-export function isCowPool(poolType: PoolType | undefined): boolean {
-  return poolType === PoolType.CowAmm
+export function isCowPool(_poolType: PoolType | undefined): boolean {
+  return false
 }
 
 export function isCowProtocol(protocol: string): boolean {

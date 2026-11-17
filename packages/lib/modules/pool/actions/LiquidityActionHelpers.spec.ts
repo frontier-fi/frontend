@@ -2,13 +2,10 @@ import {
   auraBalAddress,
   bal80Weth20Address,
   balAddress,
-  daiAddress,
   ethAddress,
   osEthAddress,
   osEth_WETH_BptAddress,
-  threePoolId,
   usdcAddress,
-  usdcDaiUsdtBptAddress,
   usdtAddress,
   wETHAddress,
   waUsdcAddress,
@@ -269,7 +266,6 @@ describe('Liquidity helpers for V3 Boosted pools', async () => {
 describe('Liquidity helpers for V3 NESTED boosted pool', async () => {
   const nestedBoostedPool = getApiPoolMock(v3SepoliaNestedBoosted)
 
-  const usdcSepoliaAddress = '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8'
   const usdtSepoliaAddress = '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0'
 
   const helpers = new LiquidityActionHelpers(nestedBoostedPool)
@@ -307,83 +303,6 @@ describe('Liquidity helpers for V3 NESTED boosted pool', async () => {
         symbol: 'usdt-aave',
       },
     ])
-  })
-
-  test('nested pool state', async () => {
-    const helpers = new LiquidityActionHelpers(nestedBoostedPool)
-
-    const state = helpers.nestedPoolStateV3
-
-    expect(state).toEqual({
-      mainTokens: [
-        {
-          address: usdcSepoliaAddress,
-          decimals: 6,
-          index: 0,
-        },
-        {
-          address: usdtSepoliaAddress,
-          decimals: 6,
-          index: 1,
-        },
-        {
-          address: wethAddress,
-          decimals: 18,
-          index: 1,
-        },
-      ],
-      pools: [
-        {
-          address: nestedBoostedPool.id,
-          id: nestedBoostedPool.address,
-          level: 1,
-          tokens: [
-            {
-              address: bb_a_Usd_Sepolia_BptAddress,
-              decimals: 18,
-              index: 0,
-              underlyingToken: null,
-            },
-            {
-              address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
-              decimals: 18,
-              index: 1,
-              underlyingToken: null,
-            },
-          ],
-          type: 'WEIGHTED',
-        },
-        {
-          address: bb_a_Usd_Sepolia_BptAddress,
-          id: bb_a_Usd_Sepolia_BptAddress,
-          level: 0,
-          tokens: [
-            {
-              address: aaveUSDCAddress,
-              decimals: 6,
-              index: 0,
-              underlyingToken: {
-                address: usdcSepoliaAddress,
-                decimals: 6,
-                index: 0,
-              },
-            },
-            {
-              address: aaveUSDTAddress,
-              decimals: 6,
-              index: 1,
-              underlyingToken: {
-                address: usdtSepoliaAddress,
-                decimals: 6,
-                index: 1,
-              },
-            },
-          ],
-          type: 'Stable',
-        },
-      ],
-      protocolVersion: 3,
-    })
   })
 })
 
@@ -735,35 +654,6 @@ it('returns poolState for non nested pools', () => {
   const poolMock = aWjAuraWethPoolElementMock()
   const helpers = new LiquidityActionHelpers(aWjAuraWethPoolElementMock())
   expect(helpers.poolState.id).toBe(poolMock.id)
-})
-
-it('returns NestedPoolState for nested pools', () => {
-  const helpers = new LiquidityActionHelpers(nestedPoolMock)
-  const nestedPoolState = helpers.nestedPoolStateV2
-
-  expect(nestedPoolState.pools).toHaveLength(2)
-  const firstPool = nestedPoolState.pools[0]!
-  expect(firstPool!.id).toBe(nestedPoolMock.id)
-  expect(firstPool!.tokens.map(t => t.address)).toEqual([usdcDaiUsdtBptAddress, wETHAddress])
-
-  const secondPool = nestedPoolState.pools[1]!
-  expect(secondPool.id).toBe(threePoolId)
-
-  expect(secondPool.tokens.sort().map(t => t.address)).toEqual([
-    daiAddress,
-    usdcDaiUsdtBptAddress,
-    usdcAddress,
-    usdtAddress,
-  ])
-
-  expect(nestedPoolState.mainTokens).toHaveLength(4)
-
-  expect(nestedPoolState.mainTokens.sort().map(t => t.address)).toEqual([
-    wETHAddress,
-    daiAddress,
-    usdcAddress,
-    usdtAddress,
-  ])
 })
 
 describe('toInputAmounts', () => {

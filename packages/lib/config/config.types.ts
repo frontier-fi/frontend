@@ -53,12 +53,10 @@ export interface ContractsConfig {
     router?: Address
     batchRouter?: Address
     compositeLiquidityRouterBoosted?: Address
-    compositeLiquidityRouterNested?: Address
     relayerV6: Address
     minter: Address
     WeightedPool2TokensFactory?: Address
     bCoWFactory?: Address
-    unbalancedAddViaSwapRouter?: Address
   }
   merkl?: {
     claims: Address
@@ -74,6 +72,7 @@ export interface ContractsConfig {
 
 export interface PoolsConfig {
   issues: Partial<Record<PoolIssue, string[]>>
+  supportsNestedActions?: boolean
   disallowNestedActions?: string[] // pool ids
 }
 
@@ -90,6 +89,7 @@ export interface NetworkConfig {
   shortName: string
   /** App chain id (network configs). Superset of Frontier API `GqlChain`. */
   chain: AppChain
+  isTestnet?: boolean
   iconPath: string
   rpcUrl?: string
   blockExplorer: BlockExplorerConfig
@@ -185,6 +185,8 @@ export interface ProjectConfig {
   projectUrl: string
   appUrl: string
   projectName: string
+  /** Subtitle displayed beneath the Pools page heading. */
+  poolsTagline?: string
   /** Registered legal entity users contract with (Terms of Use, Privacy Policy). */
   legalEntityName: string
   projectLogo: string

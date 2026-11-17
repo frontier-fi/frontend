@@ -2,7 +2,7 @@
 
 // Hooks to be used on debug pages or for general debugging
 
-import { permit2Abi } from '@balancer/sdk'
+import { permit2Abi } from '@frontier-fi/sdk'
 import { getGqlChain } from '@repo/lib/config/app.config'
 import { permit2Address } from '@repo/lib/modules/tokens/approvals/permit2/permit2.helpers'
 import { Address } from 'viem'

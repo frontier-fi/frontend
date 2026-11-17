@@ -1,6 +1,18 @@
+import {
+  arbitrum,
+  avalanche,
+  base,
+  gnosis,
+  hyperEvm,
+  mainnet,
+  monad,
+  optimism,
+  plasma,
+  polygon,
+  sepolia,
+} from 'viem/chains'
 import type { AppChain } from '../services/api/graphql-enums'
 import { GqlChainValues } from '../services/api/graphql-enums'
-import { ChainId } from '@balancer/sdk'
 
 const chainToDrpcName: Partial<Record<AppChain, string | undefined>> = {
   [GqlChainValues.Mainnet]: 'ethereum',
@@ -17,17 +29,36 @@ const chainToDrpcName: Partial<Record<AppChain, string | undefined>> = {
 }
 
 const chainIdToDrpcName: Partial<Record<number, string | undefined>> = {
-  [ChainId.MAINNET]: 'ethereum',
-  [ChainId.ARBITRUM_ONE]: 'arbitrum',
-  [ChainId.OPTIMISM]: 'optimism',
-  [ChainId.BASE]: 'base',
-  [ChainId.POLYGON]: 'polygon',
-  [ChainId.AVALANCHE]: 'avalanche',
-  [ChainId.SEPOLIA]: 'sepolia',
-  [ChainId.GNOSIS_CHAIN]: 'gnosis',
-  [ChainId.HYPEREVM]: 'hyperliquid',
-  [ChainId.PLASMA]: 'plasma',
-  [ChainId.MONAD]: 'monad',
+  [mainnet.id]: 'ethereum',
+  [arbitrum.id]: 'arbitrum',
+  [optimism.id]: 'optimism',
+  [base.id]: 'base',
+  [polygon.id]: 'polygon',
+  [avalanche.id]: 'avalanche',
+  [sepolia.id]: 'sepolia',
+  [gnosis.id]: 'gnosis',
+  [hyperEvm.id]: 'hyperliquid',
+  [plasma.id]: 'plasma',
+  [monad.id]: 'monad',
+}
+
+const chainIdByChain: Partial<Record<AppChain, number>> = {
+  [GqlChainValues.Mainnet]: mainnet.id,
+  [GqlChainValues.Arbitrum]: arbitrum.id,
+  [GqlChainValues.Optimism]: optimism.id,
+  [GqlChainValues.Base]: base.id,
+  [GqlChainValues.Polygon]: polygon.id,
+  [GqlChainValues.Avalanche]: avalanche.id,
+  [GqlChainValues.Sepolia]: sepolia.id,
+  [GqlChainValues.Gnosis]: gnosis.id,
+  [GqlChainValues.Hyperevm]: hyperEvm.id,
+  [GqlChainValues.Plasma]: plasma.id,
+  [GqlChainValues.Monad]: monad.id,
+}
+
+export function chainIdHexForChain(chain: AppChain): string | undefined {
+  const id = chainIdByChain[chain]
+  return id !== undefined ? `0x${id.toString(16)}` : undefined
 }
 
 export function drpcUrl(chain: AppChain, privateKey: string) {

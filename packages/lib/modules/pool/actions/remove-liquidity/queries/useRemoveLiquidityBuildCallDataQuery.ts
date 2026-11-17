@@ -5,7 +5,7 @@ import { usePermitSignature } from '@repo/lib/modules/tokens/approvals/permit2/P
 import { useUserSettings } from '@repo/lib/modules/user/settings/UserSettingsProvider'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { defaultDebounceMs, onlyExplicitRefetch } from '@repo/lib/shared/utils/queries'
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import { useQuery } from '@tanstack/react-query'
 import { useDebounce } from 'use-debounce'
 import { Address } from 'viem/accounts'

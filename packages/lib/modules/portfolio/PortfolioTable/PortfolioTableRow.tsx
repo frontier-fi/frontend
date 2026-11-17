@@ -6,14 +6,7 @@ import { NetworkIcon } from '@repo/lib/shared/components/icons/NetworkIcon'
 import { useCurrency } from '@repo/lib/shared/hooks/useCurrency'
 import { getPoolPath } from '../../pool/pool.utils'
 import { TooltipWithTouch } from '@repo/lib/shared/components/tooltips/TooltipWithTouch'
-import {
-  ExpandedPoolInfo,
-  ExpandedPoolType,
-  StakingFilterKey,
-  StakingFilterKeyType,
-  STAKING_LABEL_MAP,
-} from './useExpandedPools'
-import { getCanStake } from '../../pool/actions/stake.helpers'
+import { ExpandedPoolInfo } from './useExpandedPools'
 import FadeInOnView from '@repo/lib/shared/components/containers/FadeInOnView'
 import { PoolListTableDetailsCell } from '@repo/lib/modules/pool/PoolList/PoolListTable/PoolListTableDetailsCell'
 import { usePoolMetadata } from '../../pool/metadata/usePoolMetadata'
@@ -23,8 +16,6 @@ import { AlertTriangle } from 'lucide-react'
 import { usePoolMigrations } from '../../pool/migrations/PoolMigrationsProvider'
 import { getChainId } from '@repo/lib/config/app.config'
 import { isChainDeprecated } from '../../chains/chain.utils'
-import { ProtocolIcon } from '@repo/lib/shared/components/icons/ProtocolIcon'
-import { Protocol } from '../../protocols/useProtocols'
 
 interface Props extends GridProps {
   pool: ExpandedPoolInfo
@@ -32,23 +23,6 @@ interface Props extends GridProps {
 }
 
 const MemoizedMainAprTooltip = memo(MainAprTooltip)
-
-// Helper to get the filter key from the pool type
-const getStakingFilterKey = (poolType: ExpandedPoolType): StakingFilterKeyType => {
-  switch (poolType) {
-    case ExpandedPoolType.StakedBal:
-      return StakingFilterKey.Staked
-    case ExpandedPoolType.Locked:
-      return StakingFilterKey.Locked
-    case ExpandedPoolType.Unlocked:
-      return StakingFilterKey.Unlocked
-    case ExpandedPoolType.Unstaked:
-      return StakingFilterKey.Unstaked
-    case ExpandedPoolType.Default:
-    default:
-      return StakingFilterKey.Default
-  }
-}
 
 export const PortfolioTableRow = memo(function PortfolioTableRow({
   pool,
@@ -58,9 +32,6 @@ export const PortfolioTableRow = memo(function PortfolioTableRow({
   const { toCurrency } = useCurrency()
   const { name } = usePoolMetadata(pool)
   const { needsMigration } = usePoolMigrations()
-
-  const filterKey = getStakingFilterKey(pool.poolType)
-  const stakingText = STAKING_LABEL_MAP[filterKey]
 
   return (
     <FadeInOnView>
@@ -95,12 +66,6 @@ export const PortfolioTableRow = memo(function PortfolioTableRow({
             <GridItem>
               <PoolListTableDetailsCell pool={pool} />
             </GridItem>
-            <GridItem display="flex" justifyContent="left" px="sm">
-              <HStack>
-                <Text fontWeight="medium">{stakingText} </Text>
-                <StakingIcons pool={pool} showIcon={false} />
-              </HStack>
-            </GridItem>
             <GridItem display="flex" justifyContent="flex-end" px="sm">
               <HStack>
                 <Text fontWeight="medium">
@@ -130,23 +95,3 @@ export const PortfolioTableRow = memo(function PortfolioTableRow({
     </FadeInOnView>
   )
 })
-
-function StakingIcons({ pool, showIcon }: { pool: ExpandedPoolInfo; showIcon: boolean }) {
-  const canStake = getCanStake(pool)
-  const shouldHideIcon = pool.poolType === ExpandedPoolType.Unstaked || !canStake
-
-  if (shouldHideIcon || !showIcon) {
-    return null
-  }
-
-  const showBalIcon =
-    pool.poolType === ExpandedPoolType.StakedBal || pool.poolType === ExpandedPoolType.Locked
-
-  return (
-    showBalIcon && (
-      <TooltipWithTouch label="Frontier Finance">
-        <ProtocolIcon protocol={Protocol.Balancer} />
-      </TooltipWithTouch>
-    )
-  )
-}

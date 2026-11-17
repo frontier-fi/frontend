@@ -6,7 +6,6 @@ import { RawAmount } from '@repo/lib/modules/tokens/approvals/approval-rules'
 import { Address } from 'viem'
 import { useTokenApprovalSteps } from '@repo/lib/modules/tokens/approvals/useTokenApprovalSteps'
 import { SdkQueryRemoveLiquidityOutput } from './remove-liquidity.types'
-import { NestedProportionalQueryRemoveLiquidityOutput } from './handlers/NestedProportionalRemoveLiquidity.handler'
 import { useUserSettings } from '@repo/lib/modules/user/settings/UserSettingsProvider'
 
 /*
@@ -46,9 +45,7 @@ function getSimulationQueryData(simulationQuery: RemoveLiquiditySimulationQueryR
   // Return default values if simulation query is not loaded
   if (!simulationQuery.data) return { rawAmount: 0n, spenderAddress: '' as Address }
 
-  // TODO: Create a common interface for  all possible types (like NestedProportionalQueryRemoveLiquidityOutput)
-  const simulationData = simulationQuery.data as
-    SdkQueryRemoveLiquidityOutput | NestedProportionalQueryRemoveLiquidityOutput
+  const simulationData = simulationQuery.data as SdkQueryRemoveLiquidityOutput
 
   const rawAmount = getRawAmount(simulationData)
 
@@ -56,15 +53,9 @@ function getSimulationQueryData(simulationQuery: RemoveLiquiditySimulationQueryR
   return { rawAmount, spenderAddress }
 }
 
-function getRawAmount(
-  simulationData: SdkQueryRemoveLiquidityOutput | NestedProportionalQueryRemoveLiquidityOutput
-) {
+function getRawAmount(simulationData: SdkQueryRemoveLiquidityOutput) {
   if (isSdkQueryRemoveLiquidityOutput(simulationData)) {
     return simulationData.sdkQueryOutput.bptIn.amount
-  }
-
-  if (isNestedProportionalQueryRemoveLiquidityOutput(simulationData)) {
-    return simulationData.sdkQueryOutput.bptAmountIn.amount
   }
 
   throw new Error(`Invalid simulation data: ${simulationData}`)
@@ -72,10 +63,4 @@ function getRawAmount(
 
 function isSdkQueryRemoveLiquidityOutput(data: any): data is SdkQueryRemoveLiquidityOutput {
   return data && data.sdkQueryOutput.bptIn !== undefined
-}
-
-function isNestedProportionalQueryRemoveLiquidityOutput(
-  data: any
-): data is NestedProportionalQueryRemoveLiquidityOutput {
-  return data && data.sdkQueryOutput.bptAmountIn !== undefined
 }

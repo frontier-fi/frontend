@@ -1,5 +1,5 @@
 import { Address } from 'viem'
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import { RemoveLiquidityHandler } from '../handlers/RemoveLiquidity.handler'
 
 const removeLiquidity = 'remove-liquidity'

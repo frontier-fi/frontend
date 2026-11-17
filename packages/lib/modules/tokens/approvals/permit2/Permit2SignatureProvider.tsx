@@ -2,7 +2,7 @@
 
 import { SignatureState } from '@repo/lib/modules/web3/signatures/signature.helpers'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
-import { Permit2 } from '@balancer/sdk'
+import { Permit2 } from '@frontier-fi/sdk'
 import { PropsWithChildren, createContext, useState } from 'react'
 
 export type UsePermit2SignatureResponse = ReturnType<typeof usePermit2SignatureLogic>

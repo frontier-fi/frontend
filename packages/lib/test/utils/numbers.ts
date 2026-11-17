@@ -1,4 +1,4 @@
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import { parseUnits } from 'viem'
 
 export const SECONDS_IN_DAY = 86400

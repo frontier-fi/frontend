@@ -8,7 +8,7 @@ import { useTokenBalances } from '@repo/lib/modules/tokens/TokenBalancesProvider
 import { CompactTokenSelectModal } from '@repo/lib/modules/tokens/TokenSelectModal/TokenSelectList/CompactTokenSelectModal'
 import { TokenInput } from '@repo/lib/modules/tokens/TokenInput/TokenInput'
 import { ApiToken } from '@repo/lib/modules/tokens/token.types'
-import { Address, HumanAmount } from '@balancer/sdk'
+import { Address, HumanAmount } from '@frontier-fi/sdk'
 import { bn } from '@repo/lib/shared/utils/numbers'
 import { isSameAddress } from '@repo/lib/shared/utils/addresses'
 import BigNumber from 'bignumber.js'

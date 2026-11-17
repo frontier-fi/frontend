@@ -1,4 +1,4 @@
-import { Path, Slippage, Swap, SwapKind, TokenAmount } from '@balancer/sdk'
+import { Path, Slippage, Swap, SwapKind, TokenAmount } from '@frontier-fi/sdk'
 import { getChainId } from '@repo/lib/config/app.config'
 import type { GqlSorSwapType } from '@repo/lib/shared/services/api/generated/graphql'
 import { GqlSorSwapTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
@@ -6,7 +6,7 @@ import { TransactionConfig } from '../../web3/contracts/contract.types'
 import { SdkBuildSwapInputs, SdkSimulateSwapResponse, SimulateSwapInputs } from '../swap.types'
 import { SwapHandler } from './Swap.handler'
 import { formatUnits } from 'viem'
-import { getRpcUrl } from '../../web3/transports'
+import { withSdkRpcFallback } from '../../web3/transports'
 import { bn } from '@repo/lib/shared/utils/numbers'
 import { getDefaultDeadlineSeconds } from '@repo/lib/shared/utils/time'
 import { ProtocolVersion } from '../../pool/pool.types'
@@ -71,15 +71,15 @@ export abstract class BaseDefaultSwapHandler implements SwapHandler {
     const { chain, swapType, swapAmount } = swapInputs
 
     // Get accurate return amount with onchain call
-    const rpcUrl = getRpcUrl(getChainId(chain))
+    const chainId = getChainId(chain)
 
     const swap = new Swap({
-      chainId: getChainId(chain),
+      chainId,
       paths,
       swapKind: this.swapTypeToKind(swapType),
     })
 
-    const queryOutput = await swap.query(rpcUrl)
+    const queryOutput = await withSdkRpcFallback(chainId, rpcUrl => swap.query(rpcUrl))
     let onchainReturnAmount: TokenAmount
 
     if (queryOutput.swapKind === SwapKind.GivenIn) {

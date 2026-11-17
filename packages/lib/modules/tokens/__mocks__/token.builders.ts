@@ -19,7 +19,7 @@ import { TokenAllowances } from '../../web3/useTokenAllowances'
 import { TokenAmount, TokenBase } from '../token.types'
 import { MswTokenList } from './token.test.types'
 import { emptyAddress } from '../../web3/contracts/wagmi-helpers'
-import { MinimalToken } from '@balancer/sdk'
+import { MinimalToken } from '@frontier-fi/sdk'
 import { Address } from 'viem'
 import { MAX_BIGINT } from '@repo/lib/shared/utils/numbers'
 

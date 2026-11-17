@@ -36,6 +36,14 @@ vi.mock('@repo/lib/modules/web3/transports', async importOriginal => {
       const { rpcUrl } = getTestRpcSetup(chainId as ChainIdWithFork)
       return rpcUrl
     },
+    getSdkRpcUrls: (chainId: number) => {
+      const { rpcUrl } = getTestRpcSetup(chainId as ChainIdWithFork)
+      return [rpcUrl]
+    },
+    withSdkRpcFallback: <T>(chainId: number, fn: (rpcUrl: string) => Promise<T>) => {
+      const { rpcUrl } = getTestRpcSetup(chainId as ChainIdWithFork)
+      return fn(rpcUrl)
+    },
   }
 })
 

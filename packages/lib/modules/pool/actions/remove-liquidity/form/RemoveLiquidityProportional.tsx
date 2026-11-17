@@ -12,7 +12,7 @@ import { ApiToken } from '@repo/lib/modules/tokens/token.types'
 import { WrappedOrUnderlyingSelectModal } from '@repo/lib/modules/tokens/WrappedOrUnderlyingSelectModal'
 import { useState } from 'react'
 import { getWrappedAndUnderlyingTokenFn } from '../../../pool-tokens.utils'
-import { isSameAddress } from '@balancer/sdk'
+import { isSameAddress } from '@frontier-fi/sdk'
 
 type Props = { tokens: ApiToken[]; pool: Pool }
 

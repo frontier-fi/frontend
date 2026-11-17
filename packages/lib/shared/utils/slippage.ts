@@ -1,4 +1,4 @@
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import { bn, fNum } from './numbers'
 
 export function slippageDiffLabel(actualAmount: HumanAmount, expectedAmount: HumanAmount) {

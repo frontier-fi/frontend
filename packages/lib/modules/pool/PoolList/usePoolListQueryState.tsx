@@ -35,7 +35,8 @@ import {
 import { PaginationState } from '@repo/lib/shared/components/pagination/pagination.types'
 
 import { ButtonGroupOption } from '@repo/lib/shared/components/btns/button-group/ButtonGroup'
-import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { useEffect } from 'react'
+import { useSupportedNetworks } from '../../chains/useSupportedNetworks'
 
 export const PROTOCOL_VERSION_TABS: ButtonGroupOption[] = [
   {
@@ -57,6 +58,7 @@ export const PROTOCOL_VERSION_TABS: ButtonGroupOption[] = [
 ] as const
 
 const JOINABLE_POOLS_FIRST = 100
+export const DEFAULT_MIN_TVL = 100
 
 const poolListQueryStateParsers = {
   first: parseAsInteger.withDefault(20),
@@ -77,7 +79,7 @@ const poolListQueryStateParsers = {
   textSearch: parseAsString,
   userAddress: parseAsString,
   joinablePools: parseAsStringLiteral(['true'] as const),
-  minTvl: parseAsFloat.withDefault(0),
+  minTvl: parseAsFloat.withDefault(DEFAULT_MIN_TVL),
   poolTags: parseAsArrayOf(
     parseAsStringEnum<PoolTagType>(poolTagFilters as unknown as PoolTagType[])
   ).withDefault([]),
@@ -286,11 +288,24 @@ export function usePoolListQueryState() {
     setJoinablePoolsValue(null)
   }
 
+  const supportedNetworks = useSupportedNetworks()
+  const allowedNetworkSet = new Set<string>(supportedNetworks)
+
+  const activeSelectedNetworks = networks.filter((network): network is GqlChain =>
+    allowedNetworkSet.has(network)
+  )
+
+  useEffect(() => {
+    if (activeSelectedNetworks.length !== networks.length) {
+      setNetworks(activeSelectedNetworks.length > 0 ? activeSelectedNetworks : null)
+    }
+  }, [activeSelectedNetworks, networks.length, setNetworks])
+
   const totalFilterCount =
-    networks.length +
+    activeSelectedNetworks.length +
     poolTypes.length +
     (userAddress ? 1 : 0) +
-    (minTvl > 0 ? 1 : 0) +
+    (minTvl !== DEFAULT_MIN_TVL ? 1 : 0) +
     poolTags.length +
     (protocolVersion ? 1 : 0) +
     poolHookTags.length +
@@ -325,13 +340,7 @@ export function usePoolListQueryState() {
       ...(mappedPoolTypes.length > 0 && poolTypes.length > 0
         ? { poolTypeIn: mappedPoolTypes }
         : {}),
-      // Only send chains the active API accepts (Frontier is Sepolia-only).
-      chainIn: (() => {
-        const allowed = PROJECT_CONFIG.supportedNetworks
-        const allowedSet = new Set<string>(allowed)
-        const selected = networks.filter((network): network is GqlChain => allowedSet.has(network))
-        return selected.length > 0 ? selected : allowed
-      })(),
+      chainIn: activeSelectedNetworks.length > 0 ? activeSelectedNetworks : supportedNetworks,
       userAddress,
       minTvl,
       tagIn:
@@ -357,7 +366,7 @@ export function usePoolListQueryState() {
       orderBy,
       orderDirection,
       poolTypes,
-      networks,
+      networks: activeSelectedNetworks,
       textSearch,
       protocolVersion,
     },

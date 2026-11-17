@@ -2,7 +2,7 @@ import { SupportedChainId } from '@repo/lib/config/config.types'
 import { isNativeAsset } from '@repo/lib/shared/utils/addresses'
 import { Address } from 'viem'
 import { MAX_BIGINT } from '@repo/lib/shared/utils/numbers'
-import { InputAmount } from '@balancer/sdk'
+import { InputAmount } from '@frontier-fi/sdk'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { requiresDoubleApproval } from '../token.helpers'
 

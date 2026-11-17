@@ -6,7 +6,7 @@ import { Address } from 'viem'
 import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { isV3Pool } from '../../pool/pool.helpers'
 import { useMemo } from 'react'
-import { vaultExtensionAbi_V3 } from '@balancer/sdk'
+import { vaultExtensionAbi_V3 } from '@frontier-fi/sdk'
 
 export function useGetTokenRates(pool: Pool) {
   const chainId = getChainId(pool.chain)

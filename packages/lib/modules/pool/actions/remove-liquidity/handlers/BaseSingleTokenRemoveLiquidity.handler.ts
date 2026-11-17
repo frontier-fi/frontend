@@ -1,4 +1,4 @@
-import { getRpcUrl } from '@repo/lib/modules/web3/transports'
+import { getRpcUrl, withSdkRpcFallback } from '@repo/lib/modules/web3/transports'
 import {
   HumanAmount,
   InputAmount,
@@ -7,7 +7,7 @@ import {
   RemoveLiquidity,
   RemoveLiquidityKind,
   RemoveLiquiditySingleTokenExactInInput,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { Address } from 'viem'
 import { Pool } from '../../../pool.types'
 import { BPT_DECIMALS } from '../../../pool.constants'
@@ -34,9 +34,13 @@ export abstract class BaseSingleTokenRemoveLiquidityHandler implements RemoveLiq
     userAddress,
   }: QueryRemoveLiquidityInput): Promise<SdkQueryRemoveLiquidityOutput> {
     const removeLiquidity = new RemoveLiquidity()
-    const removeLiquidityInput = this.constructSdkInput(humanBptIn, tokenOut, userAddress)
 
-    const sdkQueryOutput = await removeLiquidity.query(removeLiquidityInput, this.helpers.poolState)
+    const sdkQueryOutput = await withSdkRpcFallback(this.helpers.chainId, rpcUrl =>
+      removeLiquidity.query(
+        this.constructSdkInput(humanBptIn, tokenOut, userAddress, rpcUrl),
+        this.helpers.poolState
+      )
+    )
 
     return { amountsOut: sdkQueryOutput.amountsOut, sdkQueryOutput }
   }
@@ -54,11 +58,13 @@ export abstract class BaseSingleTokenRemoveLiquidityHandler implements RemoveLiq
       return 0
     }
 
-    const removeLiquidityInput = this.constructSdkInput(humanBptIn, tokenOut)
-
-    const priceImpactABA: PriceImpactAmount = await PriceImpact.removeLiquidity(
-      removeLiquidityInput,
-      this.helpers.poolState
+    const priceImpactABA: PriceImpactAmount = await withSdkRpcFallback(
+      this.helpers.chainId,
+      rpcUrl =>
+        PriceImpact.removeLiquidity(
+          this.constructSdkInput(humanBptIn, tokenOut, undefined, rpcUrl),
+          this.helpers.poolState
+        )
     )
 
     return priceImpactABA.decimal
@@ -72,7 +78,8 @@ export abstract class BaseSingleTokenRemoveLiquidityHandler implements RemoveLiq
   private constructSdkInput(
     humanBptIn: HumanAmount,
     tokenOut: Address,
-    userAddress?: Address
+    userAddress?: Address,
+    rpcUrl = getRpcUrl(this.helpers.chainId)
   ): RemoveLiquiditySingleTokenExactInInput {
     const bptInInputAmount: InputAmount = {
       rawAmount: parseAmount(humanBptIn, 18),
@@ -82,7 +89,7 @@ export abstract class BaseSingleTokenRemoveLiquidityHandler implements RemoveLiq
 
     return {
       chainId: this.helpers.chainId,
-      rpcUrl: getRpcUrl(this.helpers.chainId),
+      rpcUrl,
       bptIn: bptInInputAmount,
       kind: RemoveLiquidityKind.SingleTokenExactIn,
       tokenOut,

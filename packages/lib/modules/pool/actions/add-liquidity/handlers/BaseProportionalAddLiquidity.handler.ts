@@ -3,17 +3,18 @@ import {
   AddLiquidity,
   AddLiquidityKind,
   AddLiquidityProportionalInput,
+  AddLiquidityQueryOutput,
   Address,
   HumanAmount,
   InputAmount,
   Slippage,
-} from '@balancer/sdk'
+} from '@frontier-fi/sdk'
 import { Pool } from '../../../pool.types'
 import { getSender, LiquidityActionHelpers } from '../../LiquidityActionHelpers'
 import { SdkBuildAddLiquidityInput, SdkQueryAddLiquidityOutput } from '../add-liquidity.types'
 import { AddLiquidityHandler } from './AddLiquidity.handler'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
-import { getRpcUrl } from '@repo/lib/modules/web3/transports'
+import { getRpcUrl, withSdkRpcFallback } from '@repo/lib/modules/web3/transports'
 import { bn } from '@repo/lib/shared/utils/numbers'
 
 /**
@@ -47,8 +48,12 @@ export abstract class BaseProportionalAddLiquidityHandler implements AddLiquidit
 
     const addLiquidity = new AddLiquidity()
 
-    const addLiquidityInput = this.constructSdkInput(referenceAmount, userAddress)
-    const sdkQueryOutput = await addLiquidity.query(addLiquidityInput, this.helpers.poolState)
+    const sdkQueryOutput = await withSdkRpcFallback(this.helpers.chainId, rpcUrl =>
+      addLiquidity.query(
+        this.constructSdkInput(referenceAmount, userAddress, rpcUrl),
+        this.helpers.poolState
+      )
+    )
 
     return { bptOut: sdkQueryOutput.bptOut, to: sdkQueryOutput.to, sdkQueryOutput }
   }
@@ -62,11 +67,10 @@ export abstract class BaseProportionalAddLiquidityHandler implements AddLiquidit
     const addLiquidity = new AddLiquidity()
 
     const { callData, to, value } = addLiquidity.buildCall({
-      ...queryOutput.sdkQueryOutput,
+      ...(queryOutput.sdkQueryOutput as AddLiquidityQueryOutput),
       slippage: Slippage.fromPercentage(slippagePercent as HumanAmount),
-      sender: account,
-      recipient: account,
       wethIsEth: this.helpers.isNativeAssetIn(humanAmountsIn),
+      userData: '0x',
     })
 
     return {
@@ -83,11 +87,12 @@ export abstract class BaseProportionalAddLiquidityHandler implements AddLiquidit
    */
   private constructSdkInput(
     referenceAmount: InputAmount,
-    userAddress: Address
+    userAddress: Address,
+    rpcUrl = getRpcUrl(this.helpers.chainId)
   ): AddLiquidityProportionalInput {
     return {
       chainId: this.helpers.chainId,
-      rpcUrl: getRpcUrl(this.helpers.chainId),
+      rpcUrl,
       referenceAmount,
       kind: AddLiquidityKind.Proportional,
       sender: getSender(userAddress),

@@ -1,4 +1,4 @@
-import { Permit2, PublicWalletClient } from '@balancer/sdk'
+import { Permit2, PublicWalletClient } from '@frontier-fi/sdk'
 import { useToast } from '@chakra-ui/react'
 import {
   SignatureState,

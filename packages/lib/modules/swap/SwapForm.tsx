@@ -2,7 +2,7 @@
 
 import { TokenInput } from '@repo/lib/modules/tokens/TokenInput/TokenInput'
 import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
-import { HumanAmount, Path } from '@balancer/sdk'
+import { HumanAmount, Path } from '@frontier-fi/sdk'
 import {
   Card,
   Center,
@@ -47,7 +47,7 @@ import { SwapSimulationError } from './SwapSimulationError'
 import { ContractWalletAlert } from '@repo/lib/shared/components/alerts/ContractWalletAlert'
 import { useContractWallet } from '../web3/wallets/useContractWallet'
 import { useIsSafeAccount } from '../web3/safe.hooks'
-import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { useSupportedNetworks } from '../chains/useSupportedNetworks'
 import { usePriceImpact } from '@repo/lib/modules/price-impact/PriceImpactProvider'
 import { RoutesCard } from './RoutesCard'
 
@@ -67,6 +67,7 @@ export function SwapForm({
   customTokenUsdPrice,
 }: Props) {
   const isPoolSwapUrl = useIsPoolSwapUrl()
+  const supportedNetworks = useSupportedNetworks()
 
   const {
     tokenIn,
@@ -229,7 +230,7 @@ export function SwapForm({
                 <ContractWalletAlert />
               )}
 
-              {!isPoolSwap && hasMultipleNetworks(PROJECT_CONFIG.supportedNetworks) && (
+              {!isPoolSwap && hasMultipleNetworks(supportedNetworks) && (
                 <ChainSelect
                   onChange={newValue => {
                     setSelectedChain(newValue as AppChain)

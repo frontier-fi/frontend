@@ -1,4 +1,4 @@
-import { HumanAmount } from '@balancer/sdk'
+import { HumanAmount } from '@frontier-fi/sdk'
 import { Address } from 'viem'
 import { base, mainnet, monad } from 'viem/chains'
 import {

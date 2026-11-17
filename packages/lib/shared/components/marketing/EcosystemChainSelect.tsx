@@ -4,13 +4,13 @@ import { getChainShortName } from '@repo/lib/config/app.config'
 import { getSelectStyles } from '@repo/lib/shared/services/chakra/custom/chakra-react-select'
 import { Box, HStack, Text } from '@chakra-ui/react'
 import { Select, OptionBase, GroupBase, SingleValue, chakraComponents } from 'chakra-react-select'
-import { ReactNode } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { motion } from 'motion/react'
 import { pulseOnceWithDelay } from '@repo/lib/shared/utils/animations'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { gradientMap } from '@repo/lib/modules/marketing/useEcosystemPoolActivity'
-import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { useSupportedNetworks } from '@repo/lib/modules/chains/useSupportedNetworks'
 
 interface ChainOption extends OptionBase {
   label: ReactNode
@@ -21,32 +21,6 @@ type Props = {
   value: GqlChain | 'all'
   onChange(value: GqlChain | 'all'): void
 }
-
-const networkOptions: ChainOption[] = [
-  {
-    label: (
-      <HStack>
-        <Text>All networks</Text>
-      </HStack>
-    ),
-    value: 'all',
-  },
-  ...PROJECT_CONFIG.supportedNetworks.map(network => ({
-    label: (
-      <HStack>
-        <Box
-          backgroundImage={`linear-gradient(to bottom, ${gradientMap[network]?.from || '#F7F7F7'}, ${gradientMap[network]?.to || '#A4C6EE'})`}
-          borderRadius="50%"
-          display="inline-block"
-          height="2"
-          width="2"
-        />
-        <Text>{getChainShortName(network)}</Text>
-      </HStack>
-    ),
-    value: network,
-  })),
-]
 
 function CustomDropdownIndicator(props: any) {
   return (
@@ -59,6 +33,37 @@ function CustomDropdownIndicator(props: any) {
 }
 
 export function EcosystemChainSelect({ value, onChange }: Props) {
+  const supportedNetworks = useSupportedNetworks()
+
+  const networkOptions: ChainOption[] = useMemo(
+    () => [
+      {
+        label: (
+          <HStack>
+            <Text>All networks</Text>
+          </HStack>
+        ),
+        value: 'all',
+      },
+      ...supportedNetworks.map(network => ({
+        label: (
+          <HStack>
+            <Box
+              backgroundImage={`linear-gradient(to bottom, ${gradientMap[network]?.from || '#F7F7F7'}, ${gradientMap[network]?.to || '#A4C6EE'})`}
+              borderRadius="50%"
+              display="inline-block"
+              height="2"
+              width="2"
+            />
+            <Text>{getChainShortName(network)}</Text>
+          </HStack>
+        ),
+        value: network,
+      })),
+    ],
+    [supportedNetworks]
+  )
+
   const chainValue = networkOptions.find(option => option.value === value)
   const chakraStyles = getSelectStyles<ChainOption>()
 

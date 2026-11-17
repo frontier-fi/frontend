@@ -17,14 +17,19 @@ describe('proxyGraphqlRequest', () => {
     expect(res.status).toBe(415)
   })
 
-  it('logs structured JSON with operationName when upstream returns >= 400', async () => {
+  it('logs compact structured JSON with operationName and graphqlError when upstream returns >= 400', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ errors: [{ message: 'Validation error' }] }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      })
+      new Response(
+        JSON.stringify({
+          errors: [{ message: 'Validation error', extensions: { code: 'BAD_USER_INPUT' } }],
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
     )
 
     const req = new Request('http://localhost:3000/api/graphql', {
@@ -47,6 +52,8 @@ describe('proxyGraphqlRequest', () => {
       source: 'graphql-proxy',
       status: 400,
       operationName: 'GetPools',
+      graphqlCode: 'BAD_USER_INPUT',
+      graphqlError: 'Validation error',
     })
   })
 

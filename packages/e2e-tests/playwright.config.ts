@@ -10,6 +10,7 @@ function seconds(n: number) {
   return n * 1000
 }
 
+config({ path: resolve(__dirname, '../../apps/frontend-v3/.env.local') })
 config({ path: resolve(__dirname, '.env.local') })
 
 /**
