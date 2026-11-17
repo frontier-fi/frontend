@@ -23,7 +23,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { PoolListSearch } from './PoolListSearch'
-import { PROTOCOL_VERSION_TABS } from './usePoolListQueryState'
+import { DEFAULT_MIN_TVL, PROTOCOL_VERSION_TABS } from './usePoolListQueryState'
 import {
   PoolFilterType,
   poolHookTagFilters,
@@ -72,7 +72,7 @@ export function useFilterTagsVisible() {
   return (
     networks.length > 0 ||
     poolTypes.length > 0 ||
-    minTvl > 0 ||
+    minTvl !== DEFAULT_MIN_TVL ||
     poolTags.length > 0 ||
     poolHookTags.length > 0 ||
     joinablePools ||
@@ -307,7 +307,7 @@ export function FilterTags({
   if (
     networks.length === 0 &&
     poolTypes.length === 0 &&
-    minTvl === 0 &&
+    (minTvl === undefined || minTvl === DEFAULT_MIN_TVL) &&
     (poolTags ? poolTags.length === 0 : true) &&
     !includeExpiredPools &&
     (poolHookTags ? poolHookTags.length === 0 : true) &&
@@ -344,11 +344,11 @@ export function FilterTags({
           />
         ))}
 
-        {minTvl && minTvl > 0 && (
+        {minTvl !== undefined && minTvl !== DEFAULT_MIN_TVL && (
           <AnimatedTag
             key="minTvl"
-            label={`TVL > ${toCurrency(minTvl)}`}
-            onClose={() => setMinTvl && setMinTvl(0)}
+            label={`TVL > ${toCurrency(minTvl, { noDecimals: minTvl < 1_000 })}`}
+            onClose={() => setMinTvl && setMinTvl(null)}
           />
         )}
 

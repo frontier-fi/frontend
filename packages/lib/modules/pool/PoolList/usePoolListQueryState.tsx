@@ -58,6 +58,7 @@ export const PROTOCOL_VERSION_TABS: ButtonGroupOption[] = [
 ] as const
 
 const JOINABLE_POOLS_FIRST = 100
+export const DEFAULT_MIN_TVL = 100
 
 const poolListQueryStateParsers = {
   first: parseAsInteger.withDefault(20),
@@ -78,7 +79,7 @@ const poolListQueryStateParsers = {
   textSearch: parseAsString,
   userAddress: parseAsString,
   joinablePools: parseAsStringLiteral(['true'] as const),
-  minTvl: parseAsFloat.withDefault(0),
+  minTvl: parseAsFloat.withDefault(DEFAULT_MIN_TVL),
   poolTags: parseAsArrayOf(
     parseAsStringEnum<PoolTagType>(poolTagFilters as unknown as PoolTagType[])
   ).withDefault([]),
@@ -304,7 +305,7 @@ export function usePoolListQueryState() {
     activeSelectedNetworks.length +
     poolTypes.length +
     (userAddress ? 1 : 0) +
-    (minTvl > 0 ? 1 : 0) +
+    (minTvl !== DEFAULT_MIN_TVL ? 1 : 0) +
     poolTags.length +
     (protocolVersion ? 1 : 0) +
     poolHookTags.length +

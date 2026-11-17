@@ -4,92 +4,50 @@ import {
   HStack,
   Heading,
   Slider,
+  SliderMark,
   SliderTrack,
   SliderFilledTrack,
   SliderThumb,
+  Text,
 } from '@chakra-ui/react'
 import { useCurrency } from '@repo/lib/shared/hooks/useCurrency'
 import { usePoolList } from './PoolListProvider'
+import { DEFAULT_MIN_TVL } from './usePoolListQueryState'
 import { NumberText } from '@repo/lib/shared/components/typography/NumberText'
 
-// --- TVL value <-> slider value mapping ---
-const SLIDER_Q1_VALUE = 100_000
-const SLIDER_MID_VALUE = 1_000_000
-const SLIDER_MAX_SLIDER_VALUE = 1000
+// Logarithmic 1 / 2.5 / 5 / 10 round stops from $1 to $1M (3 stops per decade across 6 decades)
+export const TVL_STOPS = [
+  1, 2, 5, 10, 25, 50, 100, 250, 500, 1_000, 2_500, 5_000, 10_000, 25_000, 50_000, 100_000, 250_000,
+  500_000, 1_000_000,
+] as const
 
-/**
- * Map slider value (0-1000) to TVL value.
- * 0–250: linear from 0 to 100,000
- * 250–500: linear from 100,000 to 1,000,000
- * 500–1000: exponential from 1,000,000 to 100,000,000
- */
-function sliderValueToTvl(sliderValue: number): number {
-  if (sliderValue <= 250) {
-    // Linear: 0–250 → 0–100,000
-    return Math.round((sliderValue / 250) * SLIDER_Q1_VALUE)
-  } else if (sliderValue <= 500) {
-    // Linear: 250–500 → 100,000–1,000,000
-    const t = (sliderValue - 250) / 250
-    return Math.round(SLIDER_Q1_VALUE + t * (SLIDER_MID_VALUE - SLIDER_Q1_VALUE))
-  } else {
-    // Exponential: 500–1000 → 1,000,000–100,000,000
-    const minLog = 6
-    const maxLog = 8
-    const expPercent = (sliderValue - 500) / 500
-    const logValue = minLog + (maxLog - minLog) * expPercent
-    return Math.round(Math.pow(10, logValue))
-  }
+export const MIN_TVL_VALUE = 1
+export const MAX_TVL_VALUE = 1_000_000
+const MAX_STOP_INDEX = TVL_STOPS.length - 1
+export const DEFAULT_STOP_INDEX = TVL_STOPS.indexOf(DEFAULT_MIN_TVL)
+
+export function stopIndexToTvl(stopIndex: number): number {
+  const clampedIndex = Math.max(0, Math.min(Math.round(stopIndex), MAX_STOP_INDEX))
+  return TVL_STOPS[clampedIndex]!
 }
 
-/**
- * Map TVL value to slider value (0-1000)
- */
-function tvlToSliderValue(tvl: number): number {
-  if (tvl <= SLIDER_Q1_VALUE) {
-    // Linear: 0–100,000 → 0–250
-    return (tvl / SLIDER_Q1_VALUE) * 250
-  } else if (tvl <= SLIDER_MID_VALUE) {
-    // Linear: 100,000–1,000,000 → 250–500
-    const t = (tvl - SLIDER_Q1_VALUE) / (SLIDER_MID_VALUE - SLIDER_Q1_VALUE)
-    return 250 + t * 250
-  } else {
-    // Exponential: 1,000,000–100,000,000 → 500–1000
-    const minLog = 6
-    const maxLog = 8
-    const valueLog = Math.log10(tvl)
-    const expPercent = (valueLog - minLog) / (maxLog - minLog)
-    return 500 + expPercent * 500
-  }
-}
+export function tvlToStopIndex(tvl: number): number {
+  const clampedTvl = Math.max(MIN_TVL_VALUE, Math.min(tvl, MAX_TVL_VALUE))
+  const targetLog = Math.log10(clampedTvl)
 
-const SLIDER_STEP_CONFIG: { until: number; step: number }[] = [
-  { until: 10000, step: 1000 },
-  { until: 50000, step: 2500 },
-  { until: 100000, step: 5000 },
-  { until: 500000, step: 25000 },
-  { until: 1000000, step: 50000 },
-  { until: 10000000, step: 100000 },
-  { until: 100000000, step: 1000000 },
-]
+  let closestIndex = 0
+  let smallestDiff = Infinity
 
-function snapToStep(value: number): number {
-  let prevUntil = 0
+  for (let i = 0; i < TVL_STOPS.length; i++) {
+    const diff = Math.abs(Math.log10(TVL_STOPS[i]!) - targetLog)
 
-  for (const { until, step } of SLIDER_STEP_CONFIG) {
-    if (value <= until) {
-      const base = prevUntil
-      const snapped = Math.round((value - base) / step) * step + base
-      return Math.max(base, Math.min(snapped, until))
+    if (diff < smallestDiff) {
+      smallestDiff = diff
+      closestIndex = i
     }
-
-    prevUntil = until
   }
 
-  const lastConfig = SLIDER_STEP_CONFIG[SLIDER_STEP_CONFIG.length - 1]!
-  const { until, step } = lastConfig
-  const base = SLIDER_STEP_CONFIG[SLIDER_STEP_CONFIG.length - 2]!.until
-  const snapped = Math.round((value - base) / step) * step + base
-  return Math.max(base, Math.min(snapped, until))
+  return closestIndex
 }
 
 export function PoolMinTvlFilter() {
@@ -112,51 +70,67 @@ export function PoolMinTvlFilter() {
 type PoolMinTvlFilterSliderProps = {
   minTvl: number
   setMinTvl: (value: number | null) => void | Promise<unknown>
-  toCurrency: (value: number) => string
+  toCurrency: ReturnType<typeof useCurrency>['toCurrency']
 }
 
 function PoolMinTvlFilterSlider({ minTvl, setMinTvl, toCurrency }: PoolMinTvlFilterSliderProps) {
-  const [sliderValue, setSliderValue] = useState(() => tvlToSliderValue(minTvl))
+  const [stopIndex, setStopIndex] = useState(() => tvlToStopIndex(minTvl))
 
-  const tvlValue = sliderValueToTvl(sliderValue)
+  const tvlValue = stopIndexToTvl(stopIndex)
 
-  const handleSliderChange = (val: number) => {
-    const rawValue = sliderValueToTvl(val)
-    const snappedValue = snapToStep(rawValue)
-    setSliderValue(tvlToSliderValue(snappedValue))
+  const handleSliderChange = (nextIndex: number) => {
+    setStopIndex(nextIndex)
   }
 
-  const handleSliderChangeEnd = (val: number) => {
-    const rawValue = sliderValueToTvl(val)
-    const snappedValue = snapToStep(rawValue)
-    setMinTvl(snappedValue > 0 ? snappedValue : null)
+  const handleSliderChangeEnd = (nextIndex: number) => {
+    const snappedValue = stopIndexToTvl(nextIndex)
+    setStopIndex(tvlToStopIndex(snappedValue))
+    setMinTvl(snappedValue === DEFAULT_MIN_TVL ? null : snappedValue)
   }
 
   return (
-    <VStack w="full">
+    <VStack align="start" spacing="xs" w="full">
       <HStack w="full">
         <Heading as="h3" mb="xs" mt="sm" size="sm">
           Minimum TVL
         </Heading>
         <NumberText fontSize="sm" ml="auto">
-          {toCurrency(tvlValue)}
+          {toCurrency(tvlValue, { noDecimals: tvlValue < 1_000 })}
         </NumberText>
       </HStack>
       <Slider
         aria-label="slider-min-tvl"
-        max={SLIDER_MAX_SLIDER_VALUE}
+        max={MAX_STOP_INDEX}
         min={0}
         ml="sm"
         onChange={handleSliderChange}
         onChangeEnd={handleSliderChangeEnd}
         step={1}
-        value={sliderValue}
+        value={stopIndex}
       >
+        <SliderMark
+          bg={DEFAULT_STOP_INDEX <= stopIndex ? 'background.highlight' : 'background.level2'}
+          border="1px solid"
+          borderColor={DEFAULT_STOP_INDEX <= stopIndex ? 'background.base' : 'transparent'}
+          borderRadius="full"
+          height="8px"
+          top="3px"
+          transform="translateX(-4px)"
+          value={DEFAULT_STOP_INDEX}
+          width="8px"
+          zIndex="1"
+        />
         <SliderTrack>
           <SliderFilledTrack />
         </SliderTrack>
-        <SliderThumb />
+        <SliderThumb zIndex="2" />
       </Slider>
+      {tvlValue < DEFAULT_MIN_TVL && (
+        <Text color="font.warning" fontSize="xs" pt="xxs" w="full">
+          Pools under {toCurrency(DEFAULT_MIN_TVL, { noDecimals: true })} TVL are excluded from swap
+          routing.
+        </Text>
+      )}
     </VStack>
   )
 }
