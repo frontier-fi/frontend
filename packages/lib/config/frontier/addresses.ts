@@ -80,6 +80,6 @@ export function registerFrontierChain(chainId: number, addresses: FrontierChainA
   mutableMap(frontierContracts.GyroECLPPoolFactory)[chainId] = addresses.gyroEclpPoolFactory
 }
 
-// Apply Sepolia and Base on import — must run before any AddressProvider / network config eval.
+// Register both chains before any AddressProvider / network config evaluation.
 registerFrontierChain(FRONTIER_SEPOLIA.chainId, FRONTIER_SEPOLIA)
 registerFrontierChain(FRONTIER_BASE.chainId, FRONTIER_BASE)

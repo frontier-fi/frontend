@@ -1,4 +1,4 @@
-import { getRpcUrl } from '@repo/lib/modules/web3/transports'
+import { getRpcUrl, withSdkRpcFallback } from '@repo/lib/modules/web3/transports'
 import {
   HumanAmount,
   InputAmount,
@@ -36,9 +36,13 @@ export abstract class BaseProportionalRemoveLiquidityHandler implements RemoveLi
     userAddress,
   }: QueryRemoveLiquidityInput): Promise<SdkQueryRemoveLiquidityOutput> {
     const removeLiquidity = new RemoveLiquidity()
-    const removeLiquidityInput = this.constructSdkInput(bptIn, userAddress)
 
-    const sdkQueryOutput = await removeLiquidity.query(removeLiquidityInput, this.helpers.poolState)
+    const sdkQueryOutput = await withSdkRpcFallback(this.helpers.chainId, rpcUrl =>
+      removeLiquidity.query(
+        this.constructSdkInput(bptIn, userAddress, rpcUrl),
+        this.helpers.poolState
+      )
+    )
 
     return { amountsOut: sdkQueryOutput.amountsOut.filter(a => a.amount > 0n), sdkQueryOutput }
   }
@@ -50,7 +54,8 @@ export abstract class BaseProportionalRemoveLiquidityHandler implements RemoveLi
    */
   protected constructSdkInput(
     humanBptIn: HumanAmount,
-    userAddress: Address
+    userAddress: Address,
+    rpcUrl = getRpcUrl(this.helpers.chainId)
   ): RemoveLiquidityProportionalInput {
     const bptIn: InputAmount = {
       rawAmount: parseAmount(humanBptIn, 18),
@@ -60,7 +65,7 @@ export abstract class BaseProportionalRemoveLiquidityHandler implements RemoveLi
 
     return {
       chainId: this.helpers.chainId,
-      rpcUrl: getRpcUrl(this.helpers.chainId),
+      rpcUrl,
       bptIn,
       kind: RemoveLiquidityKind.Proportional,
       sender: userAddress,

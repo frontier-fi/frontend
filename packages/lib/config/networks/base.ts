@@ -55,7 +55,7 @@ const networkConfig: NetworkConfig = {
       router: AddressProvider.Router(chainId),
       batchRouter: AddressProvider.BatchRouter(chainId),
       compositeLiquidityRouterBoosted: AddressProvider.CompositeLiquidityRouter(chainId),
-      bCoWFactory: '0x03362f847B4fAbC12e1Ce98b6b59F94401E4588e',
+      bCoWFactory: undefined,
     },
     veDelegationProxy: '0xD87F44Df0159DC78029AB9CA7D7e57E7249F5ACD',
     permit2: PERMIT2[chainId],
@@ -63,16 +63,14 @@ const networkConfig: NetworkConfig = {
       claims: '0x3Ef3D8bA38EBe18DB133cEc108f4D14CE00Dd9Ae',
     },
   },
-  pools: convertHexToLowerCase({ issues: {} }),
+  pools: convertHexToLowerCase({ issues: {}, supportsNestedActions: false }),
   layerZeroChainId: 184,
-  supportsVeBalSync: true,
   lbps: {
     collateralTokens: [
       '0x4200000000000000000000000000000000000006', // WETH
       '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC
     ],
   },
-  hasAura: true,
 }
 
 export default networkConfig

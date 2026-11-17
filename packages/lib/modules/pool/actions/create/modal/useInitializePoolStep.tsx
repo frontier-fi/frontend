@@ -10,7 +10,6 @@ import { DisabledTransactionButton } from '@repo/lib/modules/transactions/transa
 import { useInitializePoolBuildCall } from '@repo/lib/modules/pool/actions/initialize/useInitializePoolBuildCall'
 import { type Address } from 'viem'
 import { PoolType, InitPoolInputV3 } from '@frontier-fi/sdk'
-import { getRpcUrl } from '@repo/lib/modules/web3/transports'
 import { useIsPoolInitialized } from '@repo/lib/modules/pool/queries/useIsPoolInitialized'
 import { TransactionBatchButton } from '@repo/lib/modules/transactions/transaction-steps/TransactionBatchButton'
 
@@ -39,7 +38,6 @@ export function useInitializePoolStep({
   const [isStepActivated, setIsStepActivated] = useState(false)
 
   const { chainId } = initPoolInput
-  const rpcUrl = getRpcUrl(chainId)
 
   const { isPoolInitialized, refetchIsPoolInitialized } = useIsPoolInitialized({
     chainId,
@@ -48,7 +46,6 @@ export function useInitializePoolStep({
   })
 
   const buildCallDataQuery = useInitializePoolBuildCall({
-    rpcUrl,
     poolAddress,
     poolType,
     enabled: isStepActivated && !isPoolInitialized && !!poolAddress,

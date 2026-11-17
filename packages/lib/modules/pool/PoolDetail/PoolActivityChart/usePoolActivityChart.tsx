@@ -150,10 +150,10 @@ const getDefaultPoolActivityChartOptions = (
               <span>${escapeHtml(String(data.seriesName ?? ''))}</span>
               <span>${escapeHtml(currencyFormatter(metaData.usdValue))}</span>
             </div>
-            <div style="display:flex;flex-direction:column;justify-content:flex-start;gap:0;margin-top:4px">
+            <div style="display:flex;flex-direction:column;justify-content:flex-start;gap:2px;margin-top:4px;margin-bottom:4px">
               ${
                 tokens
-                  ?.map((token, index) => {
+                  ?.map(token => {
                     const logoSrc = toSafeHttpsOrRelativeUrl(token.token?.logoURI)
 
                     const amountLabel = escapeHtml(
@@ -164,14 +164,12 @@ const getDefaultPoolActivityChartOptions = (
                     return `
                   <div style="color: ${
                     toolTipTheme.text
-                  }; display:flex;justify-content:start;align-items:center;gap:6px; margin-bottom:${
-                    index === tokens.length - 1 ? `4px` : `-20px`
-                  }">
+                  }; display:flex;justify-content:start;align-items:center;gap:6px">
                     ${
                       logoSrc
                         ? `<img src="${escapeHtml(
                             logoSrc
-                          )}" style="width: 16px; height: 16px; border-radius: 50%; margin-right;letter-spacing:-0.1px" />`
+                          )}" style="width: 16px; height: 16px; border-radius: 50%; letter-spacing:-0.1px" />`
                         : ``
                     }
                     <div style="text-align:left">

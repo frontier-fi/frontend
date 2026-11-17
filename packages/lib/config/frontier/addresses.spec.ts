@@ -1,7 +1,38 @@
-import { AddressProvider } from '@frontier-fi/sdk'
+import { AddressProvider, CreatePool, PoolType, TokenType } from '@frontier-fi/sdk'
+import { parseEther, zeroAddress } from 'viem'
 import { FRONTIER_BASE, FRONTIER_SEPOLIA, FRONTIER_VAULT, registerFrontierChain } from './addresses'
 
 describe('Frontier SDK address overrides', () => {
+  it('builds Base weighted pool creation using the Frontier factory', () => {
+    const token = (address: `0x${string}`) => ({
+      address,
+      weight: parseEther('0.5'),
+      rateProvider: zeroAddress,
+      tokenType: TokenType.STANDARD,
+      paysYieldFees: false,
+    })
+
+    const result = new CreatePool().buildCall({
+      chainId: FRONTIER_BASE.chainId,
+      protocolVersion: 3,
+      poolType: PoolType.Weighted,
+      symbol: 'WETH-USDC',
+      tokens: [
+        token('0x4200000000000000000000000000000000000006'),
+        token('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'),
+      ],
+      swapFeePercentage: parseEther('0.01'),
+      poolHooksContract: zeroAddress,
+      pauseManager: zeroAddress,
+      swapFeeManager: zeroAddress,
+      poolCreator: zeroAddress,
+      enableDonation: false,
+      disableUnbalancedLiquidity: false,
+    })
+
+    expect(result.to).toBe(FRONTIER_BASE.weightedPoolFactory)
+  })
+
   it.each([
     ['Sepolia', FRONTIER_SEPOLIA],
     ['Base', FRONTIER_BASE],

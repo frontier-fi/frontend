@@ -8,11 +8,12 @@ import {
 } from '@frontier-fi/sdk'
 import { type Address } from 'viem'
 import { type TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
+import { withSdkRpcFallback } from '@repo/lib/modules/web3/transports'
 import { usePermit2Signature } from '@repo/lib/modules/tokens/approvals/permit2/Permit2SignatureProvider'
 
 type Params = {
   initPoolInput: InitPoolInputV3
-  rpcUrl: string
+  rpcUrl?: string
   poolAddress: Address | undefined
   poolType: PoolType
   enabled: boolean
@@ -34,13 +35,15 @@ export function useInitializePoolBuildCall({
   const queryFn = async (): Promise<TransactionConfig> => {
     if (!poolAddress) throw new Error('missing pool address for init pool build call')
 
-    const initPoolDataProvider = new InitPoolDataProvider(initPoolInput.chainId, rpcUrl)
+    const fetchPoolState = (targetRpcUrl: string) => {
+      const initPoolDataProvider = new InitPoolDataProvider(initPoolInput.chainId, targetRpcUrl)
 
-    const poolState = await initPoolDataProvider.getInitPoolData(
-      poolAddress,
-      poolType,
-      protocolVersion
-    )
+      return initPoolDataProvider.getInitPoolData(poolAddress, poolType, protocolVersion)
+    }
+
+    const poolState = rpcUrl
+      ? await fetchPoolState(rpcUrl)
+      : await withSdkRpcFallback(initPoolInput.chainId, fetchPoolState)
 
     let callData: `0x${string}`
     let to: Address

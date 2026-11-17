@@ -1,12 +1,10 @@
 import type { GqlPoolOrderBy } from '@repo/lib/shared/services/api/generated/graphql'
 import { useMemo, useCallback, useReducer, useEffect } from 'react'
-import { getCanStake } from '../../pool/actions/stake.helpers'
 import { getTotalApr } from '../../pool/pool.utils'
-import { ExpandedPoolInfo, ExpandedPoolType } from './useExpandedPools'
 import { usePortfolioFilters } from './PortfolioFiltersProvider'
 import { bn } from '@repo/lib/shared/utils/numbers'
 
-export type PortfolioTableSortingId = 'staking' | 'vebal' | 'liquidity' | 'apr'
+export type PortfolioTableSortingId = 'vebal' | 'liquidity' | 'apr'
 export interface PortfolioSortingData {
   id: PortfolioTableSortingId | GqlPoolOrderBy
   desc: boolean
@@ -17,10 +15,6 @@ export const portfolioOrderByFn: () => {
   id: PortfolioTableSortingId
 }[] = () => [
   {
-    title: 'Staking',
-    id: 'staking',
-  },
-  {
     title: 'My liquidity',
     id: 'liquidity',
   },
@@ -29,20 +23,6 @@ export const portfolioOrderByFn: () => {
     id: 'apr',
   },
 ]
-
-const generateStakingWeightForSort = (pool: ExpandedPoolInfo) => {
-  const canStake = getCanStake(pool)
-
-  if (canStake) {
-    return (
-      Number(pool.poolType === ExpandedPoolType.Unlocked) * 50 +
-      Number(pool.poolType === ExpandedPoolType.StakedBal) * 20 +
-      Number(pool.poolType === ExpandedPoolType.Unstaked) * 10
-    )
-  } else {
-    return 0 // send all pools without staking to the bottom of the table
-  }
-}
 
 type SortingState = PortfolioSortingData | null
 
@@ -81,18 +61,8 @@ export function usePortfolioSorting() {
       return manualSortingObj
     }
 
-    // set sorting to liquidity when any filter is applied
-    if (
-      (selectedNetworks && selectedNetworks.length > 0) ||
-      (selectedPoolTypes && selectedPoolTypes.length > 0) ||
-      (selectedStakingTypes && selectedStakingTypes.length > 0)
-    ) {
-      return { id: 'liquidity' as const, desc: true }
-    } else {
-      // set sorting to staking when no filters are applied
-      return { id: 'staking' as const, desc: true }
-    }
-  }, [selectedNetworks, selectedPoolTypes, selectedStakingTypes, manualSortingObj])
+    return { id: 'liquidity' as const, desc: true }
+  }, [manualSortingObj])
 
   const setSorting = useCallback((sorting: PortfolioSortingData) => {
     dispatch({ type: 'SET_SORTING', payload: sorting })
@@ -103,39 +73,6 @@ export function usePortfolioSorting() {
     const arr = [...filteredExpandedPools]
 
     return arr.sort((a, b) => {
-      if (currentSortingObj.id === 'staking') {
-        const isALocked = a.poolType === ExpandedPoolType.Locked
-        const isBLocked = b.poolType === ExpandedPoolType.Locked
-
-        // Prioritize Locked pools regardless of canStake status
-        if (currentSortingObj.desc) {
-          if (isALocked && !isBLocked) return -1 // A (Locked) comes before B
-          if (!isALocked && isBLocked) return 1 // B (Locked) comes before A
-        } else {
-          // Ascending sort (Locked comes last)
-          if (isALocked && !isBLocked) return 1 // A (Locked) comes after B
-          if (!isALocked && isBLocked) return -1 // B (Locked) comes after A
-        }
-
-        // If both are Locked or neither is Locked, use the weight function
-        const aStakingWeight = generateStakingWeightForSort(a)
-        const bStakingWeight = generateStakingWeightForSort(b)
-
-        const weightDiff = currentSortingObj.desc
-          ? bStakingWeight - aStakingWeight
-          : aStakingWeight - bStakingWeight
-
-        // If weights are equal, use pool position USD as a tie-breaker (higher value first)
-        if (weightDiff === 0) {
-          const aPositionUsd = a.poolPositionUsd || 0
-          const bPositionUsd = b.poolPositionUsd || 0
-          // Always sort by position USD descending, regardless of primary sort direction
-          return bPositionUsd - aPositionUsd
-        }
-
-        return weightDiff
-      }
-
       if (currentSortingObj.id === 'liquidity') {
         const aTotalBalance = a.poolPositionUsd
         const bTotalBalance = b.poolPositionUsd

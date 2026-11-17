@@ -42,6 +42,25 @@ const chainIdToDrpcName: Partial<Record<number, string | undefined>> = {
   [monad.id]: 'monad',
 }
 
+const chainIdByChain: Partial<Record<AppChain, number>> = {
+  [GqlChainValues.Mainnet]: mainnet.id,
+  [GqlChainValues.Arbitrum]: arbitrum.id,
+  [GqlChainValues.Optimism]: optimism.id,
+  [GqlChainValues.Base]: base.id,
+  [GqlChainValues.Polygon]: polygon.id,
+  [GqlChainValues.Avalanche]: avalanche.id,
+  [GqlChainValues.Sepolia]: sepolia.id,
+  [GqlChainValues.Gnosis]: gnosis.id,
+  [GqlChainValues.Hyperevm]: hyperEvm.id,
+  [GqlChainValues.Plasma]: plasma.id,
+  [GqlChainValues.Monad]: monad.id,
+}
+
+export function chainIdHexForChain(chain: AppChain): string | undefined {
+  const id = chainIdByChain[chain]
+  return id !== undefined ? `0x${id.toString(16)}` : undefined
+}
+
 export function drpcUrl(chain: AppChain, privateKey: string) {
   const chainSlug = chainToDrpcName[chain]
   if (!chainSlug) throw new Error(`Invalid chain: ${chain}`)

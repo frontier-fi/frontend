@@ -37,7 +37,7 @@ import { memo, useMemo } from 'react'
 
 const rowProps = (needsLastColumnWider: boolean) => ({
   px: [0, 4],
-  gridTemplateColumns: `32px minmax(320px, 1fr) minmax(180px, max-content) minmax(100px, max-content) 126px ${needsLastColumnWider ? '160px' : 'minmax(100px, max-content)'}`,
+  gridTemplateColumns: `32px minmax(320px, 1fr) minmax(180px, max-content) 126px ${needsLastColumnWider ? '160px' : 'minmax(100px, max-content)'}`,
   alignItems: 'center',
   gap: { base: 'xxs', xl: 'lg' },
 })
@@ -59,8 +59,6 @@ export function PortfolioTable() {
     selectedPoolTypes,
     toggleNetwork,
     togglePoolType,
-    toggleStakingType,
-    selectedStakingTypes,
     hasTinyBalances,
     setShouldFilterTinyBalances,
     shouldFilterTinyBalances,
@@ -127,10 +125,8 @@ export function PortfolioTable() {
               <PortfolioFilterTags
                 networks={selectedNetworks}
                 poolTypes={selectedPoolTypes}
-                stakingTypes={selectedStakingTypes}
                 toggleNetwork={toggleNetwork}
                 togglePoolType={togglePoolType}
-                toggleStakingType={toggleStakingType}
               />
             )}
           </VStack>

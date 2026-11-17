@@ -230,7 +230,9 @@ It looks that you tried to call useBuildCallData before the last query finished 
 
 export function supportsNestedActions(pool: Pool): boolean {
   if (!hasNestedPools(pool)) return false
-  const disallowNestedActions = getNetworkConfig(pool.chain).pools?.disallowNestedActions ?? []
+  const poolsConfig = getNetworkConfig(pool.chain).pools
+  if (poolsConfig.supportsNestedActions === false) return false
+  const disallowNestedActions = poolsConfig.disallowNestedActions ?? []
   if (disallowNestedActions.includes(pool.id)) return false
   return true
 }

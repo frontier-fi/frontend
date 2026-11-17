@@ -28,7 +28,7 @@ import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 export const rpcFallbacks: Partial<Record<AppChain, string | undefined>> = {
   [GqlChainValues.Mainnet]: 'https://1rpc.io/eth',
   [GqlChainValues.Arbitrum]: 'https://1rpc.io/arb',
-  [GqlChainValues.Base]: 'https://1rpc.io/base',
+  [GqlChainValues.Base]: 'https://mainnet.base.org',
   [GqlChainValues.Avalanche]: 'https://1rpc.io/avax/c',
   [GqlChainValues.Gnosis]: 'https://1rpc.io/gnosis',
   [GqlChainValues.Optimism]: 'https://1rpc.io/op',

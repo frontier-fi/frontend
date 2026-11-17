@@ -2,6 +2,7 @@ import { selectAddLiquidityHandler } from './selectAddLiquidityHandler'
 import { getApiPoolMock } from '../../../__mocks__/api-mocks/api-mocks'
 import { balWeth8020, v3StableNonBoosted } from '../../../__mocks__/pool-examples/flat'
 import { usdcUsdtAaveBoosted } from '../../../__mocks__/pool-examples/boosted'
+import { nestedPoolMock } from '../../../__mocks__/nestedPoolMock'
 
 describe('selectAddLiquidityHandler', () => {
   it('returns ProportionalBoostedAddLiquidityV3 for boosted pools with wantsProportional', () => {
@@ -19,6 +20,17 @@ describe('selectAddLiquidityHandler', () => {
     expect(handler).toBeDefined()
     expect(handler.constructor.name).toBe('BoostedUnbalancedAddLiquidityV3Handler')
   })
+
+  it.each(['BASE', 'SEPOLIA'] as const)(
+    'uses the regular V3 add handler for nested pools on %s',
+    chain => {
+      const pool = { ...nestedPoolMock, chain, protocolVersion: 3 as const }
+
+      expect(selectAddLiquidityHandler(pool, true).constructor.name).toBe(
+        'ProportionalAddLiquidityHandlerV3'
+      )
+    }
+  )
 
   it('returns ProportionalAddLiquidityHandlerV3 for V3 pools with wantsProportional', () => {
     const v3Pool = getApiPoolMock(v3StableNonBoosted)

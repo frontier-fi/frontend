@@ -2,7 +2,12 @@
 import { NextRequest } from 'next/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GqlChain } from '../../services/api/generated/graphql'
-import { postRpcCall, resetRpcRateLimiterForTests } from './rpc'
+import {
+  MAX_RPC_BATCH_SIZE,
+  postRpcCall,
+  resetRpcRateLimiterForTests,
+  RPC_RATE_LIMIT_PER_IP,
+} from './rpc'
 
 const ALLOWED_ORIGIN = 'https://app.frontier.fi'
 
@@ -111,14 +116,14 @@ describe('postRpcCall', () => {
     expect((await postRpcCall(oversizedStreamReq, 'SEPOLIA' as GqlChain)).status).toBe(413)
   })
 
-  it('rejects malformed JSON, empty batches, and batches > 25 items with 400', async () => {
+  it('rejects malformed JSON, empty batches, and batches > MAX_RPC_BATCH_SIZE items with 400', async () => {
     expect((await postRpcCall(buildRpcRequest('{bad-json'), 'SEPOLIA' as GqlChain)).status).toBe(
       400
     )
 
     expect((await postRpcCall(buildRpcRequest([]), 'SEPOLIA' as GqlChain)).status).toBe(400)
 
-    const oversizedBatch = Array.from({ length: 26 }, (_, idx) => ({
+    const oversizedBatch = Array.from({ length: MAX_RPC_BATCH_SIZE + 1 }, (_, idx) => ({
       jsonrpc: '2.0',
       id: idx + 1,
       method: 'eth_blockNumber',
@@ -130,12 +135,14 @@ describe('postRpcCall', () => {
     )
   })
 
-  it('rejects disallowed RPC methods (debug_traceTransaction, eth_getLogs, eth_sendRawTransaction) with 403 JSON-RPC -32601', async () => {
+  it('rejects disallowed RPC methods and full-transaction eth_getBlockByNumber calls with 403 JSON-RPC -32601', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch')
 
     for (const disallowedMethod of [
       'debug_traceTransaction',
       'eth_getLogs',
+      'eth_getStorageAt',
+      'eth_getBlockByHash',
       'eth_sendRawTransaction',
     ]) {
       const req = buildRpcRequest({
@@ -159,6 +166,18 @@ describe('postRpcCall', () => {
       })
     }
 
+    const fullTxBlockRes = await postRpcCall(
+      buildRpcRequest({
+        jsonrpc: '2.0',
+        id: 7,
+        method: 'eth_getBlockByNumber',
+        params: ['latest', true],
+      }),
+      'SEPOLIA' as GqlChain
+    )
+
+    expect(fullTxBlockRes.status).toBe(403)
+
     const mixedBatch = [
       { jsonrpc: '2.0', id: 1, method: 'eth_call', params: [] },
       { jsonrpc: '2.0', id: 2, method: 'eth_getLogs', params: [] },
@@ -167,6 +186,45 @@ describe('postRpcCall', () => {
     expect((await postRpcCall(buildRpcRequest(mixedBatch), 'SEPOLIA' as GqlChain)).status).toBe(403)
 
     expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('answers eth_chainId statically without upstream fetch and short-TTL caches eth_blockNumber per caller id', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ jsonrpc: '2.0', id: 1, result: '0x37fd7f0' }), {
+        status: 200,
+      })
+    )
+
+    const chainIdRes = await postRpcCall(
+      buildRpcRequest({ jsonrpc: '2.0', id: 99, method: 'eth_chainId', params: [] }, {}, 'BASE'),
+      'BASE' as GqlChain
+    )
+
+    expect(chainIdRes.status).toBe(200)
+    expect(await chainIdRes.json()).toEqual({ jsonrpc: '2.0', id: 99, result: '0x2105' })
+    expect(fetchSpy).not.toHaveBeenCalled()
+
+    const blockResA = await postRpcCall(
+      buildRpcRequest(
+        { jsonrpc: '2.0', id: 10, method: 'eth_blockNumber', params: [] },
+        {},
+        'BASE'
+      ),
+      'BASE' as GqlChain
+    )
+
+    const blockResB = await postRpcCall(
+      buildRpcRequest(
+        { jsonrpc: '2.0', id: 11, method: 'eth_blockNumber', params: [] },
+        {},
+        'BASE'
+      ),
+      'BASE' as GqlChain
+    )
+
+    expect(await blockResA.json()).toEqual({ jsonrpc: '2.0', id: 10, result: '0x37fd7f0' })
+    expect(await blockResB.json()).toEqual({ jsonrpc: '2.0', id: 11, result: '0x37fd7f0' })
+    expect(fetchSpy).toHaveBeenCalledTimes(1)
   })
 
   it('forwards valid single and batched eth_call / eth_estimateGas requests on active chain with 200', async () => {
@@ -206,20 +264,26 @@ describe('postRpcCall', () => {
     expect(fetchSpy.mock.calls[0]?.[1]?.signal).toBeDefined()
   })
 
-  it('rate-limits per IP at 120 req/min with 429 and zero console.error noise', async () => {
+  it('charges per JSON-RPC item (not per HTTP batch) against RPC_RATE_LIMIT_PER_IP', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     vi.spyOn(globalThis, 'fetch').mockImplementation(
       async () =>
-        new Response(JSON.stringify({ jsonrpc: '2.0', id: 1, result: '0x1' }), { status: 200 })
+        new Response(JSON.stringify([{ jsonrpc: '2.0', id: 1, result: '0x1' }]), { status: 200 })
     )
 
-    for (let i = 0; i < 120; i += 1) {
+    const batchOfTen = Array.from({ length: MAX_RPC_BATCH_SIZE }, (_, idx) => ({
+      jsonrpc: '2.0',
+      id: idx + 1,
+      method: 'eth_call',
+      params: [],
+    }))
+
+    const fullBatches = RPC_RATE_LIMIT_PER_IP / MAX_RPC_BATCH_SIZE
+
+    for (let b = 0; b < fullBatches; b += 1) {
       const res = await postRpcCall(
-        buildRpcRequest(
-          { jsonrpc: '2.0', id: i, method: 'eth_blockNumber', params: [] },
-          { 'do-connecting-ip': '203.0.113.44' }
-        ),
+        buildRpcRequest(batchOfTen, { 'do-connecting-ip': '203.0.113.44' }),
         'SEPOLIA' as GqlChain
       )
 
@@ -228,7 +292,7 @@ describe('postRpcCall', () => {
 
     const limitedRes = await postRpcCall(
       buildRpcRequest(
-        { jsonrpc: '2.0', id: 121, method: 'eth_blockNumber', params: [] },
+        { jsonrpc: '2.0', id: 999, method: 'eth_call', params: [] },
         { 'do-connecting-ip': '203.0.113.44' }
       ),
       'SEPOLIA' as GqlChain

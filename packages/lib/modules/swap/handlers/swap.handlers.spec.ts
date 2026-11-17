@@ -43,7 +43,13 @@ vi.mock('@repo/lib/shared/utils/addresses', async importOriginal => {
 
 vi.mock('@repo/lib/modules/web3/transports', async importOriginal => {
   const actual = await importOriginal<typeof import('@repo/lib/modules/web3/transports')>()
-  return { ...actual, getRpcUrl: vi.fn(() => 'https://mainnet.infura.io/v3/test') }
+  return {
+    ...actual,
+    getRpcUrl: vi.fn(() => 'https://mainnet.infura.io/v3/test'),
+    withSdkRpcFallback: vi.fn((_chainId: number, fn: (rpcUrl: string) => unknown) =>
+      fn('https://mainnet.infura.io/v3/test')
+    ),
+  }
 })
 
 vi.mock('@frontier-fi/sdk', async importOriginal => {
