@@ -1,7 +1,7 @@
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { NextRequest } from 'next/server'
 import type { GqlChain } from '../../services/api/generated/graphql'
-import { drpcUrl } from '../rpc'
+import { chainIdHexForChain, drpcUrl } from '../rpc'
 import { logServerEvent, stripServerSecrets } from '../server-log'
 import {
   createBadRequestResponse,
@@ -12,8 +12,9 @@ import {
 import { createRateLimiter } from './rate-limit'
 
 const MAX_RPC_BODY_BYTES = 64 * 1024
-const MAX_RPC_BATCH_SIZE = 25
+export const MAX_RPC_BATCH_SIZE = 10
 const UPSTREAM_RPC_TIMEOUT_MS = 15_000
+const CHAIN_READ_CACHE_TTL_MS = 1_500
 
 const ALLOWED_RPC_METHODS = new Set<string>([
   'eth_call',
@@ -22,7 +23,6 @@ const ALLOWED_RPC_METHODS = new Set<string>([
   'eth_blockNumber',
   'eth_getBalance',
   'eth_getCode',
-  'eth_getStorageAt',
   'eth_getTransactionByHash',
   'eth_getTransactionReceipt',
   'eth_getTransactionCount',
@@ -30,19 +30,34 @@ const ALLOWED_RPC_METHODS = new Set<string>([
   'eth_maxPriorityFeePerGas',
   'eth_feeHistory',
   'eth_getBlockByNumber',
-  'eth_getBlockByHash',
-  'net_version',
-  'web3_clientVersion',
 ])
+
+const CACHEABLE_CHAIN_METHODS = new Set<string>([
+  'eth_blockNumber',
+  'eth_gasPrice',
+  'eth_maxPriorityFeePerGas',
+])
+
+export const RPC_RATE_LIMIT_PER_IP = 60
+export const RPC_RATE_LIMIT_GLOBAL = 600
 
 const rpcRateLimiter = createRateLimiter({
   windowMs: 60_000,
-  maxPerIp: 120,
-  maxGlobal: 1_200,
+  maxPerIp: RPC_RATE_LIMIT_PER_IP,
+  maxGlobal: RPC_RATE_LIMIT_GLOBAL,
 })
+
+const chainReadCache = new Map<string, { result: unknown; expiresAt: number }>()
+
+const inFlightChainReads = new Map<
+  string,
+  Promise<{ status: number; responseText: string; cachedResult?: unknown }>
+>()
 
 export function resetRpcRateLimiterForTests(): void {
   rpcRateLimiter.reset()
+  chainReadCache.clear()
+  inFlightChainReads.clear()
 }
 
 function isActiveSupportedRpcChain(chain: string): chain is GqlChain {
@@ -137,6 +152,10 @@ async function readStreamedBodyWithCap(
   return { ok: true, text: new TextDecoder().decode(combined) }
 }
 
+function normalizeJsonRpcId(id: unknown): string | number | null {
+  return typeof id === 'number' || typeof id === 'string' ? id : null
+}
+
 function validateJsonRpcPayload(parsed: unknown): Response | null {
   if (!parsed || typeof parsed !== 'object') {
     return createBadRequestResponse('Invalid JSON-RPC request body')
@@ -159,19 +178,17 @@ function validateJsonRpcPayload(parsed: unknown): Response | null {
       return createBadRequestResponse('Invalid JSON-RPC request body')
     }
 
-    const record = item as { id?: unknown; method?: unknown }
+    const record = item as { id?: unknown; method?: unknown; params?: unknown }
 
     if (typeof record.method !== 'string' || record.method.trim().length === 0) {
       return createBadRequestResponse('Invalid JSON-RPC request method')
     }
 
     if (!ALLOWED_RPC_METHODS.has(record.method)) {
-      const id = typeof record.id === 'number' || typeof record.id === 'string' ? record.id : null
-
       return Response.json(
         {
           jsonrpc: '2.0',
-          id,
+          id: normalizeJsonRpcId(record.id),
           error: {
             code: -32601,
             message: `Method not allowed: ${record.method}`,
@@ -180,9 +197,41 @@ function validateJsonRpcPayload(parsed: unknown): Response | null {
         { status: 403 }
       )
     }
+
+    if (
+      record.method === 'eth_getBlockByNumber' &&
+      Array.isArray(record.params) &&
+      record.params[1] === true
+    ) {
+      return Response.json(
+        {
+          jsonrpc: '2.0',
+          id: normalizeJsonRpcId(record.id),
+          error: {
+            code: -32601,
+            message: 'Full block transactions are not allowed on eth_getBlockByNumber',
+          },
+        },
+        { status: 403 }
+      )
+    }
   }
 
   return null
+}
+
+function isParameterlessSingleChainRead(
+  rpcBody: unknown
+): rpcBody is { id?: unknown; method: string; params?: unknown } {
+  if (!rpcBody || typeof rpcBody !== 'object' || Array.isArray(rpcBody)) return false
+
+  const record = rpcBody as { method?: unknown; params?: unknown }
+
+  if (typeof record.method !== 'string' || !CACHEABLE_CHAIN_METHODS.has(record.method)) {
+    return false
+  }
+
+  return record.params === undefined || (Array.isArray(record.params) && record.params.length === 0)
 }
 
 export async function postRpcCall(request: NextRequest, chain: GqlChain): Promise<Response> {
@@ -194,8 +243,8 @@ export async function postRpcCall(request: NextRequest, chain: GqlChain): Promis
     return createBadRequestResponse('Unsupported chain')
   }
 
-  const rateLimitResponse = rpcRateLimiter.consume(request)
-  if (rateLimitResponse) return rateLimitResponse
+  const initialRateLimit = rpcRateLimiter.consume(request, 1)
+  if (initialRateLimit) return initialRateLimit
 
   const contentType = request.headers.get('content-type') || ''
 
@@ -223,6 +272,36 @@ export async function postRpcCall(request: NextRequest, chain: GqlChain): Promis
   const validationError = validateJsonRpcPayload(rpcBody)
   if (validationError) return validationError
 
+  if (Array.isArray(rpcBody) && rpcBody.length > 1) {
+    const batchRateLimit = rpcRateLimiter.consume(request, rpcBody.length - 1)
+    if (batchRateLimit) return batchRateLimit
+  }
+
+  if (!Array.isArray(rpcBody) && (rpcBody as { method?: string }).method === 'eth_chainId') {
+    const chainIdHex = chainIdHexForChain(chain)
+
+    if (chainIdHex) {
+      return Response.json({
+        jsonrpc: '2.0',
+        id: normalizeJsonRpcId((rpcBody as { id?: unknown }).id),
+        result: chainIdHex,
+      })
+    }
+  }
+
+  if (isParameterlessSingleChainRead(rpcBody)) {
+    const cacheKey = `${chain}:${rpcBody.method}`
+    const cached = chainReadCache.get(cacheKey)
+
+    if (cached && Date.now() < cached.expiresAt) {
+      return Response.json({
+        jsonrpc: '2.0',
+        id: normalizeJsonRpcId(rpcBody.id),
+        result: cached.result,
+      })
+    }
+  }
+
   const drpcKey = process.env.DRPC_API_KEY || ''
 
   if (!drpcKey) {
@@ -241,6 +320,80 @@ export async function postRpcCall(request: NextRequest, chain: GqlChain): Promis
   const rpcUrl = drpcUrl(chain, drpcKey)
 
   try {
+    if (isParameterlessSingleChainRead(rpcBody)) {
+      const cacheKey = `${chain}:${rpcBody.method}`
+      let inFlight = inFlightChainReads.get(cacheKey)
+
+      if (!inFlight) {
+        inFlight = (async () => {
+          const rpcResponse = await fetch(rpcUrl, {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: rpcBody.method, params: [] }),
+            signal: AbortSignal.timeout(UPSTREAM_RPC_TIMEOUT_MS),
+            next: {
+              revalidate: 0,
+            },
+          })
+
+          const responseText = await rpcResponse.text()
+
+          if (rpcResponse.ok) {
+            try {
+              const parsed = JSON.parse(responseText) as { result?: unknown; error?: unknown }
+
+              if (parsed.result !== undefined && parsed.error === undefined) {
+                chainReadCache.set(cacheKey, {
+                  result: parsed.result,
+                  expiresAt: Date.now() + CHAIN_READ_CACHE_TTL_MS,
+                })
+
+                return { status: rpcResponse.status, responseText, cachedResult: parsed.result }
+              }
+            } catch {
+              // Fall through to raw response
+            }
+          }
+
+          return { status: rpcResponse.status, responseText }
+        })().finally(() => {
+          inFlightChainReads.delete(cacheKey)
+        })
+
+        inFlightChainReads.set(cacheKey, inFlight)
+      }
+
+      const outcome = await inFlight
+
+      if (outcome.cachedResult !== undefined) {
+        return Response.json({
+          jsonrpc: '2.0',
+          id: normalizeJsonRpcId(rpcBody.id),
+          result: outcome.cachedResult,
+        })
+      }
+
+      if (outcome.status < 200 || outcome.status >= 300) {
+        logServerEvent({
+          level: 'error',
+          source: 'rpc-proxy',
+          status: outcome.status,
+          chain,
+          rpcMethod,
+          message: `[rpc-proxy] ${chain} HTTP ${outcome.status}`,
+        })
+      }
+
+      return new Response(outcome.responseText, {
+        status: outcome.status,
+        headers: {
+          'content-type': 'application/json',
+        },
+      })
+    }
+
     const rpcResponse = await fetch(rpcUrl, {
       method: 'POST',
       headers: {

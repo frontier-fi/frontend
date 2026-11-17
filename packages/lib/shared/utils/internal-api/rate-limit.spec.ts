@@ -79,5 +79,21 @@ describe('rate-limit', () => {
       expect(limiter.check('192.0.2.3').allowed).toBe(true)
       expect(limiter.check('192.0.2.1').allowed).toBe(true)
     })
+
+    it('charges weighted cost for batched requests', () => {
+      const limiter = createRateLimiter({
+        windowMs: 60_000,
+        maxPerIp: 10,
+        maxGlobal: 20,
+      })
+
+      expect(limiter.consume(buildRequest({ 'do-connecting-ip': '192.0.2.9' }), 6)).toBeNull()
+
+      expect(limiter.consume(buildRequest({ 'do-connecting-ip': '192.0.2.9' }), 5)?.status).toBe(
+        429
+      )
+
+      expect(limiter.consume(buildRequest({ 'do-connecting-ip': '192.0.2.9' }), 4)).toBeNull()
+    })
   })
 })

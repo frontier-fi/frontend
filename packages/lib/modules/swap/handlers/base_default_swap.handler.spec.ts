@@ -122,6 +122,9 @@ vi.mock('@repo/lib/shared/services/viem/viem.client', () => ({
 
 vi.mock('@repo/lib/modules/web3/transports', () => ({
   getRpcUrl: vi.fn(() => 'https://mainnet.infura.io/v3/test'),
+  withSdkRpcFallback: vi.fn((_chainId: number, fn: (rpcUrl: string) => unknown) =>
+    fn('https://mainnet.infura.io/v3/test')
+  ),
 }))
 
 class TestableBaseDefaultSwapHandler extends BaseDefaultSwapHandler {

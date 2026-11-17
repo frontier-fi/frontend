@@ -13,8 +13,8 @@ export type RateLimiterOptions = {
 export type RateLimitCheckResult = { allowed: true } | { allowed: false; retryAfterSeconds: number }
 
 export type RateLimiter = {
-  check: (ip: string) => RateLimitCheckResult
-  consume: (request: Pick<Request, 'headers'>) => Response | null
+  check: (ip: string, cost?: number) => RateLimitCheckResult
+  consume: (request: Pick<Request, 'headers'>, cost?: number) => Response | null
   reset: () => void
 }
 
@@ -71,16 +71,21 @@ export function createRateLimiter({
     }
   }
 
-  function check(ip: string): RateLimitCheckResult {
+  function check(ip: string, cost = 1): RateLimitCheckResult {
+    const weight = Math.max(1, Math.ceil(cost))
     const now = Date.now()
     const existingIpBucket = perIpBuckets.get(ip)
 
-    if (existingIpBucket && now < existingIpBucket.resetAt) {
-      if (existingIpBucket.count >= maxPerIp) {
-        return {
-          allowed: false,
-          retryAfterSeconds: Math.max(1, Math.ceil((existingIpBucket.resetAt - now) / 1000)),
-        }
+    const activeIpBucket =
+      existingIpBucket && now < existingIpBucket.resetAt ? existingIpBucket : undefined
+
+    const currentIpCount = activeIpBucket ? activeIpBucket.count : 0
+
+    if (currentIpCount + weight > maxPerIp) {
+      const resetAt = activeIpBucket ? activeIpBucket.resetAt : now + windowMs
+      return {
+        allowed: false,
+        retryAfterSeconds: Math.max(1, Math.ceil((resetAt - now) / 1000)),
       }
     }
 
@@ -88,32 +93,32 @@ export function createRateLimiter({
       globalBucket = { count: 0, resetAt: now + windowMs }
     }
 
-    if (globalBucket.count >= maxGlobal) {
+    if (globalBucket.count + weight > maxGlobal) {
       return {
         allowed: false,
         retryAfterSeconds: Math.max(1, Math.ceil((globalBucket.resetAt - now) / 1000)),
       }
     }
 
-    if (existingIpBucket && now < existingIpBucket.resetAt) {
-      existingIpBucket.count += 1
+    if (activeIpBucket) {
+      activeIpBucket.count += weight
     } else {
       if (!perIpBuckets.has(ip)) {
         evictIfFull(now)
       }
 
       perIpBuckets.set(ip, {
-        count: 1,
+        count: weight,
         resetAt: now + windowMs,
       })
     }
 
-    globalBucket.count += 1
+    globalBucket.count += weight
     return { allowed: true }
   }
 
-  function consume(request: Pick<Request, 'headers'>): Response | null {
-    const result = check(getClientIp(request))
+  function consume(request: Pick<Request, 'headers'>, cost = 1): Response | null {
+    const result = check(getClientIp(request), cost)
     if (result.allowed) return null
 
     return createTooManyRequestsResponse(result.retryAfterSeconds)

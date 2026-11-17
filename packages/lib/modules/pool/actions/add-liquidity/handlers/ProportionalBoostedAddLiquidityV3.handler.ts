@@ -10,7 +10,7 @@ import {
 } from '@frontier-fi/sdk'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
 import { TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
-import { getRpcUrl } from '@repo/lib/modules/web3/transports'
+import { getRpcUrl, withSdkRpcFallback } from '@repo/lib/modules/web3/transports'
 import { Pool } from '../../../pool.types'
 import { getSender, LiquidityActionHelpers } from '../../LiquidityActionHelpers'
 import { SdkBuildAddLiquidityInput, SdkQueryAddLiquidityOutput } from '../add-liquidity.types'
@@ -54,11 +54,11 @@ export class ProportionalBoostedAddLiquidityV3 implements AddLiquidityHandler {
 
     const addLiquidity = new AddLiquidityBoostedV3()
 
-    const addLiquidityInput = this.constructSdkInput(referenceAmount, humanAmountsIn, userAddress)
-
-    const sdkQueryOutput = await addLiquidity.query(
-      addLiquidityInput,
-      this.helpers.boostedPoolState
+    const sdkQueryOutput = await withSdkRpcFallback(this.helpers.chainId, rpcUrl =>
+      addLiquidity.query(
+        this.constructSdkInput(referenceAmount, humanAmountsIn, userAddress, rpcUrl),
+        this.helpers.boostedPoolState
+      )
     )
 
     return {
@@ -114,11 +114,12 @@ export class ProportionalBoostedAddLiquidityV3 implements AddLiquidityHandler {
   private constructSdkInput(
     referenceAmount: InputAmount,
     humanAmountsIn: HumanTokenAmountWithSymbol[],
-    userAddress: Address
+    userAddress: Address,
+    rpcUrl = getRpcUrl(this.helpers.chainId)
   ): AddLiquidityBoostedProportionalInput {
     return {
       chainId: this.helpers.chainId,
-      rpcUrl: getRpcUrl(this.helpers.chainId),
+      rpcUrl,
       referenceAmount,
       kind: AddLiquidityKind.Proportional,
       sender: getSender(userAddress),

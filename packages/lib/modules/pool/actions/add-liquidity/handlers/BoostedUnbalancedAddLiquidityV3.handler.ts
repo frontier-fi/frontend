@@ -8,6 +8,7 @@ import {
 } from '@frontier-fi/sdk'
 import { HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
 import { TransactionConfig } from '@repo/lib/modules/web3/contracts/contract.types'
+import { withSdkRpcFallback } from '@repo/lib/modules/web3/transports'
 import { SdkBuildAddLiquidityInput, SdkQueryAddLiquidityOutput } from '../add-liquidity.types'
 import { BaseUnbalancedAddLiquidityHandler } from './BaseUnbalancedAddLiquidity.handler'
 import { constructBaseBuildCallInput } from './add-liquidity.utils'
@@ -20,11 +21,13 @@ export class BoostedUnbalancedAddLiquidityV3Handler extends BaseUnbalancedAddLiq
       return 0
     }
 
-    const addLiquidityInput = this.constructSdkInput(humanAmountsIn)
-
-    const priceImpactABA: PriceImpactAmount = await PriceImpact.addLiquidityUnbalancedBoosted(
-      addLiquidityInput,
-      this.helpers.boostedPoolState
+    const priceImpactABA: PriceImpactAmount = await withSdkRpcFallback(
+      this.helpers.chainId,
+      rpcUrl =>
+        PriceImpact.addLiquidityUnbalancedBoosted(
+          this.constructSdkInput(humanAmountsIn, undefined, rpcUrl),
+          this.helpers.boostedPoolState
+        )
     )
 
     return priceImpactABA.decimal
@@ -34,12 +37,16 @@ export class BoostedUnbalancedAddLiquidityV3Handler extends BaseUnbalancedAddLiq
     humanAmountsIn: HumanTokenAmountWithSymbol[]
   ): Promise<SdkQueryAddLiquidityOutput> {
     const addLiquidity = new AddLiquidityBoostedV3()
-    const addLiquidityInput: AddLiquidityBoostedInput = this.constructSdkInput(humanAmountsIn)
 
-    const sdkQueryOutput = await addLiquidity.query(
-      addLiquidityInput,
-      this.helpers.boostedPoolState
-    )
+    const sdkQueryOutput = await withSdkRpcFallback(this.helpers.chainId, rpcUrl => {
+      const addLiquidityInput: AddLiquidityBoostedInput = this.constructSdkInput(
+        humanAmountsIn,
+        undefined,
+        rpcUrl
+      )
+
+      return addLiquidity.query(addLiquidityInput, this.helpers.boostedPoolState)
+    })
 
     return {
       bptOut: sdkQueryOutput.bptOut,
