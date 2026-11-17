@@ -19,12 +19,6 @@ Copy the `.env.template` file to `.env.local`:
 cp .env.template .env.local
 ```
 
-Copy the `.env.local` file to `../../packages/lib`:
-
-```bash
-cp .env.local ../../packages/lib
-```
-
 Next, install dependencies:
 
 ```bash

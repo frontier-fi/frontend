@@ -13,6 +13,7 @@ export function createVitestConfig(monorepoRoot: string): ViteUserConfig {
         '@bal': resolveFromRoot('./apps/frontend-v3'),
       },
     },
+    envDir: resolveFromRoot('./apps/frontend-v3'),
     envPrefix: ['VITE', 'NEXT'],
     test: {
       globals: true,

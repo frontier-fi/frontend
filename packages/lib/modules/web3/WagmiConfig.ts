@@ -20,8 +20,11 @@ import { isProd, shouldUseAnvilFork } from '@repo/lib/config/app.config'
 import { defaultAnvilForkRpcUrl } from '@repo/lib/test/utils/wagmi/fork.helpers'
 import { isBrowser } from '@repo/lib/shared/utils/app.helper'
 
-const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_ID
-if (!walletConnectProjectId) throw new Error('Missing NEXT_PUBLIC_WALLET_CONNECT_ID env')
+const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_ID?.trim()
+
+if (isProd && !walletConnectProjectId) {
+  throw new Error('Missing NEXT_PUBLIC_WALLET_CONNECT_ID env')
+}
 
 let connectors: ReturnType<typeof connectorsForWallets> = []
 
@@ -36,23 +39,24 @@ if (isBrowser()) {
           safeWallet,
           rabbyWallet,
           coinbaseWallet,
-          rainbowWallet,
+          ...(walletConnectProjectId ? [rainbowWallet] : []),
           injectedWallet,
         ],
       },
     ],
     {
       appName: PROJECT_CONFIG.projectName,
-      projectId: walletConnectProjectId,
+      projectId: walletConnectProjectId || '00000000000000000000000000000000',
     }
   )
 
   /*
-  Only adding a new WC Connector if the user is not already connected to WC
+  Only adding a new WC Connector if a WalletConnect project ID is configured
+  and the user is not already connected to WC.
   This fixes this rainbowkit issue:
   https://github.com/rainbow-me/rainbowkit/issues/2232
 */
-  if (!isConnectedToWC()) {
+  if (walletConnectProjectId && !isConnectedToWC()) {
     const lastConnector = connectors[connectors.length - 1]!
 
     if (lastConnector({} as any).id !== 'walletConnect') {
