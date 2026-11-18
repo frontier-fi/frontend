@@ -7,7 +7,8 @@ import { useEffect, useRef } from 'react'
 import { PoolCreationToken, SupportedPoolTypes } from '../../types'
 import { isWeightedPool } from '../../helpers'
 import { MAX_POOL_NAME_LENGTH, MAX_POOL_SYMBOL_LENGTH } from '../../constants'
-import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+
+const POOL_SYMBOL_PREFIX = '0xFF-'
 
 export function PoolDetails() {
   const { poolCreationForm } = usePoolCreationForm()
@@ -87,18 +88,18 @@ function getSuggestions(poolTokens: PoolCreationToken[], poolType: SupportedPool
     })
     .join('-')
 
-  const suggestedPoolSymbol =
-    tokenSymbols.length <= MAX_POOL_SYMBOL_LENGTH
+  const maxSymbolBodyLength = MAX_POOL_SYMBOL_LENGTH - POOL_SYMBOL_PREFIX.length
+
+  const symbolBody =
+    tokenSymbols.length <= maxSymbolBodyLength
       ? tokenSymbols
-      : tokenSymbols.slice(0, MAX_POOL_SYMBOL_LENGTH)
+      : tokenSymbols.slice(0, maxSymbolBodyLength)
 
-  const { projectName } = PROJECT_CONFIG
-
-  const poolNameWithProject = `${projectName} ${tokenSymbols}`
+  const suggestedPoolSymbol = tokenSymbols ? `${POOL_SYMBOL_PREFIX}${symbolBody}` : ''
 
   const suggestedPoolName =
-    poolNameWithProject.length <= MAX_POOL_NAME_LENGTH
-      ? poolNameWithProject
+    tokenSymbols.length <= MAX_POOL_NAME_LENGTH
+      ? tokenSymbols
       : tokenSymbols.slice(0, MAX_POOL_NAME_LENGTH)
 
   return { suggestedPoolName, suggestedPoolSymbol }

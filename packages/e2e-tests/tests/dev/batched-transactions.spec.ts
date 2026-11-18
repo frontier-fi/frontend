@@ -58,7 +58,7 @@ async function agreeToBoostedPoolRisks(page: Page) {
 
   const boostedPoolAdditionRiskCheckbox = await checkbox(
     page,
-    /^I accept that by adding tokens to this Boosted Pool/i,
+    /^I accept that by adding tokens to this rehyped Pool/i,
   )
 
   await boostedPoolRiskCheckbox.click()

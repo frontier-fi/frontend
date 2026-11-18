@@ -56,6 +56,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
   const {
     data,
     poolSpotPrice,
+    poolPeakPrice,
     poolIsInRange,
     xMin,
     xMax,
@@ -70,6 +71,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
   const { colorMode } = useColorMode()
   const selectColor = useSelectColor()
   const chartColors = ECLP_CHART_COLORS[colorMode === 'dark' ? 'dark' : 'light']
+  const peakLineColor = colorMode === 'light' ? 'rgb(14, 165, 160)' : 'rgb(45, 212, 191)'
 
   const tokens = useMemo(() => {
     return isReversed ? poolTokens.reverse().join(' / ') : poolTokens.join(' / ')
@@ -79,15 +81,48 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
 
   const fontHighlightColor = selectColor('font', 'highlight')
   const backgroundHighlightColor = selectColor('background', 'highlight')
-  const markPointMargin = 0.05
+  // Labeled pills are wide — use a generous share of the [xMin, xMax] span.
+  const markPointMargin = 0.22
+  // Pixel offsets below the axis (positive Y is downward in echarts symbolOffset).
+  const valuePillOffsetBelow = 18
+  const valuePillOffsetStacked = 42
+  const valuePillOffsetStackedDeep = 66
 
-  const isSpotPriceNearLowerBound = useMemo(() => {
-    return bn(poolSpotPrice || 0).lt(xMin * (1 + markPointMargin))
-  }, [poolSpotPrice, xMin])
+  const priceRange = xMax - xMin
 
-  const isSpotPriceNearUpperBound = useMemo(() => {
-    return bn(poolSpotPrice || 0).gt(xMax * (1 - markPointMargin))
-  }, [poolSpotPrice, xMax])
+  function isNearPrice(
+    a: string | number | null | undefined,
+    b: string | number | null | undefined
+  ) {
+    if (a === null || a === undefined || b === null || b === undefined) return false
+    if (!priceRange) return false
+    return bn(a).minus(b).abs().lt(bn(priceRange).times(markPointMargin))
+  }
+
+  const isSpotPriceNearLowerBound = isNearPrice(poolSpotPrice, xMin)
+  const isSpotPriceNearUpperBound = isNearPrice(poolSpotPrice, xMax)
+  const isSpotPriceNearBound = isSpotPriceNearLowerBound || isSpotPriceNearUpperBound
+
+  const hasPeakPrice =
+    poolPeakPrice !== null && poolPeakPrice !== undefined && bn(poolPeakPrice || 0).gt(0)
+
+  const isPeakNearSpot = hasPeakPrice && isNearPrice(poolPeakPrice, poolSpotPrice)
+
+  const isPeakNearBound =
+    hasPeakPrice && (isNearPrice(poolPeakPrice, xMin) || isNearPrice(poolPeakPrice, xMax))
+
+  // Prefer keeping bounds on the first row; stack peak then current price as needed.
+  const peakPillOffset = isPeakNearBound ? valuePillOffsetStacked : valuePillOffsetBelow
+
+  const spotPillOffset =
+    isSpotPriceNearBound || isPeakNearSpot
+      ? isPeakNearBound && isPeakNearSpot
+        ? valuePillOffsetStackedDeep
+        : valuePillOffsetStacked
+      : valuePillOffsetBelow
+
+  const needsExtraBottomSpace =
+    spotPillOffset > valuePillOffsetBelow || peakPillOffset > valuePillOffsetBelow
 
   const toolTipTheme = {
     heading: 'font-weight: bold; color: #E5D3BE',
@@ -103,7 +138,12 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
         left: '1%',
         right: '1%',
         top: '7%',
-        bottom: '9%',
+        // Extra room below the axis when pills stack under a bound/peak.
+        bottom: needsExtraBottomSpace
+          ? spotPillOffset >= valuePillOffsetStackedDeep
+            ? '24%'
+            : '18%'
+          : '9%',
       },
       tooltip: {
         show: true,
@@ -189,36 +229,12 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
             symbolSize: 6,
             symbolRotate: 180,
             silent: true,
-            label: {
-              show: true,
-              fontSize: 12,
-              color: '#fff',
-              backgroundColor: theme.colors.gray[400],
-              padding: [2, 3, 2, 3],
-              borderRadius: 2,
-              fontWeight: 'bold',
-              offset: [0, 1],
-            },
+            label: { show: false },
             lineStyle: {
               color: chartColors.lowerBoundLine,
               padding: [2, 0, 0, 0],
             },
-            data: [
-              [
-                {
-                  coord: [xMin, 0],
-                  label: {
-                    formatter: () => fNum('tokenRatio', xMin || '0'),
-                    position: 'start',
-                    distance: 5,
-                    backgroundColor: chartColors.lowerBound,
-                  },
-                },
-                {
-                  coord: [xMin, yMax * 1.1],
-                },
-              ],
-            ],
+            data: [[{ coord: [xMin, 0] }, { coord: [xMin, yMax * 1.1] }]],
           },
         },
         // upper bound
@@ -231,37 +247,35 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
             symbolSize: 6,
             symbolRotate: 180,
             silent: true,
-            label: {
-              show: true,
-              fontSize: 12,
-              color: '#fff',
-              backgroundColor: theme.colors.gray[400],
-              padding: [2, 3, 2, 3],
-              borderRadius: 2,
-              fontWeight: 'bold',
-              offset: [0, 1],
-            },
+            label: { show: false },
             lineStyle: {
               color: chartColors.upperBoundLine,
             },
-            data: [
-              [
-                {
-                  coord: [xMax, 0],
-                  label: {
-                    formatter: () => fNum('tokenRatio', xMax || '0'),
-                    position: 'start',
-                    distance: 5,
-                    backgroundColor: chartColors.upperBound,
-                  },
-                },
-                {
-                  coord: [xMax, yMax * 1.1],
-                },
-              ],
-            ],
+            data: [[{ coord: [xMax, 0] }, { coord: [xMax, yMax * 1.1] }]],
           },
         },
+        // peak price
+        ...(hasPeakPrice
+          ? [
+              {
+                type: 'line' as const,
+                data: [],
+                symbol: 'none',
+                markLine: {
+                  symbol: ['none', 'triangle'],
+                  symbolSize: 6,
+                  symbolRotate: 180,
+                  silent: true,
+                  label: { show: false },
+                  lineStyle: {
+                    color: peakLineColor,
+                    type: 'dashed' as const,
+                  },
+                  data: [[{ coord: [poolPeakPrice, 0] }, { coord: [poolPeakPrice, yMax * 1.1] }]],
+                },
+              },
+            ]
+          : []),
         // spot price
         {
           type: 'line',
@@ -269,17 +283,13 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
           symbol: 'none',
           markPoint: {
             silent: true,
-            symbol: 'rect',
-            symbolSize: [60, 36],
-            itemStyle: {
-              color: 'transparent',
-              borderWidth: 0,
-            },
-            // but markpoints for all 3 lines are here
             data: [
               {
                 coord: [xMin, yMax * 1.22],
                 value: 'Lower\nbound',
+                symbol: 'rect',
+                symbolSize: [60, 36],
+                itemStyle: { color: 'transparent', borderWidth: 0 },
                 label: {
                   show: !isSpotPriceNearLowerBound || !poolIsInRange,
                   fontSize: 12,
@@ -291,6 +301,9 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
               {
                 coord: [xMax, yMax * 1.22],
                 value: 'Upper\nbound',
+                symbol: 'rect',
+                symbolSize: [60, 36],
+                itemStyle: { color: 'transparent', borderWidth: 0 },
                 label: {
                   show: !isSpotPriceNearUpperBound || !poolIsInRange,
                   fontSize: 12,
@@ -299,15 +312,117 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
                   borderRadius: 4,
                 },
               },
+              ...(hasPeakPrice
+                ? [
+                    {
+                      coord: [poolPeakPrice, yMax * 1.22],
+                      value: 'Peak\nprice',
+                      symbol: 'rect',
+                      symbolSize: [60, 36],
+                      itemStyle: { color: 'transparent', borderWidth: 0 },
+                      label: {
+                        show: !isPeakNearSpot || !poolIsInRange,
+                        fontSize: 12,
+                        color: peakLineColor,
+                        padding: 4,
+                        borderRadius: 4,
+                      },
+                    },
+                  ]
+                : []),
               {
                 coord: [poolSpotPrice, yMax * 1.22],
                 value: 'Current\nprice',
+                symbol: 'rect',
+                symbolSize: [60, 36],
+                itemStyle: { color: 'transparent', borderWidth: 0 },
                 label: {
                   show: poolIsInRange,
                   fontSize: 12,
                   color: fontHighlightColor,
                 },
               },
+              // Value pills — markPoint symbolOffset is reliable for stacking.
+              {
+                coord: [xMin, 0],
+                value: `Lower ${fNum('tokenRatio', xMin || '0')}`,
+                symbol: 'circle',
+                symbolSize: 1,
+                symbolOffset: [0, valuePillOffsetBelow],
+                itemStyle: { color: 'transparent' },
+                label: {
+                  show: true,
+                  color: '#fff',
+                  backgroundColor: chartColors.lowerBound,
+                  padding: [3, 5],
+                  borderRadius: 2,
+                  fontWeight: 'bold',
+                  fontSize: 12,
+                },
+                z: 5,
+              },
+              {
+                coord: [xMax, 0],
+                value: `Upper ${fNum('tokenRatio', xMax || '0')}`,
+                symbol: 'circle',
+                symbolSize: 1,
+                symbolOffset: [0, valuePillOffsetBelow],
+                itemStyle: { color: 'transparent' },
+                label: {
+                  show: true,
+                  color: '#fff',
+                  backgroundColor: chartColors.upperBound,
+                  padding: [3, 5],
+                  borderRadius: 2,
+                  fontWeight: 'bold',
+                  fontSize: 12,
+                },
+                z: 5,
+              },
+              ...(hasPeakPrice
+                ? [
+                    {
+                      coord: [poolPeakPrice, 0],
+                      value: `Peak ${fNum('tokenRatio', poolPeakPrice || '0')}`,
+                      symbol: 'circle',
+                      symbolSize: 1,
+                      symbolOffset: [0, peakPillOffset],
+                      itemStyle: { color: 'transparent' },
+                      label: {
+                        show: true,
+                        color: '#fff',
+                        backgroundColor: peakLineColor,
+                        padding: [3, 5],
+                        borderRadius: 2,
+                        fontWeight: 'bold',
+                        fontSize: 12,
+                      },
+                      z: 6,
+                    },
+                  ]
+                : []),
+              ...(poolIsInRange
+                ? [
+                    {
+                      coord: [poolSpotPrice, 0],
+                      value: `Price ${fNum('tokenRatio', poolSpotPrice || '0')}`,
+                      symbol: 'circle',
+                      symbolSize: 1,
+                      symbolOffset: [0, spotPillOffset],
+                      itemStyle: { color: 'transparent' },
+                      label: {
+                        show: true,
+                        color: '#fff',
+                        backgroundColor: backgroundHighlightColor,
+                        padding: [3, 5],
+                        borderRadius: 2,
+                        fontWeight: 'bold',
+                        fontSize: 12,
+                      },
+                      z: 10,
+                    },
+                  ]
+                : []),
             ],
           },
           markLine: poolIsInRange
@@ -316,34 +431,12 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
                 symbolSize: 6,
                 symbolRotate: 0,
                 silent: true,
-                label: {
-                  show: true,
-                  fontSize: 12,
-                  color: '#fff',
-                  backgroundColor: theme.colors.green[300],
-                  padding: [2, 3, 2, 3],
-                  borderRadius: 2,
-                  fontWeight: 'bold',
-                },
+                z: 10,
+                label: { show: false },
                 lineStyle: {
                   color: fontHighlightColor,
                 },
-                data: [
-                  [
-                    {
-                      coord: [poolSpotPrice, 0],
-                      label: {
-                        formatter: () => fNum('tokenRatio', poolSpotPrice || '0'),
-                        position: 'start',
-                        distance: 6,
-                        backgroundColor: backgroundHighlightColor,
-                      },
-                    },
-                    {
-                      coord: [poolSpotPrice, yMax * 1.1],
-                    },
-                  ],
-                ],
+                data: [[{ coord: [poolSpotPrice, 0] }, { coord: [poolSpotPrice, yMax * 1.1] }]],
               }
             : undefined,
         },
@@ -426,6 +519,13 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
   }, [
     data,
     poolSpotPrice,
+    poolPeakPrice,
+    hasPeakPrice,
+    isPeakNearSpot,
+    isPeakNearBound,
+    peakPillOffset,
+    spotPillOffset,
+    needsExtraBottomSpace,
     xMin,
     xMax,
     yMax,
@@ -437,7 +537,9 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
     backgroundHighlightColor,
     isSpotPriceNearLowerBound,
     isSpotPriceNearUpperBound,
+    isSpotPriceNearBound,
     chartColors,
+    peakLineColor,
     colorMode,
   ])
 
@@ -451,6 +553,8 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
     options,
     hasChartData: data?.length,
     poolIsInRange,
+    poolSpotPrice,
+    poolPeakPrice,
     toggleIsReversed,
     isLoading,
     outOfRangeText,

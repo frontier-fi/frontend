@@ -18,7 +18,7 @@ export function PreviewGyroEclpConfig() {
 
   const poolTokens = useWatch({ control: poolCreationForm.control, name: 'poolTokens' })
 
-  const { options } = useEclpChart()
+  const { options, poolSpotPrice } = useEclpChart()
 
   const priceDisplayCards = [
     {
@@ -27,9 +27,14 @@ export function PreviewGyroEclpConfig() {
       value: alpha ? fNumCustom(alpha, NUM_FORMAT) : '-',
     },
     {
-      color: 'green.400',
+      color: 'teal.400',
       label: 'Peak price',
       value: peakPrice ? fNumCustom(peakPrice, NUM_FORMAT) : '-',
+    },
+    {
+      color: 'green.400',
+      label: 'Current price',
+      value: poolSpotPrice ? fNumCustom(String(poolSpotPrice), NUM_FORMAT) : '-',
     },
     {
       color: 'orange.400',
@@ -46,7 +51,7 @@ export function PreviewGyroEclpConfig() {
   return (
     <Card>
       <VStack spacing="md" w="full">
-        <SimpleGrid columns={3} spacing={3} w="full">
+        <SimpleGrid columns={4} spacing={3} w="full">
           {priceDisplayCards.map(({ color, label, value }) => (
             <Card key={label} variant="subSection">
               <VStack align="start" spacing="sm">

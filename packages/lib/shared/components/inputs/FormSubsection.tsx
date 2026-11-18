@@ -26,8 +26,8 @@ export function FormSubsection({ children, marginLeft = '2', ...props }: FormSub
           top: 0,
           bottom: 0,
           width: '4px',
-          backgroundColor: 'border.base',
-          opacity: 0.5,
+          backgroundColor: 'grayText',
+          opacity: 0.7,
         },
       }}
       w={{ base: 'calc(100% - var(--chakra-space-5))', xl: 'full' }}

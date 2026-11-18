@@ -41,7 +41,7 @@ export function SparkleIconWrapper({
     const goldGroupElement = goldGroup as SVGGElement
     goldGroupElement.style.transformOrigin = 'center center'
 
-    const unsubscribe = rotate.onChange(latestRotateValue => {
+    const unsubscribe = rotate.on('change', latestRotateValue => {
       requestAnimationFrame(() => {
         goldGroupElement.style.transform = `scale(1.2) rotate(${latestRotateValue}deg)`
       })

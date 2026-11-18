@@ -88,7 +88,7 @@ export default function Privacy() {
                         <Link href="risks#stable-pools">Stable Pools</Link>
                       </li>
                       <li>
-                        <Link href="risks#boosted-pools">Boosted Pools</Link>
+                        <Link href="risks#rehyped-pools">rehyped Pools</Link>
                       </li>
                       <li>
                         <Link href="risks#concentrated-liquidity-pools">
@@ -584,7 +584,7 @@ export default function Privacy() {
                 </li>
                 <li>
                   LPs may consider providing liquidity into pools with less likelihood of token
-                  price divergence. For example, stable pools or boosted pools.
+                  price divergence. For example, stable pools or rehyped pools.
                 </li>
                 <li>
                   LP&rsquo;s should consider providing liquidity in unbalanced pools, like 80/20
@@ -951,33 +951,33 @@ export default function Privacy() {
               </FadeInOnView>
               <FadeInOnView>
                 <div className="subsection">
-                  <h4 className="anchor" id="boosted-pools">
-                    Boosted Pools
+                  <h4 className="anchor" id="rehyped-pools">
+                    rehyped Pools
                   </h4>
                   <p>
                     Typically, only 10% or less of the liquidity deposited into an AMM pool is being
                     utilized by traders because the trade sizes are much smaller than the available
-                    liquidity. Boosted Pools allow the remaining portion of liquidity to be sent to
+                    liquidity. rehyped Pools allow the remaining portion of liquidity to be sent to
                     lending protocols where the liquidity can earn additional yield for accepting
                     inherent risks.
                   </p>
                   <ul>
                     <li>
-                      Boosted Pools are designed to allow for greater capital efficiency, deeper
+                      rehyped Pools are designed to allow for greater capital efficiency, deeper
                       liquidity, and increased yield for Liquidity Providers.
                     </li>
                     <li>
-                      For traders, Boosted Pools are a cheaper entry/exit into decentralized lending
+                      For traders, rehyped Pools are a cheaper entry/exit into decentralized lending
                       protocols like Aave.
                     </li>
                     <li>
-                      Boosted Pools increase the opportunity for LPs to gain exposure to a wide
+                      rehyped Pools increase the opportunity for LPs to gain exposure to a wide
                       variety of yield increases from multiple yield protocols.
                     </li>
                   </ul>
                   <h5>Third party platform risk exposure (DeFi composability risk)</h5>
                   <p>
-                    Since boosted pools deposit excess liquidity into third-party protocols, like
+                    Since rehyped pools deposit excess liquidity into third-party protocols, like
                     Aave, to generate yield, LPs must fully understand the risks of the underlying
                     protocol since a portion of their funds will be exposed to the risks of that
                     protocol. Some of the risks of the underlying protocol may include smart
@@ -989,19 +989,19 @@ export default function Privacy() {
                     which face additional risks (described above).
                   </p>
                   <p>
-                    Also note, some boosted pools may use strategies that utilize multiple yield
+                    Also note, some rehyped pools may use strategies that utilize multiple yield
                     protocols in order to maximize yield. Since these strategies may change exposure
                     to the underlying yield protocols at any time, LPs must accept the risk that the
                     protocol utilizing these strategies carefully vets all third party protocols to
                     reduce composability risks.
                   </p>
                   <p>
-                    If the underlying protocol were to get hacked, LPs in a boosted pool that
+                    If the underlying protocol were to get hacked, LPs in a rehyped pool that
                     deposits liquidity in that protocol could lose funds.
                   </p>
                   <h5>Depegging risk</h5>
                   <p>
-                    Individual stablecoin tokens within Boosted Pools are subject to{' '}
+                    Individual stablecoin tokens within rehyped Pools are subject to{' '}
                     <Link href="risks#stable-pools">
                       <span> depegging risks</span>
                     </Link>
@@ -1055,11 +1055,11 @@ export default function Privacy() {
                       .
                     </li>
                     <li>
-                      <em>Rehype E-CLPs:</em> Arguably the most capital efficient pools, these
+                      <em>rehyped E-CLPs:</em> Arguably the most capital efficient pools, these
                       E-CLPs combine asymmetric concentrated liquidity with auto-rehypothecation to
                       lending markets. Learn more about{' '}
                       <a href="https://docs.gyro.finance/pools/rehype-clps.html">
-                        Rehype E-CLP&rsquo;s and their risks
+                        rehyped E-CLP&rsquo;s and their risks
                       </a>
                       .
                     </li>

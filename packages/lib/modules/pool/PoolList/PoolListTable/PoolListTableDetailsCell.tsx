@@ -1,7 +1,7 @@
 import { PoolCore } from '@repo/lib/modules/pool/pool.types'
 import { Box, HStack, Text } from '@chakra-ui/react'
 import { PoolVersionTag } from '@repo/lib/modules/pool/PoolList/PoolListTable/PoolVersionTag'
-import { isBoosted, isGyro } from '@repo/lib/modules/pool/pool.helpers'
+import { isBoosted, isGyro, toRehypeLabel } from '@repo/lib/modules/pool/pool.helpers'
 import { getPoolTypeLabel } from '@repo/lib/modules/pool/pool.utils'
 import Image from 'next/image'
 import { PoolHookTag } from '@repo/lib/modules/pool/PoolDetail/PoolHookTag'
@@ -10,11 +10,11 @@ import { usePoolsMetadata } from '../../metadata/PoolsMetadataProvider'
 import { Erc4626Metadata } from '../../metadata/getErc4626Metadata'
 import { Protocol } from '@repo/lib/modules/protocols/useProtocols'
 import { ProtocolIcon } from '@repo/lib/shared/components/icons/ProtocolIcon'
-import { BoostedIcon } from '@repo/lib/shared/components/icons/BoostedIcon'
 import { TooltipWithTouch } from '@repo/lib/shared/components/tooltips/TooltipWithTouch'
+import { RehypeTag } from '@repo/lib/modules/pool/PoolDetail/RehypeTag'
 
 function getPoolDisplayTypeLabel(pool: PoolCore, erc4626Metadata: Erc4626Metadata[]) {
-  const boostedTooltipLabel = [...erc4626Metadata.map(m => m.name)].join(' & ')
+  const rehypeTooltipLabel = [...erc4626Metadata.map(m => toRehypeLabel(m.name))].join(' & ')
   const hasIconTags = isGyro(pool.type) || isBoosted(pool)
 
   return (
@@ -44,15 +44,13 @@ function getPoolDisplayTypeLabel(pool: PoolCore, erc4626Metadata: Erc4626Metadat
                   •
                 </Text>
               )}
-              <TooltipWithTouch label={boostedTooltipLabel}>
+              <TooltipWithTouch label={rehypeTooltipLabel}>
                 <HStack gap="0.25rem">
-                  <Box rounded="full" shadow="md">
-                    <BoostedIcon size={18} />
-                  </Box>
+                  <RehypeTag size="sm" />
                   {erc4626Metadata.map(metadata => (
                     <Box key={metadata.name} rounded="full" shadow="md">
                       <Image
-                        alt={metadata.name}
+                        alt={toRehypeLabel(metadata.name)}
                         height={18}
                         src={metadata.iconUrl || ''}
                         width={18}
