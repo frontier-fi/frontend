@@ -36,8 +36,8 @@ export function PoolSnapshotValues() {
         totalLiquidity: toCurrency(tvl, { abbreviated: false }),
         volume24h: toCurrency(pool.dynamicData.volume24h, { abbreviated: false }),
         income24h: isCowAmmPool(pool.type)
-          ? toCurrency(pool.dynamicData.surplus24h, { abbreviated: false, noDecimals: true })
-          : toCurrency(pool.dynamicData.fees24h, { abbreviated: false, noDecimals: true }),
+          ? toCurrency(pool.dynamicData.surplus24h, { abbreviated: false })
+          : toCurrency(pool.dynamicData.fees24h, { abbreviated: false }),
         weeklyRewards: weeklyRewards ? toCurrency(weeklyRewards.toString()) : 'N/A',
       }
     : undefined
@@ -113,7 +113,7 @@ export function PoolSnapshotValues() {
         <VStack align="flex-start" spacing="xxs" w="full">
           <LabelWithTooltip
             label="Weekly incentives"
-            tooltip="The weekly liquidity mining incentives for this pool. It includes incentives from the Frontier Finance Protocol (as determined by veBAL voting) and from unaffiliated third parties. Users must stake to get these."
+            tooltip="The weekly liquidity mining incentives for this pool. It includes incentives from the Frontier Finance Protocol and from unaffiliated third parties. Users must stake to get these."
           />
           {poolStatsValues ? (
             <HStack>

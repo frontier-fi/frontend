@@ -18,9 +18,9 @@ prevents this loss (also called LVR), thereby increasing LP returns.`
 export const lockingIncentivesTooltipText = `The protocol revenue share for Liquidity Providers
                                             with 1-year locked Frontier Finance ve8020 tokens.`
 
-export const votingIncentivesTooltipText = `Vote incentives are offered to veBAL holders who
+export const votingIncentivesTooltipText = `Vote incentives are offered to voters who
                         participate in weekly gauge voting by third parties on platforms like Votemarket.
-                        Your incentives are determined by your veBAL voting power compared to other voters.
+                        Your incentives are determined by your voting power compared to other voters.
                         The listed APR represents an average rather than a guaranteed return for active participants.`
 
 const quantAMMTooltipText =

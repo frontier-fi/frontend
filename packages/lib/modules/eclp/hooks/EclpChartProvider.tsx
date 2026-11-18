@@ -1,9 +1,52 @@
 import { bn, fNum } from '@repo/lib/shared/utils/numbers'
-import { useTheme as useChakraTheme } from '@chakra-ui/react'
+import { useColorMode, useTheme as useChakraTheme } from '@chakra-ui/react'
 import { createContext, PropsWithChildren, useMemo } from 'react'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
 import { useSelectColor } from '@repo/lib/shared/hooks/useSelectColor'
 import { type ECLPLiquidityProfile } from './useGetECLPLiquidityProfile'
+
+const ECLP_CHART_COLORS = {
+  light: {
+    lineStops: [
+      'rgb(70, 95, 170)',
+      'rgb(25, 125, 185)',
+      'rgb(0, 150, 180)',
+      'rgb(20, 155, 135)',
+      'rgb(35, 155, 85)',
+    ],
+    areaStops: [
+      'rgba(70, 95, 170, 0.88)',
+      'rgba(25, 125, 185, 0.72)',
+      'rgba(0, 150, 180, 0.58)',
+      'rgba(20, 155, 135, 0.42)',
+      'rgba(35, 155, 85, 0.28)',
+    ],
+    lowerBound: 'rgb(70, 95, 170)',
+    upperBound: 'rgb(35, 155, 85)',
+    lowerBoundLine: 'rgba(70, 95, 170, 0.85)',
+    upperBoundLine: 'rgba(35, 155, 85, 0.85)',
+  },
+  dark: {
+    lineStops: [
+      'rgb(102, 123, 190)',
+      'rgb(58, 151, 199)',
+      'rgb(13, 178, 208)',
+      'rgb(47, 183, 164)',
+      'rgb(80, 187, 119)',
+    ],
+    areaStops: [
+      'rgba(102, 123, 190, 0.75)',
+      'rgba(58, 151, 199, 0.55)',
+      'rgba(13, 178, 208, 0.38)',
+      'rgba(47, 183, 164, 0.2)',
+      'rgba(80, 187, 119, 0)',
+    ],
+    lowerBound: 'rgb(102, 123, 190)',
+    upperBound: 'rgb(80, 187, 119)',
+    lowerBoundLine: 'rgba(102, 123, 190, 0.5)',
+    upperBoundLine: 'rgba(80, 187, 119, 0.5)',
+  },
+} as const
 
 type EclpChartContextType = ReturnType<typeof useEclpChartLogic>
 
@@ -24,13 +67,16 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
   } = eclpLiquidityProfile
 
   const theme = useChakraTheme()
+  const { colorMode } = useColorMode()
   const selectColor = useSelectColor()
+  const chartColors = ECLP_CHART_COLORS[colorMode === 'dark' ? 'dark' : 'light']
 
   const tokens = useMemo(() => {
     return isReversed ? poolTokens.reverse().join(' / ') : poolTokens.join(' / ')
   }, [poolTokens, isReversed])
 
-  const secondaryFontColor = selectColor('font', 'secondary')
+  const secondaryFontColor = selectColor('font', colorMode === 'light' ? 'primary' : 'secondary')
+
   const fontHighlightColor = selectColor('font', 'highlight')
   const backgroundHighlightColor = selectColor('background', 'highlight')
   const markPointMargin = 0.05
@@ -146,7 +192,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
             label: {
               show: true,
               fontSize: 12,
-              color: theme.colors.gray[800],
+              color: '#fff',
               backgroundColor: theme.colors.gray[400],
               padding: [2, 3, 2, 3],
               borderRadius: 2,
@@ -154,7 +200,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
               offset: [0, 1],
             },
             lineStyle: {
-              color: 'rgba(102, 123, 190, 0.5)',
+              color: chartColors.lowerBoundLine,
               padding: [2, 0, 0, 0],
             },
             data: [
@@ -165,7 +211,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
                     formatter: () => fNum('tokenRatio', xMin || '0'),
                     position: 'start',
                     distance: 5,
-                    backgroundColor: 'rgb(102, 123, 190)',
+                    backgroundColor: chartColors.lowerBound,
                   },
                 },
                 {
@@ -188,7 +234,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
             label: {
               show: true,
               fontSize: 12,
-              color: theme.colors.gray[800],
+              color: '#fff',
               backgroundColor: theme.colors.gray[400],
               padding: [2, 3, 2, 3],
               borderRadius: 2,
@@ -196,7 +242,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
               offset: [0, 1],
             },
             lineStyle: {
-              color: 'rgba(80, 187, 119, 0.5)',
+              color: chartColors.upperBoundLine,
             },
             data: [
               [
@@ -206,7 +252,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
                     formatter: () => fNum('tokenRatio', xMax || '0'),
                     position: 'start',
                     distance: 5,
-                    backgroundColor: 'rgb(80, 187, 119)',
+                    backgroundColor: chartColors.upperBound,
                   },
                 },
                 {
@@ -273,7 +319,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
                 label: {
                   show: true,
                   fontSize: 12,
-                  color: theme.colors.gray[800],
+                  color: '#fff',
                   backgroundColor: theme.colors.green[300],
                   padding: [2, 3, 2, 3],
                   borderRadius: 2,
@@ -310,7 +356,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
           sampling: 'lttb',
           silent: true,
           lineStyle: {
-            width: 2,
+            width: colorMode === 'light' ? 2.5 : 2,
             color: {
               type: 'linear',
               x: 0,
@@ -318,26 +364,11 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
               x2: 1,
               y2: 0,
               colorStops: [
-                {
-                  offset: 0,
-                  color: 'rgb(102, 123, 190)',
-                },
-                {
-                  offset: 0.25,
-                  color: 'rgb(58, 151, 199)',
-                },
-                {
-                  offset: 0.5,
-                  color: 'rgb(13, 178, 208)',
-                },
-                {
-                  offset: 0.75,
-                  color: 'rgb(47, 183, 164)',
-                },
-                {
-                  offset: 1,
-                  color: 'rgb(80, 187, 119)',
-                },
+                { offset: 0, color: chartColors.lineStops[0] },
+                { offset: 0.25, color: chartColors.lineStops[1] },
+                { offset: 0.5, color: chartColors.lineStops[2] },
+                { offset: 0.75, color: chartColors.lineStops[3] },
+                { offset: 1, color: chartColors.lineStops[4] },
               ],
             },
           },
@@ -350,26 +381,11 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
               x2: 1,
               y2: 0,
               colorStops: [
-                {
-                  offset: 0,
-                  color: 'rgba(102, 123, 190, 0.75)',
-                },
-                {
-                  offset: 0.25,
-                  color: 'rgba(58, 151, 199, 0.55)',
-                },
-                {
-                  offset: 0.5,
-                  color: 'rgba(13, 178, 208, 0.38)',
-                },
-                {
-                  offset: 0.75,
-                  color: 'rgba(47, 183, 164, 0.2)',
-                },
-                {
-                  offset: 1,
-                  color: 'rgba(80, 187, 119, 0)',
-                },
+                { offset: 0, color: chartColors.areaStops[0] },
+                { offset: 0.25, color: chartColors.areaStops[1] },
+                { offset: 0.5, color: chartColors.areaStops[2] },
+                { offset: 0.75, color: chartColors.areaStops[3] },
+                { offset: 1, color: chartColors.areaStops[4] },
               ],
             },
           },
@@ -383,7 +399,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
                 {
                   coord: [xMin, 0],
                   lineStyle: {
-                    color: 'rgb(102, 123, 190)',
+                    color: chartColors.lowerBound,
                     width: 2,
                     type: 'solid',
                   },
@@ -395,7 +411,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
                 {
                   coord: [xMax, 0],
                   lineStyle: {
-                    color: 'rgb(80, 187, 119)',
+                    color: chartColors.upperBound,
                     width: 2,
                     type: 'solid',
                   },
@@ -421,6 +437,8 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
     backgroundHighlightColor,
     isSpotPriceNearLowerBound,
     isSpotPriceNearUpperBound,
+    chartColors,
+    colorMode,
   ])
 
   const outOfRangeText =

@@ -80,8 +80,8 @@ export function HomeProtocols() {
                 Liquidity incentives
               </Heading>
               <Text>
-                In addition to your own points / token, boost your liquidity by utilizing the veBAL
-                system for BAL incentives.
+                In addition to your own points / token, boost your liquidity by utilizing Frontier
+                Finance incentive programs.
               </Text>
             </Box>
             <Box>

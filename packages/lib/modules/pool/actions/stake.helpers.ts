@@ -2,9 +2,9 @@ import { Pool } from '../pool.types'
 import { Address } from 'viem'
 import { HumanAmount } from '@frontier-fi/sdk'
 
-export const migrateStakeTooltipLabel = `veBAL gauges are the mechanism to distribute BAL liquidity incentives following community voting.
+export const migrateStakeTooltipLabel = `Liquidity gauges are the mechanism to distribute liquidity incentives following community voting.
 The gauge where you have staked your LP tokens has been deprecated.
-So it's likely best for you to migrate to the new gauge in order to get future BAL liquidity incentives.`
+So it's likely best for you to migrate to the new gauge in order to get future liquidity incentives.`
 
 export type UnstakeQuote = {
   gaugeAddress: Address
