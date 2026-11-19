@@ -69,8 +69,11 @@ export function PoolSettingsRadioGroup({
         control={control}
         name={name}
         render={({ field }) => {
-          const recommendedOptions = options.map(option => option.value)
-          const isCustomOptionSelected = isCustomMode || !recommendedOptions.includes(field.value)
+          const matchedOption = options.find(
+            option => option.value !== undefined && Number(option.value) === Number(field.value)
+          )
+
+          const isCustomOptionSelected = isCustomMode || !matchedOption
 
           return (
             <RadioGroup
@@ -84,7 +87,7 @@ export function PoolSettingsRadioGroup({
                   field.onChange(value)
                 }
               }}
-              value={isCustomOptionSelected ? '' : field.value}
+              value={isCustomOptionSelected ? '' : (matchedOption?.value ?? '')}
               w="full"
             >
               <Stack spacing={4}>
