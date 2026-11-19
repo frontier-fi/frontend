@@ -1,8 +1,6 @@
 import { Box, HStack, Text, ChakraProps } from '@chakra-ui/react'
 import { Pool } from '../pool.types'
 import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
-import { ProtocolIcon } from '@repo/lib/shared/components/icons/ProtocolIcon'
-import { Protocol } from '../../protocols/useProtocols'
 import { isBoosted, REHYPE_LABEL, toRehypeLabel } from '../pool.helpers'
 import Image from 'next/image'
 import { PoolListItem } from '../pool.types'
@@ -68,9 +66,8 @@ function getPoolTypeLabel(pool: Pool | PoolListItem) {
 
     case GqlPoolTypeValues.Eclp:
       return (
-        <TagWrapper>
-          <ProtocolIcon protocol={Protocol.Gyro} />
-          <Text {...TEXT_PROPS}>E-CLP</Text>
+        <TagWrapper pl="8px">
+          <Text {...TEXT_PROPS}>Concentrated</Text>
         </TagWrapper>
       )
 

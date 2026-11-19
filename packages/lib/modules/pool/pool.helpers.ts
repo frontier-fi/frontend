@@ -550,7 +550,7 @@ export function poolTypeLabel(poolType: PoolFilterType) {
     // Gyro filter maps to Frontier ECLP pools
     case GqlPoolTypeValues.Gyro:
     case GqlPoolTypeValues.Eclp:
-      return 'E-CLP'
+      return 'Concentrated'
     default:
       return getPoolTypeLabel(poolType as GqlPoolType)
   }
