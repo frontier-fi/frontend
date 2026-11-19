@@ -77,19 +77,19 @@ const ANVIL_PORTS: Record<ChainIdWithFork, number> = {
 export const ANVIL_NETWORKS: Record<ChainIdWithFork, NetworkSetup> = {
   [mainnet.id]: {
     chainId: mainnet.id,
-    fallBackRpc: 'https://cloudflare-eth.com',
+    fallBackRpc: 'https://mainnet.gateway.tenderly.co',
     port: ANVIL_PORTS[mainnet.id],
-    forkBlockNumber: 24521900n,
+    forkBlockNumber: 26444500n,
   },
   [sepolia.id]: {
     chainId: sepolia.id,
-    fallBackRpc: 'https://gateway.tenderly.co/public/sepolia',
+    fallBackRpc: 'https://sepolia.gateway.tenderly.co',
     port: ANVIL_PORTS[sepolia.id],
     forkBlockNumber: 12099000n,
   },
   [base.id]: {
     chainId: base.id,
-    fallBackRpc: 'https://gateway.tenderly.co/public/base',
+    fallBackRpc: 'https://base.gateway.tenderly.co',
     port: ANVIL_PORTS[base.id],
     forkBlockNumber: 58710000n,
   },

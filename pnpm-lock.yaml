@@ -171,8 +171,8 @@ catalogs:
       specifier: 0.2.1
       version: 0.2.1
     '@frontier-fi/sdk':
-      specifier: 0.2.0
-      version: 0.2.0
+      specifier: 0.3.0
+      version: 0.3.0
 
 overrides:
   debug>supports-color: '-'
@@ -254,7 +254,7 @@ importers:
         version: 2.12.0(react@19.3.1)
       '@frontier-fi/sdk':
         specifier: 'catalog:'
-        version: 0.2.0(typescript@6.0.3)(zod@4.6.7)
+        version: 0.3.0(typescript@6.0.3)(zod@4.6.7)
       '@nikolovlazar/chakra-ui-prose':
         specifier: ^1.2.1
         version: 1.2.1(@chakra-ui/react@2.10.10(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(framer-motion@14.0.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@chakra-ui/system@2.6.2(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(react@19.3.1))(react@19.3.1)
@@ -375,7 +375,7 @@ importers:
     devDependencies:
       '@frontier-fi/sdk':
         specifier: 'catalog:'
-        version: 0.2.0(typescript@6.0.3)(zod@3.25.76)
+        version: 0.3.0(typescript@6.0.3)(zod@3.25.76)
       '@playwright/test':
         specifier: 1.64.1
         version: 1.64.1
@@ -477,7 +477,7 @@ importers:
         version: 0.2.1
       '@frontier-fi/sdk':
         specifier: 'catalog:'
-        version: 0.2.0(typescript@6.0.3)(zod@4.6.7)
+        version: 0.3.0(typescript@6.0.3)(zod@4.6.7)
       '@nikolovlazar/chakra-ui-prose':
         specifier: ^1.2.1
         version: 1.2.1(@chakra-ui/react@2.10.10(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(framer-motion@14.0.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@chakra-ui/system@2.6.2(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(react@19.3.1))(react@19.3.1)
@@ -663,7 +663,7 @@ importers:
         version: 4.3.4(graphql-ws@6.4.0(crossws@0.3.5)(graphql@17.0.2)(ws@8.22.0))(graphql@17.0.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rxjs@7.8.2)
       '@frontier-fi/sdk':
         specifier: 'catalog:'
-        version: 0.2.0(typescript@6.0.3)(zod@3.25.76)
+        version: 0.3.0(typescript@6.0.3)(zod@3.25.76)
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
@@ -1679,8 +1679,8 @@ packages:
     resolution: {integrity: sha512-BSIOfhCSJE01Hjvz2drQRyBZm/iMTdqgcp6eg+d3pD9FI3QMCajlByu+EAr0liPGqtufmgTpyeqllnXNgdsa5A==}
     engines: {node: '>=18.x'}
 
-  '@frontier-fi/sdk@0.2.0':
-    resolution: {integrity: sha512-WfR+9hERx4ejgvKFQO7CLNKENuLUCiy2gsX+FSkoBGnM8WhjHZv4IqH/YICcMCNrGldrQGsSoGWaEOQb37vaUg==}
+  '@frontier-fi/sdk@0.3.0':
+    resolution: {integrity: sha512-cP4dXDR7t6WpjpTDisvU9BD689g9nEn2JMWFSbeR8omEw1Ihugt0oOOS2mJ5mP2YHHt8mGE4JLlFo3O8SiXZnQ==}
     engines: {node: '>=20.x'}
 
   '@graphql-codegen/add@7.1.1':
@@ -9501,7 +9501,7 @@ snapshots:
 
   '@frontier-fi/maths@0.2.1': {}
 
-  '@frontier-fi/sdk@0.2.0(typescript@6.0.3)(zod@3.25.76)':
+  '@frontier-fi/sdk@0.3.0(typescript@6.0.3)(zod@3.25.76)':
     dependencies:
       '@frontier-fi/maths': 0.2.1
       viem: 2.57.11(typescript@6.0.3)(zod@3.25.76)
@@ -9511,7 +9511,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@frontier-fi/sdk@0.2.0(typescript@6.0.3)(zod@4.6.7)':
+  '@frontier-fi/sdk@0.3.0(typescript@6.0.3)(zod@4.6.7)':
     dependencies:
       '@frontier-fi/maths': 0.2.1
       viem: 2.57.11(typescript@6.0.3)(zod@4.6.7)

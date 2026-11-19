@@ -12,7 +12,7 @@ export function PoolBreadcrumbs() {
       fontSize="sm"
       pb="ms"
       separator={
-        <Box color="border.base">
+        <Box color="grayText">
           <ChevronRight size={16} />
         </Box>
       }

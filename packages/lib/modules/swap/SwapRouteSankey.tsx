@@ -85,6 +85,7 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
 
       // Keep labels inside the plot: source to the right of its bar, hops below,
       // destination to the left of its bar (avoids clipping left/right edges).
+      const isHop = !isFirst && !isLast
       const position = isFirst ? 'right' : isLast ? 'left' : 'bottom'
       const align = isFirst ? ('left' as const) : isLast ? ('right' as const) : ('center' as const)
       const displaySymbol = truncateSymbol(n.symbol)
@@ -93,10 +94,11 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
         show: !n.isPassthrough,
         color: labelColor,
         fontSize: 11,
-        distance: isFirst || isLast ? 8 : 6,
+        // Hop labels sit under the node — extra distance + top align clears the bar edge.
+        distance: isHop ? 14 : 8,
         position,
         align,
-        verticalAlign: 'middle' as const,
+        verticalAlign: (isHop ? 'top' : 'middle') as 'top' | 'middle',
       }
 
       let label: Record<string, unknown> = {
@@ -240,7 +242,7 @@ export function SwapRouteSankey({ paths, chain, height }: Props) {
           left: 28,
           right: 28,
           top: 24,
-          bottom: 36,
+          bottom: 48,
           nodeWidth: 18,
           nodeGap: 22,
           orient: 'horizontal',

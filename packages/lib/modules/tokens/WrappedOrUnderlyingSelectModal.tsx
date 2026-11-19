@@ -61,7 +61,7 @@ export function WrappedOrUnderlyingSelectModal({
             </Box>
             <Divider w="90%" />
             <Text color="font.secondary" p="md" pt="0">
-              This Boosted pool wraps the underlying token into yield bearing tokens. You can use
+              This rehyped pool wraps the underlying token into yield bearing tokens. You can use
               either token to enter or exit a pool.
             </Text>
           </VStack>

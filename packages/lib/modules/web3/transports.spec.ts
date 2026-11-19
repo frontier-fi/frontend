@@ -1,14 +1,19 @@
 import { describe, expect, it, vi } from 'vitest'
-import { base, sepolia } from 'wagmi/chains'
+import { base, mainnet, sepolia } from 'wagmi/chains'
 import { chains } from './ChainConfig'
 import { getSdkRpcUrls, getTransports, withSdkRpcFallback } from './transports'
 
 describe('transports SDK RPC fallback', () => {
-  it('returns ordered, deduplicated RPC URLs for Base SDK quotes (proxy -> public fallback)', () => {
+  it('returns ordered, deduplicated RPC URLs for Mainnet and Base SDK quotes (proxy -> public fallback)', () => {
+    const mainnetUrls = getSdkRpcUrls(mainnet.id)
+    expect(mainnetUrls[0]).toMatch(/\/api\/rpc\/MAINNET$/)
+    expect(mainnetUrls[1]).toBe('https://mainnet.gateway.tenderly.co')
+    expect(new Set(mainnetUrls).size).toBe(mainnetUrls.length)
+
     const urls = getSdkRpcUrls(base.id)
 
     expect(urls[0]).toMatch(/\/api\/rpc\/BASE$/)
-    expect(urls[1]).toBe('https://mainnet.base.org')
+    expect(urls[1]).toBe('https://base.gateway.tenderly.co')
     expect(new Set(urls).size).toBe(urls.length)
   })
 
@@ -33,7 +38,7 @@ describe('transports SDK RPC fallback', () => {
     expect(result).toBe('quote-from-public-rpc')
     expect(fn).toHaveBeenCalledTimes(2)
     expect(fn.mock.calls[0]?.[0]).toMatch(/\/api\/rpc\/BASE$/)
-    expect(fn.mock.calls[1]?.[0]).toBe('https://mainnet.base.org')
+    expect(fn.mock.calls[1]?.[0]).toBe('https://base.gateway.tenderly.co')
   })
 
   it('does not retry deterministic EVM contract reverts against fallback RPCs', async () => {
@@ -67,7 +72,7 @@ describe('transports SDK RPC fallback', () => {
       }
     )?.transports
 
-    expect(children?.[0]?.value?.url).toBe('https://mainnet.base.org')
+    expect(children?.[0]?.value?.url).toBe('https://base.gateway.tenderly.co')
     expect(children?.[1]?.value?.url).toMatch(/\/api\/rpc\/BASE$/)
     expect(children?.[1]?.config?.retryCount).toBe(0)
     expect(getSdkRpcUrls(sepolia.id)[0]).toBe('https://sepolia.gateway.tenderly.co')

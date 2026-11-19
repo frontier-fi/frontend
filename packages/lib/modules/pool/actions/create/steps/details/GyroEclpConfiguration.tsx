@@ -28,7 +28,7 @@ function EclpParamHeader() {
   return (
     <VStack align="start" spacing="sm" w="full">
       <Heading color="font.maxContrast" pb="1" size="md">
-        Gyro E-CLP configuration
+        Gyroscope Elliptic-CLP configuration
       </Heading>
       <HStack gap="1">
         <Text color="font.secondary">To learn more about all the parameters, </Text>

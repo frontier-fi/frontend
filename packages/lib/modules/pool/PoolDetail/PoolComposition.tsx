@@ -22,7 +22,7 @@ import { bn, fNum, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { useLayoutEffect, useRef, useState, Fragment } from 'react'
 import { Address } from 'viem'
 import { usePoolsMetadata } from '../metadata/PoolsMetadataProvider'
-import { isBoosted } from '../pool.helpers'
+import { isBoosted, REHYPE_LABEL } from '../pool.helpers'
 import { PoolToken } from '../pool.types'
 import { usePool } from '../PoolProvider'
 import { Pool } from '../pool.types'
@@ -147,7 +147,7 @@ export function PoolComposition() {
 
   const protocolNames = erc4626Metadata.map(metadata => metadata.name.split(' ')[0]!)
   const formattedProtocolNames = formatStringsToSentenceList(protocolNames)
-  const boostedWarningMsg = `This Boosted pool uses wrapped ${formattedProtocolNames} tokens to generate yield from lending on ${protocolNames.length === 1 ? 'that protocol' : 'those protocols'}. This results in continuous appreciation of the pool's total value over time.`
+  const boostedWarningMsg = `This ${REHYPE_LABEL} pool uses wrapped ${formattedProtocolNames} tokens to generate yield from lending on ${protocolNames.length === 1 ? 'that protocol' : 'those protocols'}. This results in continuous appreciation of the pool's total value over time.`
 
   useLayoutEffect(() => {
     if (cardRef.current) {
@@ -188,39 +188,44 @@ export function PoolComposition() {
           {isBoosted(pool) && (
             <BalAlert
               content={
-                <>
-                  <Text color="font.dark" fontSize="sm">
-                    {boostedWarningMsg}
-                    {hasReadMoreURL && (
-                      <>
-                        {' '}
-                        Read more about{' '}
-                        {protocolLinks.map((protocol, index) => (
-                          <Fragment key={index}>
-                            <Link href={protocol.readMoreUrl} isExternal rel="noopener noreferrer">
-                              <Box
-                                as="span"
-                                color="purple.500"
-                                fontSize="sm"
-                                fontWeight="bold"
-                                textDecoration="underline"
-                              >
-                                {protocol.name}
-                              </Box>
-                            </Link>
-                            {index < protocolLinks.length - 2
-                              ? ', '
-                              : index === protocolLinks.length - 2
-                                ? ' & '
-                                : ''}
-                          </Fragment>
-                        ))}
-                        .
-                      </>
-                    )}
-                  </Text>
-                </>
+                <Text
+                  color="font.dark"
+                  fontSize="sm"
+                  fontWeight="medium"
+                  lineHeight="1.55"
+                  sx={{ textWrap: 'pretty' }}
+                >
+                  {boostedWarningMsg}
+                  {hasReadMoreURL && (
+                    <>
+                      {' '}
+                      Read more about{' '}
+                      {protocolLinks.map((protocol, index) => (
+                        <Fragment key={index}>
+                          <Link href={protocol.readMoreUrl} isExternal rel="noopener noreferrer">
+                            <Box
+                              as="span"
+                              color="purple.500"
+                              fontSize="sm"
+                              fontWeight="bold"
+                              textDecoration="underline"
+                            >
+                              {protocol.name}
+                            </Box>
+                          </Link>
+                          {index < protocolLinks.length - 2
+                            ? ', '
+                            : index === protocolLinks.length - 2
+                              ? ' & '
+                              : ''}
+                        </Fragment>
+                      ))}
+                      .
+                    </>
+                  )}
+                </Text>
               }
+              py="ms"
               status="info"
             />
           )}

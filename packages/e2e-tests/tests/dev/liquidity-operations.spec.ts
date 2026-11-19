@@ -214,7 +214,7 @@ test.describe('Boosted stable pool v3', () => {
     test('single token', async ({ page }) => {
       await clickButton(page, 'Remove')
       const singleTokenTab = page.locator('#button-group-single')
-      await expect(singleTokenTab).toBeDisabled() // Boosted pools do not support single token removes
+      await expect(singleTokenTab).toBeDisabled() // rehyped pools do not support single token removes
     })
   })
 })
@@ -227,7 +227,7 @@ async function agreeToBoostedPoolRisks(page: Page) {
 
   const boostedPoolAdditionRiskCheckbox = await checkbox(
     page,
-    /^I accept that by adding tokens to this Boosted Pool/i,
+    /^I accept that by adding tokens to this rehyped Pool/i,
   )
 
   await boostedPoolRiskCheckbox.click()

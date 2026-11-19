@@ -1,21 +1,18 @@
 import { PoolCore } from '@repo/lib/modules/pool/pool.types'
 import { Box, HStack, Text } from '@chakra-ui/react'
 import { PoolVersionTag } from '@repo/lib/modules/pool/PoolList/PoolListTable/PoolVersionTag'
-import { isBoosted, isGyro } from '@repo/lib/modules/pool/pool.helpers'
+import { isBoosted, toRehypeLabel } from '@repo/lib/modules/pool/pool.helpers'
 import { getPoolTypeLabel } from '@repo/lib/modules/pool/pool.utils'
 import Image from 'next/image'
 import { PoolHookTag } from '@repo/lib/modules/pool/PoolDetail/PoolHookTag'
 import { useHook } from '../../../hooks/useHook'
 import { usePoolsMetadata } from '../../metadata/PoolsMetadataProvider'
 import { Erc4626Metadata } from '../../metadata/getErc4626Metadata'
-import { Protocol } from '@repo/lib/modules/protocols/useProtocols'
-import { ProtocolIcon } from '@repo/lib/shared/components/icons/ProtocolIcon'
-import { BoostedIcon } from '@repo/lib/shared/components/icons/BoostedIcon'
 import { TooltipWithTouch } from '@repo/lib/shared/components/tooltips/TooltipWithTouch'
+import { RehypeTag } from '@repo/lib/modules/pool/PoolDetail/RehypeTag'
 
 function getPoolDisplayTypeLabel(pool: PoolCore, erc4626Metadata: Erc4626Metadata[]) {
-  const boostedTooltipLabel = [...erc4626Metadata.map(m => m.name)].join(' & ')
-  const hasIconTags = isGyro(pool.type) || isBoosted(pool)
+  const rehypeTooltipLabel = [...erc4626Metadata.map(m => toRehypeLabel(m.name))].join(' & ')
 
   return (
     <HStack>
@@ -23,47 +20,33 @@ function getPoolDisplayTypeLabel(pool: PoolCore, erc4626Metadata: Erc4626Metadat
         {getPoolTypeLabel(pool.type)}
       </Text>
 
-      {hasIconTags && (
-        <HStack gap="0.25rem">
-          {isGyro(pool.type) && (
-            <TooltipWithTouch label="Built by Gyroscope">
-              <Box h="18px" rounded="full" shadow="md" w="18px">
-                <ProtocolIcon
-                  protocol={Protocol.Gyro}
-                  size={18}
-                  sx={{ rounded: 'full', shadow: 'md' }}
+      {isBoosted(pool) && (
+        <TooltipWithTouch label={rehypeTooltipLabel}>
+          <HStack flexShrink={0} gap="0.25rem">
+            <Box flexShrink={0}>
+              <RehypeTag size="sm" />
+            </Box>
+            {erc4626Metadata.map(metadata => (
+              <Box
+                flexShrink={0}
+                h="18px"
+                key={metadata.name}
+                overflow="hidden"
+                rounded="full"
+                shadow="md"
+                w="18px"
+              >
+                <Image
+                  alt={toRehypeLabel(metadata.name)}
+                  height={18}
+                  src={metadata.iconUrl || ''}
+                  style={{ width: 18, height: 18 }}
+                  width={18}
                 />
               </Box>
-            </TooltipWithTouch>
-          )}
-
-          {isBoosted(pool) && (
-            <>
-              {isGyro(pool.type) && (
-                <Text color="border.base" fontSize="0.5rem">
-                  •
-                </Text>
-              )}
-              <TooltipWithTouch label={boostedTooltipLabel}>
-                <HStack gap="0.25rem">
-                  <Box rounded="full" shadow="md">
-                    <BoostedIcon size={18} />
-                  </Box>
-                  {erc4626Metadata.map(metadata => (
-                    <Box key={metadata.name} rounded="full" shadow="md">
-                      <Image
-                        alt={metadata.name}
-                        height={18}
-                        src={metadata.iconUrl || ''}
-                        width={18}
-                      />
-                    </Box>
-                  ))}
-                </HStack>
-              </TooltipWithTouch>
-            </>
-          )}
-        </HStack>
+            ))}
+          </HStack>
+        </TooltipWithTouch>
       )}
     </HStack>
   )

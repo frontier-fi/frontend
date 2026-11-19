@@ -10,10 +10,12 @@ import { getPoolActionableTokens } from '../../pool/pool-tokens.utils'
 import { usePool } from '../../pool/PoolProvider'
 import type { GqlPoolGyro } from '@repo/lib/shared/services/api/graphql-derived-types'
 import { isGyroEPool } from '../../pool/pool.helpers'
+import { calculatePeakPrice } from '../../pool/actions/create/steps/details/gyro.helpers'
 
 export type ECLPLiquidityProfile = {
   data: [number, number][] | null
   poolSpotPrice: string | number | null
+  poolPeakPrice: string | number | null
   poolIsInRange: boolean
   xMin: number
   xMax: number
@@ -68,6 +70,22 @@ export function useGetECLPLiquidityProfile(): ECLPLiquidityProfile {
     return isReversed ? bn(1).div(bn(originalPoolSpotPrice)).toString() : originalPoolSpotPrice
   }, [originalPoolSpotPrice, isReversed])
 
+  const poolPeakPrice = useMemo(() => {
+    const gyroPool = pool as GqlPoolGyro
+    if (!gyroPool?.c || !gyroPool?.s) return null
+
+    const rawPeak = calculatePeakPrice({ c: gyroPool.c, s: gyroPool.s })
+    if (!rawPeak) return null
+
+    // Scale the same way the curve (drawLiquidityECLP) and spot price (calculateSpotPrice) are
+    // scaled — by rate0 / rate1 — before normalising by priceRateRatio.
+    const scalingFactor = tokenRateScalingFactorString ?? '1'
+    const displayedPeak = bn(rawPeak).times(scalingFactor).div(priceRateRatio)
+    if (!displayedPeak.isFinite() || displayedPeak.lte(0)) return null
+
+    return isReversed ? bn(1).div(displayedPeak).toString() : displayedPeak.toNumber()
+  }, [pool, priceRateRatio, isReversed, tokenRateScalingFactorString])
+
   const data = useMemo(() => {
     if (!liquidityData) return null
 
@@ -98,6 +116,7 @@ export function useGetECLPLiquidityProfile(): ECLPLiquidityProfile {
   return {
     data,
     poolSpotPrice,
+    poolPeakPrice,
     poolIsInRange,
     xMin,
     xMax,

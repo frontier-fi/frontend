@@ -91,7 +91,7 @@ function PreviewPoolChart() {
 
   if (isGyroEllipticPool(poolType)) {
     return (
-      <EclpChartProvider eclpLiquidityProfile={eclpLiquidityProfile}>
+      <EclpChartProvider eclpLiquidityProfile={eclpLiquidityProfile} showPeakPrice>
         <PreviewGyroEclpConfig />
       </EclpChartProvider>
     )

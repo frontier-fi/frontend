@@ -1,6 +1,6 @@
 'use client'
 
-import { Flex, Box } from '@chakra-ui/react'
+import { Flex, Box, Heading } from '@chakra-ui/react'
 import Image from 'next/image'
 import { PoolVersionTag } from '../../PoolList/PoolListTable/PoolVersionTag'
 import { PoolListTokenPills } from '../../PoolList/PoolListTokenPills'
@@ -26,6 +26,21 @@ export default function PoolMetaBadges() {
           width={24}
         />
       </TooltipWithTouch>
+
+      {pool.name && (
+        <Heading
+          as="h1"
+          fontSize={{ base: 'xl', md: '3xl' }}
+          fontWeight="bold"
+          letterSpacing="-0.04rem"
+          lineHeight={{ base: '28px', md: '36px' }}
+          mr="xs"
+          noOfLines={1}
+        >
+          {pool.name}
+        </Heading>
+      )}
+
       <Box pr="xxs">
         <PoolVersionTag isSmall pool={pool} />
       </Box>

@@ -17,7 +17,7 @@ export default function DebugPools() {
           <Heading size="md">Flat pool examples</Heading>
           <PoolExampleLinks poolExamples={flatPoolExamples} />
 
-          <Heading size="md">Boosted examples</Heading>
+          <Heading size="md">rehyped examples</Heading>
           <PoolExampleLinks poolExamples={boostedPoolExamples} />
 
           <Heading size="md">Nested pool examples</Heading>
@@ -123,7 +123,7 @@ export default function DebugPools() {
             as={NextLink}
             href="/pools/ethereum/v2/0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe"
           >
-            Old mainnet boosted pool with issues
+            Old mainnet rehyped pool with issues
           </Link>
         </VStack>
 

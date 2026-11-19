@@ -10,7 +10,7 @@ import { LbpBenefitsHookIcon } from '@repo/lib/shared/components/icons/lbp/LbpBe
 
 export function HeaderBanner() {
   const capitalEfficiencyDescription = `
-  Maximize capital efficiency with boosted pools that route idle liquidity to yield markets, allowing LPs to earn both swap fees and lending interest simultaneously.
+  Maximize capital efficiency with rehyped pools that route idle liquidity to yield markets, allowing LPs to earn both swap fees and lending interest simultaneously.
 `
 
   const accessToHooksDescription = `

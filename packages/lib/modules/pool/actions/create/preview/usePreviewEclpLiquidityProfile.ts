@@ -69,6 +69,7 @@ export function usePreviewEclpLiquidityProfile(): ECLPLiquidityProfile {
   return {
     data,
     poolSpotPrice: spotPriceWithoutRate.toString(),
+    poolPeakPrice: peakPrice || null,
     poolIsInRange,
     xMin,
     xMax,

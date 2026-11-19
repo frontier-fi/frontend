@@ -15,7 +15,7 @@ allowBuilds:
 catalog:
   "@apollo/client": "4.3.4"
   "@frontier-fi/maths": "0.2.1"
-  "@frontier-fi/sdk": "0.2.0"
+  "@frontier-fi/sdk": "0.3.0"
 
 packageExtensions:
   # debug declares only optional peer metadata. Declare the peer explicitly so
