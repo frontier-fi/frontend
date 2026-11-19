@@ -27,9 +27,9 @@ import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
   https://viem.sh/docs/clients/transports/fallback#fallback-transport
 */
 export const rpcFallbacks: Partial<Record<AppChain, string | undefined>> = {
-  [GqlChainValues.Mainnet]: 'https://1rpc.io/eth',
+  [GqlChainValues.Mainnet]: 'https://mainnet.gateway.tenderly.co',
   [GqlChainValues.Arbitrum]: 'https://1rpc.io/arb',
-  [GqlChainValues.Base]: 'https://mainnet.base.org',
+  [GqlChainValues.Base]: 'https://base.gateway.tenderly.co',
   [GqlChainValues.Avalanche]: 'https://1rpc.io/avax/c',
   [GqlChainValues.Gnosis]: 'https://1rpc.io/gnosis',
   [GqlChainValues.Optimism]: 'https://1rpc.io/op',

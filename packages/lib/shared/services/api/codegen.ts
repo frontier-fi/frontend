@@ -56,8 +56,8 @@ const config: CodegenConfig = {
  */
 const WIDE_ENUMS: Record<string, string> = {
   GqlChain: `/**
- * Frontier's API enum is Sepolia-only. The app still types network configs,
- * debug pages, and legacy flows against the wider historical set (see AppChain).
+ * Frontier's API enum only includes Frontier's deployed chains. The app still types
+ * network configs, debug pages, and legacy flows against the wider historical set (see AppChain).
  * Query variables are still limited at runtime by PROJECT_CONFIG.supportedNetworks.
  */
 export type GqlChain =

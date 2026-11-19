@@ -329,6 +329,7 @@ export function useEcosystemPoolActivityChart() {
   const now = useCurrentDate()
 
   const supportedNetworks = useSupportedNetworks()
+  const includeMainnet = supportedNetworks.includes(GqlChainValues.Mainnet)
   const includeSepolia = supportedNetworks.includes(GqlChainValues.Sepolia)
   const includeBase = supportedNetworks.includes(GqlChainValues.Base)
 
@@ -337,6 +338,16 @@ export function useEcosystemPoolActivityChart() {
       setActiveNetwork('all')
     }
   }, [activeNetwork, supportedNetworks])
+
+  const { loading: loadingMainnet, data: mainnetResponse } = usePoolEvents(
+    {
+      first: 500,
+      chainIn: [GqlChainValues.Mainnet],
+    },
+    {
+      skip: !includeMainnet,
+    }
+  )
 
   const { loading: loadingSepolia, data: sepoliaResponse } = usePoolEvents(
     {
@@ -358,18 +369,24 @@ export function useEcosystemPoolActivityChart() {
     }
   )
 
-  const loading = (includeSepolia && loadingSepolia) || (includeBase && loadingBase)
+  const loading =
+    (includeMainnet && loadingMainnet) ||
+    (includeSepolia && loadingSepolia) ||
+    (includeBase && loadingBase)
 
   const response = useMemo(() => {
+    const mainnetEvents = includeMainnet ? mainnetResponse?.poolEvents || [] : []
     const sepoliaEvents = includeSepolia ? sepoliaResponse?.poolEvents || [] : []
     const baseEvents = includeBase ? baseResponse?.poolEvents || [] : []
 
-    if (!sepoliaResponse && !baseResponse) return undefined
+    if (!mainnetResponse && !sepoliaResponse && !baseResponse) return undefined
 
     return {
-      poolEvents: [...sepoliaEvents, ...baseEvents].sort((a, b) => b.timestamp - a.timestamp),
+      poolEvents: [...mainnetEvents, ...sepoliaEvents, ...baseEvents].sort(
+        (a, b) => b.timestamp - a.timestamp
+      ),
     }
-  }, [includeBase, includeSepolia, sepoliaResponse, baseResponse])
+  }, [includeMainnet, includeBase, includeSepolia, mainnetResponse, sepoliaResponse, baseResponse])
 
   const chartData = useMemo(() => {
     if (!response) return getDefaultChainMeta()
