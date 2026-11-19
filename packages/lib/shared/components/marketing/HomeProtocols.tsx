@@ -84,8 +84,7 @@ export function HomeProtocols() {
               </Heading>
               <Text>
                 In addition to your own points / token, boost your liquidity by utilizing{' '}
-                {projectName}
-                incentive programs.
+                {projectName} incentive programs.
               </Text>
             </Box>
             <Box>
