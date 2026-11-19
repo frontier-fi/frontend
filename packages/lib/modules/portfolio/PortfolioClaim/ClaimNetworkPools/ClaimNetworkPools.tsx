@@ -49,7 +49,11 @@ export function ClaimNetworkPools() {
   const { isConnected } = useUserAccount()
 
   const chainIds = PROJECT_CONFIG.merklRewardsChains.map(chain => getChainId(chain))
-  const { hasMerklRewards } = useHasMerklRewards(poolsWithOnchainUserBalances, chainIds)
+
+  const { hasMerklRewards, claimableRewards, userAddress } = useHasMerklRewards(
+    poolsWithOnchainUserBalances,
+    chainIds
+  )
 
   const { isDesktop } = useBreakpoints()
   const iconSize = isDesktop ? 12 : 8
@@ -114,7 +118,7 @@ export function ClaimNetworkPools() {
         ) : (
           hasMerklRewards && (
             <AnimatedAlert>
-              <MerklAlert />
+              <MerklAlert claimableRewards={claimableRewards} userAddress={userAddress} />
             </AnimatedAlert>
           )
         )}
