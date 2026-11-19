@@ -12,12 +12,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const resolvedParams = await props.params
   const poolMetadata: PoolMetadata = await generatePoolMetadata(resolvedParams)
 
-  return {
-    ...poolMetadata.metadata,
-    openGraph: {
-      images: '/images/opengraph/og-balancer-pool.jpg',
-    },
-  }
+  return poolMetadata.metadata
 }
 
 export default async function PoolLayoutWrapper({ params, children }: Props) {
