@@ -64,7 +64,7 @@ export const POOL_TYPES: Record<SupportedPoolTypes, PoolTypeDetails> = {
       'Weighted Pools are highly versatile and configurable pools. They are ideal for general cases and enable users to build pools with different token counts and weightings.',
   },
   [PoolType.GyroE]: {
-    label: 'Gyro Elliptic CLP',
+    label: 'Concentrated (Gyroscope Elliptic-CLP)',
     maxTokens: 2,
     description:
       'Concentrated liquidity pools that use an elliptical price curve to focus liquidity asymmetrically within customizable bounds. E-CLPs provide deeper liquidity and lower slippage for trades while maximizing LP capital efficiency within expected price ranges.',

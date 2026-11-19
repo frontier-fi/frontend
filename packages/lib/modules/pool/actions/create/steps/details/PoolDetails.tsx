@@ -23,7 +23,7 @@ export function PoolDetails() {
 
   useEffect(() => {
     if (hasInitialized.current) return
-    if (!suggestedPoolName || suggestedPoolName === '-') return
+    if (!suggestedPoolName) return
 
     const currentName = poolCreationForm.getValues('name')
     const currentSymbol = poolCreationForm.getValues('symbol')
@@ -79,26 +79,32 @@ export function PoolDetails() {
 }
 
 function getSuggestions(poolTokens: PoolCreationToken[], poolType: SupportedPoolTypes) {
+  // Only suggest once every token has a symbol, otherwise joining empty symbols yields '-', '--', etc.
+  if (!poolTokens.length || poolTokens.some(({ data }) => !data?.symbol)) {
+    return { suggestedPoolName: '', suggestedPoolSymbol: '' }
+  }
+
   const tokenSymbols = poolTokens
     .map(({ data, weight }) => {
-      if (!data?.symbol) return ''
-      if (!isWeightedPool(poolType) || !weight) return data.symbol
-      return weight + data.symbol
+      const symbol = data?.symbol ?? ''
+      if (!isWeightedPool(poolType) || !weight) return symbol
+      return weight + symbol
     })
     .join('-')
 
-  const suggestedPoolSymbol =
-    tokenSymbols.length <= MAX_POOL_SYMBOL_LENGTH
+  const { poolSymbolPrefix } = PROJECT_CONFIG
+  const maxSymbolBodyLength = MAX_POOL_SYMBOL_LENGTH - poolSymbolPrefix.length
+
+  const symbolBody =
+    tokenSymbols.length <= maxSymbolBodyLength
       ? tokenSymbols
-      : tokenSymbols.slice(0, MAX_POOL_SYMBOL_LENGTH)
+      : tokenSymbols.slice(0, maxSymbolBodyLength)
 
-  const { projectName } = PROJECT_CONFIG
-
-  const poolNameWithProject = `${projectName} ${tokenSymbols}`
+  const suggestedPoolSymbol = tokenSymbols ? `${poolSymbolPrefix}${symbolBody}` : ''
 
   const suggestedPoolName =
-    poolNameWithProject.length <= MAX_POOL_NAME_LENGTH
-      ? poolNameWithProject
+    tokenSymbols.length <= MAX_POOL_NAME_LENGTH
+      ? tokenSymbols
       : tokenSymbols.slice(0, MAX_POOL_NAME_LENGTH)
 
   return { suggestedPoolName, suggestedPoolSymbol }

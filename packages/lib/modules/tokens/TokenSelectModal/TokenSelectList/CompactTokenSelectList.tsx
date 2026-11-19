@@ -1,12 +1,13 @@
 'use client'
 
-import { Box, BoxProps, Center, Text } from '@chakra-ui/react'
+import { Box, BoxProps } from '@chakra-ui/react'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Virtuoso } from 'react-virtuoso'
 import { useTokenBalances } from '../../TokenBalancesProvider'
 import { TokenSelectListRow } from './TokenSelectListRow'
+import { TokenSelectNoResults } from './TokenSelectNoResults'
 import { ApiToken } from '../../token.types'
 
 type Props = {
@@ -61,11 +62,7 @@ export function CompactTokenSelectList({ tokens, onTokenSelect, ...rest }: Props
   return (
     <Box {...rest}>
       {tokens.length === 0 ? (
-        <Center h="60">
-          <Text color="gray.500" fontSize="sm">
-            No tokens found
-          </Text>
-        </Center>
+        <TokenSelectNoResults />
       ) : (
         <Virtuoso data={tokens} itemContent={renderRow} style={style} />
       )}

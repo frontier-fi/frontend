@@ -54,7 +54,7 @@ export function RemoveLiquidityForm() {
   const isDisabledSingleTokenTab = isBoosted(pool) || pool.dynamicData.isInRecoveryMode
 
   const tabTooltipLabel = isDisabledSingleTokenTab
-    ? `${isBoosted(pool) ? 'Boosted pools' : 'Pools in recovery mode'} do not support single token removes`
+    ? `${isBoosted(pool) ? 'rehyped pools' : 'Pools in recovery mode'} do not support single token removes`
     : undefined
 
   const TABS: ButtonGroupOption[] = [

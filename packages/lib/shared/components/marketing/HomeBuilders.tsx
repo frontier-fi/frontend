@@ -112,7 +112,7 @@ export function HomeBuilders() {
                       yStart="-10%"
                     >
                       <Picture
-                        altText="veBAL tokens"
+                        altText="Incentive tokens"
                         defaultImgType="jpg"
                         imgJpg
                         imgJpgDark
@@ -135,8 +135,8 @@ export function HomeBuilders() {
                       textWrap: 'balance',
                     }}
                   >
-                    Plug into Frontier Finance&lsquo;s veBAL incentive mechanism and grants
-                    framework to bootstrap AMM liquidity.
+                    Plug into Frontier Finance&lsquo;s incentive mechanism and grants framework to
+                    bootstrap AMM liquidity.
                   </Text>
                 </Flex>
               </Card>

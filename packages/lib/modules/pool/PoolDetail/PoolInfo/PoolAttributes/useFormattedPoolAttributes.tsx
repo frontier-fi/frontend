@@ -31,7 +31,7 @@ type FormattedPoolAttributes = {
 
 function getPoolTypeText(pool: Pool) {
   if (isBoosted(pool)) {
-    return 'Boosted'
+    return 'rehyped'
   }
 
   return getPoolTypeLabel(pool.type)

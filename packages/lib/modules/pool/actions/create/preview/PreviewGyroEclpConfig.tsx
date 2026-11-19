@@ -1,7 +1,7 @@
 import { Card, VStack, Text, SimpleGrid, Box, HStack, Divider, Button } from '@chakra-ui/react'
 import { usePoolCreationForm } from '../PoolCreationFormProvider'
 import { RefreshCcw } from 'lucide-react'
-import { fNumCustom } from '@repo/lib/shared/utils/numbers'
+import { bn, fNumCustom } from '@repo/lib/shared/utils/numbers'
 import { NUM_FORMAT } from '../constants'
 import ReactECharts from 'echarts-for-react'
 import { useEclpChart } from '@repo/lib/modules/eclp/hooks/EclpChartProvider'
@@ -18,7 +18,7 @@ export function PreviewGyroEclpConfig() {
 
   const poolTokens = useWatch({ control: poolCreationForm.control, name: 'poolTokens' })
 
-  const { options } = useEclpChart()
+  const { options, poolSpotPrice } = useEclpChart()
 
   const priceDisplayCards = [
     {
@@ -27,9 +27,18 @@ export function PreviewGyroEclpConfig() {
       value: alpha ? fNumCustom(alpha, NUM_FORMAT) : '-',
     },
     {
-      color: 'green.400',
+      color: 'teal.400',
       label: 'Peak price',
       value: peakPrice ? fNumCustom(peakPrice, NUM_FORMAT) : '-',
+    },
+    {
+      color: 'green.400',
+      label: 'Current price',
+      // spot price is 'NaN' / 'Infinity' when either token lacks a USD price
+      value:
+        poolSpotPrice && bn(poolSpotPrice).isFinite() && bn(poolSpotPrice).gt(0)
+          ? fNumCustom(String(poolSpotPrice), NUM_FORMAT)
+          : '-',
     },
     {
       color: 'orange.400',
@@ -46,19 +55,30 @@ export function PreviewGyroEclpConfig() {
   return (
     <Card>
       <VStack spacing="md" w="full">
-        <SimpleGrid columns={3} spacing={3} w="full">
+        <SimpleGrid columns={4} spacing={3} w="full">
           {priceDisplayCards.map(({ color, label, value }) => (
-            <Card key={label} variant="subSection">
-              <VStack align="start" spacing="sm">
+            <Card key={label} minW={0} overflow="hidden" variant="subSection">
+              <VStack align="start" minW={0} spacing="sm" w="full">
                 <HStack spacing="sm">
-                  <Box bg={color} borderRadius="full" h="8px" w="8px" />
+                  <Box bg={color} borderRadius="full" flexShrink={0} h="8px" w="8px" />
 
                   <Text color="font.secondary" fontSize="sm">
                     {label}
                   </Text>
                 </HStack>
 
-                <Text fontWeight="bold">{value}</Text>
+                <Text
+                  fontSize="xs"
+                  fontWeight="bold"
+                  lineHeight="1.25"
+                  overflow="hidden"
+                  textOverflow="ellipsis"
+                  title={value}
+                  w="full"
+                  whiteSpace="nowrap"
+                >
+                  {value}
+                </Text>
               </VStack>
             </Card>
           ))}

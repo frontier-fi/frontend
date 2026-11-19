@@ -153,24 +153,25 @@ function RateProviderRows({ poolTokens }: { poolTokens: PoolCreationForm['poolTo
           )
 
           return (
-            <CardDataRow
-              data={[
-                <IdentifyTokenCell
-                  address={data.address}
-                  chain={data.chain}
-                  symbol={data.symbol}
-                />,
-                <RateProviderReviewedCell hasBeenReviewed={hasBeenReviewed} />,
-                <HStack justify="end">
-                  <BlockExplorerLink
-                    address={token.rateProvider || undefined}
+            <Box key={data.address} pb="sm" w="full">
+              <CardDataRow
+                data={[
+                  <IdentifyTokenCell
+                    address={data.address}
                     chain={data.chain}
-                    fontSize="md"
-                  />
-                </HStack>,
-              ]}
-              key={data.address}
-            />
+                    symbol={data.symbol}
+                  />,
+                  <RateProviderReviewedCell hasBeenReviewed={hasBeenReviewed} />,
+                  <HStack justify="end">
+                    <BlockExplorerLink
+                      address={token.rateProvider || undefined}
+                      chain={data.chain}
+                      fontSize="md"
+                    />
+                  </HStack>,
+                ]}
+              />
+            </Box>
           )
         })}
     </>

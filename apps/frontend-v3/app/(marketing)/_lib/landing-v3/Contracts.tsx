@@ -44,7 +44,7 @@ const contracts = [
         'Weighted pools',
         'Stable pool',
         '80/20 pool',
-        'Boosted pool',
+        'rehyped pool',
         'Liquidity Boostrapping Pools (LBP)',
       ],
     },

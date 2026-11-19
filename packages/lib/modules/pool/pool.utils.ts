@@ -159,7 +159,7 @@ export function getTotalAprRaw(aprItems: GqlPoolAprItem[]): string {
 const poolTypeLabelMap: Partial<Record<GqlPoolType, string>> = {
   [GqlPoolTypeValues.Weighted]: 'Weighted',
   [GqlPoolTypeValues.Stable]: 'Stable',
-  [GqlPoolTypeValues.Eclp]: 'E-CLP',
+  [GqlPoolTypeValues.Eclp]: 'Concentrated',
 }
 
 export function getPoolTypeLabel(type: GqlPoolType): string {

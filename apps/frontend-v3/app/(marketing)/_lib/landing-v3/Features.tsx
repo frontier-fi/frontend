@@ -47,8 +47,8 @@ const keyFeatures = [
     icon: <HookIcon size={70} />,
   },
   {
-    title: '100% Boosted Pools',
-    subTitle: 'Boosted earnings, simplified strategy.',
+    title: '100% rehyped Pools',
+    subTitle: 'rehyped earnings, simplified strategy.',
     description:
       'Put your liquidity to work 100% of the time. Seamless integration with Aave and Morpho delivers passive, diversified yield in a single click.',
     icon: <StarsIconPlain size={32} />,

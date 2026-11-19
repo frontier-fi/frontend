@@ -18,6 +18,7 @@ export const ProjectConfigFrontier: ProjectConfig = {
   projectUrl: 'https://frontier.fi',
   appUrl: 'https://app.frontier.fi',
   projectLogo: '/images/icons/0xff.png',
+  poolSymbolPrefix: '0xFF-',
   acceptedPoliciesVersion: undefined,
   supportedNetworks: [GqlChainValues.Base, GqlChainValues.Sepolia],
   variantConfig: {
@@ -32,8 +33,8 @@ export const ProjectConfigFrontier: ProjectConfig = {
   defaultNetwork: GqlChainValues.Base,
   ensNetwork: GqlChainValues.Sepolia,
   delegateOwner: '0xba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1b',
-  // Merkl does not support Sepolia (api.merkl.xyz returns 400); leave empty until a Merkl chain is live.
-  merklRewardsChains: [],
+  // Merkl supports Base; Sepolia is unsupported (api.merkl.xyz returns 400).
+  merklRewardsChains: [GqlChainValues.Base],
   options: {
     poolDisplayType: PoolDisplayType.TokenPills,
     hidePoolTags: ['DYNAMIC_ECLP', 'VE8020'],

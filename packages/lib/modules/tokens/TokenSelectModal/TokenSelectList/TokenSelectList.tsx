@@ -18,6 +18,7 @@ import { isSameAddress } from '@repo/lib/shared/utils/addresses'
 import { ApiOrCustomToken, ApiToken, CustomToken } from '../../token.types'
 import { useTokenMetadata } from '@repo/lib/modules/tokens/useTokenMetadata'
 import { getChainId } from '@repo/lib/config/app.config'
+import { TokenSelectNoResults } from './TokenSelectNoResults'
 
 type Props = {
   chain: GqlChain
@@ -257,22 +258,7 @@ export function TokenSelectList({
   return (
     <Box height={listHeight} {...rest}>
       {tokensToShow.length === 0 && !unlistedTokenToShow ? (
-        <Box p="lg">
-          <Text color="font.error" fontWeight="bold" mb="xxs">
-            No tokens found
-          </Text>
-          <Text color="font.secondary" fontSize="sm">
-            Are you sure this token is on this network?
-          </Text>
-          <Text color="font.secondary" fontSize="sm">
-            You can search by token name, symbol or address
-          </Text>
-          {enableUnlistedToken && (
-            <Text color="font.warning" fontSize="sm">
-              To search for unlisted tokens, use the contract address
-            </Text>
-          )}
-        </Box>
+        <TokenSelectNoResults enableUnlistedToken={enableUnlistedToken} />
       ) : (
         <GroupedVirtuoso
           groupContent={index => groups[index]}

@@ -76,6 +76,13 @@ export function isBoosted(pool: Pick<PoolCore, 'protocolVersion' | 'tags'>) {
   return isV3Pool(pool) && pool.tags?.includes('BOOSTED')
 }
 
+/** User-facing label for BOOSTED pools (product name: rehyped). */
+export const REHYPE_LABEL = 'rehyped'
+
+export function toRehypeLabel(text: string) {
+  return text.replace(/\bBoosted\b/gi, REHYPE_LABEL)
+}
+
 /** Non-ECLP Gyro types are not in the Frontier API. ECLP is matched via isGyroEPool. */
 export function isGyro(poolType: GqlPoolType | string) {
   return poolType === GqlPoolTypeValues.Eclp
@@ -543,7 +550,7 @@ export function poolTypeLabel(poolType: PoolFilterType) {
     // Gyro filter maps to Frontier ECLP pools
     case GqlPoolTypeValues.Gyro:
     case GqlPoolTypeValues.Eclp:
-      return 'E-CLP'
+      return 'Concentrated'
     default:
       return getPoolTypeLabel(poolType as GqlPoolType)
   }

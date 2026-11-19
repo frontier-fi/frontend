@@ -75,8 +75,8 @@ export function useBufferBalanceWarning(params: UseBufferBalanceWarningParams) {
         content={
           <>
             <Text color="black" mb="sm">
-              Liquidity buffers Boosted pools facilitate instant, gas-efficient transitions between
-              the wrapped yield generating tokens and the unwrapped underlying tokens.
+              Liquidity buffers in rehyped pools facilitate instant, gas-efficient transitions
+              between the wrapped yield generating tokens and the unwrapped underlying tokens.
             </Text>
             <Text color="black">
               Unfortunately, the {selectedTokenSymbol} in this pool's buffer is too small to allow

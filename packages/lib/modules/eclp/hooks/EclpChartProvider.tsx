@@ -1,18 +1,70 @@
 import { bn, fNum } from '@repo/lib/shared/utils/numbers'
-import { useTheme as useChakraTheme } from '@chakra-ui/react'
+import { useColorMode, useTheme as useChakraTheme } from '@chakra-ui/react'
 import { createContext, PropsWithChildren, useMemo } from 'react'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
 import { useSelectColor } from '@repo/lib/shared/hooks/useSelectColor'
 import { type ECLPLiquidityProfile } from './useGetECLPLiquidityProfile'
 
+const ECLP_CHART_COLORS = {
+  light: {
+    lineStops: [
+      'rgb(70, 95, 170)',
+      'rgb(25, 125, 185)',
+      'rgb(0, 150, 180)',
+      'rgb(20, 155, 135)',
+      'rgb(35, 155, 85)',
+    ],
+    areaStops: [
+      'rgba(70, 95, 170, 0.88)',
+      'rgba(25, 125, 185, 0.72)',
+      'rgba(0, 150, 180, 0.58)',
+      'rgba(20, 155, 135, 0.42)',
+      'rgba(35, 155, 85, 0.28)',
+    ],
+    lowerBound: 'rgb(70, 95, 170)',
+    upperBound: 'rgb(35, 155, 85)',
+    lowerBoundLine: 'rgba(70, 95, 170, 0.85)',
+    upperBoundLine: 'rgba(35, 155, 85, 0.85)',
+  },
+  dark: {
+    lineStops: [
+      'rgb(102, 123, 190)',
+      'rgb(58, 151, 199)',
+      'rgb(13, 178, 208)',
+      'rgb(47, 183, 164)',
+      'rgb(80, 187, 119)',
+    ],
+    areaStops: [
+      'rgba(102, 123, 190, 0.75)',
+      'rgba(58, 151, 199, 0.55)',
+      'rgba(13, 178, 208, 0.38)',
+      'rgba(47, 183, 164, 0.2)',
+      'rgba(80, 187, 119, 0)',
+    ],
+    lowerBound: 'rgb(102, 123, 190)',
+    upperBound: 'rgb(80, 187, 119)',
+    lowerBoundLine: 'rgba(102, 123, 190, 0.5)',
+    upperBoundLine: 'rgba(80, 187, 119, 0.5)',
+  },
+} as const
+
 type EclpChartContextType = ReturnType<typeof useEclpChartLogic>
 
 const EclpChartContext = createContext<EclpChartContextType | null>(null)
 
-export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
+type EclpChartOptions = {
+  /** Peak price line/pill — used in pool creator preview, not pool detail. */
+  showPeakPrice?: boolean
+}
+
+export function useEclpChartLogic(
+  eclpLiquidityProfile: ECLPLiquidityProfile,
+  { showPeakPrice = false }: EclpChartOptions = {}
+) {
   const {
     data,
     poolSpotPrice,
+    poolPeakPrice,
     poolIsInRange,
     xMin,
     xMax,
@@ -24,24 +76,89 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
   } = eclpLiquidityProfile
 
   const theme = useChakraTheme()
+  const { colorMode } = useColorMode()
   const selectColor = useSelectColor()
+  const chartColors = ECLP_CHART_COLORS[colorMode === 'dark' ? 'dark' : 'light']
+  const peakLineColor = colorMode === 'light' ? 'rgb(14, 165, 160)' : 'rgb(45, 212, 191)'
 
   const tokens = useMemo(() => {
     return isReversed ? poolTokens.reverse().join(' / ') : poolTokens.join(' / ')
   }, [poolTokens, isReversed])
 
-  const secondaryFontColor = selectColor('font', 'secondary')
+  const secondaryFontColor = selectColor('font', colorMode === 'light' ? 'primary' : 'secondary')
+
   const fontHighlightColor = selectColor('font', 'highlight')
   const backgroundHighlightColor = selectColor('background', 'highlight')
-  const markPointMargin = 0.05
+  // Labeled pills are wide — use a generous share of the [xMin, xMax] span.
+  const markPointMargin = 0.22
+  // Pixel offsets below the axis tick labels (positive Y is downward in echarts symbolOffset).
+  const valuePillOffsetBelow = 34
+  const valuePillOffsetStacked = 58
+  const valuePillOffsetStackedDeep = 82
 
-  const isSpotPriceNearLowerBound = useMemo(() => {
-    return bn(poolSpotPrice || 0).lt(xMin * (1 + markPointMargin))
-  }, [poolSpotPrice, xMin])
+  const priceRange = xMax - xMin
 
-  const isSpotPriceNearUpperBound = useMemo(() => {
-    return bn(poolSpotPrice || 0).gt(xMax * (1 - markPointMargin))
-  }, [poolSpotPrice, xMax])
+  function isNearPrice(
+    a: string | number | null | undefined,
+    b: string | number | null | undefined
+  ) {
+    if (a === null || a === undefined || b === null || b === undefined) return false
+    if (!priceRange) return false
+    return bn(a).minus(b).abs().lt(bn(priceRange).times(markPointMargin))
+  }
+
+  const isSpotPriceNearLowerBound = isNearPrice(poolSpotPrice, xMin)
+  const isSpotPriceNearUpperBound = isNearPrice(poolSpotPrice, xMax)
+  const isSpotPriceNearBound = isSpotPriceNearLowerBound || isSpotPriceNearUpperBound
+
+  const hasPeakPrice =
+    showPeakPrice &&
+    poolPeakPrice !== null &&
+    poolPeakPrice !== undefined &&
+    bn(poolPeakPrice || 0).gt(0)
+
+  const isPeakNearSpot = hasPeakPrice && isNearPrice(poolPeakPrice, poolSpotPrice)
+
+  const isPeakNearBound =
+    hasPeakPrice && (isNearPrice(poolPeakPrice, xMin) || isNearPrice(poolPeakPrice, xMax))
+
+  // Prefer keeping bounds on the first row; stack peak then current price as needed.
+  const peakPillOffset = isPeakNearBound ? valuePillOffsetStacked : valuePillOffsetBelow
+
+  const spotPillOffset =
+    isSpotPriceNearBound || isPeakNearSpot
+      ? isPeakNearBound && isPeakNearSpot
+        ? valuePillOffsetStackedDeep
+        : valuePillOffsetStacked
+      : valuePillOffsetBelow
+
+  const needsExtraBottomSpace =
+    spotPillOffset > valuePillOffsetBelow || peakPillOffset > valuePillOffsetBelow
+
+  // Shared dash pattern for markLines (above axis) and stub markPoints (below).
+  // Below-axis stubs can't use markLine (y < min is dropped), so they must match this.
+  const markerLineWidth = 1.5
+  const markerDash = 2
+  const markerGap = 4
+  const markerLineDash: [number, number] = [markerDash, markerGap]
+
+  function dashedStubPoints(x: number | string, offset: number, color: string) {
+    const points: Record<string, unknown>[] = []
+
+    for (let y = markerDash / 2; y < offset - 1; y += markerDash + markerGap) {
+      points.push({
+        coord: [x, 0],
+        symbol: 'rect',
+        symbolSize: [markerLineWidth, markerDash],
+        symbolOffset: [0, y],
+        itemStyle: { color },
+        label: { show: false },
+        z: 4,
+      })
+    }
+
+    return points
+  }
 
   const toolTipTheme = {
     heading: 'font-weight: bold; color: #E5D3BE',
@@ -57,7 +174,12 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
         left: '1%',
         right: '1%',
         top: '7%',
-        bottom: '9%',
+        // Extra room below the axis for value pills under tick labels.
+        bottom: needsExtraBottomSpace
+          ? spotPillOffset >= valuePillOffsetStackedDeep
+            ? '28%'
+            : '22%'
+          : '14%',
       },
       tooltip: {
         show: true,
@@ -109,6 +231,7 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
         },
         axisLine: {
           show: true,
+          onZero: true,
           lineStyle: {
             type: 'dashed',
             color: secondaryFontColor,
@@ -117,6 +240,8 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
       },
       yAxis: {
         type: 'value',
+        // Keep min at 0 so axis tick labels stay above the value pills.
+        // Below-axis stubs use markPoint rects (negative y markLine coords are dropped).
         min: 0,
         max: yMax * 1.25,
         axisLabel: {
@@ -136,6 +261,9 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
         // lower bound
         {
           type: 'line',
+          // Draw markers above the area fill so dotted gaps stay visible.
+          zlevel: 1,
+          clip: false,
           data: [],
           symbol: 'none',
           markLine: {
@@ -143,41 +271,20 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
             symbolSize: 6,
             symbolRotate: 180,
             silent: true,
-            label: {
-              show: true,
-              fontSize: 12,
-              color: theme.colors.gray[800],
-              backgroundColor: theme.colors.gray[400],
-              padding: [2, 3, 2, 3],
-              borderRadius: 2,
-              fontWeight: 'bold',
-              offset: [0, 1],
-            },
+            label: { show: false },
             lineStyle: {
-              color: 'rgba(102, 123, 190, 0.5)',
-              padding: [2, 0, 0, 0],
+              color: chartColors.lowerBoundLine,
+              type: markerLineDash,
+              width: markerLineWidth,
             },
-            data: [
-              [
-                {
-                  coord: [xMin, 0],
-                  label: {
-                    formatter: () => fNum('tokenRatio', xMin || '0'),
-                    position: 'start',
-                    distance: 5,
-                    backgroundColor: 'rgb(102, 123, 190)',
-                  },
-                },
-                {
-                  coord: [xMin, yMax * 1.1],
-                },
-              ],
-            ],
+            data: [[{ coord: [xMin, 0] }, { coord: [xMin, yMax * 1.1] }]],
           },
         },
         // upper bound
         {
           type: 'line',
+          zlevel: 1,
+          clip: false,
           data: [],
           symbol: 'none',
           markLine: {
@@ -185,55 +292,56 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
             symbolSize: 6,
             symbolRotate: 180,
             silent: true,
-            label: {
-              show: true,
-              fontSize: 12,
-              color: theme.colors.gray[800],
-              backgroundColor: theme.colors.gray[400],
-              padding: [2, 3, 2, 3],
-              borderRadius: 2,
-              fontWeight: 'bold',
-              offset: [0, 1],
-            },
+            label: { show: false },
             lineStyle: {
-              color: 'rgba(80, 187, 119, 0.5)',
+              color: chartColors.upperBoundLine,
+              type: markerLineDash,
+              width: markerLineWidth,
             },
-            data: [
-              [
-                {
-                  coord: [xMax, 0],
-                  label: {
-                    formatter: () => fNum('tokenRatio', xMax || '0'),
-                    position: 'start',
-                    distance: 5,
-                    backgroundColor: 'rgb(80, 187, 119)',
-                  },
-                },
-                {
-                  coord: [xMax, yMax * 1.1],
-                },
-              ],
-            ],
+            data: [[{ coord: [xMax, 0] }, { coord: [xMax, yMax * 1.1] }]],
           },
         },
+        // peak price
+        ...(hasPeakPrice
+          ? [
+              {
+                type: 'line' as const,
+                zlevel: 1,
+                clip: false,
+                data: [],
+                symbol: 'none',
+                markLine: {
+                  symbol: ['none', 'triangle'],
+                  symbolSize: 6,
+                  symbolRotate: 180,
+                  silent: true,
+                  label: { show: false },
+                  lineStyle: {
+                    color: peakLineColor,
+                    type: markerLineDash,
+                    width: markerLineWidth,
+                  },
+                  data: [[{ coord: [poolPeakPrice, 0] }, { coord: [poolPeakPrice, yMax * 1.1] }]],
+                },
+              },
+            ]
+          : []),
         // spot price
         {
           type: 'line',
+          zlevel: 1,
+          clip: false,
           data: [],
           symbol: 'none',
           markPoint: {
             silent: true,
-            symbol: 'rect',
-            symbolSize: [60, 36],
-            itemStyle: {
-              color: 'transparent',
-              borderWidth: 0,
-            },
-            // but markpoints for all 3 lines are here
             data: [
               {
                 coord: [xMin, yMax * 1.22],
                 value: 'Lower\nbound',
+                symbol: 'rect',
+                symbolSize: [60, 36],
+                itemStyle: { color: 'transparent', borderWidth: 0 },
                 label: {
                   show: !isSpotPriceNearLowerBound || !poolIsInRange,
                   fontSize: 12,
@@ -245,6 +353,9 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
               {
                 coord: [xMax, yMax * 1.22],
                 value: 'Upper\nbound',
+                symbol: 'rect',
+                symbolSize: [60, 36],
+                itemStyle: { color: 'transparent', borderWidth: 0 },
                 label: {
                   show: !isSpotPriceNearUpperBound || !poolIsInRange,
                   fontSize: 12,
@@ -253,15 +364,126 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
                   borderRadius: 4,
                 },
               },
+              ...(hasPeakPrice
+                ? [
+                    {
+                      coord: [poolPeakPrice, yMax * 1.22],
+                      value: 'Peak\nprice',
+                      symbol: 'rect',
+                      symbolSize: [60, 36],
+                      itemStyle: { color: 'transparent', borderWidth: 0 },
+                      label: {
+                        show: !isPeakNearSpot || !poolIsInRange,
+                        fontSize: 12,
+                        color: peakLineColor,
+                        padding: 4,
+                        borderRadius: 4,
+                      },
+                    },
+                  ]
+                : []),
               {
                 coord: [poolSpotPrice, yMax * 1.22],
                 value: 'Current\nprice',
+                symbol: 'rect',
+                symbolSize: [60, 36],
+                itemStyle: { color: 'transparent', borderWidth: 0 },
                 label: {
                   show: poolIsInRange,
                   fontSize: 12,
                   color: fontHighlightColor,
                 },
               },
+              // Dotted stubs from the axis down to each pill (markLine can't use y < min).
+              ...dashedStubPoints(xMin, valuePillOffsetBelow, chartColors.lowerBoundLine),
+              ...dashedStubPoints(xMax, valuePillOffsetBelow, chartColors.upperBoundLine),
+              ...(hasPeakPrice
+                ? dashedStubPoints(poolPeakPrice!, peakPillOffset, peakLineColor)
+                : []),
+              ...(poolIsInRange
+                ? dashedStubPoints(poolSpotPrice!, spotPillOffset, fontHighlightColor)
+                : []),
+              // Value pills — markPoint symbolOffset is reliable for stacking.
+              {
+                coord: [xMin, 0],
+                value: `Lower ${fNum('tokenRatio', xMin || '0')}`,
+                symbol: 'circle',
+                symbolSize: 1,
+                symbolOffset: [0, valuePillOffsetBelow],
+                itemStyle: { color: 'transparent' },
+                label: {
+                  show: true,
+                  color: '#fff',
+                  backgroundColor: chartColors.lowerBound,
+                  padding: [3, 5],
+                  borderRadius: 2,
+                  fontWeight: 'bold',
+                  fontSize: 12,
+                },
+                z: 5,
+              },
+              {
+                coord: [xMax, 0],
+                value: `Upper ${fNum('tokenRatio', xMax || '0')}`,
+                symbol: 'circle',
+                symbolSize: 1,
+                symbolOffset: [0, valuePillOffsetBelow],
+                itemStyle: { color: 'transparent' },
+                label: {
+                  show: true,
+                  color: '#fff',
+                  backgroundColor: chartColors.upperBound,
+                  padding: [3, 5],
+                  borderRadius: 2,
+                  fontWeight: 'bold',
+                  fontSize: 12,
+                },
+                z: 5,
+              },
+              ...(hasPeakPrice
+                ? [
+                    {
+                      coord: [poolPeakPrice, 0],
+                      value: `Peak ${fNum('tokenRatio', poolPeakPrice || '0')}`,
+                      symbol: 'circle',
+                      symbolSize: 1,
+                      symbolOffset: [0, peakPillOffset],
+                      itemStyle: { color: 'transparent' },
+                      label: {
+                        show: true,
+                        color: '#fff',
+                        backgroundColor: peakLineColor,
+                        padding: [3, 5],
+                        borderRadius: 2,
+                        fontWeight: 'bold',
+                        fontSize: 12,
+                      },
+                      z: 6,
+                    },
+                  ]
+                : []),
+              ...(poolIsInRange
+                ? [
+                    {
+                      coord: [poolSpotPrice, 0],
+                      value: `Price ${fNum('tokenRatio', poolSpotPrice || '0')}`,
+                      symbol: 'circle',
+                      symbolSize: 1,
+                      symbolOffset: [0, spotPillOffset],
+                      itemStyle: { color: 'transparent' },
+                      label: {
+                        show: true,
+                        color: '#fff',
+                        backgroundColor: backgroundHighlightColor,
+                        padding: [3, 5],
+                        borderRadius: 2,
+                        fontWeight: 'bold',
+                        fontSize: 12,
+                      },
+                      z: 10,
+                    },
+                  ]
+                : []),
             ],
           },
           markLine: poolIsInRange
@@ -270,47 +492,27 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
                 symbolSize: 6,
                 symbolRotate: 0,
                 silent: true,
-                label: {
-                  show: true,
-                  fontSize: 12,
-                  color: theme.colors.gray[800],
-                  backgroundColor: theme.colors.green[300],
-                  padding: [2, 3, 2, 3],
-                  borderRadius: 2,
-                  fontWeight: 'bold',
-                },
+                label: { show: false },
                 lineStyle: {
                   color: fontHighlightColor,
+                  type: markerLineDash,
+                  width: markerLineWidth,
                 },
-                data: [
-                  [
-                    {
-                      coord: [poolSpotPrice, 0],
-                      label: {
-                        formatter: () => fNum('tokenRatio', poolSpotPrice || '0'),
-                        position: 'start',
-                        distance: 6,
-                        backgroundColor: backgroundHighlightColor,
-                      },
-                    },
-                    {
-                      coord: [poolSpotPrice, yMax * 1.1],
-                    },
-                  ],
-                ],
+                data: [[{ coord: [poolSpotPrice, 0] }, { coord: [poolSpotPrice, yMax * 1.1] }]],
               }
             : undefined,
         },
-        // main chart
+        // main chart — below marker zlevel so dotted gaps aren't filled in by the area
         {
           type: 'line',
+          zlevel: 0,
           data,
           smooth: false,
           symbol: 'none',
           sampling: 'lttb',
           silent: true,
           lineStyle: {
-            width: 2,
+            width: colorMode === 'light' ? 2.5 : 2,
             color: {
               type: 'linear',
               x: 0,
@@ -318,30 +520,14 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
               x2: 1,
               y2: 0,
               colorStops: [
-                {
-                  offset: 0,
-                  color: 'rgb(102, 123, 190)',
-                },
-                {
-                  offset: 0.25,
-                  color: 'rgb(58, 151, 199)',
-                },
-                {
-                  offset: 0.5,
-                  color: 'rgb(13, 178, 208)',
-                },
-                {
-                  offset: 0.75,
-                  color: 'rgb(47, 183, 164)',
-                },
-                {
-                  offset: 1,
-                  color: 'rgb(80, 187, 119)',
-                },
+                { offset: 0, color: chartColors.lineStops[0] },
+                { offset: 0.25, color: chartColors.lineStops[1] },
+                { offset: 0.5, color: chartColors.lineStops[2] },
+                { offset: 0.75, color: chartColors.lineStops[3] },
+                { offset: 1, color: chartColors.lineStops[4] },
               ],
             },
           },
-          z: 1000,
           areaStyle: {
             color: {
               type: 'linear',
@@ -350,59 +536,13 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
               x2: 1,
               y2: 0,
               colorStops: [
-                {
-                  offset: 0,
-                  color: 'rgba(102, 123, 190, 0.75)',
-                },
-                {
-                  offset: 0.25,
-                  color: 'rgba(58, 151, 199, 0.55)',
-                },
-                {
-                  offset: 0.5,
-                  color: 'rgba(13, 178, 208, 0.38)',
-                },
-                {
-                  offset: 0.75,
-                  color: 'rgba(47, 183, 164, 0.2)',
-                },
-                {
-                  offset: 1,
-                  color: 'rgba(80, 187, 119, 0)',
-                },
+                { offset: 0, color: chartColors.areaStops[0] },
+                { offset: 0.25, color: chartColors.areaStops[1] },
+                { offset: 0.5, color: chartColors.areaStops[2] },
+                { offset: 0.75, color: chartColors.areaStops[3] },
+                { offset: 1, color: chartColors.areaStops[4] },
               ],
             },
-          },
-          markLine: {
-            silent: true,
-            z: 1000,
-            symbol: ['none', 'none'],
-            data: [
-              // left enclosing line for area
-              [
-                {
-                  coord: [xMin, 0],
-                  lineStyle: {
-                    color: 'rgb(102, 123, 190)',
-                    width: 2,
-                    type: 'solid',
-                  },
-                },
-                { coord: [xMin, data?.[0]?.[1] || 0] },
-              ],
-              // right enclosing line for area
-              [
-                {
-                  coord: [xMax, 0],
-                  lineStyle: {
-                    color: 'rgb(80, 187, 119)',
-                    width: 2,
-                    type: 'solid',
-                  },
-                },
-                { coord: [xMax, data?.[data.length - 1]?.[1] || 0] },
-              ],
-            ],
           },
         },
       ],
@@ -410,6 +550,13 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
   }, [
     data,
     poolSpotPrice,
+    poolPeakPrice,
+    hasPeakPrice,
+    isPeakNearSpot,
+    isPeakNearBound,
+    peakPillOffset,
+    spotPillOffset,
+    needsExtraBottomSpace,
     xMin,
     xMax,
     yMax,
@@ -421,6 +568,10 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
     backgroundHighlightColor,
     isSpotPriceNearLowerBound,
     isSpotPriceNearUpperBound,
+    isSpotPriceNearBound,
+    chartColors,
+    peakLineColor,
+    colorMode,
   ])
 
   const outOfRangeText =
@@ -433,6 +584,8 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
     options,
     hasChartData: data?.length,
     poolIsInRange,
+    poolSpotPrice,
+    poolPeakPrice,
     toggleIsReversed,
     isLoading,
     outOfRangeText,
@@ -444,8 +597,9 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
 export function EclpChartProvider({
   children,
   eclpLiquidityProfile,
-}: PropsWithChildren<{ eclpLiquidityProfile: ECLPLiquidityProfile }>) {
-  const hook = useEclpChartLogic(eclpLiquidityProfile)
+  showPeakPrice = false,
+}: PropsWithChildren<{ eclpLiquidityProfile: ECLPLiquidityProfile } & EclpChartOptions>) {
+  const hook = useEclpChartLogic(eclpLiquidityProfile, { showPeakPrice })
   return <EclpChartContext.Provider value={hook}>{children}</EclpChartContext.Provider>
 }
 

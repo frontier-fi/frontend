@@ -52,7 +52,7 @@ export function AddLiquidityFormCheckbox() {
     dynamicProtocolString = `${allButLast}, and ${last}—unaffiliated third parties. If any of these are`
   }
 
-  const boostedRiskDescription = `I accept that by adding tokens to this Boosted Pool, my tokens are deposited into ${dynamicProtocolString} compromised, I may lose all my tokens in this pool.`
+  const boostedRiskDescription = `I accept that by adding tokens to this rehyped Pool, my tokens are deposited into ${dynamicProtocolString} compromised, I may lose all my tokens in this pool.`
 
   useEffect(() => {
     if (isBoostedPool) {
