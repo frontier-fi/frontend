@@ -1,7 +1,7 @@
 import { Card, VStack, Text, SimpleGrid, Box, HStack, Divider, Button } from '@chakra-ui/react'
 import { usePoolCreationForm } from '../PoolCreationFormProvider'
 import { RefreshCcw } from 'lucide-react'
-import { fNumCustom } from '@repo/lib/shared/utils/numbers'
+import { bn, fNumCustom } from '@repo/lib/shared/utils/numbers'
 import { NUM_FORMAT } from '../constants'
 import ReactECharts from 'echarts-for-react'
 import { useEclpChart } from '@repo/lib/modules/eclp/hooks/EclpChartProvider'
@@ -34,7 +34,11 @@ export function PreviewGyroEclpConfig() {
     {
       color: 'green.400',
       label: 'Current price',
-      value: poolSpotPrice ? fNumCustom(String(poolSpotPrice), NUM_FORMAT) : '-',
+      // spot price is 'NaN' / 'Infinity' when either token lacks a USD price
+      value:
+        poolSpotPrice && bn(poolSpotPrice).isFinite() && bn(poolSpotPrice).gt(0)
+          ? fNumCustom(String(poolSpotPrice), NUM_FORMAT)
+          : '-',
     },
     {
       color: 'orange.400',

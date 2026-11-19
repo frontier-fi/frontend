@@ -190,6 +190,8 @@ export interface ProjectConfig {
   /** Registered legal entity users contract with (Terms of Use, Privacy Policy). */
   legalEntityName: string
   projectLogo: string
+  /** Prefix prepended to suggested pool token symbols in the pool creator (e.g. '0xFF-'). */
+  poolSymbolPrefix: string
   acceptedPoliciesVersion: number | undefined
   supportedNetworks: GqlChain[]
   corePoolId: string // this prop is used to adjust the color of the SparklesIcon

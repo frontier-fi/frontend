@@ -6,8 +6,11 @@ import FadeInOnView from '@repo/lib/shared/components/containers/FadeInOnView'
 import { ParallaxImage } from '@repo/lib/shared/components/marketing/ParallaxImage'
 
 import { Picture } from '@repo/lib/shared/components/other/Picture'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 
 export function HomeProtocols() {
+  const { projectName } = PROJECT_CONFIG
+
   return (
     <Section className="protocols">
       <Box m="0 auto" maxW="maxContent" px={{ base: 'md', xl: '0' }}>
@@ -38,7 +41,7 @@ export function HomeProtocols() {
                 textWrap: 'balance',
               }}
             >
-              Launch your token with confidence by plugging into the Frontier Finance vault and
+              Launch your token with confidence by plugging into the {projectName} vault and
               ecosystem. Find product market fit and generate revenue faster with liquidity and
               community from day 1.
             </Text>
@@ -50,7 +53,7 @@ export function HomeProtocols() {
         <FadeInOnView>
           <ParallaxImage>
             <Picture
-              altText="Pools plugged into Frontier Finance vault"
+              altText={`Pools plugged into ${projectName} vault`}
               defaultImgType="png"
               height="775"
               imgAvif
@@ -71,8 +74,8 @@ export function HomeProtocols() {
                 Get swaps on day 1
               </Heading>
               <Text>
-                Access to the Frontier Finance vault for smart swap routing via your pools. Plus,
-                fast track inclusion to aggregator partners.
+                Access to the {projectName} vault for smart swap routing via your pools. Plus, fast
+                track inclusion to aggregator partners.
               </Text>
             </Box>
             <Box>
@@ -80,17 +83,18 @@ export function HomeProtocols() {
                 Liquidity incentives
               </Heading>
               <Text>
-                In addition to your own points / token, boost your liquidity by utilizing Frontier
-                Finance incentive programs.
+                In addition to your own points / token, boost your liquidity by utilizing{' '}
+                {projectName}
+                incentive programs.
               </Text>
             </Box>
             <Box>
               <Heading as="h5" pb="sm" size="h5" variant="h5">
-                Access Frontier Finance&lsquo;s community
+                Access {projectName}&lsquo;s community
               </Heading>
               <Text>
-                By building on Frontier Finance, LPs and swappers can find and / or interact with
-                your AMM / pools via the ecosystem app.
+                By building on {projectName}, LPs and swappers can find and / or interact with your
+                AMM / pools via the ecosystem app.
               </Text>
             </Box>
             <Box>

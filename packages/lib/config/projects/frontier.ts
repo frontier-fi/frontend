@@ -18,6 +18,7 @@ export const ProjectConfigFrontier: ProjectConfig = {
   projectUrl: 'https://frontier.fi',
   appUrl: 'https://app.frontier.fi',
   projectLogo: '/images/icons/0xff.png',
+  poolSymbolPrefix: '0xFF-',
   acceptedPoliciesVersion: undefined,
   supportedNetworks: [GqlChainValues.Base, GqlChainValues.Sepolia],
   variantConfig: {

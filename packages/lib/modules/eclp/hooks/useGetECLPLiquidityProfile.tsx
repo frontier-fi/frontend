@@ -77,9 +77,14 @@ export function useGetECLPLiquidityProfile(): ECLPLiquidityProfile {
     const rawPeak = calculatePeakPrice({ c: gyroPool.c, s: gyroPool.s })
     if (!rawPeak) return null
 
-    const displayedPeak = bn(rawPeak).div(priceRateRatio).toNumber()
-    return isReversed ? bn(1).div(bn(displayedPeak)).toString() : displayedPeak
-  }, [pool, priceRateRatio, isReversed])
+    // Scale the same way the curve (drawLiquidityECLP) and spot price (calculateSpotPrice) are
+    // scaled — by rate0 / rate1 — before normalising by priceRateRatio.
+    const scalingFactor = tokenRateScalingFactorString ?? '1'
+    const displayedPeak = bn(rawPeak).times(scalingFactor).div(priceRateRatio)
+    if (!displayedPeak.isFinite() || displayedPeak.lte(0)) return null
+
+    return isReversed ? bn(1).div(displayedPeak).toString() : displayedPeak.toNumber()
+  }, [pool, priceRateRatio, isReversed, tokenRateScalingFactorString])
 
   const data = useMemo(() => {
     if (!liquidityData) return null

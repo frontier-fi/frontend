@@ -7,8 +7,7 @@ import { useEffect, useRef } from 'react'
 import { PoolCreationToken, SupportedPoolTypes } from '../../types'
 import { isWeightedPool } from '../../helpers'
 import { MAX_POOL_NAME_LENGTH, MAX_POOL_SYMBOL_LENGTH } from '../../constants'
-
-const POOL_SYMBOL_PREFIX = '0xFF-'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 
 export function PoolDetails() {
   const { poolCreationForm } = usePoolCreationForm()
@@ -24,7 +23,7 @@ export function PoolDetails() {
 
   useEffect(() => {
     if (hasInitialized.current) return
-    if (!suggestedPoolName || suggestedPoolName === '-') return
+    if (!suggestedPoolName) return
 
     const currentName = poolCreationForm.getValues('name')
     const currentSymbol = poolCreationForm.getValues('symbol')
@@ -80,22 +79,28 @@ export function PoolDetails() {
 }
 
 function getSuggestions(poolTokens: PoolCreationToken[], poolType: SupportedPoolTypes) {
+  // Only suggest once every token has a symbol, otherwise joining empty symbols yields '-', '--', etc.
+  if (!poolTokens.length || poolTokens.some(({ data }) => !data?.symbol)) {
+    return { suggestedPoolName: '', suggestedPoolSymbol: '' }
+  }
+
   const tokenSymbols = poolTokens
     .map(({ data, weight }) => {
-      if (!data?.symbol) return ''
-      if (!isWeightedPool(poolType) || !weight) return data.symbol
-      return weight + data.symbol
+      const symbol = data?.symbol ?? ''
+      if (!isWeightedPool(poolType) || !weight) return symbol
+      return weight + symbol
     })
     .join('-')
 
-  const maxSymbolBodyLength = MAX_POOL_SYMBOL_LENGTH - POOL_SYMBOL_PREFIX.length
+  const { poolSymbolPrefix } = PROJECT_CONFIG
+  const maxSymbolBodyLength = MAX_POOL_SYMBOL_LENGTH - poolSymbolPrefix.length
 
   const symbolBody =
     tokenSymbols.length <= maxSymbolBodyLength
       ? tokenSymbols
       : tokenSymbols.slice(0, maxSymbolBodyLength)
 
-  const suggestedPoolSymbol = tokenSymbols ? `${POOL_SYMBOL_PREFIX}${symbolBody}` : ''
+  const suggestedPoolSymbol = tokenSymbols ? `${poolSymbolPrefix}${symbolBody}` : ''
 
   const suggestedPoolName =
     tokenSymbols.length <= MAX_POOL_NAME_LENGTH
