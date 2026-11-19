@@ -91,10 +91,10 @@ export function useEclpChartLogic(
   const backgroundHighlightColor = selectColor('background', 'highlight')
   // Labeled pills are wide — use a generous share of the [xMin, xMax] span.
   const markPointMargin = 0.22
-  // Pixel offsets below the axis (positive Y is downward in echarts symbolOffset).
-  const valuePillOffsetBelow = 18
-  const valuePillOffsetStacked = 42
-  const valuePillOffsetStackedDeep = 66
+  // Pixel offsets below the axis tick labels (positive Y is downward in echarts symbolOffset).
+  const valuePillOffsetBelow = 34
+  const valuePillOffsetStacked = 58
+  const valuePillOffsetStackedDeep = 82
 
   const priceRange = xMax - xMin
 
@@ -135,6 +135,31 @@ export function useEclpChartLogic(
   const needsExtraBottomSpace =
     spotPillOffset > valuePillOffsetBelow || peakPillOffset > valuePillOffsetBelow
 
+  // Shared dash pattern for markLines (above axis) and stub markPoints (below).
+  // Below-axis stubs can't use markLine (y < min is dropped), so they must match this.
+  const markerLineWidth = 1.5
+  const markerDash = 2
+  const markerGap = 4
+  const markerLineDash: [number, number] = [markerDash, markerGap]
+
+  function dashedStubPoints(x: number | string, offset: number, color: string) {
+    const points: Record<string, unknown>[] = []
+
+    for (let y = markerDash / 2; y < offset - 1; y += markerDash + markerGap) {
+      points.push({
+        coord: [x, 0],
+        symbol: 'rect',
+        symbolSize: [markerLineWidth, markerDash],
+        symbolOffset: [0, y],
+        itemStyle: { color },
+        label: { show: false },
+        z: 4,
+      })
+    }
+
+    return points
+  }
+
   const toolTipTheme = {
     heading: 'font-weight: bold; color: #E5D3BE',
     container: `background: ${theme.colors.gray[800]};`,
@@ -149,12 +174,12 @@ export function useEclpChartLogic(
         left: '1%',
         right: '1%',
         top: '7%',
-        // Extra room below the axis when pills stack under a bound/peak.
+        // Extra room below the axis for value pills under tick labels.
         bottom: needsExtraBottomSpace
           ? spotPillOffset >= valuePillOffsetStackedDeep
-            ? '24%'
-            : '18%'
-          : '9%',
+            ? '28%'
+            : '22%'
+          : '14%',
       },
       tooltip: {
         show: true,
@@ -206,6 +231,7 @@ export function useEclpChartLogic(
         },
         axisLine: {
           show: true,
+          onZero: true,
           lineStyle: {
             type: 'dashed',
             color: secondaryFontColor,
@@ -214,6 +240,8 @@ export function useEclpChartLogic(
       },
       yAxis: {
         type: 'value',
+        // Keep min at 0 so axis tick labels stay above the value pills.
+        // Below-axis stubs use markPoint rects (negative y markLine coords are dropped).
         min: 0,
         max: yMax * 1.25,
         axisLabel: {
@@ -233,6 +261,9 @@ export function useEclpChartLogic(
         // lower bound
         {
           type: 'line',
+          // Draw markers above the area fill so dotted gaps stay visible.
+          zlevel: 1,
+          clip: false,
           data: [],
           symbol: 'none',
           markLine: {
@@ -243,7 +274,8 @@ export function useEclpChartLogic(
             label: { show: false },
             lineStyle: {
               color: chartColors.lowerBoundLine,
-              padding: [2, 0, 0, 0],
+              type: markerLineDash,
+              width: markerLineWidth,
             },
             data: [[{ coord: [xMin, 0] }, { coord: [xMin, yMax * 1.1] }]],
           },
@@ -251,6 +283,8 @@ export function useEclpChartLogic(
         // upper bound
         {
           type: 'line',
+          zlevel: 1,
+          clip: false,
           data: [],
           symbol: 'none',
           markLine: {
@@ -261,6 +295,8 @@ export function useEclpChartLogic(
             label: { show: false },
             lineStyle: {
               color: chartColors.upperBoundLine,
+              type: markerLineDash,
+              width: markerLineWidth,
             },
             data: [[{ coord: [xMax, 0] }, { coord: [xMax, yMax * 1.1] }]],
           },
@@ -270,6 +306,8 @@ export function useEclpChartLogic(
           ? [
               {
                 type: 'line' as const,
+                zlevel: 1,
+                clip: false,
                 data: [],
                 symbol: 'none',
                 markLine: {
@@ -280,7 +318,8 @@ export function useEclpChartLogic(
                   label: { show: false },
                   lineStyle: {
                     color: peakLineColor,
-                    type: 'dashed' as const,
+                    type: markerLineDash,
+                    width: markerLineWidth,
                   },
                   data: [[{ coord: [poolPeakPrice, 0] }, { coord: [poolPeakPrice, yMax * 1.1] }]],
                 },
@@ -290,6 +329,8 @@ export function useEclpChartLogic(
         // spot price
         {
           type: 'line',
+          zlevel: 1,
+          clip: false,
           data: [],
           symbol: 'none',
           markPoint: {
@@ -353,6 +394,15 @@ export function useEclpChartLogic(
                   color: fontHighlightColor,
                 },
               },
+              // Dotted stubs from the axis down to each pill (markLine can't use y < min).
+              ...dashedStubPoints(xMin, valuePillOffsetBelow, chartColors.lowerBoundLine),
+              ...dashedStubPoints(xMax, valuePillOffsetBelow, chartColors.upperBoundLine),
+              ...(hasPeakPrice
+                ? dashedStubPoints(poolPeakPrice!, peakPillOffset, peakLineColor)
+                : []),
+              ...(poolIsInRange
+                ? dashedStubPoints(poolSpotPrice!, spotPillOffset, fontHighlightColor)
+                : []),
               // Value pills — markPoint symbolOffset is reliable for stacking.
               {
                 coord: [xMin, 0],
@@ -442,18 +492,20 @@ export function useEclpChartLogic(
                 symbolSize: 6,
                 symbolRotate: 0,
                 silent: true,
-                z: 10,
                 label: { show: false },
                 lineStyle: {
                   color: fontHighlightColor,
+                  type: markerLineDash,
+                  width: markerLineWidth,
                 },
                 data: [[{ coord: [poolSpotPrice, 0] }, { coord: [poolSpotPrice, yMax * 1.1] }]],
               }
             : undefined,
         },
-        // main chart
+        // main chart — below marker zlevel so dotted gaps aren't filled in by the area
         {
           type: 'line',
+          zlevel: 0,
           data,
           smooth: false,
           symbol: 'none',
@@ -476,7 +528,6 @@ export function useEclpChartLogic(
               ],
             },
           },
-          z: 1000,
           areaStyle: {
             color: {
               type: 'linear',
@@ -492,37 +543,6 @@ export function useEclpChartLogic(
                 { offset: 1, color: chartColors.areaStops[4] },
               ],
             },
-          },
-          markLine: {
-            silent: true,
-            z: 1000,
-            symbol: ['none', 'none'],
-            data: [
-              // left enclosing line for area
-              [
-                {
-                  coord: [xMin, 0],
-                  lineStyle: {
-                    color: chartColors.lowerBound,
-                    width: 2,
-                    type: 'solid',
-                  },
-                },
-                { coord: [xMin, data?.[0]?.[1] || 0] },
-              ],
-              // right enclosing line for area
-              [
-                {
-                  coord: [xMax, 0],
-                  lineStyle: {
-                    color: chartColors.upperBound,
-                    width: 2,
-                    type: 'solid',
-                  },
-                },
-                { coord: [xMax, data?.[data.length - 1]?.[1] || 0] },
-              ],
-            ],
           },
         },
       ],

@@ -53,17 +53,28 @@ export function PreviewGyroEclpConfig() {
       <VStack spacing="md" w="full">
         <SimpleGrid columns={4} spacing={3} w="full">
           {priceDisplayCards.map(({ color, label, value }) => (
-            <Card key={label} variant="subSection">
-              <VStack align="start" spacing="sm">
+            <Card key={label} minW={0} overflow="hidden" variant="subSection">
+              <VStack align="start" minW={0} spacing="sm" w="full">
                 <HStack spacing="sm">
-                  <Box bg={color} borderRadius="full" h="8px" w="8px" />
+                  <Box bg={color} borderRadius="full" flexShrink={0} h="8px" w="8px" />
 
                   <Text color="font.secondary" fontSize="sm">
                     {label}
                   </Text>
                 </HStack>
 
-                <Text fontWeight="bold">{value}</Text>
+                <Text
+                  fontSize="xs"
+                  fontWeight="bold"
+                  lineHeight="1.25"
+                  overflow="hidden"
+                  textOverflow="ellipsis"
+                  title={value}
+                  w="full"
+                  whiteSpace="nowrap"
+                >
+                  {value}
+                </Text>
               </VStack>
             </Card>
           ))}
