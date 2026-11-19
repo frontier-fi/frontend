@@ -1,11 +1,37 @@
+import { afterEach } from 'vitest'
 import { testHook } from '@repo/lib/test/utils/custom-renderers'
 import { notAllowedPoolMock } from '../__mocks__/notAllowedPoolMock'
 import { usePoolAlerts } from './usePoolAlerts'
 import { recoveryPoolMock } from '../__mocks__/recoveryPoolMock'
 import { HooksProvider } from '../../hooks/HooksProvider'
 import { PoolsMetadataProvider } from '../metadata/PoolsMetadataProvider'
+import { PoolIssue } from './pool-issues/PoolIssue.type'
+
+let mockPoolIssues: Partial<Record<PoolIssue, string[]>> | undefined
+
+vi.mock('@repo/lib/config/app.config', async importOriginal => {
+  const actual = await importOriginal<typeof import('@repo/lib/config/app.config')>()
+  return {
+    ...actual,
+    getNetworkConfig: (chain?: Parameters<typeof actual.getNetworkConfig>[0]) => {
+      const config = actual.getNetworkConfig(chain)
+      if (!mockPoolIssues) return config
+      return {
+        ...config,
+        pools: {
+          ...config.pools,
+          issues: mockPoolIssues,
+        },
+      }
+    },
+  }
+})
 
 describe('Creates pool alerts for', () => {
+  afterEach(() => {
+    mockPoolIssues = undefined
+  })
+
   test('a pool with 2 not allowed tokens', () => {
     const { result } = testHook(() => usePoolAlerts(notAllowedPoolMock), {
       wrapper: ({ children }) => (
@@ -34,6 +60,11 @@ describe('Creates pool alerts for', () => {
   })
 
   test('a pool with 2 vulnerability alerts', () => {
+    mockPoolIssues = {
+      [PoolIssue.EulerRecoveryModeWarning]: [recoveryPoolMock.id],
+      [PoolIssue.CspPoolVulnWarning]: [recoveryPoolMock.id],
+    }
+
     const { result } = testHook(() => usePoolAlerts(recoveryPoolMock), {
       wrapper: ({ children }) => (
         <PoolsMetadataProvider erc4626Metadata={[]} poolsMetadata={{}}>

@@ -1,3 +1,4 @@
+import { afterEach } from 'vitest'
 import {
   balAddress,
   daiAddress,
@@ -16,6 +17,30 @@ import { PropsWithChildren } from 'react'
 import { useAddLiquidityLogic } from './AddLiquidityProvider'
 import { nestedPoolMock } from '../../__mocks__/nestedPoolMock'
 import { aBalWethPoolElementMock } from '@repo/lib/test/msw/builders/gqlPoolElement.builders'
+
+let mockSupportsNestedActions: boolean | undefined
+
+vi.mock('@repo/lib/config/app.config', async importOriginal => {
+  const actual = await importOriginal<typeof import('@repo/lib/config/app.config')>()
+  return {
+    ...actual,
+    getNetworkConfig: (chain?: Parameters<typeof actual.getNetworkConfig>[0]) => {
+      const config = actual.getNetworkConfig(chain)
+      if (mockSupportsNestedActions === undefined) return config
+      return {
+        ...config,
+        pools: {
+          ...config.pools,
+          supportsNestedActions: mockSupportsNestedActions,
+        },
+      }
+    },
+  }
+})
+
+afterEach(() => {
+  mockSupportsNestedActions = undefined
+})
 
 async function testUseAddLiquidity(pool: GqlPoolElement = aBalWethPoolElementMock()) {
   const PoolProvider = buildDefaultPoolTestProvider(pool)
@@ -88,7 +113,8 @@ test('uses custom add liquidity handler selector and forwards handler to custom 
   )
 })
 
-test('returns valid tokens for a nested pool', async () => {
+test('returns valid tokens for a nested pool when nested actions are enabled', async () => {
+  mockSupportsNestedActions = true
   const result = await testUseAddLiquidity(nestedPoolMock as GqlPoolElement)
 
   const validAddresses = result.current.validTokens.map(t => t.address)
@@ -98,4 +124,16 @@ test('returns valid tokens for a nested pool', async () => {
   )
 
   expect(validAddresses).toHaveLength(4)
+})
+
+test('returns root tokens for a nested pool on Frontier Mainnet (nested actions disabled)', async () => {
+  const result = await testUseAddLiquidity(nestedPoolMock as GqlPoolElement)
+
+  const validAddresses = result.current.validTokens.map(t => t.address)
+
+  expect(validAddresses).toEqual(
+    expect.arrayContaining([wETHAddress, '0x79c58f70905f734641735bc61e45c19dd9ad60bc'])
+  )
+
+  expect(validAddresses).toHaveLength(2)
 })

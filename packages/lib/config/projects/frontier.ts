@@ -20,7 +20,7 @@ export const ProjectConfigFrontier: ProjectConfig = {
   projectLogo: '/images/icons/0xff.png',
   poolSymbolPrefix: '0xFF-',
   acceptedPoliciesVersion: undefined,
-  supportedNetworks: [GqlChainValues.Base, GqlChainValues.Sepolia],
+  supportedNetworks: [GqlChainValues.Mainnet, GqlChainValues.Base, GqlChainValues.Sepolia],
   variantConfig: {
     [PartnerVariant.cow]: {
       banners: {
@@ -30,11 +30,11 @@ export const ProjectConfigFrontier: ProjectConfig = {
     },
   },
   corePoolId: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014', // veBAL BAL8020 (Balancer 80 BAL 20 WETH) pool on Ethereum
-  defaultNetwork: GqlChainValues.Base,
-  ensNetwork: GqlChainValues.Sepolia,
+  defaultNetwork: GqlChainValues.Mainnet,
+  ensNetwork: GqlChainValues.Mainnet,
   delegateOwner: '0xba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1b',
-  // Merkl supports Base; Sepolia is unsupported (api.merkl.xyz returns 400).
-  merklRewardsChains: [GqlChainValues.Base],
+  // Merkl supports Mainnet and Base; Sepolia is unsupported (api.merkl.xyz returns 400).
+  merklRewardsChains: [GqlChainValues.Mainnet, GqlChainValues.Base],
   options: {
     poolDisplayType: PoolDisplayType.TokenPills,
     hidePoolTags: ['DYNAMIC_ECLP', 'VE8020'],

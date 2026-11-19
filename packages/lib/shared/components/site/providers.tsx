@@ -1,4 +1,3 @@
-import '@repo/lib/config/frontier/addresses'
 import { Web3Provider } from '@repo/lib/modules/web3/Web3Provider'
 import { ApolloClientProvider } from '@repo/lib/shared/services/api/apollo-client-provider'
 import { ReactNode } from 'react'

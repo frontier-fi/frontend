@@ -46,7 +46,7 @@ import {
   supportsProportionalAddLiquidityReasons,
   toPoolState,
 } from './LiquidityActionHelpers'
-import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
+import { GqlChainValues, GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { getNetworkConfig } from '@repo/lib/config/networks'
 
 describe('Calculates toInputAmounts from allPoolTokens', () => {
@@ -633,7 +633,8 @@ describe('areEmptyAmounts', () => {
 
 test('detects pools requiring nested liquidity', () => {
   expect(supportsNestedActions(aWjAuraWethPoolElementMock())).toBeFalsy()
-  expect(supportsNestedActions(nestedPoolMock)).toBeTruthy()
+  expect(supportsNestedActions(nestedPoolMock)).toBeFalsy()
+  expect(supportsNestedActions({ ...nestedPoolMock, chain: GqlChainValues.Gnosis })).toBeTruthy()
 })
 
 describe('detects pools requiring recovery removal', () => {

@@ -1,12 +1,12 @@
 import { useQuery } from '@apollo/client/react'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { GetProtocolStatsPerChainDocument } from '../services/api/generated/graphql'
-import { GqlChainValues } from '../services/api/graphql-enums'
 import { secondsToMilliseconds } from 'date-fns'
 
 export function useApiHealth() {
   const { error } = useQuery(GetProtocolStatsPerChainDocument, {
     variables: {
-      chain: GqlChainValues.Sepolia,
+      chain: PROJECT_CONFIG.defaultNetwork,
     },
     pollInterval: secondsToMilliseconds(15),
   })

@@ -1,4 +1,3 @@
-import '@repo/lib/config/frontier/addresses'
 import { AppChain, GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { NetworkConfig } from '../config.types'
 import arbitrum from './arbitrum'

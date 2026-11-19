@@ -50,8 +50,11 @@ it('supportsNestedActions', () => {
 
   expect(
     supportsNestedActions(
-      // WETH / osETH Phantom composable stable
-      fakeNestedPool('0xdacf5fa19b1f720111609043ac67a9818262850c000000000000000000000635')
+      // Chain with nested actions enabled by default
+      {
+        ...fakeNestedPool('0xdacf5fa19b1f720111609043ac67a9818262850c000000000000000000000635'),
+        chain: GqlChainValues.Gnosis,
+      }
     )
   ).toBeTruthy()
 
@@ -63,11 +66,11 @@ it('supportsNestedActions', () => {
   ).toBeFalsy()
 })
 
-it('disables nested liquidity actions on Frontier Base and Sepolia', () => {
+it('disables nested liquidity actions on Frontier Mainnet, Base, and Sepolia', () => {
   const nested = fakeNestedPool('0x12345')
+  expect(supportsNestedActions({ ...nested, chain: GqlChainValues.Mainnet })).toBe(false)
   expect(supportsNestedActions({ ...nested, chain: GqlChainValues.Base })).toBe(false)
   expect(supportsNestedActions({ ...nested, chain: GqlChainValues.Sepolia })).toBe(false)
-  expect(supportsNestedActions({ ...nested, chain: GqlChainValues.Mainnet })).toBe(true)
 })
 
 function fakeNestedPool(poolId: string): Pool {
