@@ -21,7 +21,7 @@ import { escapeHtml } from '@repo/lib/shared/utils/strings'
 type NonEmptyPoolChartPeriods = [PoolChartPeriod, ...PoolChartPeriod[]]
 
 /** Map API UTC-midnight snapshot timestamps to local midnight of the same Y-M-D. */
-function utcMidnightToLocalCalendarMidnight(utcMidnightUnix: number): number {
+export function utcMidnightToLocalCalendarMidnight(utcMidnightUnix: number): number {
   const utc = new Date(utcMidnightUnix * 1000)
   return new Date(utc.getUTCFullYear(), utc.getUTCMonth(), utc.getUTCDate()).getTime() / 1000
 }
@@ -523,7 +523,9 @@ export function usePoolChartsLogic() {
     handleAxisMoved,
     chartData,
     chartValueSum,
-    hasChartData: !!chartData.length,
+    // Based on snapshots, not the active tab's series: tabs with their own data (e.g. Growth of $10k)
+    // build no `chartData` here, and a false value replaces the whole card, tabs included.
+    hasChartData: !!data?.snapshots?.length,
   }
 }
 
