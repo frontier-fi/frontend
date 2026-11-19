@@ -52,7 +52,15 @@ type EclpChartContextType = ReturnType<typeof useEclpChartLogic>
 
 const EclpChartContext = createContext<EclpChartContextType | null>(null)
 
-export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
+type EclpChartOptions = {
+  /** Peak price line/pill — used in pool creator preview, not pool detail. */
+  showPeakPrice?: boolean
+}
+
+export function useEclpChartLogic(
+  eclpLiquidityProfile: ECLPLiquidityProfile,
+  { showPeakPrice = false }: EclpChartOptions = {}
+) {
   const {
     data,
     poolSpotPrice,
@@ -104,7 +112,10 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
   const isSpotPriceNearBound = isSpotPriceNearLowerBound || isSpotPriceNearUpperBound
 
   const hasPeakPrice =
-    poolPeakPrice !== null && poolPeakPrice !== undefined && bn(poolPeakPrice || 0).gt(0)
+    showPeakPrice &&
+    poolPeakPrice !== null &&
+    poolPeakPrice !== undefined &&
+    bn(poolPeakPrice || 0).gt(0)
 
   const isPeakNearSpot = hasPeakPrice && isNearPrice(poolPeakPrice, poolSpotPrice)
 
@@ -566,8 +577,9 @@ export function useEclpChartLogic(eclpLiquidityProfile: ECLPLiquidityProfile) {
 export function EclpChartProvider({
   children,
   eclpLiquidityProfile,
-}: PropsWithChildren<{ eclpLiquidityProfile: ECLPLiquidityProfile }>) {
-  const hook = useEclpChartLogic(eclpLiquidityProfile)
+  showPeakPrice = false,
+}: PropsWithChildren<{ eclpLiquidityProfile: ECLPLiquidityProfile } & EclpChartOptions>) {
+  const hook = useEclpChartLogic(eclpLiquidityProfile, { showPeakPrice })
   return <EclpChartContext.Provider value={hook}>{children}</EclpChartContext.Provider>
 }
 

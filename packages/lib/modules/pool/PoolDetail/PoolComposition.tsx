@@ -188,39 +188,44 @@ export function PoolComposition() {
           {isBoosted(pool) && (
             <BalAlert
               content={
-                <>
-                  <Text color="font.dark" fontSize="sm">
-                    {boostedWarningMsg}
-                    {hasReadMoreURL && (
-                      <>
-                        {' '}
-                        Read more about{' '}
-                        {protocolLinks.map((protocol, index) => (
-                          <Fragment key={index}>
-                            <Link href={protocol.readMoreUrl} isExternal rel="noopener noreferrer">
-                              <Box
-                                as="span"
-                                color="purple.500"
-                                fontSize="sm"
-                                fontWeight="bold"
-                                textDecoration="underline"
-                              >
-                                {protocol.name}
-                              </Box>
-                            </Link>
-                            {index < protocolLinks.length - 2
-                              ? ', '
-                              : index === protocolLinks.length - 2
-                                ? ' & '
-                                : ''}
-                          </Fragment>
-                        ))}
-                        .
-                      </>
-                    )}
-                  </Text>
-                </>
+                <Text
+                  color="font.dark"
+                  fontSize="sm"
+                  fontWeight="medium"
+                  lineHeight="1.55"
+                  sx={{ textWrap: 'pretty' }}
+                >
+                  {boostedWarningMsg}
+                  {hasReadMoreURL && (
+                    <>
+                      {' '}
+                      Read more about{' '}
+                      {protocolLinks.map((protocol, index) => (
+                        <Fragment key={index}>
+                          <Link href={protocol.readMoreUrl} isExternal rel="noopener noreferrer">
+                            <Box
+                              as="span"
+                              color="purple.500"
+                              fontSize="sm"
+                              fontWeight="bold"
+                              textDecoration="underline"
+                            >
+                              {protocol.name}
+                            </Box>
+                          </Link>
+                          {index < protocolLinks.length - 2
+                            ? ', '
+                            : index === protocolLinks.length - 2
+                              ? ' & '
+                              : ''}
+                        </Fragment>
+                      ))}
+                      .
+                    </>
+                  )}
+                </Text>
               }
+              py="ms"
               status="info"
             />
           )}

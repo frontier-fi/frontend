@@ -1,3 +1,4 @@
+import { useColorModeValue } from '@chakra-ui/react'
 import type { GqlPoolAprItem } from '../services/api/graphql-derived-types'
 import type { GqlPoolAprItemType } from '@repo/lib/shared/services/api/generated/graphql'
 import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
@@ -136,12 +137,15 @@ export function useAprTooltip({
   const isVotingPresent = false
   const isLockingAprPresent = false
 
+  // gray.400 washes out on light beige tooltip backgrounds; darken in light mode.
+  const subitemFontColor = useColorModeValue('gray.500', 'gray.400')
+
   const subitemPopoverAprItemProps = {
     pt: 2,
     pl: 'sm',
     backgroundColor: 'background.level1',
     fontWeight: 500,
-    fontColor: 'gray.400',
+    fontColor: subitemFontColor,
   }
 
   return {

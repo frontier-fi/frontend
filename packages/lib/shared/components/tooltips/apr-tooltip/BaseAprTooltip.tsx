@@ -129,7 +129,7 @@ function BaseAprTooltip({
       <TooltipAprItem
         {...basePopoverAprItemProps}
         apr={swapFeesDisplayed}
-        aprOpacity={isSwapFeePresent ? 1 : 0.5}
+        aprOpacity={isSwapFeePresent ? 1 : 0.7}
         displayValueFormatter={usedDisplayValueFormatter}
         pt={3}
         title="Swap fees"
@@ -156,7 +156,7 @@ function BaseAprTooltip({
       <TooltipAprItem
         {...basePopoverAprItemProps}
         apr={stakingIncentivesAprDisplayed}
-        aprOpacity={isStakingPresent ? 1 : 0.5}
+        aprOpacity={isStakingPresent ? 1 : 0.7}
         displayValueFormatter={usedDisplayValueFormatter}
         title="Staking incentives"
       >
@@ -176,7 +176,7 @@ function BaseAprTooltip({
       <TooltipAprItem
         {...basePopoverAprItemProps}
         apr={yieldBearingTokensAprDisplayed}
-        aprOpacity={isYieldPresent ? 1 : 0.5}
+        aprOpacity={isYieldPresent ? 1 : 0.7}
         displayValueFormatter={usedDisplayValueFormatter}
         title="Yield bearing tokens"
       >
@@ -256,7 +256,7 @@ function BaseAprTooltip({
               pt={3}
               {...basePopoverAprItemProps}
               apr={lockingAprDisplayed}
-              aprOpacity={isLockingAprPresent ? 1 : 0.5}
+              aprOpacity={isLockingAprPresent ? 1 : 0.7}
               displayValueFormatter={usedDisplayValueFormatter}
               title="Protocol revenue share (max)"
               tooltipText={lockingIncentivesTooltipText}
@@ -264,7 +264,7 @@ function BaseAprTooltip({
             <TooltipAprItem
               {...basePopoverAprItemProps}
               apr={votingAprDisplayed}
-              aprOpacity={isVotingPresent ? 1 : 0.5}
+              aprOpacity={isVotingPresent ? 1 : 0.7}
               displayValueFormatter={usedDisplayValueFormatter}
               title="Voting incentives (average)"
               tooltipText={votingIncentivesTooltipText}

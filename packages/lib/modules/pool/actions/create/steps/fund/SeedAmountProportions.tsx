@@ -1,4 +1,4 @@
-import { Box, Card, CardBody, HStack, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, CardBody, HStack, Text, VStack, Wrap, WrapItem } from '@chakra-ui/react'
 import { usePoolCreationForm } from '../../PoolCreationFormProvider'
 import { BullseyeIcon } from '@repo/lib/shared/components/icons/BullseyeIcon'
 import { useTokens } from '@repo/lib/modules/tokens/TokensProvider'
@@ -76,8 +76,8 @@ export function SeedAmountProportions({ variant = 'level3', displayAlert = false
         shadow="sm"
         variant={variant}
       >
-        <CardBody>
-          <VStack spacing="md">
+        <CardBody overflow="hidden">
+          <VStack spacing="md" w="full">
             <WeightsPercentageLabels
               tokens={tokenAmountToUsdWithWeights.map(t => ({
                 symbol: t.symbol,
@@ -122,7 +122,13 @@ function WeightsBarChart({ weights, height, opacity }: WeightsBarChartProps) {
   const allZeroWeights = weights.every(weight => weight === 0)
 
   return (
-    <HStack opacity={opacity} spacing={allZeroWeights ? 0 : 0.5} w="full">
+    <HStack
+      minW={0}
+      opacity={opacity}
+      overflow="hidden"
+      spacing={allZeroWeights ? 0 : 0.5}
+      w="full"
+    >
       {weights.map((weight, idx) => {
         const isFirst = idx === 0
         const isLast = idx === weights.length - 1
@@ -138,6 +144,7 @@ function WeightsBarChart({ weights, height, opacity }: WeightsBarChartProps) {
             flex={allZeroWeights ? '1' : weight.toString()}
             h={height}
             key={idx}
+            minW={0}
           />
         )
       })}
@@ -153,35 +160,39 @@ interface WeightsPercentageLabelsProps {
 
 function WeightsPercentageLabels({ tokens, showIcon, textColor }: WeightsPercentageLabelsProps) {
   const isMoreThanTwoTokens = tokens.length > 2
+  const isCrowded = tokens.length > 4
 
   return (
-    <HStack justify="space-between" spacing={0.5} w="full">
+    <Wrap align="center" justify="flex-start" spacing="sm" w="full">
       {tokens.map((token, idx) => {
-        const isFirst = idx === 0
         const isLast = idx === tokens.length - 1
-
         const color = WEIGHT_COLORS[idx % WEIGHT_COLORS.length]
+        const symbolLabel = token.symbol ? `${token.symbol}: ` : ''
+
+        const weightLabel = token.weight
+          ? token.weight.toFixed(isCrowded ? 1 : 2)
+          : isCrowded
+            ? '0.0'
+            : '0.00'
+
         return (
-          <HStack
-            align="center"
-            justify={isFirst ? 'flex-start' : isLast ? 'flex-end' : 'center'}
-            key={idx}
-            spacing="xs"
-          >
-            {(!isLast || isMoreThanTwoTokens) && (
-              <Box bg={color} borderRadius="full" h="8px" w="8px" />
-            )}
-            {showIcon && <BullseyeIcon />}
-            <Text color={textColor}>
-              {token.symbol ? `${token.symbol}: ` : ''}
-              {token.weight ? token.weight.toFixed(2) : '0.00'}%
-            </Text>
-            {!isMoreThanTwoTokens && isLast && (
-              <Box bg={color} borderRadius="full" h="8px" w="8px" />
-            )}
-          </HStack>
+          <WrapItem key={idx}>
+            <HStack align="center" spacing="xs">
+              {(!isLast || isMoreThanTwoTokens) && (
+                <Box bg={color} borderRadius="full" flexShrink={0} h="8px" w="8px" />
+              )}
+              {showIcon && <BullseyeIcon />}
+              <Text color={textColor} fontSize={isCrowded ? 'sm' : 'md'} whiteSpace="nowrap">
+                {symbolLabel}
+                {weightLabel}%
+              </Text>
+              {!isMoreThanTwoTokens && isLast && (
+                <Box bg={color} borderRadius="full" flexShrink={0} h="8px" w="8px" />
+              )}
+            </HStack>
+          </WrapItem>
         )
       })}
-    </HStack>
+    </Wrap>
   )
 }
