@@ -78,6 +78,13 @@ export const wagmiConfig = createConfig({
   chains: getChainsForNetworks(getActiveSupportedNetworks(false)),
   transports,
   connectors,
+  /*
+    With ssr: false, wagmi's <Hydrate> calls onMount() (store rehydrate + reconnect) during every
+    render, which updates useAccount subscribers (e.g. UserAccountProvider) mid-render and triggers
+    React's "Cannot update a component while rendering a different component" error.
+    ssr: true defers that work to a one-time effect. Web3Provider only renders after mount anyway.
+  */
+  ssr: true,
 })
 
 /*
@@ -117,6 +124,7 @@ export function impersonateWagmiConfig(impersonationAddress?: Address) {
     chains,
     transports: _transports,
     connectors,
+    ssr: true,
   })
 
   return { connectors, updatedConfig: impersonatedConfig }
