@@ -155,11 +155,11 @@ export function getTotalAprRaw(aprItems: GqlPoolAprItem[]): string {
   return minTotal.toString()
 }
 
-// Maps GraphQL pool type enum to human readable label for UI (Frontier: W / S / ECLP only).
+// Maps GraphQL pool type enum to human readable label for UI (Frontier: W / S / GYROE only).
 const poolTypeLabelMap: Partial<Record<GqlPoolType, string>> = {
   [GqlPoolTypeValues.Weighted]: 'Weighted',
   [GqlPoolTypeValues.Stable]: 'Stable',
-  [GqlPoolTypeValues.Eclp]: 'Concentrated',
+  [GqlPoolTypeValues.GyroE]: 'Concentrated',
 }
 
 export function getPoolTypeLabel(type: GqlPoolType): string {

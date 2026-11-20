@@ -120,7 +120,6 @@ export type GqlPoolStakingType =
 export const GqlPoolTypeValues = {
   ComposableStable: 'COMPOSABLE_STABLE',
   CowAmm: 'COW_AMM',
-  Eclp: 'ECLP',
   Element: 'ELEMENT',
   FixedLbp: 'FIXED_LBP',
   Fx: 'FX',

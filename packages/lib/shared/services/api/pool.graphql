@@ -55,7 +55,7 @@ query GetPool($id: String!, $chain: GqlChain!, $userAddress: String) {
       walletBalanceUsd
     }
     version
-    ... on GqlPoolEclp {
+    ... on GqlPoolGyro {
       alpha
       beta
       c

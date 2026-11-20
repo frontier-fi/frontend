@@ -31,7 +31,7 @@ describe('getGqlPoolType', () => {
   it('maps supported SDK pool types to Frontier GQL counterparts', () => {
     expect(getGqlPoolType(PoolType.Weighted)).toBe(GqlPoolTypeValues.Weighted)
     expect(getGqlPoolType(PoolType.Stable)).toBe(GqlPoolTypeValues.Stable)
-    expect(getGqlPoolType(PoolType.GyroE)).toBe(GqlPoolTypeValues.Eclp)
+    expect(getGqlPoolType(PoolType.GyroE)).toBe(GqlPoolTypeValues.GyroE)
   })
 
   it('throws for unmapped pool types', () => {

@@ -60,7 +60,7 @@ export function useGetECLPLiquidityProfile(): ECLPLiquidityProfile {
   const params = pool && pool.poolTokens ? destructureRequiredPoolParams(pool, tokenRates) : null
 
   const originalPoolSpotPrice = params
-    ? bn(formatUnits(calculateSpotPrice(GqlPoolTypeValues.Eclp, params), 18))
+    ? bn(formatUnits(calculateSpotPrice(GqlPoolTypeValues.GyroE, params), 18))
         .div(priceRateRatio)
         .toNumber()
     : null

@@ -28,7 +28,7 @@ export type GqlTokenPrice = GetTokenPricesQuery['tokenPrices'][number]
 
 // ── Pool discriminated union members ──
 
-/** Any concrete pool returned by GetPool (Weighted | Stable | Eclp). */
+/** Any concrete pool returned by GetPool (Weighted | Stable | Gyro). */
 export type GqlPoolElement = GetPoolQuery['pool'] & {
   /** Optional — Frontier schema omits gauges; kept for stake UI + test mocks. */
   staking?: GqlPoolStaking | null
@@ -36,10 +36,7 @@ export type GqlPoolElement = GetPoolQuery['pool'] & {
   poolCreator?: string
 }
 export type GqlPoolWeighted = Extract<GetPoolQuery['pool'], { __typename: 'GqlPoolWeighted' }>
-/** Frontier API renamed Gyro ECLP pools to `GqlPoolEclp` / type `ECLP`. */
-export type GqlPoolEclp = Extract<GetPoolQuery['pool'], { __typename: 'GqlPoolEclp' }>
-/** @deprecated Use GqlPoolEclp — kept as an alias for existing helpers. */
-export type GqlPoolGyro = GqlPoolEclp
+export type GqlPoolGyro = Extract<GetPoolQuery['pool'], { __typename: 'GqlPoolGyro' }>
 export type GqlPoolStable = Extract<GetPoolQuery['pool'], { __typename: 'GqlPoolStable' }>
 /** Removed from Frontier schema — kept as never for leftover imports. */
 export type GqlPoolComposableStable = never
