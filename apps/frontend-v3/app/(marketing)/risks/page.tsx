@@ -88,7 +88,7 @@ export default function Privacy() {
                         <Link href="risks#stable-pools">Stable Pools</Link>
                       </li>
                       <li>
-                        <Link href="risks#rehyped-pools">rehyped Pools</Link>
+                        <Link href="risks#rehyped-pools">Rehyped Pools</Link>
                       </li>
                       <li>
                         <Link href="risks#concentrated-liquidity-pools">
@@ -246,7 +246,6 @@ export default function Privacy() {
                     <li>Tokens with transfer fees</li>
                     <li>Proxy tokens with double entry points</li>
                     <li>Tokens with more than 18 decimal points</li>
-                    <li>Rebasing tokens</li>
                   </ul>
                 </li>
 
@@ -453,7 +452,7 @@ export default function Privacy() {
               <h5>How can LPs mitigate this risk?</h5>
               <ul>
                 <li>
-                  LPs should check to see the edibility of pool attributes and understand who can
+                  LPs should check to see the editability of pool attributes and understand who can
                   authorize any changes.
                 </li>
               </ul>
@@ -511,8 +510,8 @@ export default function Privacy() {
                 <li>
                   LP&rsquo;s are warned via the Frontier Finance App UI when the price impact is
                   excessive. Once price impact exceeds a certain threshold, the Frontier Finance App
-                  UI prevents user&rsquo;s from executing a transaction where they would otherwise
-                  get rekt.
+                  UI prevents users from executing a transaction where they would otherwise get
+                  rekt.
                 </li>
               </ul>
               <h5>How LP&rsquo;s can mitigate this risk:</h5>
@@ -633,7 +632,7 @@ export default function Privacy() {
               <p>
                 DeFi users, including liquidity providers and swappers, typically interact with
                 front-end user interfaces to interact with a protocol&rsquo;s smart contracts. An
-                example is the app.balancer.fi front-end UI instance which interacts with Frontier
+                example is the app.frontier.fi front-end UI instance which interacts with Frontier
                 Finance Protocol smart contracts.
               </p>
 
@@ -646,8 +645,8 @@ export default function Privacy() {
                 <li>UIs could be maliciously updated or exploited by rogue developers.</li>
                 <li>UIs may be updated and remove certain feature sets.</li>
                 <li>
-                  UIs may block certain wallet addresses or user&rsquo;s in certain jurisdictions to
-                  comply with their regulations.
+                  UIs may block certain wallet addresses or users in certain jurisdictions to comply
+                  with their regulations.
                 </li>
                 <li>
                   UIs may experience periods of downtime or potentially be discontinued. UIs may
@@ -817,13 +816,13 @@ export default function Privacy() {
                     </li>
                   </ul>
                   <p>
-                    Depegging occurs when a stablecoin losses its peg to the target asset. In stable
-                    pools, if a stablecoin depegs, LPs may incurs losses. This is because liquidity
+                    Depegging occurs when a stablecoin loses its peg to the target asset. In stable
+                    pools, if a stablecoin depegs, LPs may incur losses. This is because liquidity
                     pools typically sell the winners (tokens moving up in price) and accumulate the
                     losers (tokens moving down in price). In the case of a USD-pegged stable pool,
-                    if an asset permanently loses it&rsquo;s peg to $1 and goes down in value, the
-                    pool will sell any pegged assets and accumulate the asset which has lost
-                    it&rsquo;s peg, leading to an overall loss of funds for LPs.
+                    if an asset permanently loses its peg to $1 and goes down in value, the pool
+                    will sell any pegged assets and accumulate the asset which has lost its peg,
+                    leading to an overall loss of funds for LPs.
                   </p>
 
                   <div>
@@ -952,26 +951,26 @@ export default function Privacy() {
               <FadeInOnView>
                 <div className="subsection">
                   <h4 className="anchor" id="rehyped-pools">
-                    rehyped Pools
+                    Rehyped Pools
                   </h4>
                   <p>
                     Typically, only 10% or less of the liquidity deposited into an AMM pool is being
                     utilized by traders because the trade sizes are much smaller than the available
-                    liquidity. rehyped Pools allow the remaining portion of liquidity to be sent to
+                    liquidity. Rehyped pools allow the remaining portion of liquidity to be sent to
                     lending protocols where the liquidity can earn additional yield for accepting
                     inherent risks.
                   </p>
                   <ul>
                     <li>
-                      rehyped Pools are designed to allow for greater capital efficiency, deeper
+                      Rehyped pools are designed to allow for greater capital efficiency, deeper
                       liquidity, and increased yield for Liquidity Providers.
                     </li>
                     <li>
-                      For traders, rehyped Pools are a cheaper entry/exit into decentralized lending
+                      For traders, rehyped pools are a cheaper entry/exit into decentralized lending
                       protocols like Aave.
                     </li>
                     <li>
-                      rehyped Pools increase the opportunity for LPs to gain exposure to a wide
+                      Rehyped pools increase the opportunity for LPs to gain exposure to a wide
                       variety of yield increases from multiple yield protocols.
                     </li>
                   </ul>
@@ -1001,7 +1000,7 @@ export default function Privacy() {
                   </p>
                   <h5>Depegging risk</h5>
                   <p>
-                    Individual stablecoin tokens within rehyped Pools are subject to{' '}
+                    Individual stablecoin tokens within rehyped pools are subject to{' '}
                     <Link href="risks#stable-pools">
                       <span> depegging risks</span>
                     </Link>
@@ -1016,50 +1015,30 @@ export default function Privacy() {
                     Concentrated Liquidity Pools
                   </h4>
                   <p>
-                    <a href="https://gyro.finance">Gyroscope&rsquo;s</a>&nbsp; &lsquo;Concentrated
+                    <a href="https://gyro.finance">Gyroscope</a>&rsquo;s &lsquo;Concentrated
                     Liquidity Pools&rsquo; (CLPs) are a class of AMMs that price the exchange of
                     assets within a defined range. As such, any CLP only provides liquidity for
                     trading activity restricted to this specific region. The goal is to use the
-                    pool&rsquo;s capital efficiently. There&rsquo;s a few different types of CLPs:
+                    pool&rsquo;s capital efficiently. Frontier Finance supports the following types
+                    of CLPs:
                   </p>
                   <ul>
                     <li>
-                      <em>2-CLPs:</em> Pools with two assets, known as Quadratic-CLPs or 2-CLPs,
-                      named after the quadratic invariant curve—are similar to Uniswap v3&rsquo;s
-                      concentrated liquidity pools. But unlike Uniswap, a 2-CLP effectively offers a
-                      &lsquo;single tick&rsquo;, where liquidity is distributed evenly across a
-                      single active trading range. Learn more about{' '}
-                      <a href="https://docs.gyro.finance/pools/2-clps.html">
-                        2-CLP&rsquo;s and their risks
-                      </a>
-                      .
-                    </li>
-                    <li>
-                      <em>3-CLPs:</em> Pools with three assets, known as Cubic-CLPs or 3-CLPs,
-                      support three assets and are functionally best understood as an extension of
-                      2-CLPs. As a high-level summary, they amplify the benefits of 2-CLPs. Learn
-                      more about{' '}
-                      <a href="https://docs.gyro.finance/pools/3-clps.html">
-                        3-CLP&rsquo;s and their risks
-                      </a>
-                      .
-                    </li>
-                    <li>
-                      <em>E-CLPs:</em> Also known as &lsquo;Elliptic-CLPs&rsquo; support asymmetric
-                      concentrated liquidity for two assets. They provide a new type of concentrated
-                      liquidity that allows highly flexible and asymmetric liquidity profiles in a
-                      single pool position. Learn more about{' '}
+                      <em>E-CLPs:</em> Also known as &lsquo;Elliptic CLPs&rsquo;, these pools
+                      support asymmetric concentrated liquidity for two assets. They provide a new
+                      type of concentrated liquidity that allows highly flexible and asymmetric
+                      liquidity profiles in a single pool position. Learn more about{' '}
                       <a href="https://docs.gyro.finance/pools/e-clps.html">
-                        E-CLP&rsquo;s and their risks
+                        E-CLPs and their risks
                       </a>
                       .
                     </li>
                     <li>
-                      <em>rehyped E-CLPs:</em> Arguably the most capital efficient pools, these
+                      <em>Rehyped E-CLPs:</em> Arguably the most capital efficient pools, these
                       E-CLPs combine asymmetric concentrated liquidity with auto-rehypothecation to
                       lending markets. Learn more about{' '}
                       <a href="https://docs.gyro.finance/pools/rehype-clps.html">
-                        rehyped E-CLP&rsquo;s and their risks
+                        rehyped E-CLPs and their risks
                       </a>
                       .
                     </li>
@@ -1068,16 +1047,10 @@ export default function Privacy() {
                   <ul>
                     <li>
                       The Frontier Finance UI allows people to manage their liquidity in certain
-                      Gyroscope pools. This is not an endorsement of their products or of the the
-                      safety of their smart contracts. The Gyroscope GYD system and E-CLPs have been
-                      audited several times. You can review the{' '}
+                      Gyroscope pools. This is not an endorsement of their products or of the safety
+                      of their smart contracts. Gyroscope E-CLPs have been audited several times.
+                      You can review the{' '}
                       <a href="https://docs.gyro.finance/audit-reports.html">audit reports here</a>.
-                    </li>
-                    <li>
-                      Some concentrated liquidity pools also contain Gyroscope&rsquo;s Gyro Dollars
-                      (GYD). Here are some of the{' '}
-                      <a href="https://docs.gyro.finance/gyd/sgyd/risks.html">risks of using GYD</a>
-                      .
                     </li>
                   </ul>
                 </div>
@@ -1101,11 +1074,10 @@ export default function Privacy() {
                     centralization risks.
                   </p>
                   <p>
-                    In addition, there are bridging risks when user&rsquo;s move funds between
-                    networks. Asset bridges rely on smart contracts to facilitate transfers between
-                    Ethereum Mainnet and Layer 2/sidechains. These contracts may have
-                    vulnerabilities, which could expose users&apos; funds to risks during the
-                    bridging process.
+                    In addition, there are bridging risks when users move funds between networks.
+                    Asset bridges rely on smart contracts to facilitate transfers between Ethereum
+                    Mainnet and Layer 2/sidechains. These contracts may have vulnerabilities, which
+                    could expose users&apos; funds to risks during the bridging process.
                   </p>
                   <p>
                     This list of networks below is not updated regularly and may not reflect all
@@ -1163,8 +1135,8 @@ export default function Privacy() {
                     is directly tied to the security and integrity of its validators.{' '}
                   </p>
                   <p>
-                    Since Avalanche is independent from Ethereum, user&apos;s may face additional
-                    risks around briding assets.{' '}
+                    Since Avalanche is independent from Ethereum, users may face additional risks
+                    around bridging assets.{' '}
                   </p>
                 </div>
               </FadeInOnView>

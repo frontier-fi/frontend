@@ -14,7 +14,7 @@ export function SeedPoolAlert({ poolType }: { poolType: PoolType }) {
     : 'The AutoRange pool type requires you to deploy the pool contract before initial token amounts can be chosen.'
 
   const gyroEclpContent =
-    'When you enter a seed amount for one of the Gyro ECLP tokens, the other amount is proportionally autofilled to maintain the recommended price ratio for pool initialization.'
+    'When you enter a seed amount for one of the Concentrated pool tokens, the other amount is proportionally autofilled to maintain the recommended price ratio for pool initialization.'
 
   const poolSpecificContent = isAutoRangePool(poolType)
     ? autoRangeContent

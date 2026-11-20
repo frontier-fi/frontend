@@ -45,9 +45,9 @@ export function ClpPoolAttributes({ pool }: { pool: Pool }) {
       title: 'λ (lambda)',
       value: fNumCustom(clpPool.lambda, '0,0'),
       description: `λ (lambda) defines the stretching factor. The higher λ, the more liquidity is
-      concentrated within the price range. For lower , the pool’s liquidity is more evenly spread
-      across the price range. Geometrically, a higher  means that the ellipse is more elongated,
-      with  corresponding to a circle.`,
+      concentrated within the price range. For lower λ, the pool’s liquidity is more evenly spread
+      across the price range. Geometrically, a higher λ means that the ellipse is more elongated,
+      with λ = 1 corresponding to a circle.`,
     },
   ]
 
