@@ -88,6 +88,21 @@ query GetPoolSnapshots($poolId: String!, $range: GqlPoolSnapshotDataRange!, $cha
     fees24h
     surplus24h
     sharePrice
+    totalShares
+  }
+}
+
+query GetTokenHistoricalPrices(
+  $addresses: [String!]!
+  $chain: GqlChain!
+  $range: GqlTokenChartDataRange!
+) {
+  tokenGetHistoricalPrices(addresses: $addresses, chain: $chain, range: $range) {
+    address
+    prices {
+      timestamp
+      price
+    }
   }
 }
 

@@ -15,6 +15,7 @@ export enum PoolChartTab {
   SURPLUS = 'surplus',
   LIQUIDITY_PROFILE = 'liquidity_profile',
   AUTORANGE = 'autorange',
+  GROWTH = 'growth',
   /** Legacy LBP chart tabs (pages redirected away on Frontier). */
   PRICE = 'price',
   FUNDS_RAISED = 'funds_raised',
@@ -39,6 +40,7 @@ const BASE_TABS: NonEmptyPoolChartTabs = [
 const TABS_WITH_FEES: NonEmptyPoolChartTabs = [
   ...BASE_TABS,
   { value: PoolChartTab.FEES, label: 'Fees' },
+  { value: PoolChartTab.GROWTH, label: 'Growth of $10k' },
 ]
 
 const POOL_SPECIFIC_TABS: PoolTabsMap = {

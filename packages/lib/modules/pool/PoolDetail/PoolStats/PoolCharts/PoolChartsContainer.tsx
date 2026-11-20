@@ -30,6 +30,7 @@ import { PoolCharts } from './PoolCharts'
 import { ReversedToggleButton } from '@repo/lib/shared/components/btns/ReversedToggleButton'
 import { ThumbsDown, ThumbsUp } from 'lucide-react'
 import { useGetECLPLiquidityProfile } from '@repo/lib/modules/eclp/hooks/useGetECLPLiquidityProfile'
+import { PoolGrowthChart, PoolGrowthSummary } from './growth/PoolGrowthChart'
 
 const COMMON_NOISY_CARD_PROPS: { contentProps: BoxProps; cardProps: BoxProps } = {
   contentProps: {
@@ -85,7 +86,8 @@ function PoolChartsContent({ ...props }: any) {
   const hasChartData = hasEclpChartData || hasPoolChartData
 
   const showLiquidityProfileChart = activeTab.value === PoolChartTab.LIQUIDITY_PROFILE
-  const showPoolCharts = !showLiquidityProfileChart
+  const showGrowthChart = activeTab.value === PoolChartTab.GROWTH
+  const showPoolCharts = !showLiquidityProfileChart && !showGrowthChart
 
   const clpBadgeConfigs = {
     liquidityProfile: {
@@ -119,7 +121,7 @@ function PoolChartsContent({ ...props }: any) {
                       tokenPair={tokensEclp}
                     />
                   )}
-                  {showPoolCharts && (
+                  {(showPoolCharts || showGrowthChart) && (
                     <Box w="max-content">
                       <PeriodSelect />
                     </Box>
@@ -132,6 +134,8 @@ function PoolChartsContent({ ...props }: any) {
                 >
                   {showLiquidityProfileChart ? (
                     <ClpBadge {...clpBadgeConfigs.liquidityProfile} />
+                  ) : showGrowthChart ? (
+                    <PoolGrowthSummary />
                   ) : (
                     <>
                       <Heading fontWeight="bold" size="h5">
@@ -160,6 +164,22 @@ function PoolChartsContent({ ...props }: any) {
                       transition={{ duration: 0.3, ease: 'easeInOut' }}
                     >
                       <EclpChart />
+                    </motion.div>
+                  )}
+                  {showGrowthChart && (
+                    <motion.div
+                      animate={{ x: '0%' }}
+                      exit={{ x: '-100%' }}
+                      initial={{ x: '100%' }}
+                      key={activeTab.value}
+                      style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                      }}
+                      transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    >
+                      <PoolGrowthChart />
                     </motion.div>
                   )}
                   {showPoolCharts && <PoolCharts key={`default-chart-${activeTab.value}`} />}
