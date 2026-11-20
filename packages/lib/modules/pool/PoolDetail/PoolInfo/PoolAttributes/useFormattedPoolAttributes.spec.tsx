@@ -23,12 +23,12 @@ describe('getPoolTypeText', () => {
     expect(getPoolTypeText({ type: GqlPoolTypeValues.Weighted, version: 3 })).toBe('Weighted (V3)')
   })
 
-  it('formats Concentrated (ECLP) pools as Concentrated (Gyroscope Elliptic CLP)', () => {
-    expect(getPoolTypeText({ type: GqlPoolTypeValues.Eclp, version: 1 })).toBe(
+  it('formats Concentrated (GyroE) pools as Concentrated (Gyroscope Elliptic CLP)', () => {
+    expect(getPoolTypeText({ type: GqlPoolTypeValues.GyroE, version: 1 })).toBe(
       'Concentrated (Gyroscope Elliptic CLP)'
     )
 
-    expect(getPoolTypeText({ type: GqlPoolTypeValues.Eclp, version: 2 })).toBe(
+    expect(getPoolTypeText({ type: GqlPoolTypeValues.GyroE, version: 2 })).toBe(
       'Concentrated (Gyroscope Elliptic CLP)'
     )
   })

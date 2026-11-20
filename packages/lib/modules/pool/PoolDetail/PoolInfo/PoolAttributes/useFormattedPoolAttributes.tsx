@@ -32,7 +32,7 @@ type FormattedPoolAttributes = {
   link?: string
 }
 
-export function getPoolTypeText(pool: Pick<Pool, 'type' | 'version'>) {
+export function getPoolTypeText(pool: Pick<Pool, 'type'> & { version?: number }) {
   if (isGyro(pool.type)) {
     return 'Concentrated (Gyroscope Elliptic CLP)'
   }
