@@ -18,6 +18,7 @@ export function useProtocolRewards() {
   const { priceFor, getToken, isLoadingTokens } = useTokens()
 
   const networkConfig = getNetworkConfig(GqlChainValues.Mainnet)
+  const feeDistributor = networkConfig.contracts.feeDistributor
 
   const {
     data: protocolRewardsData = [],
@@ -27,12 +28,12 @@ export function useProtocolRewards() {
     status,
   } = useReadContract({
     chainId: networkConfig.chainId,
-    address: networkConfig.contracts.feeDistributor,
+    address: feeDistributor,
     abi: FeeDistributorStaticAbi,
     functionName: 'claimTokens',
     args: [userAddress, claimableVeBalRewardsTokens],
     query: {
-      enabled: isConnected && !isLoadingTokens,
+      enabled: isConnected && !isLoadingTokens && Boolean(feeDistributor),
       select: data => {
         return (data as bigint[]).map((clBalance, index) => {
           const tokenAddress = claimableVeBalRewardsTokens[index]

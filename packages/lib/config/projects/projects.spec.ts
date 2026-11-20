@@ -19,5 +19,6 @@ describe('Project configs', () => {
     expect(ProjectConfigFrontier.supportedNetworks).toContain('SEPOLIA')
     expect(ProjectConfigFrontier.defaultNetwork).toBe('MAINNET')
     expect(ProjectConfigFrontier.ensNetwork).toBe('MAINNET')
+    expect(ProjectConfigFrontier.corePoolId).toBeUndefined()
   })
 })

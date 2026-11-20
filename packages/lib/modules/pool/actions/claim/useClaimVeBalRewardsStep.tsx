@@ -9,7 +9,7 @@ import {
 import { ManagedTransactionInput } from '@repo/lib/modules/web3/contracts/useManagedTransaction'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { useMemo, useState } from 'react'
-import { Address } from 'viem'
+import { Address, zeroAddress } from 'viem'
 import { isTransactionSuccess } from '@repo/lib/modules/transactions/transaction-steps/transaction.helper'
 
 const labels: TransactionLabels = {
@@ -31,14 +31,16 @@ export function useClaimVeBalRewardsStep({
   const { userAddress } = useUserAccount()
   const [transaction, setTransaction] = useState<ManagedResult | undefined>()
 
+  const feeDistributor = networkConfig.contracts.feeDistributor
+
   const props: ManagedTransactionInput = {
     labels,
     chainId: 1, // only on mainnet
-    contractAddress: networkConfig.contracts.feeDistributor as string,
+    contractAddress: (feeDistributor ?? zeroAddress) as string,
     contractId: 'balancer.feeDistributor',
     functionName: 'claimTokens',
     args: [userAddress, claimableVeBalRewardsTokens as Address[]],
-    enabled: !!userAddress,
+    enabled: !!userAddress && Boolean(feeDistributor),
     onTransactionChange: setTransaction,
   }
 

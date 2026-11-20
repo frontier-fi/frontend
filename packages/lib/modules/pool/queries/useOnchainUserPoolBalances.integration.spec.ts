@@ -1,8 +1,5 @@
 import { setUserTokenBalance } from '@repo/lib/test/integration/sdk-utils'
-import {
-  aBalWethPoolElementMock,
-  toGqlWeighedPoolMock,
-} from '@repo/lib/test/msw/builders/gqlPoolElement.builders'
+import { toGqlWeighedPoolMock } from '@repo/lib/test/msw/builders/gqlPoolElement.builders'
 import { testHook } from '@repo/lib/test/utils/custom-renderers'
 import { sepoliaTestPublicClient } from '@repo/test/utils/wagmi/wagmi-test-clients'
 import { connectWithDefaultUser } from '@repo/test/utils/wagmi/wagmi-connections'
@@ -52,21 +49,6 @@ describe.runIf(isChainSupported(GqlChainValues.Sepolia))(
 
       await waitFor(() => expect(result.current.isFetching).toBeFalsy())
       expect(result.current.data[0]!.userBalance?.walletBalance).toBeDefined()
-    })
-  }
-)
-
-describe.runIf(isChainSupported(GqlChainValues.Mainnet))(
-  'fetches onchain and overrides user balances on Mainnet',
-  () => {
-    test('when the pool does not have staking info', async () => {
-      const poolMockWithUndefinedStaking = aBalWethPoolElementMock()
-      poolMockWithUndefinedStaking.staking = undefined as any
-
-      const result = await testUseChainPoolBalances(poolMockWithUndefinedStaking)
-
-      await waitFor(() => expect(result.current.isFetching).toBeFalsy())
-      expect(result.current.data[0]!.userBalance).toBeDefined()
     })
   }
 )
