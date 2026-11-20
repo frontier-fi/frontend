@@ -32,3 +32,25 @@ describe.runIf(isChainSupported(GqlChainValues.Sepolia))(
     })
   }
 )
+
+describe.runIf(isChainSupported(GqlChainValues.Mainnet))(
+  'enriches Mainnet V3 pool with on-chain data',
+  () => {
+    test('enriches Frontier V3 pool with on-chain data on Mainnet', async () => {
+      const pool = await fetchPoolMock({
+        poolId: '0xbe4f51b275f3d4d6a0130988be79b25523549c7a',
+        chain: GqlChainValues.Mainnet,
+        query: poolEnrichQuery,
+      })
+
+      pool.dynamicData.totalLiquidity = '0'
+      pool.dynamicData.totalShares = '0'
+
+      const result = testPoolEnrichWithOnChainData(pool)
+
+      await waitFor(() => expect(result.current.isLoading).toBeFalsy())
+
+      expect(Number(result.current.pool.dynamicData.totalShares)).toBeGreaterThan(0)
+    })
+  }
+)
