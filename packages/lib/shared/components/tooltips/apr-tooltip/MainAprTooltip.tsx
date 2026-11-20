@@ -92,7 +92,7 @@ export function SparklesIcon({
   let gradFromColor = defaultGradFrom
   let gradToColor = defaultGradTo
 
-  if (pool.id === PROJECT_CONFIG.corePoolId) {
+  if (PROJECT_CONFIG.corePoolId && pool.id === PROJECT_CONFIG.corePoolId) {
     gradFromColor = corePoolGradFrom
     gradToColor = corePoolGradTo
   }

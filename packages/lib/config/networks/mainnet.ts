@@ -2,6 +2,7 @@ import { AddressProvider, ChainId, PERMIT2 } from '@frontier-fi/sdk'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { convertHexToLowerCase } from '@repo/lib/shared/utils/objects'
 import { SupportedWrapHandler } from '@repo/lib/modules/swap/swap.types'
+import { zeroAddress } from 'viem'
 import { mainnet } from 'viem/chains'
 import { NetworkConfig } from '../config.types'
 
@@ -72,23 +73,17 @@ const networkConfig: NetworkConfig = {
   contracts: {
     multicall2: '0xca11bde05977b3631167028862be2a173976ca11',
     balancer: {
-      vaultV2: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+      vaultV2: zeroAddress,
       vaultV3: AddressProvider.Vault(chainId),
-      relayerV6: '0x35Cea9e57A393ac66Aaa7E25C391D52C74B5648f',
-      minter: '0x239e55F427D44C3cc793f49bFB507ebe76638a2b',
+      relayerV6: zeroAddress,
+      minter: zeroAddress,
       vaultAdminV3: AddressProvider.VaultAdmin(chainId),
       router: AddressProvider.Router(chainId),
       batchRouter: AddressProvider.BatchRouter(chainId),
       compositeLiquidityRouterBoosted: AddressProvider.CompositeLiquidityRouter(chainId),
-      WeightedPool2TokensFactory: '0xa5bf2ddf098bb0ef6d120c98217dd6b141c74ee0',
       bCoWFactory: undefined,
     },
-    feeDistributor: '0xD3cf852898b21fc233251427c2DC93d3d604F3BB',
-    veDelegationProxy: '0x6f5a2eE11E7a772AeB5114A20d0D7c0ff61EB8A0',
-    veBAL: '0xC128a9954e6c874eA3d62ce62B468bA073093F25',
-    omniVotingEscrow: '0x96484f2aBF5e58b15176dbF1A799627B53F13B6d',
     permit2: PERMIT2[chainId],
-    gaugeController: '0xC128468b7Ce63eA702C1f104D55A2566b13D3ABD',
     merkl: {
       claims: '0x3Ef3D8bA38EBe18DB133cEc108f4D14CE00Dd9Ae',
     },
@@ -101,6 +96,6 @@ const networkConfig: NetworkConfig = {
       '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT
     ],
   },
-} as const satisfies NetworkConfig
+}
 
 export default networkConfig

@@ -1,10 +1,10 @@
 import { setUserTokenBalance } from '@repo/lib/test/integration/sdk-utils'
-import {
-  aBalWethPoolElementMock,
-  toGqlWeighedPoolMock,
-} from '@repo/lib/test/msw/builders/gqlPoolElement.builders'
+import { toGqlWeighedPoolMock } from '@repo/lib/test/msw/builders/gqlPoolElement.builders'
 import { testHook } from '@repo/lib/test/utils/custom-renderers'
-import { sepoliaTestPublicClient } from '@repo/test/utils/wagmi/wagmi-test-clients'
+import {
+  mainnetTestPublicClient,
+  sepoliaTestPublicClient,
+} from '@repo/test/utils/wagmi/wagmi-test-clients'
 import { connectWithDefaultUser } from '@repo/test/utils/wagmi/wagmi-connections'
 import { defaultTestUserAccount, isChainSupported } from '@repo/test/anvil/anvil-setup'
 import { waitFor } from '@testing-library/react'
@@ -59,14 +59,29 @@ describe.runIf(isChainSupported(GqlChainValues.Sepolia))(
 describe.runIf(isChainSupported(GqlChainValues.Mainnet))(
   'fetches onchain and overrides user balances on Mainnet',
   () => {
-    test('when the pool does not have staking info', async () => {
-      const poolMockWithUndefinedStaking = aBalWethPoolElementMock()
-      poolMockWithUndefinedStaking.staking = undefined as any
+    const mainnetPoolId = '0xbe4f51b275f3d4d6a0130988be79b25523549c7a' as const
 
-      const result = await testUseChainPoolBalances(poolMockWithUndefinedStaking)
+    test('when the user has wallet balance on Mainnet v3 pool', async () => {
+      const poolMock = await fetchPoolMock({
+        poolId: mainnetPoolId,
+        chain: GqlChainValues.Mainnet,
+        query: minimalPoolQuery,
+      })
+
+      poolMock.staking = undefined as any
+
+      await setUserTokenBalance({
+        client: mainnetTestPublicClient,
+        account: defaultTestUserAccount,
+        tokenAddress: poolMock.address as `0x${string}`,
+        slot: 0,
+        balance: parseUnits('40', 18),
+      })
+
+      const result = await testUseChainPoolBalances(poolMock)
 
       await waitFor(() => expect(result.current.isFetching).toBeFalsy())
-      expect(result.current.data[0]!.userBalance).toBeDefined()
+      expect(result.current.data[0]!.userBalance?.walletBalance).toBeDefined()
     })
   }
 )
