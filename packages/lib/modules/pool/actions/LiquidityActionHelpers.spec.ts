@@ -851,7 +851,7 @@ describe('requiresProportionalInput', () => {
 
   it('should require for gyro V2 pools', () => {
     const pool = getApiPoolMock(gyroV3)
-    pool.type = GqlPoolTypeValues.Eclp
+    pool.type = GqlPoolTypeValues.GyroE
     pool.protocolVersion = 2
 
     expect(requiresProportionalInput(pool)).toBe(true)

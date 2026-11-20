@@ -83,9 +83,9 @@ export function toRehypeLabel(text: string) {
   return text.replace(/\bBoosted\b/gi, REHYPE_LABEL)
 }
 
-/** Non-ECLP Gyro types are not in the Frontier API. ECLP is matched via isGyroEPool. */
+/** Frontier only supports Gyro E-CLP (GYROE); 2-CLP (GYRO) and 3-CLP (GYRO3) are omitted. */
 export function isGyro(poolType: GqlPoolType | string) {
-  return poolType === GqlPoolTypeValues.Eclp
+  return poolType === GqlPoolTypeValues.GyroE
 }
 
 export function isClp(poolType: GqlPoolType | string) {
@@ -94,9 +94,8 @@ export function isClp(poolType: GqlPoolType | string) {
 
 export function isGyroEPool(
   pool: Pool
-): pool is Pool & { __typename: 'GqlPoolEclp'; type: typeof GqlPoolTypeValues.Eclp } {
-  // Frontier API uses type ECLP / __typename GqlPoolEclp (formerly GyroE).
-  return pool.type === GqlPoolTypeValues.Eclp
+): pool is Pool & { __typename: 'GqlPoolGyro'; type: typeof GqlPoolTypeValues.GyroE } {
+  return pool.type === GqlPoolTypeValues.GyroE
 }
 
 /** Frontier API has no RECLAMM / AutoRange — always false. */
@@ -541,15 +540,15 @@ export function isPoolSwapAllowed(pool: Pool, token1: Address, token2: Address):
 }
 
 export function poolTypeLabel(poolType: PoolFilterType) {
-  // Widen to string: filters use legacy keys (e.g. GYRO) while the API returns ECLP
+  // Widen to string: filters use legacy keys (e.g. GYRO) while the API returns GYROE
   switch (poolType as string) {
     case GqlPoolTypeValues.Weighted:
       return 'Weighted'
     case GqlPoolTypeValues.Stable:
       return 'Stable'
-    // Gyro filter maps to Frontier ECLP pools
+    // Gyro filter maps to Frontier GYROE pools
     case GqlPoolTypeValues.Gyro:
-    case GqlPoolTypeValues.Eclp:
+    case GqlPoolTypeValues.GyroE:
       return 'Concentrated'
     default:
       return getPoolTypeLabel(poolType as GqlPoolType)
