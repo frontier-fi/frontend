@@ -129,4 +129,47 @@ describe('calculateGrowth', () => {
     expect(calculateGrowth([], [], [])).toEqual([])
     expect(calculateGrowth([snapshot(0, 0)], [series(1)], [1])).toEqual([])
   })
+
+  test('skips a create-day sharePrice spike when the hold basket is flat', () => {
+    // Day 0 sharePrice is ~4.4× too low (common bad seed snapshot); tokens unchanged.
+    const points = calculateGrowth(
+      [snapshot(0, 1), snapshot(1, 4.41), snapshot(2, 4.42)],
+      [series(1, 1, 1), series(1, 1, 1)],
+      EQUAL,
+      10_000
+    )
+
+    expect(points.map(p => p.timestamp)).toEqual([DAY, 2 * DAY])
+    expect(points[0]!.lp).toBe(10_000)
+    expect(points[1]!.lp).toBeCloseTo(10_000 * (4.42 / 4.41))
+    expect(points[0]!.hold).toBeCloseTo(10_000)
+    expect(points[1]!.hold).toBeCloseTo(10_000)
+  })
+
+  test('with only a bad first day and one later point, does not invent multi-day growth', () => {
+    const points = calculateGrowth(
+      [snapshot(0, 1), snapshot(1, 4.41)],
+      [series(1, 1), series(1, 1)],
+      EQUAL,
+      10_000
+    )
+
+    // Unreliable day-0 baseline is dropped; a single remaining point is not enough to chart.
+    expect(points).toHaveLength(1)
+    expect(points[0]!.lp).toBe(10_000)
+  })
+
+  test('keeps real LP outperformance that stays within the daily unexplained cap', () => {
+    // ~10% LP gain vs flat hold over one day — below the 1.5× trim threshold.
+    const points = calculateGrowth(
+      [snapshot(0, 1), snapshot(1, 1.1), snapshot(2, 1.12)],
+      [series(1, 1, 1), series(1, 1, 1)],
+      EQUAL,
+      10_000
+    )
+
+    expect(points).toHaveLength(3)
+    expect(points[0]!.lp).toBe(10_000)
+    expect(points[1]!.lp).toBeCloseTo(11_000)
+  })
 })

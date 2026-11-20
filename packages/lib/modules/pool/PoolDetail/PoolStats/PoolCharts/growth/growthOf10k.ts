@@ -1,5 +1,12 @@
 export const GROWTH_INITIAL_INVESTMENT_USD = 10_000
 
+/**
+ * Max one-day LP return vs hold return we'll trust when choosing a baseline.
+ * Create-day snapshots often have a depressed sharePrice that later "corrects"
+ * overnight (e.g. 4×) while the underlying basket is flat — that is not real yield.
+ */
+export const MAX_DAILY_UNEXPLAINED_LP_FACTOR = 1.5
+
 export type GrowthSnapshot = {
   /** Unix seconds (API snapshots are UTC midnight). */
   timestamp: number
@@ -75,6 +82,50 @@ function isUsableSnapshot(snapshot: GrowthSnapshot) {
 }
 
 /**
+ * Drop leading snapshots whose next-day sharePrice move is far beyond the hold basket.
+ * Those are almost always bad create/seed baselines, not real LP performance.
+ */
+export function trimLeadingUnreliableSnapshots(
+  snapshots: GrowthSnapshot[],
+  sortedPrices: PricePoint[][],
+  weights: number[],
+  maxUnexplainedFactor = MAX_DAILY_UNEXPLAINED_LP_FACTOR
+): GrowthSnapshot[] {
+  if (snapshots.length < 2) return snapshots
+
+  let start = 0
+
+  while (start < snapshots.length - 1) {
+    const current = snapshots[start]!
+    const next = snapshots[start + 1]!
+    const lpStep = Number(next.sharePrice) / Number(current.sharePrice)
+
+    let holdStep = 1
+    const units = getHoldUnits(current.timestamp, sortedPrices, weights, 1)
+
+    if (units) {
+      const holdStart = holdValueAt(units, sortedPrices, current.timestamp)
+      const holdEnd = holdValueAt(units, sortedPrices, next.timestamp)
+
+      if (holdStart && holdEnd && holdStart > 0) {
+        holdStep = holdEnd / holdStart
+      }
+    }
+
+    if (!(holdStep > 0)) break
+
+    // Only trim upside spikes vs hold (create-day sharePrice corrections).
+    // LP lagging the basket is normal (IL) and must not discard history.
+    const unexplainedUpside = lpStep / holdStep
+    if (unexplainedUpside <= maxUnexplainedFactor) break
+
+    start += 1
+  }
+
+  return snapshots.slice(start)
+}
+
+/**
  * "Growth of $10k": compares depositing into the pool (LP) against holding its tokens.
  *
  * - LP: initial × sharePrice(t) / sharePrice(t0). Share price already includes fees and price moves.
@@ -84,6 +135,9 @@ function isUsableSnapshot(snapshot: GrowthSnapshot) {
  * `tokenPrices[i]` is the USD price history for the token with `weights[i]`.
  * If any token lacks a price at t0, `hold` is null for every point; if a token lacks a price at a
  * later point, `hold` is null for that point only.
+ *
+ * Leading snapshots with an unexplained sharePrice jump vs the hold basket are skipped so a bad
+ * create-day baseline cannot invent multi-hundred-percent "growth".
  */
 export function calculateGrowth(
   snapshots: GrowthSnapshot[],
@@ -91,13 +145,16 @@ export function calculateGrowth(
   weights: number[],
   initial = GROWTH_INITIAL_INVESTMENT_USD
 ): GrowthPoint[] {
-  const usable = snapshots.filter(isUsableSnapshot).sort((a, b) => a.timestamp - b.timestamp)
-  const first = usable[0]
-  if (!first) return []
+  const sorted = snapshots.filter(isUsableSnapshot).sort((a, b) => a.timestamp - b.timestamp)
+  if (!sorted.length) return []
 
   const sortedPrices = tokenPrices.map(series =>
     [...series].sort((a, b) => a.timestamp - b.timestamp)
   )
+
+  const usable = trimLeadingUnreliableSnapshots(sorted, sortedPrices, weights)
+  const first = usable[0]
+  if (!first) return []
 
   const holdUnits = getHoldUnits(first.timestamp, sortedPrices, weights, initial)
   const initialSharePrice = Number(first.sharePrice)
