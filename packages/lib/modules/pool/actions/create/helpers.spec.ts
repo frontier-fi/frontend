@@ -61,9 +61,9 @@ describe('getSwapFeePercentageOptions', () => {
     expect(getSwapFeePercentageOptions(PoolType.Weighted)).toEqual(expected)
   })
 
-  it('returns Gyro E-CLP presets for GyroE pools', () => {
+  it('returns Elliptic CLP presets for GyroE pools', () => {
     expect(getSwapFeePercentageOptions(PoolType.GyroE)).toEqual([
-      { value: '0.30', tip: 'Best for most Gyro E-CLP pairs' },
+      { value: '0.30', tip: 'Best for most Elliptic CLP pairs' },
       { value: '1.00', tip: 'Best for exotic pairs' },
     ])
   })

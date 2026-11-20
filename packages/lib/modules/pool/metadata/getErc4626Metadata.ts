@@ -18,6 +18,10 @@ export type Erc4626Metadata = {
   readMoreURL?: string
 }
 
+export function getErc4626ProtocolName(metadata: Pick<Erc4626Metadata, 'name'>): string {
+  return metadata.name.replace(/\s+boosted$/i, '').trim()
+}
+
 export async function getErc4626Metadata(): Promise<Erc4626Metadata[] | undefined> {
   try {
     const res = await fetch(ERC4626_METADATA_URL, {

@@ -21,6 +21,7 @@ import { useState, useEffect } from 'react'
 import { usePool } from '../../../PoolProvider'
 import { isBoosted } from '../../../pool.helpers'
 import { usePoolsMetadata } from '../../../metadata/PoolsMetadataProvider'
+import { getErc4626ProtocolName } from '../../../metadata/getErc4626Metadata'
 
 export function AddLiquidityFormCheckbox() {
   const [hasAcceptedPoolRisks, setHasAcceptedPoolRisks] = useState(false)
@@ -37,7 +38,7 @@ export function AddLiquidityFormCheckbox() {
   const isBoostedPool = isBoosted(pool)
   const { getErc4626Metadata } = usePoolsMetadata()
   const erc4626Metadata = getErc4626Metadata(pool)
-  const protocolNames = erc4626Metadata.map(metadata => metadata.name.split(' ')[0])
+  const protocolNames = erc4626Metadata.map(metadata => getErc4626ProtocolName(metadata))
   const numberOfProtocols = protocolNames.length
 
   let dynamicProtocolString
@@ -52,7 +53,7 @@ export function AddLiquidityFormCheckbox() {
     dynamicProtocolString = `${allButLast}, and ${last}—unaffiliated third parties. If any of these are`
   }
 
-  const boostedRiskDescription = `I accept that by adding tokens to this rehyped Pool, my tokens are deposited into ${dynamicProtocolString} compromised, I may lose all my tokens in this pool.`
+  const boostedRiskDescription = `I accept that by adding tokens to this rehyped pool, my tokens are deposited into ${dynamicProtocolString} compromised, I may lose all my tokens in this pool.`
 
   useEffect(() => {
     if (isBoostedPool) {

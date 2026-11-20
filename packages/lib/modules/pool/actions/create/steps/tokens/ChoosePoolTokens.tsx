@@ -344,7 +344,7 @@ function AddTokenButton({
       case PoolType.Stable:
         return 'Only 5 tokens can be added to a Stable pool'
       case PoolType.GyroE:
-        return 'Only 2 tokens can be added to a Gyro pool'
+        return 'Only 2 tokens can be added to a Concentrated pool'
       default:
         return undefined
     }

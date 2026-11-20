@@ -248,7 +248,7 @@ export function usePoolListQueryState() {
       case 'POINTS':
         return 'Points'
       case 'BOOSTED':
-        return 'rehyped'
+        return 'Rehyped'
       case 'RWA':
         return 'RWA'
       case 'DYNAMIC_ECLP':
