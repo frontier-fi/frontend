@@ -42,7 +42,7 @@ const TABS_WITH_FEES: NonEmptyPoolChartTabs = [
 ]
 
 const POOL_SPECIFIC_TABS: PoolTabsMap = {
-  [GqlPoolTypeValues.Eclp]: [
+  [GqlPoolTypeValues.GyroE]: [
     { value: PoolChartTab.LIQUIDITY_PROFILE, label: 'Liquidity profile' },
     ...TABS_WITH_FEES,
   ],

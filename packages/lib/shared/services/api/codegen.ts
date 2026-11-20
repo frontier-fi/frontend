@@ -119,13 +119,12 @@ export type GqlPoolAprItemType =
   | 'VEBAL_EMISSIONS'
   | 'VOTING';`,
   GqlPoolType: `/**
- * Frontier's API currently returns ECLP / STABLE / WEIGHTED.
+ * Frontier's API currently returns GYROE / STABLE / WEIGHTED.
  * The wider union keeps legacy helpers and filters typechecking.
  */
 export type GqlPoolType =
   | 'COMPOSABLE_STABLE'
   | 'COW_AMM'
-  | 'ECLP'
   | 'ELEMENT'
   | 'FIXED_LBP'
   | 'FX'
