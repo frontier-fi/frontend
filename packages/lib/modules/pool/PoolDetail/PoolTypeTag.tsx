@@ -64,7 +64,7 @@ function getPoolTypeLabel(pool: Pool | PoolListItem) {
         </TagWrapper>
       )
 
-    case GqlPoolTypeValues.Eclp:
+    case GqlPoolTypeValues.GyroE:
       return (
         <TagWrapper pl="8px">
           <Text {...TEXT_PROPS}>Concentrated</Text>

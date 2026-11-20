@@ -16,8 +16,7 @@ import {
 const sdkToGqlPoolType: Partial<Record<PoolType, GqlPoolType>> = {
   [PoolType.Weighted]: GqlPoolTypeValues.Weighted,
   [PoolType.Stable]: GqlPoolTypeValues.Stable,
-  // Frontier API exposes ECLP (not GYROE) for Gyro elliptic CLPs
-  [PoolType.GyroE]: GqlPoolTypeValues.Eclp,
+  [PoolType.GyroE]: GqlPoolTypeValues.GyroE,
 }
 
 export function getGqlPoolType(poolType: PoolType): GqlPoolType {

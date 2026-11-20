@@ -130,7 +130,7 @@ export type PoolFilterType = (typeof poolTypeFilters)[number]
 export const API_GQL_POOL_TYPES = [
   GqlPoolTypeValues.Weighted,
   GqlPoolTypeValues.Stable,
-  GqlPoolTypeValues.Eclp,
+  GqlPoolTypeValues.GyroE,
 ] as const satisfies readonly GqlPoolType[]
 
 export type ApiGqlPoolType = (typeof API_GQL_POOL_TYPES)[number]
@@ -144,8 +144,7 @@ export function isApiGqlPoolType(type: string): type is ApiGqlPoolType {
 export const POOL_TYPE_MAP: { [key in PoolFilterType]: GqlPoolType[] } = {
   [GqlPoolTypeValues.Weighted]: [GqlPoolTypeValues.Weighted],
   [GqlPoolTypeValues.Stable]: [GqlPoolTypeValues.Stable],
-  // Frontier renamed Gyro ECLP pools to type ECLP.
-  [GqlPoolTypeValues.Gyro]: [GqlPoolTypeValues.Eclp],
+  [GqlPoolTypeValues.Gyro]: [GqlPoolTypeValues.GyroE],
   [GqlPoolTypeValues.CowAmm]: [GqlPoolTypeValues.CowAmm],
   [GqlPoolTypeValues.Fx]: [GqlPoolTypeValues.Fx],
   [GqlPoolTypeValues.QuantAmmWeighted]: [GqlPoolTypeValues.QuantAmmWeighted],

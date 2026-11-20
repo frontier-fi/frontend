@@ -185,7 +185,8 @@ function AfterPoolDeployedWarning({
   return (
     <VStack align="start" spacing="md">
       <Text>
-        You have deployed a {poolType} pool but have not seeded it with liquidity. Pool address:
+        You have deployed a {getPoolTypeLabel(poolType)} pool but have not seeded it with liquidity.
+        Pool address:
       </Text>
       <Text color="font.link">{poolAddress}</Text>
       <Text>
