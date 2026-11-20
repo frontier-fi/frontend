@@ -9,6 +9,7 @@ import { fNum } from '@repo/lib/shared/utils/numbers'
 import {
   isBoosted,
   isCowAmmPool,
+  isGyro,
   isQuantAmmPool,
   isStable,
   isV2Pool,
@@ -17,6 +18,8 @@ import {
 import { useCurrency } from '@repo/lib/shared/hooks/useCurrency'
 import { getPoolTypeLabel, shouldHideSwapFee } from '../../../pool.utils'
 import { useTokens } from '@repo/lib/modules/tokens/TokensProvider'
+import { usePoolsMetadata } from '../../../metadata/PoolsMetadataProvider'
+import { getErc4626ProtocolName, type Erc4626Metadata } from '../../../metadata/getErc4626Metadata'
 import { compact } from 'lodash'
 import { getNetworkConfig } from '@repo/lib/config/app.config'
 import { getBlockExplorerAddressUrl } from '@repo/lib/shared/utils/blockExplorer'
@@ -29,18 +32,46 @@ type FormattedPoolAttributes = {
   link?: string
 }
 
-function getPoolTypeText(pool: Pool) {
-  if (isBoosted(pool)) {
-    return 'rehyped'
+export function getPoolTypeText(pool: Pick<Pool, 'type' | 'version'>) {
+  if (isGyro(pool.type)) {
+    return 'Concentrated (Gyroscope Elliptic CLP)'
   }
 
-  return getPoolTypeLabel(pool.type)
+  const label = getPoolTypeLabel(pool.type)
+  return pool.version ? `${label} (V${pool.version})` : label
+}
+
+export function getRehypothecatedText(
+  pool: Pick<Pool, 'protocolVersion' | 'tags'>,
+  erc4626Metadata: Erc4626Metadata[]
+) {
+  if (!isBoosted(pool)) {
+    return 'No'
+  }
+
+  const protocolNames = erc4626Metadata
+    .map(metadata => getErc4626ProtocolName(metadata))
+    .filter(Boolean)
+
+  if (protocolNames.length > 0) {
+    return [...new Set(protocolNames)].join(', ')
+  }
+
+  const tagProtocols = (pool.tags ?? [])
+    .filter((tag): tag is string => !!tag && /^boosted_/i.test(tag))
+    .map(tag => {
+      const name = tag.replace(/^boosted_/i, '')
+      return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+    })
+
+  return tagProtocols.length > 0 ? [...new Set(tagProtocols)].join(', ') : 'Yes'
 }
 
 export function useFormattedPoolAttributes() {
   const { pool } = usePool()
   const { toCurrency } = useCurrency()
   const { usdValueForTokenAddress } = useTokens()
+  const { getErc4626Metadata } = usePoolsMetadata()
 
   const isV2 = isV2Pool(pool)
   const isV3 = isV3Pool(pool)
@@ -97,6 +128,7 @@ export function useFormattedPoolAttributes() {
     const networkConfig = getNetworkConfig(chain)
 
     const editNote = poolOwnerData?.editableText ? ` (${poolOwnerData.editableText})` : ''
+    const erc4626Metadata = getErc4626Metadata(pool)
 
     const attributes = compact([
       {
@@ -110,6 +142,10 @@ export function useFormattedPoolAttributes() {
       {
         title: 'Type',
         value: getPoolTypeText(pool),
+      },
+      {
+        title: 'Rehypothecated',
+        value: getRehypothecatedText(pool, erc4626Metadata),
       },
       {
         title: 'Protocol',
@@ -157,7 +193,7 @@ export function useFormattedPoolAttributes() {
     }
 
     return attributes
-  }, [pool, poolOwnerData, isV2, toCurrency, usdValueForTokenAddress])
+  }, [pool, poolOwnerData, isV2, toCurrency, usdValueForTokenAddress, getErc4626Metadata])
 
   return formattedPoolAttributes
 }

@@ -22,6 +22,7 @@ import { bn, fNum, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { useLayoutEffect, useRef, useState, Fragment } from 'react'
 import { Address } from 'viem'
 import { usePoolsMetadata } from '../metadata/PoolsMetadataProvider'
+import { getErc4626ProtocolName } from '../metadata/getErc4626Metadata'
 import { isBoosted, REHYPE_LABEL } from '../pool.helpers'
 import { PoolToken } from '../pool.types'
 import { usePool } from '../PoolProvider'
@@ -140,12 +141,12 @@ export function PoolComposition() {
 
   const protocolLinks = erc4626Metadata.flatMap(metadata => {
     const readMoreUrl = toSafeHttpsUrl(metadata.readMoreURL)
-    return readMoreUrl ? [{ name: metadata.name.split(' ')[0]!, readMoreUrl }] : []
+    return readMoreUrl ? [{ name: getErc4626ProtocolName(metadata), readMoreUrl }] : []
   })
 
   const hasReadMoreURL = protocolLinks.length > 0
 
-  const protocolNames = erc4626Metadata.map(metadata => metadata.name.split(' ')[0]!)
+  const protocolNames = erc4626Metadata.map(metadata => getErc4626ProtocolName(metadata))
   const formattedProtocolNames = formatStringsToSentenceList(protocolNames)
   const boostedWarningMsg = `This ${REHYPE_LABEL} pool uses wrapped ${formattedProtocolNames} tokens to generate yield from lending on ${protocolNames.length === 1 ? 'that protocol' : 'those protocols'}. This results in continuous appreciation of the pool's total value over time.`
 

@@ -41,7 +41,7 @@ type GetPoolMessageProps = {
 
 function getPoolMessage({ poolType, weightedPoolStructure }: GetPoolMessageProps): string | null {
   if (isGyroEllipticPool(poolType)) {
-    return "Gyroscope's elliptic concentrated liquidity pools offer the flexibility to asymmetrically focus liquidity. You can only add 2 tokens into a Gyro E-CLP."
+    return "Gyroscope's elliptic concentrated liquidity pools offer the flexibility to asymmetrically focus liquidity. You can only add 2 tokens into an Elliptic CLP."
   }
 
   if (isStablePool(poolType)) {

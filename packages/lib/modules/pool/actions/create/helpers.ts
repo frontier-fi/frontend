@@ -40,7 +40,7 @@ export function getSwapFeePercentageOptions(
     ]
   } else if (poolType === PoolType.GyroE) {
     return [
-      { value: '0.30', tip: 'Best for most Gyro E-CLP pairs' },
+      { value: '0.30', tip: 'Best for most Elliptic CLP pairs' },
       { value: '1.00', tip: 'Best for exotic pairs' },
     ]
   } else {

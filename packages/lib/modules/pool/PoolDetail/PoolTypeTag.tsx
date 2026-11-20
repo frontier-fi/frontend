@@ -5,6 +5,7 @@ import { isBoosted, REHYPE_LABEL, toRehypeLabel } from '../pool.helpers'
 import Image from 'next/image'
 import { PoolListItem } from '../pool.types'
 import { usePoolsMetadata } from '../metadata/PoolsMetadataProvider'
+import { getErc4626ProtocolName } from '../metadata/getErc4626Metadata'
 import { CustomPopover } from '@repo/lib/shared/components/popover/CustomPopover'
 import { formatStringsToSentenceList } from '../usePoolTokenPriceWarnings'
 
@@ -81,7 +82,7 @@ export function PoolTypeTag({ pool }: PoolTypeTagProps) {
   const erc4626Metadata = getErc4626Metadata(pool)
   const rehypeTooltipLabel = [...erc4626Metadata.map(m => toRehypeLabel(m.name))].join(' & ')
 
-  const protocolNames = erc4626Metadata.map(metadata => metadata.name.split(' ')[0]!)
+  const protocolNames = erc4626Metadata.map(metadata => getErc4626ProtocolName(metadata))
   const formattedProtocolNames = formatStringsToSentenceList(protocolNames)
 
   const rehypeWarningMsg = `This ${REHYPE_LABEL} pool uses wrapped ${formattedProtocolNames} tokens to generate yield from lending on ${
