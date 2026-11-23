@@ -12,7 +12,7 @@ const hiddenPoolTypes: PoolFilterType[] = [
 export const ProjectConfigFrontier: ProjectConfig = {
   projectId: 'frontier',
   projectName: 'Frontier Finance',
-  announcement: 'Zero protocol fees',
+  announcement: 'Welcome to the frontier of finance. Please enjoy zero protocol fees!',
   poolsTagline:
     'The official fork of the Balancer V3 protocol. New smart contract addresses, same bytecode',
   legalEntityName: 'Frontier Finance',

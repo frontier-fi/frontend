@@ -256,10 +256,12 @@ export function NavBar({
       {announcement && (
         <Alert
           color="font.dark"
-          fontSize="lg"
+          fontSize={{ base: 'sm', md: 'lg' }}
           fontWeight="bold"
           h={`${announcementHeight}px`}
           justifyContent="center"
+          lineHeight="short"
+          py="0"
           role="note"
           rounded="none"
           status="warning"
