@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, BoxProps, Button, Center, HStack, Link, Text } from '@chakra-ui/react'
+import { Alert, Box, BoxProps, Button, HStack, Link } from '@chakra-ui/react'
 import { isDev, shouldUseAnvilFork } from '@repo/lib/config/app.config'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { UserSettings } from '@repo/lib/modules/user/settings/UserSettings'
@@ -30,7 +30,7 @@ type Props = {
   allowCreateWallet?: boolean
 }
 
-const announcementHeight = 32
+const announcementHeight = 48
 
 function useBoundedScroll(threshold: number) {
   const { scrollY } = useScroll()
@@ -254,20 +254,19 @@ export function NavBar({
       {...rest}
     >
       {announcement && (
-        <Center bg="background.level0" h={`${announcementHeight}px`}>
-          <Text
-            bg="green.100"
-            border="1px solid"
-            borderColor="green.600"
-            color="green.900"
-            fontSize="sm"
-            fontWeight="semibold"
-            px="3"
-            rounded="full"
-          >
-            {announcement}
-          </Text>
-        </Center>
+        <Alert
+          color="font.dark"
+          fontSize="lg"
+          fontWeight="bold"
+          h={`${announcementHeight}px`}
+          justifyContent="center"
+          role="note"
+          rounded="none"
+          status="warning"
+          textAlign="center"
+        >
+          {announcement}
+        </Alert>
       )}
       {!apiOK && <ApiOutageAlert />}
 
