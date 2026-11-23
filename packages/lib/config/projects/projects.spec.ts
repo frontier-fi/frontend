@@ -16,6 +16,7 @@ describe('Project configs', () => {
     expect(ProjectConfigFrontier.options.isOnSafeAppList).toBe(true)
     expect(ProjectConfigFrontier.supportedNetworks).toContain('MAINNET')
     expect(ProjectConfigFrontier.supportedNetworks).toContain('BASE')
+    expect(ProjectConfigFrontier.supportedNetworks).toContain('MONAD')
     expect(ProjectConfigFrontier.supportedNetworks).toContain('SEPOLIA')
     expect(ProjectConfigFrontier.defaultNetwork).toBe('MAINNET')
     expect(ProjectConfigFrontier.ensNetwork).toBe('MAINNET')

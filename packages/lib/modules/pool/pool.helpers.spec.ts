@@ -66,10 +66,11 @@ it('supportsNestedActions', () => {
   ).toBeFalsy()
 })
 
-it('disables nested liquidity actions on Frontier Mainnet, Base, and Sepolia', () => {
+it('disables nested liquidity actions on Frontier Mainnet, Base, Monad, and Sepolia', () => {
   const nested = fakeNestedPool('0x12345')
   expect(supportsNestedActions({ ...nested, chain: GqlChainValues.Mainnet })).toBe(false)
   expect(supportsNestedActions({ ...nested, chain: GqlChainValues.Base })).toBe(false)
+  expect(supportsNestedActions({ ...nested, chain: GqlChainValues.Monad })).toBe(false)
   expect(supportsNestedActions({ ...nested, chain: GqlChainValues.Sepolia })).toBe(false)
 })
 

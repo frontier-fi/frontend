@@ -20,7 +20,12 @@ export const ProjectConfigFrontier: ProjectConfig = {
   projectLogo: '/images/icons/0xff.png',
   poolSymbolPrefix: '0xFF-',
   acceptedPoliciesVersion: undefined,
-  supportedNetworks: [GqlChainValues.Mainnet, GqlChainValues.Base, GqlChainValues.Sepolia],
+  supportedNetworks: [
+    GqlChainValues.Mainnet,
+    GqlChainValues.Base,
+    GqlChainValues.Monad,
+    GqlChainValues.Sepolia,
+  ],
   variantConfig: {
     [PartnerVariant.cow]: {
       banners: {
@@ -33,8 +38,8 @@ export const ProjectConfigFrontier: ProjectConfig = {
   defaultNetwork: GqlChainValues.Mainnet,
   ensNetwork: GqlChainValues.Mainnet,
   delegateOwner: '0xba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1b',
-  // Merkl supports Mainnet and Base; Sepolia is unsupported (api.merkl.xyz returns 400).
-  merklRewardsChains: [GqlChainValues.Mainnet, GqlChainValues.Base],
+  // Merkl supports Mainnet, Base, and Monad; Sepolia is unsupported (api.merkl.xyz returns 400).
+  merklRewardsChains: [GqlChainValues.Mainnet, GqlChainValues.Base, GqlChainValues.Monad],
   options: {
     poolDisplayType: PoolDisplayType.TokenPills,
     hidePoolTags: ['DYNAMIC_ECLP', 'VE8020'],

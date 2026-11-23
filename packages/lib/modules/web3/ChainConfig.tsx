@@ -37,7 +37,7 @@ export const rpcFallbacks: Partial<Record<AppChain, string | undefined>> = {
   [GqlChainValues.Sepolia]: 'https://sepolia.gateway.tenderly.co',
   [GqlChainValues.Hyperevm]: 'https://1rpc.io/hyperliquid',
   [GqlChainValues.Plasma]: 'https://rpc.plasma.to',
-  [GqlChainValues.Monad]: 'https://rpc.monad.xyz',
+  [GqlChainValues.Monad]: 'https://monad.gateway.tenderly.co',
 }
 
 const baseUrl = getBaseUrl()
