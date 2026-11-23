@@ -36,7 +36,7 @@ export function FocussedActionLayout({
     <Box bg="transparent" left={0} onClick={goBack} pos="absolute" top={0} w="full" zIndex={100}>
       <VStack backdropFilter={blur} bg={bg} onClick={redirectToPage} w="full" zIndex={51}>
         <NavBar disableBlur leftSlot={leftSlot} />
-        <Box pt="72px" px={['0', 'md']} w="full">
+        <Box pt="var(--navbar-height, 72px)" px={['0', 'md']} w="full">
           <Card
             borderBottomRadius={0}
             borderTopRadius="2xl"

@@ -1,7 +1,8 @@
 'use client'
 
-import { Box, BoxProps, Button, HStack, Link } from '@chakra-ui/react'
+import { Box, BoxProps, Button, Center, HStack, Link, Text } from '@chakra-ui/react'
 import { isDev, shouldUseAnvilFork } from '@repo/lib/config/app.config'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { UserSettings } from '@repo/lib/modules/user/settings/UserSettings'
 import { ConnectWallet } from '@repo/lib/modules/web3/ConnectWallet'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
@@ -28,6 +29,8 @@ type Props = {
   customLinks?: ReactNode
   allowCreateWallet?: boolean
 }
+
+const announcementHeight = 32
 
 function useBoundedScroll(threshold: number) {
   const { scrollY } = useScroll()
@@ -191,6 +194,8 @@ export function NavBar({
 }: Props & BoxProps) {
   const { apiOK } = useApiHealth()
   const [showShadow, setShowShadow] = useState(false)
+  const { announcement } = PROJECT_CONFIG
+  const navbarHeight = 72 + (announcement ? announcementHeight : 0) + (apiOK ? 0 : 48)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -212,16 +217,11 @@ export function NavBar({
 
   const blurEffect = useTransform(scrollYBoundedProgressDelayed, [0, 1], [10, 0])
   const backdropFilter = useMotionTemplate`blur(${blurEffect}px)`
-  const top = useTransform(scrollYBoundedProgressDelayed, [0, 1], [0, -72])
+  const top = useTransform(scrollYBoundedProgressDelayed, [0, 1], [0, -navbarHeight])
   const opacity = useTransform(scrollYBoundedProgressDelayed, [0, 1], [1, 0])
 
-  // Determine navbar height based on alerts — each alert adds 48px to the 72px nav row
-  const alertCount = [!apiOK].filter(Boolean).length
-  const navbarHeight = alertCount === 0 ? '72px' : `${72 + alertCount * 48}px`
-
-  // Set CSS variable on document root
   useEffect(() => {
-    document.documentElement.style.setProperty('--navbar-height', navbarHeight)
+    document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`)
   }, [navbarHeight])
 
   return (
@@ -253,6 +253,22 @@ export function NavBar({
       zIndex={100}
       {...rest}
     >
+      {announcement && (
+        <Center bg="background.level0" h={`${announcementHeight}px`}>
+          <Text
+            bg="green.100"
+            border="1px solid"
+            borderColor="green.600"
+            color="green.900"
+            fontSize="sm"
+            fontWeight="semibold"
+            px="3"
+            rounded="full"
+          >
+            {announcement}
+          </Text>
+        </Center>
+      )}
       {!apiOK && <ApiOutageAlert />}
 
       <HStack as="nav" justify="space-between" padding={{ base: 'sm', md: 'md' }}>
