@@ -1,8 +1,9 @@
 'use client'
 
-import { Alert, Box, BoxProps, Button, HStack, Link } from '@chakra-ui/react'
+import { Alert, Box, BoxProps, Button, CloseButton, HStack, Link } from '@chakra-ui/react'
 import { isDev, shouldUseAnvilFork } from '@repo/lib/config/app.config'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { LS_KEYS } from '@repo/lib/modules/local-storage/local-storage.constants'
 import { UserSettings } from '@repo/lib/modules/user/settings/UserSettings'
 import { ConnectWallet } from '@repo/lib/modules/web3/ConnectWallet'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
@@ -18,6 +19,8 @@ import { ArrowUpRight } from 'lucide-react'
 import { DevToolsDrawerButton } from '@repo/lib/modules/dev-tools/DevToolsDrawer'
 import { ApiOutageAlert } from '../alerts/ApiOutageAlert'
 import { useApiHealth } from '../../hooks/useApiHealth'
+import { useIsMounted } from '../../hooks/useIsMounted'
+import { useLocalStorage } from 'usehooks-ts'
 
 type Props = {
   mobileNav?: ReactNode
@@ -195,7 +198,15 @@ export function NavBar({
   const { apiOK } = useApiHealth()
   const [showShadow, setShowShadow] = useState(false)
   const { announcement } = PROJECT_CONFIG
-  const navbarHeight = 72 + (announcement ? announcementHeight : 0) + (apiOK ? 0 : 48)
+  const isMounted = useIsMounted()
+
+  const [dismissedAnnouncement, setDismissedAnnouncement] = useLocalStorage<string | null>(
+    LS_KEYS.UserSettings.DismissedAnnouncement,
+    null
+  )
+
+  const showAnnouncement = isMounted && announcement && dismissedAnnouncement !== announcement
+  const navbarHeight = 72 + (showAnnouncement ? announcementHeight : 0) + (apiOK ? 0 : 48)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -253,7 +264,7 @@ export function NavBar({
       zIndex={100}
       {...rest}
     >
-      {announcement && (
+      {showAnnouncement && (
         <Alert
           color="font.dark"
           fontSize={{ base: 'sm', md: 'lg' }}
@@ -261,6 +272,7 @@ export function NavBar({
           h={`${announcementHeight}px`}
           justifyContent="center"
           lineHeight="short"
+          px="40px"
           py="0"
           role="note"
           rounded="none"
@@ -268,6 +280,19 @@ export function NavBar({
           textAlign="center"
         >
           {announcement}
+          <CloseButton
+            aria-label="Dismiss announcement"
+            color="font.dark"
+            h="full"
+            onClick={event => {
+              event.stopPropagation()
+              setDismissedAnnouncement(announcement)
+            }}
+            position="absolute"
+            right="0"
+            type="button"
+            w="40px"
+          />
         </Alert>
       )}
       {!apiOK && <ApiOutageAlert />}
