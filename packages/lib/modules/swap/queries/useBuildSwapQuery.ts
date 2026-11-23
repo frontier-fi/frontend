@@ -44,6 +44,9 @@ export function useBuildSwapQuery({
     slippagePercent: slippage,
     simulateResponse: simulationQuery.data || ({} as SimulateSwapResponse),
     isSafeAccount,
+    wethIsEth,
+    relayerApprovalSignature,
+    permit2,
   })
 
   const queryFn = async () => {
