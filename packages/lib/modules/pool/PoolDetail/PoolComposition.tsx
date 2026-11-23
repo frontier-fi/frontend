@@ -34,6 +34,7 @@ import { useGetPoolTokensWithActualWeights } from '../useGetPoolTokensWithActual
 import { PoolCompositionChart } from './PoolCompositionChart'
 import { PoolTotalLiquidityDisplay } from './PoolTotalLiquidityDisplay'
 import { formatStringsToSentenceList } from '../usePoolTokenPriceWarnings'
+import { isDev } from '@repo/lib/config/app.config'
 
 type CardContentProps = {
   totalLiquidity: string
@@ -176,7 +177,7 @@ export function PoolComposition() {
         direction={{ base: 'column', md: 'row' }}
         justifyContent="stretch"
         maxH="1000px"
-        minH="400px"
+        minH={isDev ? '400px' : undefined}
         spacing="md"
       >
         <VStack align="flex-start" spacing="md" w="full">
@@ -242,7 +243,7 @@ export function PoolComposition() {
             From {fNum('integer', pool.dynamicData.holdersCount)} Liquidity Providers
           </Text>
         </VStack>
-        <PoolCompositionChart height={height} isMobile={!!isMobile} />
+        {isDev && <PoolCompositionChart height={height} isMobile={!!isMobile} />}
       </Stack>
     </Card>
   )

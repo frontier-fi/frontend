@@ -1,7 +1,7 @@
 import { VStack, Heading, HStack, Text, CardBody, Box } from '@chakra-ui/react'
 import { NetworkIcon } from '@repo/lib/shared/components/icons/NetworkIcon'
 import { usePoolCreationForm } from '../PoolCreationFormProvider'
-import { getChainName } from '@repo/lib/config/app.config'
+import { getChainName, isDev } from '@repo/lib/config/app.config'
 import { NetworkPreviewSVG } from '@repo/lib/shared/components/imgs/AutoRangeConfigSvgs'
 import { PreviewPoolCreationCard } from './PreviewPoolCreationCard'
 import { POOL_TYPES } from '../constants'
@@ -63,17 +63,19 @@ export function PreviewPoolType() {
             ))}
           </VStack>
 
-          <Box position="relative">
-            <NetworkPreviewSVG
-              chain={network}
-              tokenAddresses={tokenAddresses}
-              tokenSymbols={tokenSymbols}
-              tokenWeights={tokenWeights}
-            />
-            <Box left="50%" position="absolute" top="50%" transform="translate(-50%, -50%)">
-              <NetworkIcon bg="background.level4" chain={network} shadow="lg" />
+          {isDev && (
+            <Box position="relative">
+              <NetworkPreviewSVG
+                chain={network}
+                tokenAddresses={tokenAddresses}
+                tokenSymbols={tokenSymbols}
+                tokenWeights={tokenWeights}
+              />
+              <Box left="50%" position="absolute" top="50%" transform="translate(-50%, -50%)">
+                <NetworkIcon bg="background.level4" chain={network} shadow="lg" />
+              </Box>
             </Box>
-          </Box>
+          )}
         </HStack>
       </CardBody>
     </PreviewPoolCreationCard>
