@@ -21,7 +21,7 @@ describe('selectAddLiquidityHandler', () => {
     expect(handler.constructor.name).toBe('BoostedUnbalancedAddLiquidityV3Handler')
   })
 
-  it.each(['MAINNET', 'BASE', 'SEPOLIA'] as const)(
+  it.each(['MAINNET', 'BASE', 'MONAD', 'SEPOLIA'] as const)(
     'uses the regular V3 add handler for nested pools on %s',
     chain => {
       const pool = { ...nestedPoolMock, chain, protocolVersion: 3 as const }
