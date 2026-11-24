@@ -18,10 +18,20 @@ afterEach(() => {
 it('dismisses the current announcement across visits and keeps space for the outage alert', () => {
   localStorage.setItem(LS_KEYS.UserSettings.DismissedAnnouncement, JSON.stringify('Earlier notice'))
   const navbar = <NavBar leftSlot={<span>Navigation</span>} rightSlot={<span>Wallet</span>} />
-  const firstVisit = render(navbar, { wrapper: ChakraProvider })
+  const onBackdropClick = vi.fn()
+
+  const firstVisit = render(<div onClick={onBackdropClick}>{navbar}</div>, {
+    wrapper: ChakraProvider,
+  })
 
   expect(document.documentElement.style.getPropertyValue('--navbar-height')).toBe('168px')
+  const banner = screen.getByRole('note')
+  fireEvent.click(banner)
+  expect(onBackdropClick).not.toHaveBeenCalled()
+  expect(banner).toBeVisible()
+
   fireEvent.click(screen.getByRole('button', { name: 'Dismiss announcement' }))
+  expect(onBackdropClick).not.toHaveBeenCalled()
   expect(screen.queryByRole('note')).toBeNull()
   expect(document.documentElement.style.getPropertyValue('--navbar-height')).toBe('120px')
   firstVisit.unmount()
@@ -29,4 +39,20 @@ it('dismisses the current announcement across visits and keeps space for the out
   render(navbar, { wrapper: ChakraProvider })
   expect(screen.queryByRole('note')).toBeNull()
   expect(screen.getByText(/experiencing some technical difficulties/)).toBeVisible()
+})
+
+it('updates the navigation offset when the announcement wraps or shrinks', () => {
+  render(<NavBar leftSlot={<span />} rightSlot={<span />} />, { wrapper: ChakraProvider })
+  const banner = screen.getByRole('note')
+  const measuredRow = banner.parentElement!
+  const bounds = vi.spyOn(measuredRow, 'getBoundingClientRect')
+
+  for (const height of [96, 64, 48]) {
+    bounds.mockReturnValue(new DOMRect(0, 0, 320, height))
+    fireEvent(window, new Event('resize'))
+
+    expect(document.documentElement.style.getPropertyValue('--navbar-height')).toBe(
+      `${72 + height + 48}px`
+    )
+  }
 })

@@ -15,7 +15,6 @@ import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { isStablePool, isStableSurgePool, isPoolCreatorEnabled } from '../../helpers'
 import { useWatch } from 'react-hook-form'
-import { PoolType } from '@frontier-fi/sdk'
 import { ConfigOptionsGroup } from './AutoRangeConfiguration'
 import {
   SteepCurve,
@@ -59,26 +58,6 @@ export function PoolSettings() {
 
   // Only "No hooks" + "Custom" (appended by PoolSettingsRadioGroup).
   const poolHooksOptions: PoolSettingsOption[] = [{ label: 'No hooks', value: zeroAddress }]
-
-  // If the fee is still a preset from a different pool type (e.g. Stable's 0.01%
-  // after switching to Weighted), snap to this type's first recommended option.
-  useEffect(() => {
-    if (!poolCreationForm.isHydrated) return
-
-    const recommended = getSwapFeePercentageOptions(poolType)
-    const current = poolCreationForm.getValues('swapFeePercentage')
-    if (recommended.some(option => Number(option.value) === Number(current))) return
-
-    const otherPresets = ([PoolType.Stable, PoolType.Weighted, PoolType.GyroE] as const)
-      .filter(type => type !== poolType)
-      .flatMap(type => getSwapFeePercentageOptions(type).map(option => option.value))
-
-    if (otherPresets.some(value => Number(value) === Number(current))) {
-      poolCreationForm.setValue('swapFeePercentage', recommended[0].value, {
-        shouldValidate: true,
-      })
-    }
-  }, [poolType, poolCreationForm.isHydrated, poolCreationForm.getValues, poolCreationForm.setValue])
 
   useEffect(() => {
     if (isStableSurgePool(poolType) && poolHooksWhitelist) {

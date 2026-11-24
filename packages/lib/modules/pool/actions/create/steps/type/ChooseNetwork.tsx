@@ -11,6 +11,7 @@ import {
   RadioCardGroup,
   type RadioCardOption,
 } from '@repo/lib/shared/components/inputs/RadioCardGroup'
+import { getSwapFeePercentageOptions } from '../../helpers'
 import { INITIAL_POOL_CREATION_FORM } from '../../constants'
 import { useEffect } from 'react'
 import { useWatch } from 'react-hook-form'
@@ -50,13 +51,12 @@ export function ChooseNetwork({ control }: { control: Control<PoolCreationForm> 
           <RadioCardGroup
             name={field.name}
             onChange={(value: GqlChain) => {
-              field.onChange(value)
-
               poolCreationForm.reset({
                 ...INITIAL_POOL_CREATION_FORM,
                 network: value,
                 protocol,
                 poolType,
+                swapFeePercentage: getSwapFeePercentageOptions(poolType)[0].value,
               })
             }}
             options={networkOptions}
