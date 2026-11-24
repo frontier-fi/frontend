@@ -1,4 +1,4 @@
-import { Button, HStack, IconButton, useDisclosure, Divider, VStack } from '@chakra-ui/react'
+import { Button, HStack, IconButton, useDisclosure, Divider, Text, VStack } from '@chakra-ui/react'
 import { ChevronLeftIcon } from '@chakra-ui/icons'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
 import { ConnectWallet } from '@repo/lib/modules/web3/ConnectWallet'
@@ -9,14 +9,15 @@ import { InvalidTotalWeightAlert } from './InvalidTotalWeightAlert'
 import { useCopyToClipboard } from '@repo/lib/shared/hooks/useCopyToClipboard'
 import { isAutoRangePool, isCowPool, isEclpCreationDisabled } from './helpers'
 import { useFormState, useWatch } from 'react-hook-form'
+import { isAddress, zeroAddress } from 'viem'
 
 export function PoolCreationFormAction({ disabled }: { disabled?: boolean }) {
   const { poolAddress, poolCreationForm, goToNextStep, goToPreviousStep, isLastStep, isFirstStep } =
     usePoolCreationForm()
 
-  const [poolTokens, poolType, network] = useWatch({
+  const [poolTokens, poolType, network, poolHooksContract] = useWatch({
     control: poolCreationForm.control,
-    name: ['poolTokens', 'poolType', 'network'],
+    name: ['poolTokens', 'poolType', 'network', 'poolHooksContract'],
   })
 
   const formState = useFormState({ control: poolCreationForm.control })
@@ -37,8 +38,12 @@ export function PoolCreationFormAction({ disabled }: { disabled?: boolean }) {
   if (!isConnected) return <ConnectWallet variant="primary" w="full" />
 
   const showBackButton = !isFirstStep && !poolAddress
-  const isEclpSubmitDisabled = isLastStep && isEclpCreationDisabled(poolType)
-  const isSubmitDisabled = disabled || isEclpSubmitDisabled
+
+  const invalidHookAddress =
+    isLastStep && !poolAddress && !isAddress(poolHooksContract ?? zeroAddress)
+
+  const canPreviewPool = isLastStep && !isEclpCreationDisabled(poolType) && !invalidHookAddress
+  const isSubmitDisabled = disabled || !canPreviewPool
 
   const initializeUrl = `${window.location.origin}/create/${network}/${poolType}/${poolAddress}`
 
@@ -48,6 +53,9 @@ export function PoolCreationFormAction({ disabled }: { disabled?: boolean }) {
         <Divider />
 
         <InvalidTotalWeightAlert />
+        {invalidHookAddress && (
+          <Text color="font.error">Return to Details and enter a valid pool hooks address.</Text>
+        )}
 
         <HStack spacing="md" w="full">
           {showBackButton && (
@@ -96,7 +104,7 @@ export function PoolCreationFormAction({ disabled }: { disabled?: boolean }) {
         </HStack>
       </VStack>
 
-      {formState.isValid && isLastStep && !isEclpSubmitDisabled && (
+      {formState.isValid && canPreviewPool && (
         <PoolCreationModal
           finalFocusRef={nextBtn}
           isOpen={previewModalDisclosure.isOpen}
