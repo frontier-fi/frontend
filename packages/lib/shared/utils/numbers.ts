@@ -43,7 +43,7 @@ export const FIAT_FORMAT_WITHOUT_DECIMALS = '0,0'
 export const TOKEN_FORMAT_A = '0,0.[0000]a'
 export const TOKEN_FORMAT_A_BIG = '0,0.[00]a'
 export const TOKEN_FORMAT = '0,0.[0000]'
-export const APR_FORMAT = '0,0.00%'
+export const APR_FORMAT = '0,0.0%'
 export const APR_FORMAT_WITHOUT_DECIMALS = '0,0%'
 export const SLIPPAGE_FORMAT = '0.00%'
 export const FEE_FORMAT = '0.[0000]%'
@@ -68,6 +68,9 @@ export const SMALL_AMOUNT_LABEL = '<0.001'
 // Display <0.01% for small percentages)
 export const PERCENTAGE_LOWER_THRESHOLD = 0.0001
 export const SMALL_PERCENTAGE_LABEL = '<0.01%'
+// Display <0.1% for small APR percentages (matches 1-decimal APR display)
+export const APR_PERCENTAGE_LOWER_THRESHOLD = 0.001
+export const SMALL_APR_LABEL = '<0.1%'
 
 // fiat value threshold for displaying the fiat format without cents
 export const FIAT_CENTS_THRESHOLD = '100000'
@@ -286,21 +289,24 @@ function aprFormat(apr: Numberish, { canBeNegative = false }: FormatOpts = {}): 
   const aprBn = bn(apr)
 
   if (aprBn.gt(APR_UPPER_THRESHOLD)) return '-'
-  if (isSmallPercentage(apr) && !canBeNegative) return SMALL_PERCENTAGE_LABEL
 
-  // numeral '0,0.00%' semantics: value × 100, then fixed decimals with grouping.
+  if (!aprBn.isZero() && aprBn.lt(APR_PERCENTAGE_LOWER_THRESHOLD) && !canBeNegative) {
+    return SMALL_APR_LABEL
+  }
+
+  // numeral '0,0.0%' semantics: value × 100, then fixed 1 decimal with grouping.
   // > 1000% displays without decimals: 12.3456789 => 1,235%
   if (aprBn.abs().gt(10)) {
     return `${toIntegerGrouped(roundHalfUp(aprBn.times(100), 0))}%`
   }
 
-  // Otherwise 2 decimals: 0.10 => 10.00%
-  const rounded2 = roundHalfUp(aprBn.times(100), 2)
-  const s = rounded2.toFixed(2) // keep 2 decimals
+  // Otherwise 1 decimal: 0.10 => 10.0%
+  const rounded1 = roundHalfUp(aprBn.times(100), 1)
+  const s = rounded1.toFixed(1)
   const [intPart, frac] = splitDecimalString(s)
-  const neg = intPart.startsWith('-')
-  const groupedInt = groupIntegerString(neg ? intPart.slice(1) : intPart)
-  const sign = neg ? '-' : ''
+  const isNegStr = intPart.startsWith('-')
+  const groupedInt = groupIntegerString(isNegStr ? intPart.slice(1) : intPart)
+  const sign = !rounded1.isZero() && isNegStr ? '-' : ''
   return `${sign}${groupedInt}.${frac}%`
 }
 

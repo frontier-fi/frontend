@@ -85,16 +85,28 @@ describe('tokenFormat', () => {
 
 describe('aprFormat', () => {
   test('Abbreviated formats', () => {
-    expect(fNum('apr', '0.10')).toBe('10.00%')
-    expect(fNum('apr', '0.0010')).toBe('0.10%')
-    expect(fNum('apr', '0.0016')).toBe('0.16%')
-    expect(fNum('apr', '0.0001')).toBe('0.01%')
-    expect(fNum('apr', '0.00001')).toBe('<0.01%')
-    expect(fNum('apr', '0.00009')).toBe('<0.01%')
-    expect(fNum('apr', '0.000007595846919227514')).toBe('<0.01%')
-    expect(fNum('apr', '1.3456789')).toBe('134.57%')
+    expect(fNum('apr', '0')).toBe('0.0%')
+    expect(fNum('apr', '0.10')).toBe('10.0%')
+    expect(fNum('apr', '0.0010')).toBe('0.1%')
+    expect(fNum('apr', '0.0014')).toBe('0.1%')
+    expect(fNum('apr', '0.0015')).toBe('0.2%')
+    expect(fNum('apr', '0.0016')).toBe('0.2%')
+    expect(fNum('apr', '0.0009')).toBe('<0.1%')
+    expect(fNum('apr', '0.0001')).toBe('<0.1%')
+    expect(fNum('apr', '0.00001')).toBe('<0.1%')
+    expect(fNum('apr', '0.00009')).toBe('<0.1%')
+    expect(fNum('apr', '0.000007595846919227514')).toBe('<0.1%')
+    expect(fNum('apr', '1.3456789')).toBe('134.6%')
     // Big percentages > 1000%
     expect(fNum('apr', '12.3456789')).toBe('1,235%')
+  })
+
+  test('with canBeNegative enabled', () => {
+    expect(fNum('apr', '0.0004', { canBeNegative: true })).toBe('0.0%')
+    expect(fNum('apr', '0.0007', { canBeNegative: true })).toBe('0.1%')
+    expect(fNum('apr', '-0.0526', { canBeNegative: true })).toBe('-5.3%')
+    expect(fNum('apr', '-0.0004', { canBeNegative: true })).toBe('0.0%')
+    expect(fNum('apr', '-0.0005', { canBeNegative: true })).toBe('-0.1%')
   })
 })
 
@@ -461,7 +473,7 @@ describe('bn', () => {
 
 test('all formats types do not break with super small inputs (AKA dust)', () => {
   const dust = BN_LOWER_THRESHOLD
-  expect(fNum('apr', dust)).toBe('<0.01%')
+  expect(fNum('apr', dust)).toBe('<0.1%')
   expect(fNum('feePercent', dust)).toBe('<0.01%')
   expect(fNum('fiat', dust)).toBe('<0.001')
   expect(fNum('integer', dust)).toBe('0')
