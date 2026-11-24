@@ -11,6 +11,9 @@ import {
 import { Controller, Control, FieldPath, FieldValues } from 'react-hook-form'
 import { BalPopover } from '../popover/BalPopover'
 import { InfoIcon } from '../icons/InfoIcon'
+import { cleanAmountInput } from '@repo/lib/shared/utils/numbers'
+
+const isDecimalInputChar = (character: string) => /^[0-9.,]$/.test(character)
 
 interface NumberInputProps<T extends FieldValues = FieldValues> {
   name: FieldPath<T>
@@ -100,8 +103,11 @@ export function NumberInput<T extends FieldValues = FieldValues>({
                     {...field}
                     isDisabled={isDisabled}
                     isInvalid={isInvalid || !!fieldState.error}
+                    isValidCharacter={isDecimalInputChar}
                     keepWithinRange={true}
-                    onChange={field.onChange}
+                    min={0}
+                    onChange={valueAsString => field.onChange(cleanAmountInput(valueAsString))}
+                    parse={cleanAmountInput}
                     value={field.value}
                     w="full"
                   >

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Text, HStack, VStack, RadioGroup, Stack, Radio, Link, Box } from '@chakra-ui/react'
 import { FormSubsection } from '@repo/lib/shared/components/inputs/FormSubsection'
 import { InputWithError } from '@repo/lib/shared/components/inputs/InputWithError'
@@ -5,18 +6,18 @@ import { RATE_PROVIDER_RADIO_OPTIONS, RateProviderOption } from '../../constants
 import { PoolCreationForm } from '../../types'
 import { usePoolCreationForm } from '../../PoolCreationFormProvider'
 import { Address, parseAbi, zeroAddress } from 'viem'
-import { getChainName } from '@repo/lib/config/app.config'
+import { getChainId, getChainName, isDev } from '@repo/lib/config/app.config'
 import { Control, Controller, FieldErrors, useFormState, useWatch } from 'react-hook-form'
 import { BalAlert } from '@repo/lib/shared/components/alerts/BalAlert'
 import { BlockExplorerLink } from '@repo/lib/shared/components/BlockExplorerLink'
 import { ShareYieldFeesCheckbox } from './ShareYieldFeesCheckbox'
 import { InfoIconPopover } from '../../InfoIconPopover'
 import { usePublicClient } from 'wagmi'
-import { getChainId } from '@repo/lib/config/app.config'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { ArrowUpRight } from 'lucide-react'
 import { isMarketRateProvider } from '@repo/lib/modules/tokens/token.helpers'
+import { getDefaultPaysYieldFees } from '../../helpers'
 
 interface ConfigureTokenRateProviderProps {
   tokenIndex: number
@@ -36,10 +37,21 @@ export function ConfigureTokenRateProvider({
 
   const formState = useFormState({ control: poolCreationForm.control })
 
-  // Early return if token doesn't exist or has no address
-  if (!poolTokens?.[tokenIndex] || !poolTokens[tokenIndex].address) return null
+  const token = poolTokens?.[tokenIndex]
+  const defaultPaysYieldFees = token ? getDefaultPaysYieldFees(token) : false
 
-  const { rateProvider: currentRateProvider, paysYieldFees } = poolTokens[tokenIndex]
+  useEffect(() => {
+    if (isDev || !token?.address) return
+
+    if (token.paysYieldFees !== defaultPaysYieldFees) {
+      updatePoolToken(tokenIndex, { paysYieldFees: defaultPaysYieldFees })
+    }
+  }, [defaultPaysYieldFees, token?.address, token?.paysYieldFees, tokenIndex])
+
+  // Early return if token doesn't exist or has no address
+  if (!token || !token.address) return null
+
+  const { rateProvider: currentRateProvider, paysYieldFees } = token
 
   let rateProviderRadioValue = RateProviderOption.Null
 
@@ -73,7 +85,7 @@ export function ConfigureTokenRateProvider({
 
   const isCustomRateProvider = rateProviderRadioValue === RateProviderOption.Custom
   const isVerifiedRateProvider = rateProviderRadioValue === RateProviderOption.Verified
-  const showYieldFeesToggle = isCustomRateProvider || isVerifiedRateProvider
+  const showYieldFeesToggle = isDev && (isCustomRateProvider || isVerifiedRateProvider)
 
   const adjustedRateProviderOptions = RATE_PROVIDER_RADIO_OPTIONS.filter(
     option => option.value !== RateProviderOption.Verified || verifiedRateProviderAddress
@@ -123,7 +135,7 @@ export function ConfigureTokenRateProvider({
       )}
       {showYieldFeesToggle && (
         <ShareYieldFeesCheckbox
-          isMarketRateProvider={isMarketRateProvider(poolTokens[tokenIndex].data)}
+          isMarketRateProvider={isMarketRateProvider(token.data)}
           paysYieldFees={paysYieldFees}
           tokenIndex={tokenIndex}
         />

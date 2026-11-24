@@ -1,7 +1,7 @@
 import { PoolCore } from '@repo/lib/modules/pool/pool.types'
 import { Box, HStack, Text } from '@chakra-ui/react'
 import { PoolVersionTag } from '@repo/lib/modules/pool/PoolList/PoolListTable/PoolVersionTag'
-import { isBoosted, toRehypeLabel } from '@repo/lib/modules/pool/pool.helpers'
+import { isBoosted, isCowAmmPool, toRehypeLabel } from '@repo/lib/modules/pool/pool.helpers'
 import { getPoolTypeLabel } from '@repo/lib/modules/pool/pool.utils'
 import Image from 'next/image'
 import { PoolHookTag } from '@repo/lib/modules/pool/PoolDetail/PoolHookTag'
@@ -16,7 +16,7 @@ function getPoolDisplayTypeLabel(pool: PoolCore, erc4626Metadata: Erc4626Metadat
 
   return (
     <HStack>
-      <Text fontWeight="medium" textAlign="left">
+      <Text fontWeight="medium" textAlign="left" whiteSpace="nowrap">
         {getPoolTypeLabel(pool.type)}
       </Text>
 
@@ -64,9 +64,11 @@ export function PoolListTableDetailsCell({ pool }: Props) {
 
   return (
     <HStack gap="0.25rem">
-      <Box pr="0.1875rem">
-        <PoolVersionTag isSmall pool={pool} />
-      </Box>
+      {isCowAmmPool(pool.type) && (
+        <Box pr="0.1875rem">
+          <PoolVersionTag isSmall pool={pool} />
+        </Box>
+      )}
       {getPoolDisplayTypeLabel(pool, erc4626Metadata)}
       {hasHook && (
         <HStack gap="0.25rem">

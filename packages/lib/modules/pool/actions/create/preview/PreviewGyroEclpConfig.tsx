@@ -1,7 +1,7 @@
 import { Card, VStack, Text, SimpleGrid, Box, HStack, Divider, Button } from '@chakra-ui/react'
 import { usePoolCreationForm } from '../PoolCreationFormProvider'
 import { RefreshCcw } from 'lucide-react'
-import { bn, fNumCustom } from '@repo/lib/shared/utils/numbers'
+import { bn, fNumCustom, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { NUM_FORMAT } from '../constants'
 import ReactECharts from 'echarts-for-react'
 import { useEclpChart } from '@repo/lib/modules/eclp/hooks/EclpChartProvider'
@@ -24,26 +24,26 @@ export function PreviewGyroEclpConfig() {
     {
       color: 'purple.400',
       label: 'Lower bound',
-      value: alpha ? fNumCustom(alpha, NUM_FORMAT) : '-',
+      value: isBnParseable(alpha) ? fNumCustom(alpha, NUM_FORMAT) : '-',
     },
     {
       color: 'teal.400',
       label: 'Peak price',
-      value: peakPrice ? fNumCustom(peakPrice, NUM_FORMAT) : '-',
+      value: isBnParseable(peakPrice) ? fNumCustom(peakPrice, NUM_FORMAT) : '-',
     },
     {
       color: 'green.400',
       label: 'Current price',
       // spot price is 'NaN' / 'Infinity' when either token lacks a USD price
       value:
-        poolSpotPrice && bn(poolSpotPrice).isFinite() && bn(poolSpotPrice).gt(0)
+        isBnParseable(poolSpotPrice) && bn(poolSpotPrice!).isFinite() && bn(poolSpotPrice!).gt(0)
           ? fNumCustom(String(poolSpotPrice), NUM_FORMAT)
           : '-',
     },
     {
       color: 'orange.400',
       label: 'Upper bound',
-      value: beta ? fNumCustom(beta, NUM_FORMAT) : '-',
+      value: isBnParseable(beta) ? fNumCustom(beta, NUM_FORMAT) : '-',
     },
   ]
 
@@ -87,7 +87,7 @@ export function PreviewGyroEclpConfig() {
         <Divider />
 
         <Box h={333} w="full">
-          <ReactECharts option={options} style={{ height: '100%', width: '100%' }} />
+          {options && <ReactECharts option={options} style={{ height: '100%', width: '100%' }} />}
         </Box>
 
         <Divider />

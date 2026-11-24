@@ -796,3 +796,14 @@ export function parseAmount(value: string, decimals: number): bigint {
 
   return parseUnits(trimmed, decimals)
 }
+
+export function cleanAmountInput(newValue: string): string {
+  let cleanValue = newValue.replace(',', '.')
+  cleanValue = cleanValue.replace(/[^\d.]/g, '')
+  let separators = 0 // Keep only the first decimal separator, drop any extras (e.g. pasted '1.2.3')
+  cleanValue = cleanValue.replace(/\./g, () => (separators++ === 0 ? '.' : ''))
+  // A bare leading separator ('.') is not parseable by BigNumber and would crash downstream
+  if (cleanValue.startsWith('.')) cleanValue = '0' + cleanValue
+
+  return cleanValue
+}

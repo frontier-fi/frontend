@@ -56,12 +56,11 @@ export function PoolListTableRow({ pool, keyValue, needsMarginForPoints, ...rest
         }}
         key={keyValue}
         minW="fit-content"
-        px={{ base: '0', sm: 'md' }}
         transition="all 0.2s ease-in-out"
         w="full"
       >
         <Link href={getPoolPath(pool)} prefetch role="group">
-          <Grid {...rest} pr="4" py={{ base: 'ms', md: 'md' }}>
+          <Grid {...rest} py={{ base: 'ms', md: 'md' }}>
             <GridItem>
               <NetworkIcon chain={pool.chain} size={6} />
             </GridItem>
@@ -77,7 +76,7 @@ export function PoolListTableRow({ pool, keyValue, needsMarginForPoints, ...rest
                 poolDisplayType={poolDisplayType}
               />
             </GridItem>
-            <GridItem minW="32">
+            <GridItem justifySelf="start">
               <PoolListTableDetailsCell pool={pool} />
             </GridItem>
             {userAddress ? (

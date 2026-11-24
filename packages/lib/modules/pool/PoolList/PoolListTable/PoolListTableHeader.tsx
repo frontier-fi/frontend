@@ -31,7 +31,7 @@ export function PoolListTableHeader({ ...rest }) {
   }
 
   return (
-    <Grid {...rest} p={['sm', 'md']} w="full">
+    <Grid {...rest} py={['sm', 'md']} w="full">
       <GridItem>
         <VStack align="start" w="full">
           <Icon as={Globe} boxSize="5" color="font.primary" />
@@ -54,7 +54,7 @@ export function PoolListTableHeader({ ...rest }) {
           justifySelf="end"
           key={orderByItem}
           position="relative"
-          pr={index === orderBy.length - 1 ? { base: 'md', sm: 'lg', lg: 'sm', xl: '0' } : '0'}
+          pr={index === orderBy.length - 1 ? { base: 'md', lg: 'sm', xl: '0' } : '0'}
           right="-6px"
         >
           <SortableHeader
