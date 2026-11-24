@@ -1,7 +1,7 @@
 {
   "short_name": "Frontier Finance",
   "name": "Frontier Finance",
-  "description": "Frontier Finance provides unique solutions to many liquidity provision needs",
+  "description": "Advanced liquidity primitives beyond standard AMMs: custom weights, multi-asset pools, elliptic CLPs, and rehyped yield.",
   "icons": [
     {
       "src": "/images/icons/0xff.png",
