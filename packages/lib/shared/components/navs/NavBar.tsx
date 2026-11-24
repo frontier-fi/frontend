@@ -1,7 +1,9 @@
 'use client'
 
-import { Box, BoxProps, Button, HStack, Link } from '@chakra-ui/react'
+import { Alert, Box, BoxProps, Button, CloseButton, HStack, Link } from '@chakra-ui/react'
 import { isDev, shouldUseAnvilFork } from '@repo/lib/config/app.config'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { LS_KEYS } from '@repo/lib/modules/local-storage/local-storage.constants'
 import { UserSettings } from '@repo/lib/modules/user/settings/UserSettings'
 import { ConnectWallet } from '@repo/lib/modules/web3/ConnectWallet'
 import { useUserAccount } from '@repo/lib/modules/web3/UserAccountProvider'
@@ -17,6 +19,9 @@ import { ArrowUpRight } from 'lucide-react'
 import { DevToolsDrawerButton } from '@repo/lib/modules/dev-tools/DevToolsDrawer'
 import { ApiOutageAlert } from '../alerts/ApiOutageAlert'
 import { useApiHealth } from '../../hooks/useApiHealth'
+import { useIsMounted } from '../../hooks/useIsMounted'
+import { useLocalStorage } from 'usehooks-ts'
+import useMeasure from 'react-use-measure'
 
 type Props = {
   mobileNav?: ReactNode
@@ -28,6 +33,8 @@ type Props = {
   customLinks?: ReactNode
   allowCreateWallet?: boolean
 }
+
+const minAnnouncementHeight = 48
 
 function useBoundedScroll(threshold: number) {
   const { scrollY } = useScroll()
@@ -191,6 +198,21 @@ export function NavBar({
 }: Props & BoxProps) {
   const { apiOK } = useApiHealth()
   const [showShadow, setShowShadow] = useState(false)
+  const { announcement } = PROJECT_CONFIG
+  const isMounted = useIsMounted()
+
+  const [dismissedAnnouncement, setDismissedAnnouncement] = useLocalStorage<string | null>(
+    LS_KEYS.UserSettings.DismissedAnnouncement,
+    null
+  )
+
+  const showAnnouncement = isMounted && announcement && dismissedAnnouncement !== announcement
+  const [announcementRef, { height: announcementHeight }] = useMeasure()
+
+  const navbarHeight =
+    72 +
+    (showAnnouncement ? Math.max(announcementHeight, minAnnouncementHeight) : 0) +
+    (apiOK ? 0 : 48)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -212,16 +234,11 @@ export function NavBar({
 
   const blurEffect = useTransform(scrollYBoundedProgressDelayed, [0, 1], [10, 0])
   const backdropFilter = useMotionTemplate`blur(${blurEffect}px)`
-  const top = useTransform(scrollYBoundedProgressDelayed, [0, 1], [0, -72])
+  const top = useTransform(scrollYBoundedProgressDelayed, [0, 1], [0, -navbarHeight])
   const opacity = useTransform(scrollYBoundedProgressDelayed, [0, 1], [1, 0])
 
-  // Determine navbar height based on alerts — each alert adds 48px to the 72px nav row
-  const alertCount = [!apiOK].filter(Boolean).length
-  const navbarHeight = alertCount === 0 ? '72px' : `${72 + alertCount * 48}px`
-
-  // Set CSS variable on document root
   useEffect(() => {
-    document.documentElement.style.setProperty('--navbar-height', navbarHeight)
+    document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`)
   }, [navbarHeight])
 
   return (
@@ -253,6 +270,37 @@ export function NavBar({
       zIndex={100}
       {...rest}
     >
+      <Box ref={announcementRef}>
+        {showAnnouncement && (
+          <Alert
+            color="font.dark"
+            fontSize={{ base: 'sm', md: 'lg' }}
+            fontWeight="bold"
+            justifyContent="center"
+            lineHeight="short"
+            minH={`${minAnnouncementHeight}px`}
+            onClick={event => event.stopPropagation()}
+            px="40px"
+            py="1"
+            role="note"
+            rounded="none"
+            status="warning"
+            textAlign="center"
+          >
+            {announcement}
+            <CloseButton
+              aria-label="Dismiss announcement"
+              color="font.dark"
+              h="full"
+              onClick={() => setDismissedAnnouncement(announcement)}
+              position="absolute"
+              right="0"
+              type="button"
+              w="40px"
+            />
+          </Alert>
+        )}
+      </Box>
       {!apiOK && <ApiOutageAlert />}
 
       <HStack as="nav" justify="space-between" padding={{ base: 'sm', md: 'md' }}>

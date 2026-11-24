@@ -171,26 +171,28 @@ const tokenColors: Partial<Record<AppChain, Record<Address, TokenColorDef>>> = {
   },
 }
 
+// High-contrast categorical palette. First 8 avoid USDC/ETH-like blues so
+// unknown tokens stay distinct next to common mapped stables in 8-token pools.
 const DEFAULT_TOKEN_COLORS: TokenColorDef[] = [
-  { from: '#1E4CF1', to: '#00FFAA' },
-  { from: '#B2C4DB', to: '#FDFDFD' },
-  { from: '#EF4A2B', to: '#F48975' },
-  { from: '#FFD600', to: '#F48975' },
-  { from: '#9C68AA', to: '#C03BE4' },
-  { from: '#FFBD91', to: '#FF957B' },
-  { from: '#30CEF0', to: '#02A2FE' },
-  { from: '#FFDD00', to: '#FFF5B2' },
-  { from: '#FF07A4', to: '#FF9EDB' },
-  { from: '#039241', to: '#96FDC3' },
-  { from: '#001B7D', to: '#1448FF' },
-  { from: '#871500', to: '#F02600' },
-  { from: '#EA6200', to: '#FFB885' },
-  { from: '#AAAAAA', to: '#666666' },
-  { from: '#D4FF00', to: '#EEFF99' },
-  { from: '#510A94', to: '#8614F0' },
+  { from: '#E53935', to: '#FF7043' }, // red → coral
+  { from: '#FB8C00', to: '#FFB74D' }, // orange
+  { from: '#F9A825', to: '#FFE082' }, // amber
+  { from: '#7CB342', to: '#C5E1A5' }, // lime
+  { from: '#00897B', to: '#4DB6AC' }, // teal
+  { from: '#8E24AA', to: '#CE93D8' }, // purple
+  { from: '#D81B60', to: '#F48FB1' }, // magenta
+  { from: '#6D4C41', to: '#A1887F' }, // brown
+  { from: '#00ACC1', to: '#80DEEA' }, // cyan
+  { from: '#5E35B1', to: '#B39DDB' }, // violet
+  { from: '#C0CA33', to: '#E6EE9C' }, // chartreuse
+  { from: '#EF6C00', to: '#FFCC80' }, // deep orange
+  { from: '#43A047', to: '#A5D6A7' }, // green
+  { from: '#546E7A', to: '#B0BEC5' }, // blue-gray
+  { from: '#3949AB', to: '#9FA8DA' }, // indigo
+  { from: '#AD1457', to: '#F48FB1' }, // rose
 ]
 
-const defaultColor: TokenColorDef = { from: '#30CEF0', to: '#02A2FE' }
+const defaultColor: TokenColorDef = { from: '#00897B', to: '#4DB6AC' }
 
 export function getTokenColor(
   chain: AppChain | number,

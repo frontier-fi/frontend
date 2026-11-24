@@ -187,6 +187,7 @@ export interface ProjectConfig {
   projectName: string
   /** Subtitle displayed beneath the Pools page heading. */
   poolsTagline?: string
+  announcement?: string
   /** Registered legal entity users contract with (Terms of Use, Privacy Policy). */
   legalEntityName: string
   projectLogo: string
