@@ -13,7 +13,7 @@ export const ProjectConfigFrontier: ProjectConfig = {
   projectId: 'frontier',
   projectName: 'Frontier Finance',
   poolsTagline:
-    'The official fork of the Balancer V3 protocol. New smart contract addresses, same bytecode',
+    'The official fork of the Balancer V3 protocol. New smart contract addresses, same audited bytecode',
   legalEntityName: 'Frontier Finance',
   projectUrl: 'https://frontier.fi',
   appUrl: 'https://app.frontier.fi',
