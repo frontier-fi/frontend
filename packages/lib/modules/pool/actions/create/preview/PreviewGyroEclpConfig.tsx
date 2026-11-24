@@ -18,21 +18,21 @@ export function PreviewGyroEclpConfig() {
 
   const poolTokens = useWatch({ control: poolCreationForm.control, name: 'poolTokens' })
 
-  const { options, poolSpotPrice } = useEclpChart()
+  const { options, poolSpotPrice, markerColors } = useEclpChart()
 
   const priceDisplayCards = [
     {
-      color: 'purple.400',
+      color: markerColors.lowerBound,
       label: 'Lower bound',
       value: isBnParseable(alpha) ? fNumCustom(alpha, NUM_FORMAT) : '-',
     },
     {
-      color: 'teal.400',
+      color: markerColors.peakPrice,
       label: 'Peak price',
       value: isBnParseable(peakPrice) ? fNumCustom(peakPrice, NUM_FORMAT) : '-',
     },
     {
-      color: 'green.400',
+      color: markerColors.currentPrice,
       label: 'Current price',
       // spot price is 'NaN' / 'Infinity' when either token lacks a USD price
       value:
@@ -41,7 +41,7 @@ export function PreviewGyroEclpConfig() {
           : '-',
     },
     {
-      color: 'orange.400',
+      color: markerColors.upperBound,
       label: 'Upper bound',
       value: isBnParseable(beta) ? fNumCustom(beta, NUM_FORMAT) : '-',
     },
@@ -87,7 +87,9 @@ export function PreviewGyroEclpConfig() {
         <Divider />
 
         <Box h={333} w="full">
-          {options && <ReactECharts option={options} style={{ height: '100%', width: '100%' }} />}
+          {options && (
+            <ReactECharts notMerge option={options} style={{ height: '100%', width: '100%' }} />
+          )}
         </Box>
 
         <Divider />

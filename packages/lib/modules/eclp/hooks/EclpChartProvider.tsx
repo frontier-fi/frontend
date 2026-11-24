@@ -577,6 +577,13 @@ export function useEclpChartLogic(
   const inRangeText =
     'The current price is between the liquidity upper and lower bounds for this Concentrated Liquidity Pool (CLP). In range pools earn high swap fees.'
 
+  const markerColors = {
+    lowerBound: chartColors.lowerBound,
+    peakPrice: peakLineColor,
+    currentPrice: backgroundHighlightColor,
+    upperBound: chartColors.upperBound,
+  }
+
   return {
     options,
     hasChartData: data?.length,
@@ -588,6 +595,7 @@ export function useEclpChartLogic(
     outOfRangeText,
     inRangeText,
     tokens,
+    markerColors,
   }
 }
 

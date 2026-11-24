@@ -8,7 +8,9 @@ export function EclpChart() {
 
   return (
     <Box h="full" position="relative" w="full">
-      <ReactECharts option={options} style={{ height: '100%', width: '100%' }} />
+      {options && (
+        <ReactECharts notMerge option={options} style={{ height: '100%', width: '100%' }} />
+      )}
     </Box>
   )
 }

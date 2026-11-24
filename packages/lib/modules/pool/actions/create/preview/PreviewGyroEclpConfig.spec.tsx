@@ -12,8 +12,14 @@ import { usePreviewEclpLiquidityProfile } from './usePreviewEclpLiquidityProfile
 
 const mockSpotPrice = vi.hoisted(() => ({ numerator: '0', denominator: '0' }))
 
+const mockChartRender = vi.hoisted(() => vi.fn())
+
 vi.mock('echarts-for-react', () => ({
-  default: () => <div data-testid="eclp-echarts" />,
+  default: (props: Record<string, unknown>) => {
+    mockChartRender(props)
+
+    return <div data-testid="eclp-echarts" />
+  },
 }))
 
 vi.mock('../steps/details/usePoolSpotPriceWithoutRate', () => ({
@@ -61,7 +67,7 @@ const testTheme = extendTheme({
         highlight: { default: '#0f0', _dark: '#0f0' },
       },
       background: {
-        highlight: { default: '#0f0', _dark: '#0f0' },
+        highlight: { default: 'rgb(0, 180, 90)', _dark: 'rgb(0, 180, 90)' },
       },
     },
   },
@@ -122,5 +128,39 @@ describe('PreviewGyroEclpConfig', () => {
 
     rerender(<PreviewHarness />)
     expect(screen.queryByTestId('eclp-echarts')).not.toBeInTheDocument()
+  })
+
+  test('passes notMerge to ReactECharts and uses chart markerColors for summary card dots', () => {
+    mockChartRender.mockClear()
+    mockSpotPrice.numerator = '1'
+    mockSpotPrice.denominator = '1'
+
+    currentEclpValues = {
+      alpha: '0.99',
+      beta: '1.0001',
+      peakPrice: '0.9995',
+      lambda: '100',
+    }
+
+    render(<PreviewHarness />)
+
+    expect(screen.getByTestId('eclp-echarts')).toBeInTheDocument()
+    expect(mockChartRender).toHaveBeenLastCalledWith(expect.objectContaining({ notMerge: true }))
+
+    expect(screen.getByText('Lower bound').previousElementSibling).toHaveStyle({
+      backgroundColor: 'rgb(70, 95, 170)',
+    })
+
+    expect(screen.getByText('Peak price').previousElementSibling).toHaveStyle({
+      backgroundColor: 'rgb(14, 165, 160)',
+    })
+
+    expect(screen.getByText('Current price').previousElementSibling).toHaveStyle({
+      backgroundColor: 'rgb(0, 180, 90)',
+    })
+
+    expect(screen.getByText('Upper bound').previousElementSibling).toHaveStyle({
+      backgroundColor: 'rgb(35, 155, 85)',
+    })
   })
 })
