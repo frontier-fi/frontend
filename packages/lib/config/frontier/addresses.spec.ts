@@ -78,6 +78,16 @@ describe('Frontier SDK contract addresses', () => {
       expect(AddressProvider.StablePoolFactory(chainId)).toBeDefined()
       expect(AddressProvider.WeightedPoolFactory(chainId)).toBeDefined()
       expect(AddressProvider.GyroECLPPoolFactory(chainId)).toBeDefined()
+
+      expect(network.contracts.balancer.vaultV2).toBe(zeroAddress)
+      expect(network.contracts.balancer.relayerV6).toBe(zeroAddress)
+      expect(network.contracts.balancer.minter).toBe(zeroAddress)
+      expect(network.contracts.balancer.WeightedPool2TokensFactory).toBeUndefined()
+      expect(network.contracts.feeDistributor).toBeUndefined()
+      expect(network.contracts.veDelegationProxy).toBeUndefined()
+      expect(network.contracts.veBAL).toBeUndefined()
+      expect(network.contracts.omniVotingEscrow).toBeUndefined()
+      expect(network.contracts.gaugeController).toBeUndefined()
     }
   )
 })

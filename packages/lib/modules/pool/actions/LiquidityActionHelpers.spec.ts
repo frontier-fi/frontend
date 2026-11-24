@@ -801,6 +801,7 @@ describe('supportsProportionalAddLiquidityKind', () => {
 
   it('should not allow proportional add for v2 weighted 2 tokens', () => {
     const pool = getApiPoolMock(balWeth8020)
+    pool.chain = GqlChainValues.Polygon
     pool.type = GqlPoolTypeValues.Weighted
 
     pool.factory =

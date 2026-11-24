@@ -2,6 +2,7 @@ import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { NetworkConfig } from '../config.types'
 import { convertHexToLowerCase } from '@repo/lib/shared/utils/objects'
 import { AddressProvider, ChainId, PERMIT2 } from '@frontier-fi/sdk'
+import { zeroAddress } from 'viem'
 import { sepolia } from 'viem/chains'
 
 const chainId = ChainId.SEPOLIA
@@ -39,13 +40,13 @@ const networkConfig: NetworkConfig = {
     multicall2: '0xca11bde05977b3631167028862be2a173976ca11',
     balancer: {
       // Same pattern as other networks: SDK AddressProvider (Frontier Sepolia on frontier-fi/sdk).
-      vaultV2: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+      vaultV2: zeroAddress,
       vaultV3: AddressProvider.Vault(chainId),
       router: AddressProvider.Router(chainId),
       batchRouter: AddressProvider.BatchRouter(chainId),
       compositeLiquidityRouterBoosted: AddressProvider.CompositeLiquidityRouter(chainId),
-      relayerV6: '0x7852fB9d0895e6e8b3EedA553c03F6e2F9124dF9',
-      minter: '0x1783Cd84b3d01854A96B4eD5843753C2CcbD574A',
+      relayerV6: zeroAddress,
+      minter: zeroAddress,
       vaultAdminV3: AddressProvider.VaultAdmin(chainId),
       bCoWFactory: undefined,
     },

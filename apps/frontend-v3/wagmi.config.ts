@@ -1,6 +1,5 @@
 import { defineConfig, loadEnv } from '@wagmi/cli'
 import { etherscan } from '@wagmi/cli/plugins'
-import mainnetNetworkConfig from '@repo/lib/config/networks/mainnet'
 
 import { erc20Abi } from 'viem'
 
@@ -27,7 +26,7 @@ export default defineConfig(() => {
         contracts: [
           {
             name: 'BalancerV2Vault',
-            address: mainnetNetworkConfig.contracts.balancer.vaultV2,
+            address: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
           },
           // Uncomment and replace manual abi when vault is deployed in mainnet
           // {
@@ -62,15 +61,15 @@ export default defineConfig(() => {
           },
           {
             name: 'veBal',
-            address: mainnetNetworkConfig.contracts.veBAL,
+            address: '0xC128a9954e6c874eA3d62ce62B468bA073093F25',
           },
           {
             name: 'feeDistributor',
-            address: mainnetNetworkConfig.contracts.feeDistributor,
+            address: '0xD3cf852898b21fc233251427c2DC93d3d604F3BB',
           },
           {
             name: 'veDelegationProxy',
-            address: mainnetNetworkConfig.contracts.veDelegationProxy,
+            address: '0x6f5a2eE11E7a772AeB5114A20d0D7c0ff61EB8A0',
           },
           // Uncomment when Frontier VaultAdmin is deployed on Ethereum Mainnet
           // {

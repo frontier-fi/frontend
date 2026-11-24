@@ -36,7 +36,6 @@ export const ProjectConfigFrontier: ProjectConfig = {
       },
     },
   },
-  corePoolId: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014', // veBAL BAL8020 (Balancer 80 BAL 20 WETH) pool on Ethereum
   defaultNetwork: GqlChainValues.Mainnet,
   ensNetwork: GqlChainValues.Mainnet,
   delegateOwner: '0xba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1b',

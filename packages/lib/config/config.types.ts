@@ -195,7 +195,7 @@ export interface ProjectConfig {
   poolSymbolPrefix: string
   acceptedPoliciesVersion: number | undefined
   supportedNetworks: GqlChain[]
-  corePoolId: string // this prop is used to adjust the color of the SparklesIcon
+  corePoolId?: string // this prop is used to adjust the color of the SparklesIcon
   variantConfig?: VariantConfig
   defaultNetwork: GqlChain
   ensNetwork: GqlChain

@@ -2,7 +2,7 @@ import { testHook } from '@repo/lib/test/utils/custom-renderers'
 import { useBuildUnstakeCallData } from './useBuildUnstakeCallData'
 import { GaugeService } from '@repo/lib/shared/services/staking/gauge.service'
 import { BatchRelayerService } from '@repo/lib/shared/services/batch-relayer/batch-relayer.service'
-import mainnetNetworkConfig from '@repo/lib/config/networks/mainnet'
+import gnosisNetworkConfig from '@repo/lib/config/networks/gnosis'
 import { defaultTestUserAccount } from '@repo/test/anvil/anvil-setup'
 import { Address } from 'viem'
 import { defaultTestGaugeAddress } from '@repo/lib/test/msw/builders/gqlStaking.builders'
@@ -10,7 +10,7 @@ import { act } from '@testing-library/react'
 
 function testBuildUnstakeCallData(amount: bigint, userAddress: Address = defaultTestUserAccount) {
   const batchRelayerService = BatchRelayerService.create(
-    mainnetNetworkConfig.contracts.balancer.relayerV6
+    gnosisNetworkConfig.contracts.balancer.relayerV6
   )
 
   const gaugeService = new GaugeService(batchRelayerService)
