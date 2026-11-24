@@ -19,6 +19,12 @@ describe('Frontier SDK contract addresses', () => {
       '0x4200000000000000000000000000000000000006' as const,
       '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as const,
     ],
+    [
+      'Monad',
+      ChainId.MONAD,
+      '0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A' as const,
+      '0x754704Bc059F8C67012fEd69BC8A327a5aafb603' as const,
+    ],
   ])(
     'builds %s weighted pool creation using the native SDK Frontier factory',
     (_label, chainId, tokenA, tokenB) => {
@@ -52,6 +58,7 @@ describe('Frontier SDK contract addresses', () => {
   it.each([
     ['Mainnet', ChainId.MAINNET, GqlChainValues.Mainnet],
     ['Base', ChainId.BASE, GqlChainValues.Base],
+    ['Monad', ChainId.MONAD, GqlChainValues.Monad],
     ['Sepolia', ChainId.SEPOLIA, GqlChainValues.Sepolia],
   ])(
     'wires %s network config to native SDK Frontier V3 deployments',
