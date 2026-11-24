@@ -18,6 +18,8 @@ export function PoolAttributes() {
         <Divider />
         <VStack width="full">
           {formattedAttributes.map(attribute => {
+            const items = attribute.items
+
             return (
               <Stack
                 direction={{ base: 'column', md: 'row' }}
@@ -25,10 +27,41 @@ export function PoolAttributes() {
                 spacing={{ base: 'xxs', md: 'xl' }}
                 width="full"
               >
-                <Box minWidth="160px">
+                <Box flexShrink={0} minWidth="160px">
                   <Text variant={{ base: 'primary', md: 'secondary' }}>{attribute.title}:</Text>
                 </Box>
-                {attribute.link ? (
+                {items && items.length > 0 ? (
+                  <HStack flexWrap="wrap" gap="0" mb={{ base: 'sm', md: '0' }} rowGap="xxs">
+                    {items.map((item, index) => (
+                      <HStack gap="0" key={`${item.label}-${item.link ?? index}`}>
+                        {item.link ? (
+                          <Link
+                            alignItems="center"
+                            display="inline-flex"
+                            gap="xxs"
+                            href={item.link}
+                            isExternal
+                            variant="link"
+                          >
+                            <Text as="span" color="link">
+                              {item.label}
+                            </Text>
+                            <ArrowUpRight size={12} />
+                          </Link>
+                        ) : (
+                          <Text as="span" variant="secondary">
+                            {item.label}
+                          </Text>
+                        )}
+                        {index < items.length - 1 && (
+                          <Text as="span" mr="xs" variant="secondary">
+                            ,
+                          </Text>
+                        )}
+                      </HStack>
+                    ))}
+                  </HStack>
+                ) : attribute.link ? (
                   <Link href={attribute.link} isExternal variant="link">
                     <HStack gap="xxs">
                       <Text color="link">{attribute.value}</Text>
