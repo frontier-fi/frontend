@@ -64,7 +64,7 @@ export function useSwapStep({
 
   useEffect(() => {
     // simulationQuery is refetched every 30 seconds by SwapTimeout
-    if (simulationQuery.data && isConnected) {
+    if (simulationQuery.data && isConnected && isBuildQueryEnabled) {
       buildSwapQuery.refetch()
     }
   }, [simulationQuery.data])

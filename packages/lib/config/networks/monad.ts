@@ -1,3 +1,4 @@
+import { AddressProvider, ChainId, PERMIT2 } from '@frontier-fi/sdk'
 import { GqlChainValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { convertHexToLowerCase } from '@repo/lib/shared/utils/objects'
 import { CSP_ISSUE_POOL_IDS } from '@repo/lib/shared/data/csp-issue'
@@ -6,6 +7,7 @@ import { zeroAddress } from 'viem'
 import { monad } from 'viem/chains'
 import type { NetworkConfig } from '../config.types'
 
+const chainId = ChainId.MONAD
 const nativeAssetAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' as const
 const wMonAddress = '0x3bd359c1119da7da1d913d1c4d2b7c461115433a' as const
 
@@ -36,8 +38,9 @@ const networkConfig: NetworkConfig = {
     popularTokens: {
       [nativeAssetAddress]: monad.nativeCurrency.symbol,
       [wMonAddress]: `W${monad.nativeCurrency.symbol}`,
+      '0x00000000efe302beaa2b3e6e1b18d08d69a9012a': 'AUSD',
       '0xe7cd86e13ac4309349f30b3435a9d337750fc82d': 'USDT0',
-      '0x74b7f16337b8972027f6196a17a631ac6de26d22': 'USDC',
+      '0x754704bc059f8c67012fed69bc8a327a5aafb603': 'USDC',
       '0xee8c0e9f1bffb4eb878d8f15f368a02a35481242': 'WETH',
       '0x10aeaf63194db8d453d4d85a06e5efe1dd0b5417': 'WSTETH',
       '0x0555e30da8f98308edb960aa94c0db47230d2b9c': 'WBTC',
@@ -48,13 +51,31 @@ const networkConfig: NetworkConfig = {
     multicall3: '0xcA11bde05977b3631167028862bE2a173976CA11',
     balancer: {
       vaultV2: zeroAddress,
+      vaultV3: AddressProvider.Vault(chainId),
       relayerV6: zeroAddress,
       minter: zeroAddress,
+      vaultAdminV3: AddressProvider.VaultAdmin(chainId),
+      router: AddressProvider.Router(chainId),
+      batchRouter: AddressProvider.BatchRouter(chainId),
+      compositeLiquidityRouterBoosted: AddressProvider.CompositeLiquidityRouter(chainId),
+      bCoWFactory: undefined,
+    },
+    permit2: PERMIT2[chainId],
+    merkl: {
+      claims: '0x3Ef3D8bA38EBe18DB133cEc108f4D14CE00Dd9Ae',
     },
   },
   pools: convertHexToLowerCase({
     issues: { [PoolIssue.CspPoolVulnWarning]: CSP_ISSUE_POOL_IDS[GqlChainValues.Monad] },
+    supportsNestedActions: false,
   }),
+  lbps: {
+    collateralTokens: [
+      '0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A', // WMON
+      '0x754704Bc059F8C67012fEd69BC8A327a5aafb603', // USDC
+      '0xe7cd86e13AC4309349F30B3435a9d337750fC82D', // USDT0
+    ],
+  },
   supportsVeBalSync: false,
 }
 
