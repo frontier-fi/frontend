@@ -8,7 +8,13 @@ import {
   TransactionLabels,
 } from '@repo/lib/modules/transactions/transaction-steps/lib'
 import { Abi, Address, ContractFunctionArgs, ContractFunctionName } from 'viem'
-import { useSimulateContract, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
+import {
+  usePublicClient,
+  useSimulateContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from 'wagmi'
+import { useUserAccount } from '../UserAccountProvider'
 import { useChainSwitch } from '../useChainSwitch'
 import { AbiMap } from './AbiMap'
 import { TransactionExecution, TransactionSimulation, WriteAbiMutability } from './contract.types'
@@ -28,6 +34,43 @@ const allowSkipTransaction = false
 
 type IAbiMap = typeof AbiMap
 type AbiMapKey = keyof typeof AbiMap
+
+export async function estimateBufferedContractGas({
+  publicClient,
+  chainId,
+  connectorId,
+  userAddress,
+  request,
+}: {
+  publicClient: ReturnType<typeof usePublicClient>
+  chainId: SupportedChainId
+  connectorId?: string
+  userAddress?: Address
+  request: {
+    abi: Abi
+    address: Address
+    functionName: string
+    args?: any
+    value?: bigint
+  }
+}): Promise<bigint | undefined> {
+  // MetaMask on Monad rejects the app-estimated gas limit, so let the wallet estimate it
+  const isMetaMaskOnMonad = chainId === 143 && connectorId === 'metaMask'
+
+  if (!publicClient || !userAddress || isMetaMaskOnMonad) return undefined
+
+  try {
+    const estimatedGas = await publicClient.estimateContractGas({
+      ...request,
+      account: userAddress,
+    })
+
+    return (estimatedGas * 120n) / 100n
+  } catch {
+    // Fall back to wallet gas estimation if RPC estimateContractGas fails
+    return undefined
+  }
+}
 
 export interface ManagedTransactionInput {
   contractAddress: string
@@ -54,6 +97,8 @@ export function useManagedTransaction({
 }: ManagedTransactionInput) {
   const { minConfirmations } = useNetworkConfig()
   const { shouldChangeNetwork } = useChainSwitch(chainId)
+  const { userAddress, connector } = useUserAccount()
+  const publicClient = usePublicClient({ chainId })
 
   const txConfig = {
     abi: AbiMap[contractId] as Abi,
@@ -129,8 +174,20 @@ export function useManagedTransaction({
       if (txHash) return
     }
 
+    const gas = await estimateBufferedContractGas({
+      publicClient,
+      chainId,
+      connectorId: connector?.id,
+      userAddress,
+      request: {
+        ...txConfig,
+        value,
+      },
+    })
+
     return await writeQuery.writeContractAsync({
       ...simulateQuery.data.request,
+      ...(gas ? { gas } : {}),
       chainId: chainId,
     })
   }

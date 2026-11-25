@@ -29,6 +29,10 @@ describe('useEip5792AtomicCapability', () => {
 
   async function setupMocks(opts: {
     atomicStatus?: 'supported' | 'ready' | 'unsupported'
+    capabilitiesData?: Record<
+      number,
+      { atomic?: { status: 'supported' | 'ready' | 'unsupported' } }
+    >
     userAddress?: string
     chainId?: number
   }) {
@@ -36,23 +40,42 @@ describe('useEip5792AtomicCapability', () => {
 
     const { useUserAccount } = await import('@repo/lib/modules/web3/UserAccountProvider')
 
+    const resolvedChainId = opts.chainId ?? 1
+
     ;(useUserAccount as ReturnType<typeof vi.fn>).mockReturnValue({
       userAddress: opts.userAddress ?? '0x1234567890123456789012345678901234567890',
-      chainId: opts.chainId ?? 1,
+      chainId: resolvedChainId,
     })
 
+    const data =
+      opts.capabilitiesData !== undefined
+        ? opts.capabilitiesData
+        : opts.atomicStatus
+          ? { [resolvedChainId]: { atomic: { status: opts.atomicStatus } } }
+          : undefined
+
     ;(useCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: opts.atomicStatus ? { atomic: { status: opts.atomicStatus } } : undefined,
+      data,
       isLoading: false,
     })
+
+    return { useCapabilities }
   }
 
   it('returns "supported" when the wallet reports atomic supported', async () => {
-    await setupMocks({ atomicStatus: 'supported' })
+    const { useCapabilities } = await setupMocks({ atomicStatus: 'supported' })
 
     const { result } = testHook(() => useEip5792AtomicCapability())
 
     await waitFor(() => expect(result.current.atomicStatus).toBe('supported'))
+
+    expect(useCapabilities).not.toHaveBeenCalledWith(
+      expect.objectContaining({ chainId: expect.anything() })
+    )
+
+    expect((useCapabilities as ReturnType<typeof vi.fn>).mock.calls[0]?.[0]).not.toHaveProperty(
+      'chainId'
+    )
   })
 
   it('returns "ready" when the wallet reports atomic ready', async () => {
@@ -77,5 +100,19 @@ describe('useEip5792AtomicCapability', () => {
     const { result } = testHook(() => useEip5792AtomicCapability())
 
     await waitFor(() => expect(result.current.atomicStatus).toBeUndefined())
+  })
+
+  it('returns undefined when capabilities map is empty or lacks the active chain', async () => {
+    await setupMocks({ capabilitiesData: {}, chainId: 1 })
+    const emptyHook = testHook(() => useEip5792AtomicCapability())
+    await waitFor(() => expect(emptyHook.result.current.atomicStatus).toBeUndefined())
+
+    await setupMocks({
+      capabilitiesData: { 8453: { atomic: { status: 'supported' } } },
+      chainId: 1,
+    })
+
+    const otherChainHook = testHook(() => useEip5792AtomicCapability())
+    await waitFor(() => expect(otherChainHook.result.current.atomicStatus).toBeUndefined())
   })
 })
