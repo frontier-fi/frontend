@@ -34,6 +34,8 @@ export type Params = {
   lpToken?: string
   enabled?: boolean
   wethIsEth?: boolean
+  // When false, the approval is for exactly the required amount instead of an unlimited allowance
+  approveMaxBigInt?: boolean
 }
 
 /*
@@ -49,6 +51,7 @@ export function useTokenApprovalSteps({
   enabled = true,
   lpToken,
   wethIsEth,
+  approveMaxBigInt = true,
 }: Params): { isLoading: boolean; steps: TransactionStep[] } {
   const { userAddress } = useUserAccount()
   const { getTransaction, setTransactionFn } = useStepsTransactionState()
@@ -99,6 +102,7 @@ export function useTokenApprovalSteps({
     rawAmounts: _approvalAmounts,
     allowanceFor: tokenAllowances.allowanceFor,
     isPermit2,
+    approveMaxBigInt,
     skipAllowanceCheck: isUnwrappingNative,
   })
 
