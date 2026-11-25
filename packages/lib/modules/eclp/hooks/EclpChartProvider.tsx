@@ -65,12 +65,17 @@ export function useEclpChartLogic(
     data,
     poolSpotPrice,
     poolPeakPrice,
+    poolLowerBound,
+    poolUpperBound,
     poolIsInRange,
     xMin,
     xMax,
     yMax,
     isReversed,
     toggleIsReversed,
+    hasRateAdjustment,
+    isNormalized,
+    setIsNormalized,
     isLoading,
     poolTokens,
   } = eclpLiquidityProfile
@@ -82,7 +87,7 @@ export function useEclpChartLogic(
   const peakLineColor = colorMode === 'light' ? 'rgb(14, 165, 160)' : 'rgb(45, 212, 191)'
 
   const tokens = useMemo(() => {
-    return isReversed ? poolTokens.reverse().join(' / ') : poolTokens.join(' / ')
+    return isReversed ? [...poolTokens].reverse().join(' / ') : poolTokens.join(' / ')
   }, [poolTokens, isReversed])
 
   const secondaryFontColor = selectColor('font', colorMode === 'light' ? 'primary' : 'secondary')
@@ -506,7 +511,6 @@ export function useEclpChartLogic(
           data,
           smooth: false,
           symbol: 'none',
-          sampling: 'lttb',
           silent: true,
           lineStyle: {
             width: colorMode === 'light' ? 2.5 : 2,
@@ -590,7 +594,12 @@ export function useEclpChartLogic(
     poolIsInRange,
     poolSpotPrice,
     poolPeakPrice,
+    poolLowerBound,
+    poolUpperBound,
     toggleIsReversed,
+    hasRateAdjustment,
+    isNormalized,
+    setIsNormalized,
     isLoading,
     outOfRangeText,
     inRangeText,
