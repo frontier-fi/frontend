@@ -7,6 +7,8 @@ import { BalAlert } from '@repo/lib/shared/components/alerts/BalAlert'
 import { isComposableStablePool } from '../pool.utils'
 import { usePoolMigrations } from '../migrations/PoolMigrationsProvider'
 import { getChainId, getChainName } from '@repo/lib/config/app.config'
+import { isSameAddress } from '@repo/lib/shared/utils/addresses'
+import { useUserAccount } from '../../web3/UserAccountProvider'
 import { MigrationAlert } from '../migrations/MigrationAlert'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
 import { isChainDeprecated } from '../../chains/chain.utils'
@@ -17,15 +19,26 @@ import { isEmpty } from '@repo/lib/shared/utils/array'
 export function PoolAlerts() {
   const { pool } = usePool()
   const { poolAlerts, dismissAlert } = usePoolAlerts(pool)
-  const { needsMigration } = usePoolMigrations()
+  const { migratablePositions } = usePoolMigrations()
+  const { isConnected } = useUserAccount()
   const { surging } = useStableSurgeMetrics(pool)
 
   const affectedByV2Exploit = pool.protocolVersion === 2 && isComposableStablePool(pool)
   const chainDeprecated = isChainDeprecated(pool.chain)
+  const chainId = getChainId(pool.chain)
+
+  const shouldShowMigrationAlert =
+    isConnected &&
+    migratablePositions.some(
+      position =>
+        position.totalBptBalance > 0n &&
+        position.migration.new.chainId === chainId &&
+        isSameAddress(position.migration.new.id, pool.id)
+    )
 
   if (
     isEmpty(poolAlerts) &&
-    !needsMigration &&
+    !shouldShowMigrationAlert &&
     !affectedByV2Exploit &&
     !chainDeprecated &&
     !surging
@@ -52,9 +65,7 @@ export function PoolAlerts() {
         <BalAlert content={<DeprecatedChainWarningContent chain={pool.chain} />} status="warning" />
       )}
 
-      {needsMigration(pool.protocolVersion, getChainId(pool.chain), pool.id) && (
-        <MigrationAlert pool={pool} />
-      )}
+      {shouldShowMigrationAlert && <MigrationAlert pool={pool} />}
 
       {surging && <PoolSurgingWarning />}
     </VStack>

@@ -3,12 +3,21 @@ import { ArrowUpRight } from 'lucide-react'
 import { usePoolCreationForm } from '../../PoolCreationFormProvider'
 import { useSuggestedGyroEclpConfig } from './useSuggestedGyroEclpConfig'
 import { calculateRotationComponents } from './gyro.helpers'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { MAX_LAMBDA } from '../../constants'
 import { useValidateEclpParams } from './useValidateEclpParams'
 import { BalAlert } from '@repo/lib/shared/components/alerts/BalAlert'
 import { useWatch } from 'react-hook-form'
+import { zeroAddress } from 'viem'
 import { NumberInput } from '@repo/lib/shared/components/inputs/NumberInput'
+import { bn, fNum, isBnParseable } from '@repo/lib/shared/utils/numbers'
+import {
+  calculateMarketRateMultiplier,
+  parseRateTo18,
+} from '@repo/lib/modules/eclp/helpers/eclpRateScaling'
+import { isGyroEllipticPool } from '../../helpers'
+import { usePoolSpotPriceWithoutRate } from './usePoolSpotPriceWithoutRate'
+import { useCreatePoolUnwrapRates } from '../../preview/useCreatePoolUnwrapRates'
 
 export function GyroEclpConfiguration() {
   const { errorMessage } = useValidateEclpParams()
@@ -25,6 +34,13 @@ export function GyroEclpConfiguration() {
 }
 
 function EclpParamHeader() {
+  const { poolCreationForm } = usePoolCreationForm()
+  const poolTokens = useWatch({ control: poolCreationForm.control, name: 'poolTokens' })
+
+  const hasRateProvider = poolTokens?.some(
+    token => token.rateProvider && token.rateProvider !== zeroAddress
+  )
+
   return (
     <VStack align="start" spacing="sm" w="full">
       <Heading color="font.maxContrast" pb="1" size="md">
@@ -43,6 +59,12 @@ function EclpParamHeader() {
           <ArrowUpRight size={14} />
         </Link>
       </HStack>
+      {hasRateProvider && (
+        <Text color="font.secondary" fontSize="sm">
+          Parameters are entered in normalized (onchain) units. The preview chart shows market
+          prices by default.
+        </Text>
+      )}
     </VStack>
   )
 }
@@ -50,17 +72,54 @@ function EclpParamHeader() {
 function EclpParamInputs() {
   const suggestedEclpConfig = useSuggestedGyroEclpConfig()
   const { eclpConfigForm, poolCreationForm } = usePoolCreationForm()
-  const poolTokens = useWatch({ control: poolCreationForm.control, name: 'poolTokens' })
+
+  const [poolTokens, poolType, network] = useWatch({
+    control: poolCreationForm.control,
+    name: ['poolTokens', 'poolType', 'network'],
+  })
 
   const [alpha, beta, peakPrice, lambda] = useWatch({
     control: eclpConfigForm.control,
     name: ['alpha', 'beta', 'peakPrice', 'lambda'],
   })
 
+  const { rateTokenA, rateTokenB, isRateLoading } = usePoolSpotPriceWithoutRate()
+
+  const parsedTokenRates = useMemo(
+    () => [parseRateTo18(rateTokenA), parseRateTo18(rateTokenB)] as const,
+    [rateTokenA, rateTokenB]
+  )
+
+  const { unwrapRates, displaySymbols } = useCreatePoolUnwrapRates(
+    poolTokens,
+    network,
+    isGyroEllipticPool(poolType),
+    isRateLoading ? null : parsedTokenRates
+  )
+
+  const { multiplier: marketMultiplier, hasRateAdjustment } = useMemo(() => {
+    if (isRateLoading || !unwrapRates) {
+      return { multiplier: bn(1), hasRateAdjustment: false }
+    }
+
+    return calculateMarketRateMultiplier(parsedTokenRates, unwrapRates)
+  }, [isRateLoading, parsedTokenRates, unwrapRates])
+
   const tokenPricePair = poolTokens
     .map(token => token.data?.symbol)
     .filter(Boolean)
     .join(' / ')
+
+  const marketPair = displaySymbols.length > 0 ? displaySymbols.join(' / ') : tokenPricePair
+
+  const getMarketHint = (rawValue: string | undefined) => {
+    if (!hasRateAdjustment || !isBnParseable(rawValue)) return null
+    const parsed = bn(rawValue!)
+    if (!parsed.isFinite() || parsed.lte(0)) return null
+    const scaled = parsed.times(marketMultiplier)
+    if (!scaled.isFinite() || scaled.lte(0)) return null
+    return `≈ ${fNum('tokenRatio', scaled)} ${marketPair} (market)`
+  }
 
   // c and s are derived from peakPrice, computed directly to avoid effect-based mirroring
   const { c, s } = calculateRotationComponents(peakPrice || '')
@@ -74,7 +133,7 @@ function EclpParamInputs() {
   }, [alpha, beta, peakPrice, lambda, c, s])
 
   const lowerBoundPriceInput = {
-    label: `Lower bound price: ${tokenPricePair}`,
+    label: `Lower bound price (α): ${tokenPricePair}`,
     name: 'alpha' as const,
     placeholder: suggestedEclpConfig.alpha,
     suggestedValue: Number(suggestedEclpConfig.alpha),
@@ -117,7 +176,7 @@ function EclpParamInputs() {
   }
 
   const upperBoundPriceInput = {
-    label: `Upper bound price: ${tokenPricePair}`,
+    label: `Upper bound price (β): ${tokenPricePair}`,
     name: 'beta' as const,
     placeholder: suggestedEclpConfig.beta,
     suggestedValue: Number(suggestedEclpConfig.beta),
@@ -142,7 +201,7 @@ function EclpParamInputs() {
   }
 
   const stretchingFactorInput = {
-    label: `Stretching factor`,
+    label: 'Stretching factor (λ)',
     name: 'lambda' as const,
     placeholder: suggestedEclpConfig.lambda,
     tooltip: 'The concentration of liquidity around the peak price',
@@ -155,16 +214,23 @@ function EclpParamInputs() {
   }
 
   const eclpConfigInputs = [
-    lowerBoundPriceInput,
-    peakPriceInput,
-    upperBoundPriceInput,
-    stretchingFactorInput,
+    { ...lowerBoundPriceInput, marketHint: getMarketHint(alpha) },
+    { ...peakPriceInput, marketHint: getMarketHint(peakPrice) },
+    { ...upperBoundPriceInput, marketHint: getMarketHint(beta) },
+    { ...stretchingFactorInput, marketHint: null },
   ]
 
   return (
     <>
-      {eclpConfigInputs.map(input => (
-        <NumberInput key={input.name} {...input} width="full" />
+      {eclpConfigInputs.map(({ marketHint, ...input }) => (
+        <VStack align="start" key={input.name} spacing="xs" w="full">
+          <NumberInput {...input} width="full" />
+          {marketHint && (
+            <Text color="font.secondary" fontSize="xs">
+              {marketHint}
+            </Text>
+          )}
+        </VStack>
       ))}
     </>
   )

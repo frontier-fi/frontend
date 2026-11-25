@@ -68,6 +68,20 @@ describe('getRequiredTokenApprovals', () => {
     ])
   })
 
+  test('when approveMaxBigInt is false it requests exactly the required amounts', () => {
+    const approvals = getRequiredTokenApprovals({
+      rawAmounts,
+      chainId,
+      allowanceFor,
+      approveMaxBigInt: false,
+    })
+
+    expect(approvals.map(approval => approval.requestedRawAmount)).toEqual([
+      10000000000000000000n,
+      20000000000000000000n,
+    ])
+  })
+
   test('when one token (USDT) requires double token approval', () => {
     function allowanceFor(): bigint {
       return 5n

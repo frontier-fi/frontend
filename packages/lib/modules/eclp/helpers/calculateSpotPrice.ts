@@ -1,53 +1,44 @@
-import { calculateInvariantWithError } from './gyroEMath'
-import { calcSpotPrice0in1 } from './gyroECLPMath'
-import { divDownMagU, mulDownMagU } from './gyroSignedFixedPoint'
-import { _normalizeBalances } from './helpers'
+import { sortBy } from 'lodash'
+import {
+  GyroECLPMath,
+  MathSol,
+  WAD,
+  type DerivedEclpParams,
+  type EclpParams,
+} from '@frontier-fi/maths'
 import type { GqlPoolType } from '@repo/lib/shared/services/api/generated/graphql'
 import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import { safeParseFixedBigInt } from '@repo/lib/shared/utils/numbers'
 import { Pool } from '../../pool/pool.types'
 import { isGyroEPool } from '../../pool/pool.helpers'
-import { ZERO } from './constants'
 
 type GyroEParams = {
   balanceIn: bigint
   balanceOut: bigint
   decimalsIn: number
   decimalsOut: number
-  gyroEParams: {
-    alpha: bigint
-    beta: bigint
-    c: bigint
-    s: bigint
-    lambda: bigint
-  }
-  derivedGyroEParams: {
-    tauAlpha: Vector2
-    tauBeta: Vector2
-    u: bigint
-    v: bigint
-    w: bigint
-    z: bigint
-    dSq: bigint
-  }
-  swapFee: bigint
+  gyroEParams: EclpParams
+  derivedGyroEParams: DerivedEclpParams
   tokenRates: readonly [bigint, bigint] | null
 }
 
-type Vector2 = {
-  x: bigint
-  y: bigint
+function normalizeBalances(
+  balances: [bigint, bigint],
+  decimals: [number, number]
+): [bigint, bigint] {
+  return [
+    (balances[0] * WAD) / 10n ** BigInt(decimals[0]),
+    (balances[1] * WAD) / 10n ** BigInt(decimals[1]),
+  ]
 }
-
-type GyroPoolParams = GyroEParams
 
 export function destructureRequiredPoolParams(
   pool: Pool,
   tokenRates?: readonly [bigint, bigint] | null
-) {
+): GyroEParams | null {
   if (!isGyroEPool(pool)) return null
 
-  const [token0, token1] = pool.poolTokens
+  const [token0, token1] = sortBy(pool.poolTokens, 'index')
   if (!token0?.balance || !token1?.balance) return null
 
   const balanceIn = safeParseFixedBigInt(token0.balance, token0.decimals)
@@ -80,23 +71,20 @@ export function destructureRequiredPoolParams(
       z: safeParseFixedBigInt(pool.z as string, 38),
       dSq: safeParseFixedBigInt(pool.dSq as string, 38),
     },
-    swapFee: safeParseFixedBigInt(pool.dynamicData.swapFee, 16),
     tokenRates: tokenRates ?? null,
-  } as GyroEParams
+  }
 }
 
-export function calculateSpotPrice(poolType: GqlPoolType | string, params: GyroPoolParams): bigint {
-  let price = ZERO
-
+export function calculateSpotPrice(poolType: GqlPoolType | string, params: GyroEParams): bigint {
   if (poolType === GqlPoolTypeValues.GyroE) {
-    price = calculateGyroESpotPrice(params as GyroEParams)
+    return calculateGyroESpotPrice(params)
   }
 
-  return price
+  return 0n
 }
 
 function calculateGyroESpotPrice(params: GyroEParams): bigint {
-  const normalizedBalances = _normalizeBalances(
+  const normalizedBalances = normalizeBalances(
     [params.balanceIn, params.balanceOut],
     [params.decimalsIn, params.decimalsOut]
   )
@@ -105,26 +93,28 @@ function calculateGyroESpotPrice(params: GyroEParams): bigint {
 
   const scaledBalances: [bigint, bigint] =
     rate0 && rate1
-      ? [mulDownMagU(normalizedBalances[0], rate0), mulDownMagU(normalizedBalances[1], rate1)]
+      ? [
+          MathSol.mulDownFixed(normalizedBalances[0], rate0),
+          MathSol.mulDownFixed(normalizedBalances[1], rate1),
+        ]
       : normalizedBalances
 
-  const [invariant] = calculateInvariantWithError(
+  if (scaledBalances[0] === 0n && scaledBalances[1] === 0n) {
+    return 0n
+  }
+
+  const [invariant] = GyroECLPMath.calculateInvariantWithError(
     scaledBalances,
     params.gyroEParams,
     params.derivedGyroEParams
   )
 
-  const newSpotPrice = calcSpotPrice0in1(
+  // Returns the 18-decimal normalized (Vault-scaled) spot price in [alpha, beta];
+  // callers apply the display multiplier once.
+  return GyroECLPMath.calcSpotPrice0in1(
     scaledBalances,
     params.gyroEParams,
     params.derivedGyroEParams,
     invariant
   )
-
-  if (rate0 && rate1) {
-    const scalingFactor = divDownMagU(rate0, rate1)
-    return mulDownMagU(newSpotPrice, scalingFactor)
-  }
-
-  return newSpotPrice
 }

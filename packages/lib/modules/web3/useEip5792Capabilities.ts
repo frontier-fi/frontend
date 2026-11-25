@@ -23,19 +23,19 @@ export function useEip5792AtomicCapability(): {
 
   const capabilitiesQuery = useCapabilities({
     account: userAddress,
-    chainId,
     query: {
       enabled: !!userAddress && !!chainId,
       retry: false,
     },
   })
 
-  // When chainId is passed, useCapabilities returns the capabilities object directly.
-  // Cast to the atomic shape we care about (the raw type is a union of index signatures).
-  const capabilities = capabilitiesQuery.data as
-    { atomic?: { status: AtomicCapabilityStatus } } | undefined
+  // Omit `chainId` from `useCapabilities` above: when `chainId` is passed, viem's
+  // `getCapabilities` returns `capabilities[chainId]`, which is `undefined` when a
+  // wallet returns `{}` (no capabilities on that chain) and violates TanStack Query v5.
+  const capabilitiesByChain = capabilitiesQuery.data as
+    Record<number, { atomic?: { status: AtomicCapabilityStatus } }> | undefined
 
-  const atomicStatus = capabilities?.atomic?.status
+  const atomicStatus = chainId ? capabilitiesByChain?.[chainId]?.atomic?.status : undefined
 
   return { atomicStatus, isLoading: capabilitiesQuery.isLoading }
 }

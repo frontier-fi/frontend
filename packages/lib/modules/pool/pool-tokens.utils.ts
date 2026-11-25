@@ -12,7 +12,6 @@ import { ApiToken, BalanceForFn } from '../tokens/token.types'
 import { getLeafTokens } from '../tokens/token.helpers'
 import { supportsNestedActions } from './actions/LiquidityActionHelpers'
 import { FeaturedPool } from './PoolProvider'
-import { bn } from '@repo/lib/shared/utils/numbers'
 
 export function getCompositionTokens(pool: PoolCore | GqlNestedPool | FeaturedPool): PoolToken[] {
   return sortByIndex(excludeNestedBptTokens(getPoolTokens(pool), pool.address))
@@ -351,15 +350,6 @@ export function getStandardRootTokens(pool: Pool, poolActionableTokens?: ApiToke
 export function getPriceRateForToken(token: ApiToken, pool: Pool) {
   return pool.poolTokens.find(poolToken => poolToken.underlyingToken?.address === token.address)
     ?.priceRate
-}
-
-// for use with ECLPs
-export function getPriceRateRatio(pool: Pool) {
-  const priceRates = getPoolActionableTokens(pool).map((token: ApiToken) => {
-    return token.useUnderlyingForAddRemove ? token.priceRate : '1'
-  })
-
-  return bn(priceRates[0] || '1').div(priceRates[1] || '1')
 }
 
 /* Given a token (wrapped or underlying):

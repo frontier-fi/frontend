@@ -15,7 +15,7 @@ export function PortfolioTableHeader({ currentSortingObj, setCurrentSortingObj, 
   const portfolioOrderBy = portfolioOrderByFn()
 
   return (
-    <Grid {...rest} p={['ms', 'md']} px="xs" w="full">
+    <Grid {...rest} py={['ms', 'md']} w="full">
       <GridItem>
         <VStack align="start" w="full">
           <Icon as={Globe} boxSize="5" color="font.primary" ml="1" />

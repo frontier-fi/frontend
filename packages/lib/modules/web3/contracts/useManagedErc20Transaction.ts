@@ -8,12 +8,19 @@ import {
   TransactionLabels,
 } from '@repo/lib/modules/transactions/transaction-steps/lib'
 import { isSameAddress } from '@repo/lib/shared/utils/addresses'
-import { Address, ContractFunctionArgs, ContractFunctionName } from 'viem'
-import { useSimulateContract, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
+import { Abi, Address, ContractFunctionArgs, ContractFunctionName } from 'viem'
+import {
+  usePublicClient,
+  useSimulateContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from 'wagmi'
+import { useUserAccount } from '../UserAccountProvider'
 import { useTxHash } from '../safe.hooks'
 import { useChainSwitch } from '../useChainSwitch'
 import { usdtAbi } from './abi/UsdtAbi'
 import { TransactionExecution, TransactionSimulation, WriteAbiMutability } from './contract.types'
+import { estimateBufferedContractGas } from './useManagedTransaction'
 import { useOnTransactionConfirmation } from './useOnTransactionConfirmation'
 import { useOnTransactionSubmission } from './useOnTransactionSubmission'
 import { getWaitForReceiptTimeout } from './wagmi-helpers'
@@ -44,6 +51,8 @@ export function useManagedErc20Transaction({
 }: ManagedErc20TransactionInput) {
   const { minConfirmations } = useNetworkConfig()
   const { shouldChangeNetwork } = useChainSwitch(chainId)
+  const { userAddress, connector } = useUserAccount()
+  const publicClient = usePublicClient({ chainId })
 
   const usdtAddress = '0xdac17f958d2ee523a2206206994597c13d831ec7'
   const isUsdt = isSameAddress(tokenAddress, usdtAddress)
@@ -116,9 +125,22 @@ export function useManagedErc20Transaction({
 
     const finalArgs = overrideArgs ?? args
 
+    const gas = await estimateBufferedContractGas({
+      publicClient,
+      chainId,
+      connectorId: connector?.id,
+      userAddress,
+      request: {
+        ...txConfig,
+        abi: txConfig.abi as Abi,
+        args: finalArgs as any,
+      },
+    })
+
     const request = {
       ...simulateQuery.data.request,
       args: finalArgs as any,
+      ...(gas ? { gas } : {}),
     }
 
     return await writeQuery.writeContractAsync(request)

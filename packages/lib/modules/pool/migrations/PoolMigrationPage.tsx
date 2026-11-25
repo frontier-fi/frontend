@@ -1,26 +1,22 @@
 'use client'
 
-import { notFound } from 'next/navigation'
-import { ChainSlug, getChainSlug } from '../pool.utils'
-import { usePoolMigrations } from './PoolMigrationsProvider'
+import { Button, Card, Heading, HStack, VStack } from '@chakra-ui/react'
 import { getChainId } from '@repo/lib/config/app.config'
-import { BaseVariant } from '../pool.types'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
+import { BalAlert } from '@repo/lib/shared/components/alerts/BalAlert'
 import { DefaultPageContainer } from '@repo/lib/shared/components/containers/DefaultPageContainer'
-import { TransactionStateProvider } from '../../transactions/transaction-steps/TransactionStateProvider'
-import { RelayerSignatureProvider } from '../../relayer/RelayerSignatureProvider'
-import { PermitSignatureProvider } from '../../tokens/approvals/permit2/PermitSignatureProvider'
+import { AddLiquidityLayout } from '@repo/lib/shared/layouts/AddLiquidityLayout'
+import { isSameAddress } from '@repo/lib/shared/utils/addresses'
+import NextLink from 'next/link'
+import { useMemo } from 'react'
 import { PoolActionsLayout } from '../actions/PoolActionsLayout'
-import { PriceImpactProvider } from '../../price-impact/PriceImpactProvider'
-import { RemoveLiquidityProvider } from '../actions/remove-liquidity/RemoveLiquidityProvider'
-import { TokenInputsValidationProvider } from '../../tokens/TokenInputsValidationProvider'
-import { Permit2SignatureProvider } from '../../tokens/approvals/permit2/Permit2SignatureProvider'
-import { PoolProvider } from '../PoolProvider'
-import type { GetPoolQuery } from '@repo/lib/shared/services/api/generated/graphql'
-import { AddLiquidityProvider } from '../actions/add-liquidity/AddLiquidityProvider'
-import { MigrateLiquidityProvider, useFetchPool } from './MigrateLiquidityProvider'
+import { usePool } from '../PoolProvider'
+import { BaseVariant } from '../pool.types'
+import { ChainSlug, getChainSlug, getPoolPath } from '../pool.utils'
+import { PoolMigration } from './getPoolMigrations'
+import { MigrateLiquidityProvider } from './MigrateLiquidityProvider'
 import { PoolMigrationModal } from './PoolMigrationModal'
-import { useUserAccount } from '../../web3/UserAccountProvider'
-import { Skeleton } from '@chakra-ui/react'
+import { usePoolMigrations } from './PoolMigrationsProvider'
 
 export interface PoolPathProps {
   id: string
@@ -28,63 +24,70 @@ export interface PoolPathProps {
   variant: BaseVariant
 }
 
-export function PoolMigrationPage({ id, chain, variant }: PoolPathProps) {
-  const { userAddress } = useUserAccount()
-  const gqlChain = getChainSlug(chain)
-  const protocol = Number(variant.replace('v', ''))
-  const { getMigration } = usePoolMigrations()
-  const migration = getMigration(protocol, getChainId(gqlChain), id as string)
+export interface PoolMigrationPageProps extends PoolPathProps {
+  fromPoolId?: string
+}
 
-  if (!migration) throw new Error('No migration for the specified pool')
+export function resolveTargetMigration(
+  migrationsForTarget: PoolMigration[],
+  fromPoolId?: string
+): PoolMigration | undefined {
+  if (migrationsForTarget.length === 0) return undefined
 
-  const {
-    data: newPool,
-    error,
-    loading,
-  } = useFetchPool(migration.new.chainId, migration.new.id, userAddress)
-
-  if (error) {
-    if (error?.message === 'Pool with id does not exist') notFound()
-    throw new Error('Failed to fetch pool')
-  } else if (!loading && !newPool) {
-    throw new Error('Failed to fetch pool')
+  if (fromPoolId) {
+    return migrationsForTarget.find(migration => isSameAddress(migration.old.id, fromPoolId))
   }
 
-  if (!newPool) return <Skeleton />
+  return migrationsForTarget[0]
+}
+
+export function PoolMigrationPage({ id, chain, variant, fromPoolId }: PoolMigrationPageProps) {
+  const { pool } = usePool()
+  const gqlChain = getChainSlug(chain)
+  const chainId = getChainId(gqlChain)
+  const { getMigrationsForTarget } = usePoolMigrations()
+
+  const migration = useMemo(() => {
+    if (variant !== BaseVariant.v3 || pool.protocolVersion !== 3) return undefined
+    const targetMigrations = getMigrationsForTarget(chainId, id)
+    return resolveTargetMigration(targetMigrations, fromPoolId)
+  }, [variant, pool.protocolVersion, getMigrationsForTarget, chainId, id, fromPoolId])
+
+  if (!migration) {
+    return (
+      <DefaultPageContainer>
+        <Card maxW="lg" mx="auto" p="lg" variant="level2">
+          <VStack align="start" spacing="md" w="full">
+            <Heading as="h1" size="h4">
+              Migration route not found
+            </Heading>
+            <BalAlert
+              content={`No Balancer V3 migration route matches this ${PROJECT_CONFIG.projectName} pool${
+                fromPoolId ? ` for source pool ${fromPoolId}` : ''
+              }.`}
+              status="warning"
+            />
+            <HStack spacing="sm">
+              <Button as={NextLink} href="/migrate" variant="primary">
+                View migrations
+              </Button>
+              <Button as={NextLink} href={getPoolPath(pool)} variant="tertiary">
+                Back to pool
+              </Button>
+            </HStack>
+          </VStack>
+        </Card>
+      </DefaultPageContainer>
+    )
+  }
 
   return (
-    <DefaultPageContainer>
-      <TransactionStateProvider>
-        <RelayerSignatureProvider>
-          <PermitSignatureProvider>
-            <PoolActionsLayout closeButton={false}>
-              <PriceImpactProvider>
-                <RemoveLiquidityProvider>
-                  <TokenInputsValidationProvider>
-                    <Permit2SignatureProvider>
-                      <PoolProvider
-                        chain={gqlChain}
-                        data={newPool as GetPoolQuery}
-                        id={migration.new.id}
-                      >
-                        <AddLiquidityProvider>
-                          <MigrateLiquidityProvider
-                            chainId={migration.old.chainId}
-                            poolId={migration.old.id}
-                            protocol={migration.old.protocol}
-                          >
-                            <PoolMigrationModal />
-                          </MigrateLiquidityProvider>
-                        </AddLiquidityProvider>
-                      </PoolProvider>
-                    </Permit2SignatureProvider>
-                  </TokenInputsValidationProvider>
-                </RemoveLiquidityProvider>
-              </PriceImpactProvider>
-            </PoolActionsLayout>
-          </PermitSignatureProvider>
-        </RelayerSignatureProvider>
-      </TransactionStateProvider>
-    </DefaultPageContainer>
+    <AddLiquidityLayout>
+      <PoolActionsLayout closeButton={false}>
+        <MigrateLiquidityProvider migration={migration}>
+          <PoolMigrationModal />
+        </MigrateLiquidityProvider>
+      </PoolActionsLayout>
+    </AddLiquidityLayout>
   )
 }

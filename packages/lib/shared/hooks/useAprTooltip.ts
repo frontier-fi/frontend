@@ -133,7 +133,7 @@ export function useAprTooltip({
 
   const isSwapFeePresent = !swapFeesDisplayed.isZero()
   const isYieldPresent = !yieldBearingTokensAprDisplayed.isZero()
-  const isStakingPresent = false
+  const isStakingPresent = stakingIncentivesAprDisplayed.gt(0)
   const isVotingPresent = false
   const isLockingAprPresent = false
 

@@ -54,7 +54,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
             {children}
             <Footer
               logoType={<BalancerLogoType />}
-              subTitle="Frontier Finance provides unique solutions to many liquidity provision needs"
+              subTitle="Advanced liquidity primitives beyond standard AMMs: custom weights, multi-asset pools, elliptic CLPs, and rehyped yield."
               title="The Frontier AMM"
             />
           </Providers>

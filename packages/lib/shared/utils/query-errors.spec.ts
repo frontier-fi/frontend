@@ -23,6 +23,13 @@ describe('shouldIgnore', () => {
       shouldIgnore('MethodNotFoundRpcError: The method "wallet_getCapabilities" does not exist')
     ).toBe(true)
 
+    expect(
+      shouldIgnore(
+        'Cannot convert undefined or null to object',
+        'at getCapabilities (getCapabilities.js:35:26)'
+      )
+    ).toBe(true)
+
     expect(shouldIgnore('Cannot redefine property: ethereum')).toBe(true)
 
     expect(shouldIgnore('ResizeObserver loop completed with undelivered notifications.')).toBe(true)

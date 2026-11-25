@@ -19,7 +19,12 @@ import {
   Switch,
 } from '@chakra-ui/react'
 import { useUserSettings } from './UserSettingsProvider'
-import { blockInvalidNumberInput, bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
+import {
+  blockInvalidNumberInput,
+  bn,
+  cleanAmountInput,
+  isBnParseable,
+} from '@repo/lib/shared/utils/numbers'
 import { Percent, Settings } from 'lucide-react'
 import { ColorModePreference } from './color-mode'
 import { CurrencySelect } from './CurrencySelect'
@@ -81,7 +86,7 @@ export function SlippageInput({ slippage, setSlippage }: SlippageInputProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     beginEditing()
-    const value = e.currentTarget.value
+    const value = cleanAmountInput(e.currentTarget.value)
 
     if (!value || (parseFloat(value) <= 50 && isBnParseable(value))) {
       inputSlippageRef.current = value

@@ -24,11 +24,7 @@ import { ConfigureTokenRateProvider } from './ConfigureTokenRateProvider'
 import { TotalWeightDisplay } from './TotalWeightDisplay'
 import { NumberInput } from '@repo/lib/shared/components/inputs/NumberInput'
 import { validatePoolTokens } from '../../validatePoolCreationForm'
-import {
-  isConstantRateProvider,
-  isDynamicRateProvider,
-  isMarketRateProvider,
-} from '@repo/lib/modules/tokens/token.helpers'
+import { isMarketRateProvider } from '@repo/lib/modules/tokens/token.helpers'
 import { PoolCreationToken, SupportedPoolTypes } from '../../types'
 import { useEffect } from 'react'
 import { useCoingeckoTokenPrice } from './useCoingeckoTokenPrice'
@@ -39,6 +35,7 @@ import {
   isAutoRangePool,
   isGyroEllipticPool,
   isCowPool,
+  getVerifiedRateProviderAddress,
 } from '../../helpers'
 import { PoolType } from '@frontier-fi/sdk'
 import { ChoosePoolTokensAlert } from './ChoosePoolTokensAlert'
@@ -79,17 +76,6 @@ export function ChoosePoolTokens() {
     if (isEditingPoolToken) return true
     return !isTokenAlreadyInPool
   })
-
-  function getVerifiedRateProviderAddress(token: ApiOrCustomToken) {
-    if (!('priceRateProviderData' in token) || !token.priceRateProviderData) return undefined
-
-    const isRateProviderConstant = isConstantRateProvider(token)
-    const isRateProviderDynamic = isDynamicRateProvider(token)
-
-    return !(isRateProviderConstant || isRateProviderDynamic)
-      ? (token.priceRateProviderData?.address as Address)
-      : undefined
-  }
 
   function handleTokenSelect(tokenMetadata: ApiOrCustomToken) {
     if (!tokenMetadata || selectedTokenIndex === null) return

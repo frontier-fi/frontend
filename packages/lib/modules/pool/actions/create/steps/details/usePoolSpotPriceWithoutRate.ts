@@ -1,6 +1,6 @@
 import { useTokens } from '@repo/lib/modules/tokens/TokensProvider'
 import { usePoolCreationForm } from '../../PoolCreationFormProvider'
-import { bn } from '@repo/lib/shared/utils/numbers'
+import { bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { useRateProvider } from '../tokens/useRateProvider'
 import { formatUnits, zeroAddress } from 'viem'
 import { useWatch } from 'react-hook-form'
@@ -44,8 +44,8 @@ export function usePoolSpotPriceWithoutRate() {
   const rateTokenB = rawRateTokenB ? formatUnits(rawRateTokenB, 18) : '1'
 
   // always scale wrapped token usd price to underlying token usd price
-  const adjustedPriceTokenA = bn(priceTokenA).div(rateTokenA)
-  const adjustedPriceTokenB = bn(priceTokenB).div(rateTokenB)
+  const adjustedPriceTokenA = bn(isBnParseable(priceTokenA) ? priceTokenA : 0).div(rateTokenA)
+  const adjustedPriceTokenB = bn(isBnParseable(priceTokenB) ? priceTokenB : 0).div(rateTokenB)
 
   const spotPriceWithoutRate = adjustedPriceTokenA.div(adjustedPriceTokenB)
 

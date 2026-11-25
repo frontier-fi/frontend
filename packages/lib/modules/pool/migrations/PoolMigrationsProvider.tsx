@@ -1,19 +1,50 @@
 'use client'
 
+import { isSameAddress } from '@repo/lib/shared/utils/addresses'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
-import { createContext, PropsWithChildren } from 'react'
+import { createContext, PropsWithChildren, useCallback, useMemo } from 'react'
 import { PoolMigration } from './getPoolMigrations'
+import { useBalV3MigratablePositions } from './useBalV3MigratablePositions'
 
 export type UsePoolsMigrationsResult = ReturnType<typeof usePoolsMigrationsLogic>
 export const PoolsMigrationsContext = createContext<UsePoolsMigrationsResult | null>(null)
 
 export function usePoolsMigrationsLogic(poolMigrations: PoolMigration[]) {
-  return {
-    needsMigration: (protocolVersion: number, chainId: number, poolId: string) =>
-      needsMigration(poolMigrations, protocolVersion, chainId, poolId),
-    getMigration: (protocolVersion: number, chainId: number, poolId: string) =>
-      getMigration(poolMigrations, protocolVersion, chainId, poolId),
-  }
+  const { migratablePositions, hasMigratablePositions, isLoading, refetch } =
+    useBalV3MigratablePositions(poolMigrations)
+
+  const getMigrationsForTargetCallback = useCallback(
+    (chainId: number, frontierPoolId: string) =>
+      getMigrationsForTarget(poolMigrations, chainId, frontierPoolId),
+    [poolMigrations]
+  )
+
+  const getMigrationBySourceCallback = useCallback(
+    (chainId: number, sourcePoolId: string) =>
+      getMigrationBySource(poolMigrations, chainId, sourcePoolId),
+    [poolMigrations]
+  )
+
+  return useMemo(
+    () => ({
+      poolMigrations,
+      getMigrationsForTarget: getMigrationsForTargetCallback,
+      getMigrationBySource: getMigrationBySourceCallback,
+      migratablePositions,
+      hasMigratablePositions,
+      isLoading,
+      refetch,
+    }),
+    [
+      poolMigrations,
+      getMigrationsForTargetCallback,
+      getMigrationBySourceCallback,
+      migratablePositions,
+      hasMigratablePositions,
+      isLoading,
+      refetch,
+    ]
+  )
 }
 
 export function PoolMigrationsProvider({
@@ -27,25 +58,23 @@ export function PoolMigrationsProvider({
 export const usePoolMigrations = () =>
   useMandatoryContext(PoolsMigrationsContext, 'PoolsMigrations')
 
-function needsMigration(
+function getMigrationsForTarget(
   migrations: PoolMigration[],
-  protocolVersion: number,
   chainId: number,
-  poolId: string
-) {
-  return getMigration(migrations, protocolVersion, chainId, poolId) !== undefined
+  frontierPoolId: string
+): PoolMigration[] {
+  return migrations.filter(
+    migration =>
+      migration.new.chainId === chainId && isSameAddress(migration.new.id, frontierPoolId)
+  )
 }
 
-function getMigration(
+function getMigrationBySource(
   migrations: PoolMigration[],
-  protocolVersion: number,
   chainId: number,
-  poolId: string
-) {
+  sourcePoolId: string
+): PoolMigration | undefined {
   return migrations.find(
-    migration =>
-      migration.old.protocol === protocolVersion &&
-      migration.old.chainId === chainId &&
-      migration.old.id === poolId
+    migration => migration.old.chainId === chainId && isSameAddress(migration.old.id, sourcePoolId)
   )
 }

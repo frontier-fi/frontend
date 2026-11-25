@@ -34,10 +34,21 @@ export function useNav() {
       href: '/create',
       label: 'Create',
     },
+    {
+      href: '/migrate',
+      label: 'Migrate',
+    },
   ]
 
   function linkColorFor(path: string) {
     if (path === '/create' && pathname.startsWith('/create')) {
+      return 'font.highlight'
+    }
+
+    if (
+      path === '/migrate' &&
+      (pathname.startsWith('/migrate') || pathname.endsWith('/migrate-pool'))
+    ) {
       return 'font.highlight'
     }
 

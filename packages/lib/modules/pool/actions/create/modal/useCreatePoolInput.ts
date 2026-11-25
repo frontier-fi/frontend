@@ -6,6 +6,7 @@ import { getNetworkConfig, getGqlChain, isDev } from '@repo/lib/config/app.confi
 import { parseAmount } from '@repo/lib/shared/utils/numbers'
 import { CreatePoolInput } from '../types'
 import { calculateRotationComponents } from '../steps/details/gyro.helpers'
+import { getDefaultPaysYieldFees } from '../helpers'
 
 export function useCreatePoolInput(chainId: number): CreatePoolInput {
   const { poolCreationForm, eclpConfigForm } = usePoolCreationForm()
@@ -50,14 +51,18 @@ export function useCreatePoolInput(chainId: number): CreatePoolInput {
     enableDonation: resolvedEnableDonation,
     poolHooksContract: poolHooksContract ? poolHooksContract : zeroAddress,
     disableUnbalancedLiquidity,
-    tokens: poolTokens.map(({ address, rateProvider, paysYieldFees }) => {
+    tokens: poolTokens.map(({ address, rateProvider, paysYieldFees, data }) => {
       const tokenAddress = address === nativeAsset ? wNativeAsset : address
       if (!tokenAddress) throw new Error('token address missing for pool creation')
+      const resolvedRateProvider = rateProvider ? rateProvider : zeroAddress
       return {
         address: tokenAddress,
-        tokenType: rateProvider === zeroAddress ? TokenType.STANDARD : TokenType.TOKEN_WITH_RATE,
-        rateProvider: rateProvider ? rateProvider : zeroAddress,
-        paysYieldFees,
+        tokenType:
+          resolvedRateProvider === zeroAddress ? TokenType.STANDARD : TokenType.TOKEN_WITH_RATE,
+        rateProvider: resolvedRateProvider,
+        paysYieldFees: isDev
+          ? paysYieldFees
+          : getDefaultPaysYieldFees({ rateProvider: resolvedRateProvider, data }),
       }
     }),
   }

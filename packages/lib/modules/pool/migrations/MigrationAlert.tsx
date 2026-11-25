@@ -1,84 +1,75 @@
-import { getChainId, getChainName } from '@repo/lib/config/app.config'
+'use client'
+
+import { HStack, Text, VStack } from '@chakra-ui/react'
+import { getChainId, getChainShortName } from '@repo/lib/config/app.config'
+import { SupportedChainId } from '@repo/lib/config/config.types'
+import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { BalAlert } from '@repo/lib/shared/components/alerts/BalAlert'
 import { BalAlertButton } from '@repo/lib/shared/components/alerts/BalAlertButton'
-import { BaseVariant, Pool } from '../pool.types'
-import { HStack, Link, Text, useDisclosure } from '@chakra-ui/react'
-import { UnstakeWarningModal } from './UnstakeWarningModal'
-import { hasBalancerStakedBalance, hasTotalBalance } from '../user-balance.helpers'
+import { isSameAddress } from '@repo/lib/shared/utils/addresses'
 import { useRouter } from 'next/navigation'
-import { chainToSlugMap, getPoolPath } from '../pool.utils'
+import { useUserAccount } from '../../web3/UserAccountProvider'
+import { Pool } from '../pool.types'
+import { getPoolPath } from '../pool.utils'
 import { usePoolMigrations } from './PoolMigrationsProvider'
-import { abbreviateAddress } from '@repo/lib/shared/utils/addresses'
 
 type Props = {
   pool: Pool
 }
 
+/**
+ * Shown on a target pool when the connected wallet holds a Balancer V3 position that migrates to it.
+ */
 export function MigrationAlert({ pool }: Props) {
-  const userHasBalance = hasTotalBalance(pool)
-
-  if (userHasBalance) {
-    return <AlertWithBalance pool={pool} />
-  } else {
-    return <AlertWithoutBalance pool={pool} />
-  }
-}
-
-function AlertWithBalance({ pool }: Props) {
   const router = useRouter()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isConnected } = useUserAccount()
+  const { migratablePositions } = usePoolMigrations()
+  const chainId = getChainId(pool.chain)
 
-  const { getMigration } = usePoolMigrations()
-  const migration = getMigration(pool.protocolVersion, getChainId(pool.chain), pool.id)
-  const poolPath = `/pools/${chainToSlugMap[pool.chain]}/${BaseVariant.v3}/${migration?.new.id || ''}`
+  const matchingBalV3Positions = isConnected
+    ? migratablePositions.filter(
+        position =>
+          position.totalBptBalance > 0n &&
+          position.migration.new.chainId === chainId &&
+          isSameAddress(position.migration.new.id, pool.id)
+      )
+    : []
 
-  const hasStakedBalance = hasBalancerStakedBalance(pool)
+  if (matchingBalV3Positions.length === 0) return null
 
-  const migrate = () => {
-    if (hasStakedBalance) {
-      onOpen()
-    } else {
-      router.push(`${getPoolPath(pool)}/migrate-pool`)
-    }
-  }
+  const basePoolPath = getPoolPath(pool)
 
-  return (
-    <>
+  const alerts = matchingBalV3Positions.map(position => {
+    const source = position.migration.old
+    const chainName = getChainShortName(source.chainId as SupportedChainId)
+    const migrateHref = `${basePoolPath}/migrate-pool?from=${source.id}`
+
+    return (
       <BalAlert
         content={
-          <HStack justifyContent="space-between" w="full">
+          <HStack
+            flexWrap={{ base: 'wrap', md: 'nowrap' }}
+            gap="md"
+            justifyContent="space-between"
+            w="full"
+          >
             <Text color="black">
-              {`Migrate your position from ${pool.name} (on ${getChainName(pool.chain)}) to the recommended pool:`}
-              <Link href={poolPath} textDecoration="underline">
-                {abbreviateAddress(pool.address)}
-              </Link>
+              {`You have liquidity in Balancer V3 ${source.symbol} on ${chainName}. Migrate your position to this ${PROJECT_CONFIG.projectName} pool.`}
             </Text>
-            <BalAlertButton onClick={migrate}>Migrate</BalAlertButton>
+            <BalAlertButton onClick={() => router.push(migrateHref)}>Migrate</BalAlertButton>
           </HStack>
         }
+        key={`${source.chainId}:${source.id}`}
         status="info"
       />
-      <UnstakeWarningModal isOpen={isOpen} onClose={onClose} pool={pool} />
-    </>
-  )
-}
+    )
+  })
 
-function AlertWithoutBalance({ pool }: Props) {
-  const { getMigration } = usePoolMigrations()
-  const migration = getMigration(pool.protocolVersion, getChainId(pool.chain), pool.id)
-  const poolPath = `/pools/${chainToSlugMap[pool.chain]}/${BaseVariant.v3}/${migration?.new.id || ''}`
+  if (alerts.length === 1) return alerts[0]
 
   return (
-    <BalAlert
-      content={
-        <Text color="black">
-          The recommended similar pool for migration is:{' '}
-          <Link href={poolPath} textDecoration="underline">
-            {pool.address}
-          </Link>
-        </Text>
-      }
-      status="info"
-    ></BalAlert>
+    <VStack spacing="sm" w="full">
+      {alerts}
+    </VStack>
   )
 }

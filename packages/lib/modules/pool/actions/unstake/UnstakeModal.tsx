@@ -14,9 +14,6 @@ import { TransactionModalHeader } from '@repo/lib/shared/components/modals/Trans
 import { ActionModalFooter } from '@repo/lib/shared/components/modals/ActionModalFooter'
 import { usePoolRedirect } from '../../pool.hooks'
 import { AnimateHeightChange } from '@repo/lib/shared/components/animations/AnimateHeightChange'
-import { getChainId } from '@repo/lib/config/app.config'
-import { usePoolMigrations } from '../../migrations/PoolMigrationsProvider'
-import { MigrationAlert } from './MigrationAlert'
 import { TxBatchAlert } from '@repo/lib/shared/components/alerts/TxBatchAlert'
 import { useShouldBatchTransactions } from '@repo/lib/modules/transactions/transaction-steps/tx-batch.hooks'
 
@@ -40,7 +37,6 @@ export function UnstakeModal({
   const { pool } = usePool()
   const { isMobile } = useBreakpoints()
   const { redirectToPoolPage } = usePoolRedirect(pool)
-  const { needsMigration } = usePoolMigrations()
 
   const isSuccess = !!unstakeTxHash
 
@@ -78,10 +74,6 @@ export function UnstakeModal({
               <MobileStepTracker chain={pool.chain} transactionSteps={transactionSteps} />
             )}
             <UnstakePreview />
-
-            {needsMigration(pool.protocolVersion, getChainId(pool.chain), pool.id) && isSuccess && (
-              <MigrationAlert pool={pool} />
-            )}
           </AnimateHeightChange>
         </ModalBody>
         <ActionModalFooter

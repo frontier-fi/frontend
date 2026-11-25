@@ -1,6 +1,7 @@
 export const LS_KEYS = {
   UserAddress: 'userAddress',
   UserSettings: {
+    DismissedAnnouncement: 'userSettings.DismissedAnnouncement',
     ColorMode: 'userSettings.ColorMode',
     Currency: 'userSettings.Currency',
     Slippage: 'userSettings.Slippage',

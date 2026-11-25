@@ -1,3 +1,4 @@
+import { isSameAddress } from '@repo/lib/shared/utils/addresses'
 import { useState } from 'react'
 import { VStack, HStack, Text, RadioGroup, Radio, Stack } from '@chakra-ui/react'
 import { InfoIconPopover } from '../../InfoIconPopover'
@@ -69,8 +70,13 @@ export function PoolSettingsRadioGroup({
         control={control}
         name={name}
         render={({ field }) => {
-          const recommendedOptions = options.map(option => option.value)
-          const isCustomOptionSelected = isCustomMode || !recommendedOptions.includes(field.value)
+          const matchedOption = options.find(option =>
+            customInputType === 'address'
+              ? isSameAddress(option.value, field.value)
+              : option.value !== undefined && Number(option.value) === Number(field.value)
+          )
+
+          const isCustomOptionSelected = isCustomMode || !matchedOption
 
           return (
             <RadioGroup
@@ -84,7 +90,7 @@ export function PoolSettingsRadioGroup({
                   field.onChange(value)
                 }
               }}
-              value={isCustomOptionSelected ? '' : field.value}
+              value={isCustomOptionSelected ? '' : (matchedOption?.value ?? '')}
               w="full"
             >
               <Stack spacing={4}>
@@ -102,22 +108,15 @@ export function PoolSettingsRadioGroup({
                       {showCustomInput &&
                         (customInputType === 'address' ? (
                           <FormSubsection>
-                            <Controller
-                              control={control}
-                              name={name}
-                              render={({ field }) => (
-                                <InputWithError
-                                  error={errors?.message}
-                                  isInvalid={!!errors}
-                                  label={customInputLabel}
-                                  onChange={e => field.onChange(e.target.value)}
-                                  pasteFn={handlePaste}
-                                  placeholder="0xba100000625a3754423978a60c9317c58a424e3D"
-                                  tooltip="Paste any valid address"
-                                  value={field.value}
-                                />
-                              )}
-                              rules={{ validate: validateAsync ? validateAsync : validate }}
+                            <InputWithError
+                              error={errors?.message}
+                              isInvalid={!!errors}
+                              label={customInputLabel}
+                              onChange={e => field.onChange(e.target.value)}
+                              pasteFn={handlePaste}
+                              placeholder="0xba100000625a3754423978a60c9317c58a424e3D"
+                              tooltip="Paste any valid address"
+                              value={field.value}
                             />
                             {name === 'poolHooksContract' && (
                               <BalAlert
@@ -149,6 +148,7 @@ export function PoolSettingsRadioGroup({
             </RadioGroup>
           )
         }}
+        rules={customInputType === 'address' ? { validate: validateAsync ?? validate } : undefined}
       />
     </VStack>
   )
