@@ -28,9 +28,6 @@ import {
 import { usePortfolioFilters } from './PortfolioFiltersProvider'
 import { motion } from 'motion/react'
 import { usePortfolioSorting } from './usePortfolioSorting'
-import { usePoolMigrations } from '../../pool/migrations/PoolMigrationsProvider'
-import { getChainId } from '@repo/lib/config/app.config'
-import { MigrationAlert } from '../../pool/migrations/MigrationAlert'
 import { isChainDeprecated } from '../../chains/chain.utils'
 import { BalAlert } from '@repo/lib/shared/components/alerts/BalAlert'
 import { memo, useMemo } from 'react'
@@ -74,19 +71,6 @@ export function PortfolioTable() {
       transform: 'translateY(0)',
     },
   }
-
-  const { needsMigration } = usePoolMigrations()
-
-  const poolsThatNeedMigration = useMemo(
-    () =>
-      sortedPools
-        .filter(pool => needsMigration(pool.protocolVersion, getChainId(pool.chain), pool.id))
-        .sort(
-          (a, b) => (b.userBalance?.totalBalanceUsd || 0) - (a.userBalance?.totalBalanceUsd || 0)
-        )
-        .filter((item, pos, ary) => !pos || item.id !== ary[pos - 1]?.id), // deduplication
-    [sortedPools, needsMigration]
-  )
 
   const deprecatedChainPools = sortedPools.filter(pool => isChainDeprecated(pool.chain)).length
 
@@ -142,10 +126,6 @@ export function PortfolioTable() {
             />
           </Stack>
         </Stack>
-
-        {poolsThatNeedMigration.map(pool => (
-          <MigrationAlert key={pool.id} pool={pool} />
-        ))}
 
         {deprecatedChainPools > 0 && (
           <BalAlert

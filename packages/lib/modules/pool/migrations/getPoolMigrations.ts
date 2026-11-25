@@ -4,6 +4,7 @@ import { AppChain, GqlChainValues } from '@repo/lib/shared/services/api/graphql-
 import { isSameAddress } from '@repo/lib/shared/utils/addresses'
 import { mins } from '@repo/lib/shared/utils/time'
 import { Address, zeroAddress } from 'viem'
+import { isBalV3SupportedChain } from './balv3.constants'
 
 const POOL_MIGRATIONS_URL =
   'https://raw.githubusercontent.com/frontier-fi/metadata/main/pools/migration.json'
@@ -286,6 +287,7 @@ export function parseCompactMigrationItem(
   const newRef = parseCompactPoolRef(entry.new)
 
   if (!oldRef || !newRef) return undefined
+  if (oldRef.chainId !== newRef.chainId) return undefined
 
   return { old: oldRef, new: newRef }
 }
@@ -576,15 +578,106 @@ export async function hydrateCompactMigrations(
   })
 }
 
-function isExpandedPoolMigration(entry: RawPoolMigrationEntry): entry is PoolMigration {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function isAddressLike(value: unknown): value is Address {
+  return typeof value === 'string' && /^0x[a-fA-F0-9]{40}$/.test(value)
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+function isTokenDecimals(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 255
+}
+
+function isOptionalBoolean(value: unknown): boolean {
+  return value === undefined || typeof value === 'boolean'
+}
+
+function isOptionalString(value: unknown): boolean {
+  return value === undefined || typeof value === 'string'
+}
+
+function isValidUnderlyingToken(value: unknown): boolean {
   return (
-    Boolean(entry) &&
-    typeof entry === 'object' &&
-    typeof entry.old === 'object' &&
-    entry.old !== null &&
-    typeof entry.new === 'object' &&
-    entry.new !== null
+    isRecord(value) &&
+    isAddressLike(value.address) &&
+    isNonEmptyString(value.symbol) &&
+    isTokenDecimals(value.decimals)
   )
+}
+
+function isValidMigrationToken(value: unknown): value is BalV3MigrationToken {
+  if (!isRecord(value)) return false
+
+  // An unwrapping exit pays out the underlying token, so its address and decimals must be known
+  const describesUnwrappedToken =
+    value.isErc4626 !== true || value.unwrapOnExit !== true || value.underlyingToken !== undefined
+
+  return (
+    typeof value.index === 'number' &&
+    Number.isInteger(value.index) &&
+    value.index >= 0 &&
+    isAddressLike(value.address) &&
+    isNonEmptyString(value.symbol) &&
+    isTokenDecimals(value.decimals) &&
+    isOptionalBoolean(value.isErc4626) &&
+    isOptionalBoolean(value.unwrapOnExit) &&
+    (value.underlyingToken === undefined || isValidUnderlyingToken(value.underlyingToken)) &&
+    describesUnwrappedToken
+  )
+}
+
+function isValidSourcePool(value: unknown): value is SourceBalV3PoolInfo {
+  if (!isRecord(value) || !Array.isArray(value.tokens) || value.tokens.length === 0) return false
+  if (!value.tokens.every(isValidMigrationToken)) return false
+
+  const hasUniqueTokenIndexes =
+    new Set(value.tokens.map(token => token.index)).size === value.tokens.length
+
+  return (
+    value.protocol === 3 &&
+    typeof value.chainId === 'number' &&
+    isBalV3SupportedChain(value.chainId) &&
+    isAddressLike(value.id) &&
+    typeof value.name === 'string' &&
+    isNonEmptyString(value.symbol) &&
+    isNonEmptyString(value.type) &&
+    (value.gaugeAddress === undefined || isAddressLike(value.gaugeAddress)) &&
+    isOptionalBoolean(value.isPaused) &&
+    isOptionalBoolean(value.isInRecoveryMode) &&
+    hasUniqueTokenIndexes
+  )
+}
+
+function isValidTargetPool(value: unknown): value is TargetFrontierPoolInfo {
+  return (
+    isRecord(value) &&
+    value.protocol === 3 &&
+    typeof value.chainId === 'number' &&
+    isAddressLike(value.id) &&
+    isOptionalString(value.name) &&
+    isOptionalString(value.symbol)
+  )
+}
+
+/**
+ * Entries written out in full skip the API hydration that compact `<chain>/v3/<address>` entries
+ * go through, so nothing else checks them before the migration flow reads their fields.
+ */
+export function isValidExpandedPoolMigration(entry: unknown): entry is PoolMigration {
+  if (!isRecord(entry)) return false
+  if (!isValidSourcePool(entry.old) || !isValidTargetPool(entry.new)) return false
+
+  return entry.old.chainId === entry.new.chainId
+}
+
+function isExpandedEntry(entry: unknown): boolean {
+  return isRecord(entry) && isRecord(entry.old) && isRecord(entry.new)
 }
 
 /**
@@ -774,8 +867,8 @@ export async function getPoolMigrations(): Promise<PoolMigration[]> {
     const compactEntries: Array<{ index: number; pair: CompactMigrationPair }> = []
 
     rawEntries.forEach((entry, index) => {
-      if (isExpandedPoolMigration(entry)) {
-        expandedByIndex.set(index, entry)
+      if (isExpandedEntry(entry)) {
+        if (isValidExpandedPoolMigration(entry)) expandedByIndex.set(index, entry)
         return
       }
 

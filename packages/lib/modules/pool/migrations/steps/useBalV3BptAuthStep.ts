@@ -129,7 +129,7 @@ function BalV3SignPermitButton({
 /**
  * Step 1: authorizes the Balancer V3 Router / CompositeLiquidityRouter to spend the user's BPT.
  * Uses gasless EIP-2612 `Permit` signatures when `shouldUseSignatures && !isSafeAccount && !shouldBatchTransactions`,
- * and automatically falls back to `useTokenApprovalSteps` (`erc20Abi.approve`) otherwise.
+ * and automatically falls back to `useTokenApprovalSteps` (`erc20Abi.approve` of the exact BPT amount) otherwise.
  * Latches completion once the remove step completes so step indices remain stable after BPT/allowance is spent.
  */
 export function useBalV3BptAuthStep({
@@ -398,6 +398,8 @@ export function useBalV3BptAuthStep({
     ],
     actionType: 'RemoveLiquidity',
     bptSymbol: oldPool.symbol,
+    // One-off exit through an external router: approve what is removed, like the permit path does
+    approveMaxBigInt: false,
     enabled: Boolean(
       enabled &&
       !shouldUsePermit &&

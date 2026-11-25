@@ -5,7 +5,7 @@ import { testHook } from '@repo/lib/test/utils/custom-renderers'
 import { testQueryClient } from '@repo/lib/test/utils/react-query'
 import { testWagmiConfig } from '@repo/test/anvil/testWagmiConfig'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { PropsWithChildren, ReactNode } from 'react'
 import { Address, encodeAbiParameters, encodeEventTopics, erc20Abi, Log } from 'viem'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -13,13 +13,17 @@ import { WagmiProvider } from 'wagmi'
 import { ManagedResult, TransactionStep } from '../../transactions/transaction-steps/lib'
 import { TransactionStateProvider } from '../../transactions/transaction-steps/TransactionStateProvider'
 import { PriceImpactProvider } from '@repo/lib/modules/price-impact/PriceImpactProvider'
+import { QueryAddLiquidityOutput } from '../actions/add-liquidity/add-liquidity.types'
 import { Pool } from '../pool.types'
 import { ChainSlug } from '../pool.utils'
 import { BALANCER_V3_CONTRACTS } from './balv3.constants'
 import { PoolMigration } from './getPoolMigrations'
 import {
+  ACCEPT_POOL_RISKS_REASON,
+  ACKNOWLEDGE_LEFTOVER_REASON,
   deriveTargetMigrationAmounts,
   evaluateDepositableExitValue,
+  getQuotedDepositAmounts,
   MigrateLiquidityProvider,
   useMigrateLiquidity,
 } from './MigrateLiquidityProvider'
@@ -49,6 +53,7 @@ const {
   usePoolMock,
   usePoolMigrationsMock,
   useAddLiquidityMock,
+  setAcceptPoolRisksMock,
   useTokensMock,
   useAddLiquidityReceiptMock,
   usePoolRedirectMock,
@@ -67,6 +72,7 @@ const {
   usePoolMock: vi.fn(),
   usePoolMigrationsMock: vi.fn(),
   useAddLiquidityMock: vi.fn(),
+  setAcceptPoolRisksMock: vi.fn(),
   useTokensMock: vi.fn(),
   useAddLiquidityReceiptMock: vi.fn(),
   usePoolRedirectMock: vi.fn(),
@@ -170,10 +176,32 @@ vi.mock(
 
     return {
       ...actual,
-      useAddLiquidity: useAddLiquidityMock,
+      // Pool risks count as accepted unless a test says otherwise
+      useAddLiquidity: () => ({
+        acceptPoolRisks: true,
+        setAcceptPoolRisks: setAcceptPoolRisksMock,
+        ...useAddLiquidityMock(),
+      }),
     }
   }
 )
+
+vi.mock('@repo/lib/modules/pool/metadata/PoolsMetadataProvider', () => ({
+  usePoolsMetadata: () => ({
+    getErc4626Metadata: () => [{ id: 'aave', name: 'Aave Boosted' }],
+    getPoolMetadata: () => undefined,
+  }),
+}))
+
+vi.mock('@repo/lib/modules/pool/PoolDetail/PoolInfo/PoolRisks/PoolRisks', () => ({
+  RisksList: () => <div data-testid="pool-risks-list" />,
+}))
+
+vi.mock('@repo/lib/modules/tokens/TokenRow/BptRow', () => ({
+  BptRow: ({ label, bptAmount }: { label: string; bptAmount: string }) => (
+    <div data-testid="bpt-row">{`${label}:${bptAmount}`}</div>
+  ),
+}))
 
 vi.mock('@repo/lib/modules/tokens/TokensProvider', async importOriginal => {
   const actual = await importOriginal<typeof import('@repo/lib/modules/tokens/TokensProvider')>()
@@ -284,26 +312,6 @@ vi.mock('@repo/lib/modules/pool/actions/PoolActionsLayout', () => ({
   PoolActionsLayout: ({ children, closeButton }: PropsWithChildren & { closeButton?: boolean }) => (
     <div data-close-button={String(closeButton)} data-testid="pool-actions-layout">
       {children}
-    </div>
-  ),
-}))
-
-vi.mock('@repo/lib/modules/tokens/TokenRow/TokenRowGroup', () => ({
-  TokenRowGroup: ({
-    label,
-    amounts,
-    rightElement,
-  }: {
-    label: string
-    amounts: Array<{ tokenAddress: string; humanAmount: string; symbol?: string }>
-    rightElement?: ReactNode
-  }) => (
-    <div data-testid="token-row-group">
-      <span>{label}</span>
-      {rightElement}
-      {amounts.map(a => (
-        <span key={a.tokenAddress}>{`${a.symbol ?? a.tokenAddress}:${a.humanAmount}`}</span>
-      ))}
     </div>
   ),
 }))
@@ -537,6 +545,26 @@ function makeGyroeTargetPool(): Pool {
   } as unknown as Pool
 }
 
+// USDC, USDT and GHO at $1. The wrapped tokens have no price of their own and are valued
+// through their underlying token.
+function priceUnderlyingTokensAtOneDollar(address: string, _chain: string, amount: string): string {
+  const isPriced = [USDC, USDT, GHO].some(token => token.toLowerCase() === address.toLowerCase())
+  return isPriced ? String(Number(amount)) : '0'
+}
+
+// A deposit quote for 6-decimal tokens, shaped like the output of the SDK handlers
+function makeDepositQuote(amountsIn: Array<[Address, bigint]>): QueryAddLiquidityOutput {
+  return {
+    bptOut: { amount: 160_000_000_000_000_000_000n },
+    sdkQueryOutput: {
+      amountsIn: amountsIn.map(([address, amount]) => ({
+        token: { address, decimals: 6 },
+        amount,
+      })),
+    },
+  } as unknown as QueryAddLiquidityOutput
+}
+
 function makeTransferLog(tokenAddress: Address, from: Address, to: Address, value: bigint): Log {
   return {
     address: tokenAddress,
@@ -683,6 +711,7 @@ describe('MigrateLiquidityProvider', () => {
     const { result, rerender } = testHook(() => useMigrateLiquidity(), { wrapper: Wrapper })
 
     await waitFor(() => expect(result.current.isPreExitDepositVerified).toBe(true))
+    act(() => result.current.setIsLeftoverAcknowledged(true))
 
     expect(result.current.hadStakedBalance).toBe(true)
     expect(result.current.initialStakedBptBalance).toBe(400n)
@@ -863,6 +892,7 @@ describe('MigrateLiquidityProvider', () => {
     rerender()
 
     await waitFor(() => expect(result.current.isPreExitDepositVerified).toBe(true))
+    act(() => result.current.setIsLeftoverAcknowledged(true))
 
     // Target boosted pool defaults wrapUnderlying to [true, true]; exiting wrapped tokens must sync both to false
     expect(setWrapUnderlyingByIndexMock).toHaveBeenCalledWith(0, false)
@@ -1310,6 +1340,320 @@ describe('MigrateLiquidityProvider', () => {
     expect(exactRatioDerived.hasProportionalDustWarning).toBe(false)
     expect(exactRatioDerived.migratedAmounts).toHaveLength(2)
   })
+
+  it('asks for both confirmations before the first exit step and not again after the exit', async () => {
+    let currentPositions: MigratableBalV3Position[] = [
+      {
+        migration: AAVE_3_TO_2_MIGRATION,
+        walletBptBalance: 100n,
+        stakedBptBalance: 400n,
+        totalBptBalance: 500n,
+        estimatedUsdValue: 150,
+      },
+    ]
+
+    usePoolMigrationsMock.mockImplementation(() => ({
+      migratablePositions: currentPositions,
+      isLoading: false,
+      refetch: refetchPositionsMock,
+      getMigrationsForTarget: () => [AAVE_3_TO_2_MIGRATION],
+    }))
+
+    const addLiquidity = useAddLiquidityMock()
+    useAddLiquidityMock.mockReturnValue({ ...addLiquidity, acceptPoolRisks: false })
+
+    function Wrapper({ children }: PropsWithChildren) {
+      return (
+        <TransactionStateProvider>
+          <MigrateLiquidityProvider migration={AAVE_3_TO_2_MIGRATION}>
+            {children}
+          </MigrateLiquidityProvider>
+        </TransactionStateProvider>
+      )
+    }
+
+    const { result, rerender } = testHook(() => useMigrateLiquidity(), { wrapper: Wrapper })
+
+    await waitFor(() => expect(result.current.isPreExitDepositVerified).toBe(true))
+
+    function renderStepAction(stepId: string) {
+      const step = result.current.migrationSteps.steps.find(s => s.id === stepId)!
+      return render(<ChakraProvider>{step.renderAction()}</ChakraProvider>)
+    }
+
+    expect(result.current.migrationSteps.currentStep?.id).toBe('unstake-balv3-gauge')
+
+    async function expectGatedUnstakeButton(reason: string) {
+      const gatedUnstake = renderStepAction('unstake-balv3-gauge')
+      const unstakeButton = screen.getByRole('button', { name: 'Unstake Aave GHO/USDT/USDC' })
+      expect(unstakeButton).toBeDisabled()
+      expect(screen.queryByTestId('unstake-balv3-gauge')).toBeNull()
+
+      fireEvent.pointerOver(unstakeButton)
+      expect(await screen.findByText(reason)).toBeInTheDocument()
+      gatedUnstake.unmount()
+    }
+
+    // Nothing confirmed: the exit steps render a disabled button that says what is missing.
+    // 20 waEthUSDT and all of the Aave Prime GHO would stay in the wallet, so that comes first.
+    expect(result.current.needsLeftoverAcknowledgement).toBe(true)
+    expect(result.current.isLeftoverAcknowledged).toBe(false)
+    await expectGatedUnstakeButton(ACKNOWLEDGE_LEFTOVER_REASON)
+
+    act(() => result.current.setIsLeftoverAcknowledged(true))
+    expect(result.current.isLeftoverAcknowledged).toBe(true)
+    await expectGatedUnstakeButton(ACCEPT_POOL_RISKS_REASON)
+
+    const gatedPermit = renderStepAction('sign-balv3-bpt-permit')
+    expect(screen.getByRole('button', { name: 'Sign permit' })).toBeDisabled()
+    gatedPermit.unmount()
+
+    const gatedRemove = renderStepAction('remove-balv3-liquidity')
+    expect(screen.getByRole('button', { name: 'Remove liquidity' })).toBeDisabled()
+    expect(screen.queryByTestId('remove-balv3-liquidity')).toBeNull()
+    gatedRemove.unmount()
+
+    // Accepted: the real transaction buttons take over
+    useAddLiquidityMock.mockReturnValue({ ...addLiquidity, acceptPoolRisks: true })
+    rerender()
+
+    const unstake = renderStepAction('unstake-balv3-gauge')
+    expect(screen.getByTestId('unstake-balv3-gauge')).toBeInTheDocument()
+    unstake.unmount()
+
+    currentPositions = [
+      {
+        migration: AAVE_3_TO_2_MIGRATION,
+        walletBptBalance: 500n,
+        stakedBptBalance: 0n,
+        totalBptBalance: 500n,
+        estimatedUsdValue: 150,
+      },
+    ]
+
+    rerender()
+
+    renderStepAction('remove-balv3-liquidity')
+    expect(screen.getByTestId('remove-balv3-liquidity')).toBeInTheDocument()
+
+    const txHash = ('0x' + '55'.repeat(32)) as `0x${string}`
+    const vault = BALANCER_V3_CONTRACTS[1].vault
+
+    act(() => {
+      managedSendButtonOnChangeRef.current?.({
+        chainId: 1,
+        simulation: { isLoading: false, isPending: false, isError: false },
+        execution: { isPending: false, isError: false, data: txHash },
+        result: {
+          isLoading: false,
+          isError: false,
+          isSuccess: true,
+          data: {
+            transactionHash: txHash,
+            logs: [
+              makeTransferLog(WAETH_USDT, vault, USER_ADDRESS, 100_000_000n),
+              makeTransferLog(AAVE_PRIME_GHO, vault, USER_ADDRESS, 50_000_000_000_000_000_000n),
+              makeTransferLog(WAETH_USDC, vault, USER_ADDRESS, 80_000_000n),
+            ],
+          },
+        },
+        isSafeTxLoading: false,
+      } as unknown as ManagedResult)
+    })
+
+    await waitFor(() => expect(result.current.isBalV3RemoveComplete).toBe(true))
+
+    // The removed tokens are in the wallet now: the deposit must stay reachable whatever happens
+    // to the confirmations afterwards
+    useAddLiquidityMock.mockReturnValue({ ...addLiquidity, acceptPoolRisks: false })
+    act(() => result.current.setIsLeftoverAcknowledged(false))
+    rerender()
+
+    expect(result.current.needsLeftoverAcknowledgement).toBe(false)
+    expect(result.current.migrationSteps.currentStep?.id).toBe('add-liquidity')
+
+    render(<div>{result.current.migrationSteps.currentStep?.renderAction()}</div>)
+    expect(screen.getByTestId('add-liquidity-btn')).toBeInTheDocument()
+  })
+
+  describe('leftover confirmation', () => {
+    // Exit pays 100 waEthUSDT + 50 Aave Prime GHO + 80 waEthUSDC ($230 with everything at $1).
+    // The target takes waEthUSDC and waEthUSDT 1:1, so at most 80 + 80 can be deposited.
+    function setup({ quotedAmount }: { quotedAmount: bigint }) {
+      usePoolMigrationsMock.mockReturnValue({
+        migratablePositions: [
+          {
+            migration: AAVE_3_TO_2_MIGRATION,
+            walletBptBalance: 500n,
+            stakedBptBalance: 0n,
+            totalBptBalance: 500n,
+            estimatedUsdValue: 230,
+          },
+        ],
+        isLoading: false,
+        refetch: refetchPositionsMock,
+        getMigrationsForTarget: () => [AAVE_3_TO_2_MIGRATION],
+      })
+
+      useTokensMock.mockReturnValue({
+        usdValueForTokenAddress: priceUnderlyingTokensAtOneDollar,
+        stopTokenPricePolling: vi.fn(),
+      })
+
+      const addLiquidity = useAddLiquidityMock()
+
+      const quote = (amount: bigint) => {
+        useAddLiquidityMock.mockReturnValue({
+          ...addLiquidity,
+          simulationQuery: {
+            ...addLiquidity.simulationQuery,
+            data: makeDepositQuote([
+              [WAETH_USDC, amount],
+              [WAETH_USDT, amount],
+            ]),
+          },
+        })
+      }
+
+      quote(quotedAmount)
+
+      function Wrapper({ children }: PropsWithChildren) {
+        return (
+          <TransactionStateProvider>
+            <MigrateLiquidityProvider migration={AAVE_3_TO_2_MIGRATION}>
+              {children}
+            </MigrateLiquidityProvider>
+          </TransactionStateProvider>
+        )
+      }
+
+      return { ...testHook(() => useMigrateLiquidity(), { wrapper: Wrapper }), quote }
+    }
+
+    it('measures the leftover against the quoted deposit, not the amounts sent for quoting', async () => {
+      const { result } = setup({ quotedAmount: 79_600_000n })
+
+      await waitFor(() => expect(result.current.isPreExitDepositVerified).toBe(true))
+
+      const { breakdown } = result.current
+
+      expect(breakdown.removedUsd).toBe('230')
+      expect(breakdown.depositedUsd).toBe('159.2')
+      expect(breakdown.leftoverUsd).toBe('70.8')
+      expect(breakdown.leftoverRatio).toBeCloseTo(70.8 / 230, 10)
+
+      expect(breakdown.deposited.map(({ symbol, humanAmount }) => [symbol, humanAmount])).toEqual([
+        ['waEthUSDC', '79.6'],
+        ['waEthUSDT', '79.6'],
+      ])
+
+      expect(breakdown.leftover.map(({ symbol, humanAmount }) => [symbol, humanAmount])).toEqual([
+        ['waEthUSDT', '20.4'],
+        ['Aave Prime GHO', '50'],
+        ['waEthUSDC', '0.4'],
+      ])
+    })
+
+    it('keeps a confirmation through small quote changes and asks again when clearly more stays behind', async () => {
+      const { result, rerender, quote } = setup({ quotedAmount: 79_600_000n })
+
+      await waitFor(() => expect(result.current.isPreExitDepositVerified).toBe(true))
+
+      expect(result.current.needsLeftoverAcknowledgement).toBe(true)
+      expect(result.current.isLeftoverAcknowledged).toBe(false)
+
+      act(() => result.current.setIsLeftoverAcknowledged(true))
+      expect(result.current.isLeftoverAcknowledged).toBe(true)
+
+      // 30.8% -> 31.3% of the position left behind: within the tolerance
+      quote(79_000_000n)
+      rerender()
+      expect(result.current.breakdown.leftoverRatio).toBeCloseTo(72 / 230, 10)
+      expect(result.current.isLeftoverAcknowledged).toBe(true)
+
+      // 30.8% -> 33.9%: not what was confirmed anymore
+      quote(76_000_000n)
+      rerender()
+      expect(result.current.breakdown.leftoverRatio).toBeCloseTo(78 / 230, 10)
+      expect(result.current.isLeftoverAcknowledged).toBe(false)
+
+      expect(result.current.migrationSteps.currentStep?.id).toBe('sign-balv3-bpt-permit')
+
+      render(
+        <ChakraProvider>{result.current.migrationSteps.currentStep?.renderAction()}</ChakraProvider>
+      )
+
+      const gatedButton = screen.getByRole('button', { name: 'Sign permit' })
+      expect(gatedButton).toBeDisabled()
+      fireEvent.pointerOver(gatedButton)
+      expect(await screen.findByText(ACKNOWLEDGE_LEFTOVER_REASON)).toBeInTheDocument()
+    })
+
+    it('does not ask when only the slippage buffer stays behind', async () => {
+      // Exit pays exactly what the target pool takes: 80 waEthUSDT + 80 waEthUSDC
+      simulateContractMock.mockResolvedValue({ result: [80_000_000n, 0n, 80_000_000n] })
+      useUserSettingsMock.mockReturnValue({ shouldUseSignatures: false, slippage: '0.5' })
+
+      const { result } = setup({ quotedAmount: 79_600_000n })
+
+      await waitFor(() => expect(result.current.isPreExitDepositVerified).toBe(true))
+
+      expect(result.current.breakdown.leftoverRatio).toBeCloseTo(0.005, 10)
+      expect(result.current.needsLeftoverAcknowledgement).toBe(false)
+
+      // With the pool risks accepted, nothing else stands in the way of the exit
+      expect(result.current.migrationSteps.currentStep?.id).toBe('remove-balv3-liquidity')
+      render(<div>{result.current.migrationSteps.currentStep?.renderAction()}</div>)
+      expect(screen.getByTestId('remove-balv3-liquidity')).toBeInTheDocument()
+    })
+  })
+})
+
+describe('getQuotedDepositAmounts', () => {
+  const migratedAmounts = [
+    { tokenAddress: WAETH_USDC, humanAmount: '80', symbol: 'waEthUSDC', decimals: 6 },
+    { tokenAddress: WAETH_USDT, humanAmount: '80', symbol: 'waEthUSDT', decimals: 6 },
+  ] as const
+
+  it('returns the quoted amounts in the order and shape of the migrated amounts', () => {
+    const quote = makeDepositQuote([
+      [WAETH_USDT, 79_500_000n],
+      [WAETH_USDC.toUpperCase().replace('0X', '0x') as Address, 79_600_000n],
+    ])
+
+    expect(getQuotedDepositAmounts(quote, [...migratedAmounts])).toEqual([
+      { tokenAddress: WAETH_USDC, humanAmount: '79.6', symbol: 'waEthUSDC', decimals: 6 },
+      { tokenAddress: WAETH_USDT, humanAmount: '79.5', symbol: 'waEthUSDT', decimals: 6 },
+    ])
+  })
+
+  it.each([
+    ['there is no quote', undefined],
+    ['the quote carries no amounts', { bptOut: { amount: 1n } }],
+    ['a migrated token is missing from the quote', makeDepositQuote([[WAETH_USDC, 79_600_000n]])],
+    [
+      'the quote is for more than is available',
+      makeDepositQuote([
+        [WAETH_USDC, 79_600_000n],
+        [WAETH_USDT, 80_000_001n],
+      ]),
+    ],
+    [
+      'a quoted amount is zero',
+      makeDepositQuote([
+        [WAETH_USDC, 79_600_000n],
+        [WAETH_USDT, 0n],
+      ]),
+    ],
+  ])('returns undefined when %s', (_case, quote) => {
+    expect(getQuotedDepositAmounts(quote as never, [...migratedAmounts])).toBeUndefined()
+  })
+
+  it('returns undefined when nothing can be migrated', () => {
+    expect(
+      getQuotedDepositAmounts(makeDepositQuote([[WAETH_USDC, 79_600_000n]]), [])
+    ).toBeUndefined()
+  })
 })
 
 Element.prototype.animate = vi.fn().mockImplementation(() => {
@@ -1334,6 +1678,20 @@ Element.prototype.animate = vi.fn().mockImplementation(() => {
 
   return anim as unknown as Animation
 })
+
+// A section of the breakdown card reads, in this order: its label, the total at its right (when
+// everything is priced), the token amounts, and for the leftover a note that says why
+async function expectBreakdownSection(label: string, ...content: string[]) {
+  const section = await screen.findByRole('group', { name: label })
+
+  await waitFor(() =>
+    expect(
+      within(section)
+        .getAllByText(/./)
+        .map(element => element.textContent)
+    ).toEqual([label, ...content])
+  )
+}
 
 function renderWithProviders(ui: ReactNode) {
   return render(
@@ -1480,7 +1838,7 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
     expect(screen.getByText('0xFF-waEthUSDC-waEthUSDT')).toBeTruthy()
   })
 
-  it('renders unmigratedTokens and proportional dust notes in MigrateLiquiditySummary', () => {
+  it('explains in MigrateLiquiditySummary why some tokens stay in the wallet', async () => {
     const targetPool = makeGyroeTargetPool()
 
     const gyroeMigration: PoolMigration = {
@@ -1557,13 +1915,19 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
       </MigrateLiquidityProvider>
     )
 
-    return waitFor(() => {
-      expect(screen.getByText(/not accepted by the target pool/i)).toBeTruthy()
-      expect(screen.getByText(/target pool's exact ratio/i)).toBeTruthy()
-    })
+    // Exit pays 10 rETH + 15 WETH + 20 GHO; the target takes rETH and WETH 1:1 and no GHO.
+    // Nothing is priced in this setup, so no dollar totals are shown.
+    await expectBreakdownSection("You're removing", '10 rETH + 15 WETH + 20 GHO')
+    await expectBreakdownSection("You're depositing", '10 rETH + 10 WETH')
+
+    await expectBreakdownSection(
+      'Staying in your wallet',
+      '5 WETH + 20 GHO',
+      'The target pool only takes tokens in its own ratio. GHO is not accepted by the target pool.'
+    )
   })
 
-  it('syncs priceImpactQuery and displays upfront, high, and unknown join price impact in MigrateLiquiditySummary', async () => {
+  it('forces a proportional deposit and reports zero price impact whatever the add-liquidity quote says', async () => {
     const targetPool = makeTarget2TokenPool()
     usePoolMock.mockReturnValue({ pool: targetPool })
 
@@ -1593,14 +1957,16 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
       getMigrationsForTarget: () => [AAVE_3_TO_2_MIGRATION],
     })
 
-    const baseAddLiquidityReturn = {
+    const setWantsProportional = vi.fn()
+
+    useAddLiquidityMock.mockReturnValue({
       transactionSteps: { steps: [], isLoading: false },
       humanAmountsIn: [],
       setHumanAmountsIn: vi.fn(),
       wrapUnderlying: [true, true],
       setWrapUnderlyingByIndex: vi.fn(),
       wantsProportional: false,
-      setWantsProportional: vi.fn(),
+      setWantsProportional,
       referenceAmountAddress: undefined,
       setReferenceAmountAddress: vi.fn(),
       hasQuoteContext: true,
@@ -1613,12 +1979,8 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
         error: null,
         isFetching: false,
       },
+      priceImpactQuery: { data: 0.075, error: null, isFetching: false },
       slippage: '0.5',
-    }
-
-    useAddLiquidityMock.mockReturnValue({
-      ...baseAddLiquidityReturn,
-      priceImpactQuery: { data: 0.004, error: null, isFetching: false },
     })
 
     const TestWrapper = ({ children }: PropsWithChildren) => (
@@ -1633,7 +1995,7 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
       </QueryClientProvider>
     )
 
-    const { rerender } = render(
+    render(
       <MigrateLiquidityProvider migration={AAVE_3_TO_2_MIGRATION}>
         <MigrateLiquiditySummary />
       </MigrateLiquidityProvider>,
@@ -1643,44 +2005,426 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
     await waitFor(() => {
       expect(screen.getByText('Target pool deposit')).toBeTruthy()
       expect(screen.getByText('Potential losses')).toBeTruthy()
-      expect(screen.getByText(/\$0\.40\s*\(0\.40%\)/)).toBeTruthy()
+      expect(screen.getByText(/\$0\.00\s*\(0\.00%\)/)).toBeTruthy()
+    })
+
+    expect(setWantsProportional).toHaveBeenCalledWith(true)
+    expect(screen.queryByText(/High price impact \(/)).toBeNull()
+    expect(screen.queryByText(/Price impact could not be calculated/)).toBeNull()
+  })
+
+  describe('removed, deposited and left in the wallet', () => {
+    // The Aave pool position exits into waEthUSDT, Aave Prime GHO and waEthUSDC. The two-token
+    // target takes waEthUSDC and waEthUSDT 1:1. Everything is worth $1.
+    function setupPricedMigration({
+      exitAmounts,
+      quotedAmount,
+    }: {
+      exitAmounts: [waEthUsdt: bigint, aavePrimeGho: bigint, waEthUsdc: bigint]
+      quotedAmount: bigint
+    }) {
+      usePoolMock.mockReturnValue({ pool: makeTarget2TokenPool() })
+
+      usePublicClientMock.mockReturnValue({
+        simulateContract: vi.fn().mockResolvedValue({ result: exitAmounts }),
+      })
+
+      // No signatures and no pending approvals: the exit is a single "Remove liquidity" step
+      useUserSettingsMock.mockReturnValue({ shouldUseSignatures: false, slippage: '0.5' })
+      useIsSafeAccountMock.mockReturnValue(false)
+      useSdkWalletClientMock.mockReturnValue({ sdkClient: undefined, isLoading: false })
+      useTokenApprovalStepsMock.mockReturnValue({ isLoading: false, steps: [] })
+
+      useTokensMock.mockReturnValue({
+        usdValueForTokenAddress: priceUnderlyingTokensAtOneDollar,
+        stopTokenPricePolling: vi.fn(),
+      })
+
+      usePoolMigrationsMock.mockReturnValue({
+        migratablePositions: [
+          {
+            migration: AAVE_3_TO_2_MIGRATION,
+            walletBptBalance: 500n,
+            stakedBptBalance: 0n,
+            totalBptBalance: 500n,
+            estimatedUsdValue: 230,
+          },
+        ],
+        isLoading: false,
+        refetch: vi.fn(),
+        getMigrationsForTarget: () => [AAVE_3_TO_2_MIGRATION],
+      })
+
+      const addLiquidityStep: TransactionStep = {
+        id: 'add-liquidity',
+        stepType: 'addLiquidity',
+        labels: { init: 'Add liquidity', tooltip: 'Add liquidity' },
+        isComplete: () => false,
+        renderAction: () => (
+          <button data-testid="add-liquidity-btn" type="button">
+            Add liquidity
+          </button>
+        ),
+      }
+
+      const addLiquidity = {
+        transactionSteps: { steps: [addLiquidityStep], isLoading: false },
+        humanAmountsIn: [
+          { tokenAddress: WAETH_USDC, humanAmount: '80', symbol: 'waEthUSDC', decimals: 6 },
+          { tokenAddress: WAETH_USDT, humanAmount: '80', symbol: 'waEthUSDT', decimals: 6 },
+        ],
+        setHumanAmountsIn: vi.fn(),
+        wrapUnderlying: [false, false],
+        setWrapUnderlyingByIndex: vi.fn(),
+        wantsProportional: true,
+        setWantsProportional: vi.fn(),
+        referenceAmountAddress: WAETH_USDC,
+        setReferenceAmountAddress: vi.fn(),
+        isMinimumDepositMet: true,
+        hasQuoteContext: true,
+        addLiquidityTxHash: undefined as string | undefined,
+        urlTxHash: undefined,
+        lastTransaction: undefined,
+        totalUSDValue: '160',
+        simulationQuery: {
+          data: makeDepositQuote([
+            [WAETH_USDC, quotedAmount],
+            [WAETH_USDT, quotedAmount],
+          ]),
+          error: null,
+          isLoading: false,
+          isFetching: false,
+        },
+        slippage: '0.5',
+      }
+
+      useAddLiquidityMock.mockReturnValue(addLiquidity)
+
+      return addLiquidity
+    }
+
+    const RATIO_AND_GHO_NOTE =
+      'The target pool only takes tokens in its own ratio. Aave Prime GHO is not accepted by the target pool.'
+
+    it('shows all three before the first step and asks to confirm a large leftover', async () => {
+      setupPricedMigration({
+        exitAmounts: [100_000_000n, 50_000_000_000_000_000_000n, 80_000_000n],
+        quotedAmount: 79_600_000n,
+      })
+
+      renderWithProviders(
+        <MigrateLiquidityProvider migration={AAVE_3_TO_2_MIGRATION}>
+          <MigrateLiquiditySummary />
+        </MigrateLiquidityProvider>
+      )
+
+      await expectBreakdownSection(
+        "You're removing",
+        '$230.00',
+        '100 waEthUSDT + 50 Aave Prime GHO + 80 waEthUSDC'
+      )
+
+      await expectBreakdownSection(
+        "You're depositing",
+        '$159.20',
+        '79.6 waEthUSDC + 79.6 waEthUSDT'
+      )
+
+      await expectBreakdownSection(
+        'Staying in your wallet',
+        '$70.80 (30.8%)',
+        '20.4 waEthUSDT + 50 Aave Prime GHO + 0.4 waEthUSDC',
+        RATIO_AND_GHO_NOTE
+      )
+
+      // The old summary only said what would be deposited, under this heading
+      expect(screen.queryByText("You're migrating")).toBeNull()
+
+      const acknowledgement = screen.getByRole('checkbox', {
+        name: 'I understand that $70.80 (30.8%) of what I remove will stay in my wallet and will not be deposited',
+      })
+
+      await waitFor(() => expect(acknowledgement).toBeEnabled())
+      expect(acknowledgement).not.toBeChecked()
+
+      fireEvent.click(acknowledgement)
+      await waitFor(() => expect(acknowledgement).toBeChecked())
+
+      fireEvent.click(acknowledgement)
+      await waitFor(() => expect(acknowledgement).not.toBeChecked())
+    })
+
+    it('lists the token amounts in the confirmation when the leftover cannot be priced', async () => {
+      setupPricedMigration({
+        exitAmounts: [100_000_000n, 50_000_000_000_000_000_000n, 80_000_000n],
+        quotedAmount: 79_600_000n,
+      })
+
+      // GHO has no price here, so neither has the Aave Prime GHO that stays behind
+      useTokensMock.mockReturnValue({
+        usdValueForTokenAddress: (address: string, chain: string, amount: string) =>
+          address.toLowerCase() === GHO.toLowerCase()
+            ? '0'
+            : priceUnderlyingTokensAtOneDollar(address, chain, amount),
+        stopTokenPricePolling: vi.fn(),
+      })
+
+      renderWithProviders(
+        <MigrateLiquidityProvider migration={AAVE_3_TO_2_MIGRATION}>
+          <MigrateLiquiditySummary />
+        </MigrateLiquidityProvider>
+      )
+
+      expect(
+        await screen.findByRole('checkbox', {
+          name: 'I understand that 20.4 waEthUSDT, 50 Aave Prime GHO and 0.4 waEthUSDC will stay in my wallet and will not be deposited',
+        })
+      ).toBeInTheDocument()
+
+      // No dollar figure or percentage is made up for it
+      await expectBreakdownSection(
+        'Staying in your wallet',
+        '20.4 waEthUSDT + 50 Aave Prime GHO + 0.4 waEthUSDC',
+        RATIO_AND_GHO_NOTE
+      )
+
+      await expectBreakdownSection(
+        "You're removing",
+        '100 waEthUSDT + 50 Aave Prime GHO + 80 waEthUSDC'
+      )
+    })
+
+    it('shows a small leftover without asking to confirm it', async () => {
+      setupPricedMigration({
+        exitAmounts: [80_000_000n, 0n, 80_000_000n],
+        quotedAmount: 79_600_000n,
+      })
+
+      renderWithProviders(
+        <MigrateLiquidityProvider migration={AAVE_3_TO_2_MIGRATION}>
+          <MigrateLiquiditySummary />
+        </MigrateLiquidityProvider>
+      )
+
+      await expectBreakdownSection("You're removing", '$160.00', '80 waEthUSDT + 80 waEthUSDC')
+
+      await expectBreakdownSection(
+        'Staying in your wallet',
+        '$0.80 (0.5%)',
+        '0.4 waEthUSDT + 0.4 waEthUSDC',
+        'A small buffer is held back in case prices move.'
+      )
+
+      await screen.findByRole('checkbox', {
+        name: /I accept the risks of interacting with this pool/,
+      })
+
+      expect(screen.queryByRole('checkbox', { name: /I understand that/ })).toBeNull()
+    })
+
+    it('follows the migration: the quote, then what the exit paid out, then what the deposit took', async () => {
+      const addLiquidity = setupPricedMigration({
+        exitAmounts: [100_000_000n, 50_000_000_000_000_000_000n, 80_000_000n],
+        quotedAmount: 79_600_000n,
+      })
+
+      const modal = (
+        <MigrateLiquidityProvider migration={AAVE_3_TO_2_MIGRATION}>
+          <PoolMigrationModal />
+        </MigrateLiquidityProvider>
+      )
+
+      const { rerender } = renderWithProviders(modal)
+
+      const rerenderModal = () =>
+        rerender(
+          <QueryClientProvider client={testQueryClient()}>
+            <WagmiProvider config={testWagmiConfig} reconnectOnMount={false}>
+              <ChakraProvider>
+                <PriceImpactProvider>
+                  <TransactionStateProvider>{modal}</TransactionStateProvider>
+                </PriceImpactProvider>
+              </ChakraProvider>
+            </WagmiProvider>
+          </QueryClientProvider>
+        )
+
+      // 1. Before the exit: the exit cannot start until the leftover is confirmed
+      await expectBreakdownSection(
+        'Staying in your wallet',
+        '$70.80 (30.8%)',
+        '20.4 waEthUSDT + 50 Aave Prime GHO + 0.4 waEthUSDC',
+        RATIO_AND_GHO_NOTE
+      )
+
+      expect(screen.getByRole('button', { name: 'Remove liquidity' })).toBeDisabled()
+      expect(screen.queryByTestId('remove-balv3-liquidity')).toBeNull()
+
+      const acknowledgement = screen.getByRole('checkbox', { name: /I understand that/ })
+      await waitFor(() => expect(acknowledgement).toBeEnabled())
+      fireEvent.click(acknowledgement)
+
+      await screen.findByTestId('remove-balv3-liquidity')
+
+      // 2. The exit confirms and pays out a little differently from the simulation
+      const txHash = ('0x' + '66'.repeat(32)) as `0x${string}`
+      const vault = BALANCER_V3_CONTRACTS[1].vault
+
+      act(() => {
+        managedSendButtonOnChangeRef.current?.({
+          chainId: 1,
+          simulation: { isLoading: false, isPending: false, isError: false },
+          execution: { isPending: false, isError: false, data: txHash },
+          result: {
+            isLoading: false,
+            isError: false,
+            isSuccess: true,
+            data: {
+              transactionHash: txHash,
+              logs: [
+                makeTransferLog(WAETH_USDT, vault, USER_ADDRESS, 102_500_000n),
+                makeTransferLog(AAVE_PRIME_GHO, vault, USER_ADDRESS, 50_000_000_000_000_000_000n),
+                makeTransferLog(WAETH_USDC, vault, USER_ADDRESS, 79_500_000n),
+              ],
+            },
+          },
+          isSafeTxLoading: false,
+        } as unknown as ManagedResult)
+      })
+
+      const REMOVED = ['$232.00', '102.5 waEthUSDT + 50 Aave Prime GHO + 79.5 waEthUSDC']
+
+      await expectBreakdownSection('You removed', ...REMOVED)
+
+      // The quote on screen was made for the simulated amounts, so the deposit falls back to
+      // what can be deposited from the tokens actually received until a new quote arrives
+      await expectBreakdownSection(
+        "You're depositing",
+        '$159.00',
+        '79.5 waEthUSDC + 79.5 waEthUSDT'
+      )
+
+      await expectBreakdownSection(
+        'Staying in your wallet',
+        '$73.00 (31.5%)',
+        '23 waEthUSDT + 50 Aave Prime GHO',
+        RATIO_AND_GHO_NOTE
+      )
+
+      // Nothing is asked anymore: the deposit is the only way forward now
+      expect(screen.queryByRole('checkbox')).toBeNull()
+      expect(await screen.findByTestId('add-liquidity-btn')).toBeInTheDocument()
+
+      // 3. The deposit confirms: its receipt says what really went in
+      useAddLiquidityMock.mockReturnValue({ ...addLiquidity, addLiquidityTxHash: txHash })
+
+      useAddLiquidityReceiptMock.mockReturnValue({
+        isLoading: false,
+        hasReceipt: true,
+        sentTokens: [
+          { tokenAddress: WAETH_USDC, humanAmount: '79.1' },
+          { tokenAddress: WAETH_USDT, humanAmount: '79.3' },
+        ],
+        receivedBptUnits: '158.4',
+      })
+
+      rerenderModal()
+
+      await expectBreakdownSection('You removed', ...REMOVED)
+      await expectBreakdownSection('You deposited', '$158.40', '79.1 waEthUSDC + 79.3 waEthUSDT')
+
+      await expectBreakdownSection(
+        'Left in your wallet',
+        '$73.60 (31.7%)',
+        '23.2 waEthUSDT + 50 Aave Prime GHO + 0.4 waEthUSDC',
+        RATIO_AND_GHO_NOTE
+      )
+
+      expect(screen.getByTestId('bpt-row')).toHaveTextContent('You got:158.4')
+    })
+  })
+
+  it('asks for the same pool risk acknowledgements as the add-liquidity form', async () => {
+    usePoolMock.mockReturnValue({ pool: makeTarget2TokenPool() })
+
+    usePublicClientMock.mockReturnValue({
+      simulateContract: vi.fn().mockResolvedValue({
+        result: [100_000_000n, 50_000_000_000_000_000_000n, 80_000_000n],
+      }),
+    })
+
+    useUserSettingsMock.mockReturnValue({ shouldUseSignatures: true, slippage: '0.5' })
+    useIsSafeAccountMock.mockReturnValue(false)
+    useSdkWalletClientMock.mockReturnValue({ sdkClient: undefined, isLoading: false })
+    useTokenApprovalStepsMock.mockReturnValue({ isLoading: false, steps: [] })
+
+    usePoolMigrationsMock.mockReturnValue({
+      migratablePositions: [
+        {
+          migration: AAVE_3_TO_2_MIGRATION,
+          walletBptBalance: 500n,
+          stakedBptBalance: 0n,
+          totalBptBalance: 500n,
+          estimatedUsdValue: 150,
+        },
+      ],
+      isLoading: false,
+      refetch: vi.fn(),
+      getMigrationsForTarget: () => [AAVE_3_TO_2_MIGRATION],
     })
 
     useAddLiquidityMock.mockReturnValue({
-      ...baseAddLiquidityReturn,
-      priceImpactQuery: { data: 0.075, error: null, isFetching: false },
-    })
-
-    rerender(
-      <MigrateLiquidityProvider migration={AAVE_3_TO_2_MIGRATION}>
-        <MigrateLiquiditySummary />
-      </MigrateLiquidityProvider>
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText(/\$7\.50\s*\(7\.50%\)/)).toBeTruthy()
-      expect(screen.getByText(/High price impact \(7\.50%\)/i)).toBeTruthy()
-    })
-
-    useAddLiquidityMock.mockReturnValue({
-      ...baseAddLiquidityReturn,
-      priceImpactQuery: {
-        data: undefined,
-        error: Object.assign(new Error('BAL#304'), { name: 'ContractFunctionExecutionError' }),
+      transactionSteps: { steps: [], isLoading: false },
+      humanAmountsIn: [
+        { tokenAddress: WAETH_USDC, humanAmount: '80', symbol: 'waEthUSDC', decimals: 6 },
+        { tokenAddress: WAETH_USDT, humanAmount: '80', symbol: 'waEthUSDT', decimals: 6 },
+      ],
+      setHumanAmountsIn: vi.fn(),
+      wrapUnderlying: [false, false],
+      setWrapUnderlyingByIndex: vi.fn(),
+      wantsProportional: true,
+      setWantsProportional: vi.fn(),
+      referenceAmountAddress: WAETH_USDC,
+      setReferenceAmountAddress: vi.fn(),
+      isMinimumDepositMet: true,
+      hasQuoteContext: true,
+      addLiquidityTxHash: undefined,
+      urlTxHash: undefined,
+      lastTransaction: undefined,
+      totalUSDValue: '160',
+      simulationQuery: {
+        data: { bptOut: { amount: 160_000_000_000_000_000_000n } },
+        error: null,
+        isLoading: false,
         isFetching: false,
       },
+      slippage: '0.5',
+      acceptPoolRisks: false,
     })
 
-    rerender(
+    renderWithProviders(
       <MigrateLiquidityProvider migration={AAVE_3_TO_2_MIGRATION}>
         <MigrateLiquiditySummary />
       </MigrateLiquidityProvider>
     )
 
-    await waitFor(() => {
-      expect(screen.getByText('Unknown')).toBeTruthy()
-      expect(screen.getByText(/Price impact could not be calculated/i)).toBeTruthy()
+    const poolRisks = await screen.findByRole('checkbox', {
+      name: /I accept the risks of interacting with this pool/,
     })
+
+    // The target is a boosted pool, so the third-party acknowledgement is required as well
+    const boostedRisks = screen.getByRole('checkbox', {
+      name: /I accept that by adding tokens to this rehyped pool, my tokens are deposited into Aave/,
+    })
+
+    await waitFor(() => expect(poolRisks).toBeEnabled())
+
+    fireEvent.click(poolRisks)
+    await waitFor(() => expect(poolRisks).toBeChecked())
+    expect(setAcceptPoolRisksMock).not.toHaveBeenCalledWith(true)
+
+    fireEvent.click(boostedRisks)
+    await waitFor(() => expect(setAcceptPoolRisksMock).toHaveBeenLastCalledWith(true))
   })
 
   it('resolves migration in PoolMigrationPage and renders a fallback link to /migrate when unmatched', () => {

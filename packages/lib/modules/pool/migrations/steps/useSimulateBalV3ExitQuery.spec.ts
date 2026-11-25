@@ -995,6 +995,16 @@ describe('useUnstakeBalV3GaugeStep & useBalV3BptAuthStep', () => {
     expect(safeResult.current.steps[0]?.stepType).toBe('tokenApproval')
     expect(safeResult.current.steps[0]?.isComplete()).toBe(false)
 
+    expect(useTokenApprovalStepsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        approveMaxBigInt: false,
+        spenderAddress: BALANCER_V3_CONTRACTS[1].router,
+        approvalAmounts: [
+          expect.objectContaining({ address: RETH_WAETHWETH_FAST_PATH.id, rawAmount: 1_000n }),
+        ],
+      })
+    )
+
     rerender({ isRemoveComplete: true })
     expect(safeResult.current.steps[0]?.isComplete()).toBe(true)
   })

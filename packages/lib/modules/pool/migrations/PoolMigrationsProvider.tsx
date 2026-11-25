@@ -13,18 +13,6 @@ export function usePoolsMigrationsLogic(poolMigrations: PoolMigration[]) {
   const { migratablePositions, hasMigratablePositions, isLoading, refetch } =
     useBalV3MigratablePositions(poolMigrations)
 
-  const needsMigrationCallback = useCallback(
-    (protocolVersion: number, chainId: number, poolId: string) =>
-      needsMigration(poolMigrations, protocolVersion, chainId, poolId),
-    [poolMigrations]
-  )
-
-  const getMigrationCallback = useCallback(
-    (protocolVersion: number, chainId: number, poolId: string) =>
-      getMigration(poolMigrations, protocolVersion, chainId, poolId),
-    [poolMigrations]
-  )
-
   const getMigrationsForTargetCallback = useCallback(
     (chainId: number, frontierPoolId: string) =>
       getMigrationsForTarget(poolMigrations, chainId, frontierPoolId),
@@ -40,8 +28,6 @@ export function usePoolsMigrationsLogic(poolMigrations: PoolMigration[]) {
   return useMemo(
     () => ({
       poolMigrations,
-      needsMigration: needsMigrationCallback,
-      getMigration: getMigrationCallback,
       getMigrationsForTarget: getMigrationsForTargetCallback,
       getMigrationBySource: getMigrationBySourceCallback,
       migratablePositions,
@@ -51,8 +37,6 @@ export function usePoolsMigrationsLogic(poolMigrations: PoolMigration[]) {
     }),
     [
       poolMigrations,
-      needsMigrationCallback,
-      getMigrationCallback,
       getMigrationsForTargetCallback,
       getMigrationBySourceCallback,
       migratablePositions,
@@ -73,29 +57,6 @@ export function PoolMigrationsProvider({
 
 export const usePoolMigrations = () =>
   useMandatoryContext(PoolsMigrationsContext, 'PoolsMigrations')
-
-function needsMigration(
-  migrations: PoolMigration[],
-  protocolVersion: number,
-  chainId: number,
-  poolId: string
-) {
-  return getMigration(migrations, protocolVersion, chainId, poolId) !== undefined
-}
-
-function getMigration(
-  migrations: PoolMigration[],
-  protocolVersion: number,
-  chainId: number,
-  poolId: string
-) {
-  return migrations.find(
-    migration =>
-      migration.old.protocol === protocolVersion &&
-      migration.old.chainId === chainId &&
-      isSameAddress(migration.old.id, poolId)
-  )
-}
 
 function getMigrationsForTarget(
   migrations: PoolMigration[],

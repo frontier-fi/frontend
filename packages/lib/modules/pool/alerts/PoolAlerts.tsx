@@ -19,16 +19,15 @@ import { isEmpty } from '@repo/lib/shared/utils/array'
 export function PoolAlerts() {
   const { pool } = usePool()
   const { poolAlerts, dismissAlert } = usePoolAlerts(pool)
-  const { needsMigration, migratablePositions } = usePoolMigrations()
+  const { migratablePositions } = usePoolMigrations()
   const { isConnected } = useUserAccount()
   const { surging } = useStableSurgeMetrics(pool)
 
   const affectedByV2Exploit = pool.protocolVersion === 2 && isComposableStablePool(pool)
   const chainDeprecated = isChainDeprecated(pool.chain)
   const chainId = getChainId(pool.chain)
-  const poolNeedsMigration = needsMigration(pool.protocolVersion, chainId, pool.id)
 
-  const hasMigratableSourceForTarget =
+  const shouldShowMigrationAlert =
     isConnected &&
     migratablePositions.some(
       position =>
@@ -36,8 +35,6 @@ export function PoolAlerts() {
         position.migration.new.chainId === chainId &&
         isSameAddress(position.migration.new.id, pool.id)
     )
-
-  const shouldShowMigrationAlert = poolNeedsMigration || hasMigratableSourceForTarget
 
   if (
     isEmpty(poolAlerts) &&

@@ -1480,13 +1480,9 @@ describe('PoolMigrationsProvider', () => {
 
     expect(result.current.poolMigrations).toEqual(migrations)
 
-    expect(result.current.needsMigration(3, 1, '0x1EA5870F7C037930CE1D5D8D9317C670E89E13E3')).toBe(
-      true
-    )
-
-    expect(result.current.getMigration(3, 1, '0x9ED5175AECB6653C1BDAA19793C16FD74FBEEB37')).toEqual(
-      SURGE_TETH_WSTETH
-    )
+    expect(
+      result.current.getMigrationBySource(1, '0x9ED5175AECB6653C1BDAA19793C16FD74FBEEB37')
+    ).toEqual(SURGE_TETH_WSTETH)
 
     expect(
       result.current.getMigrationBySource(1, '0x1846C6CBE0D433E152FA358E5FF27968E18BCE7C')

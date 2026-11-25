@@ -5,7 +5,6 @@ import { memo } from 'react'
 import { NetworkIcon } from '@repo/lib/shared/components/icons/NetworkIcon'
 import { useCurrency } from '@repo/lib/shared/hooks/useCurrency'
 import { getPoolPath } from '../../pool/pool.utils'
-import { TooltipWithTouch } from '@repo/lib/shared/components/tooltips/TooltipWithTouch'
 import { ExpandedPoolInfo } from './useExpandedPools'
 import FadeInOnView from '@repo/lib/shared/components/containers/FadeInOnView'
 import { PoolListTableDetailsCell } from '@repo/lib/modules/pool/PoolList/PoolListTable/PoolListTableDetailsCell'
@@ -13,8 +12,6 @@ import { usePoolMetadata } from '../../pool/metadata/usePoolMetadata'
 import { PoolListPoolDisplay } from '../../pool/PoolList/PoolListPoolDisplay'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
 import { AlertTriangle } from 'lucide-react'
-import { usePoolMigrations } from '../../pool/migrations/PoolMigrationsProvider'
-import { getChainId } from '@repo/lib/config/app.config'
 import { isChainDeprecated } from '../../chains/chain.utils'
 
 interface Props extends GridProps {
@@ -31,7 +28,6 @@ export const PortfolioTableRow = memo(function PortfolioTableRow({
 }: Props) {
   const { toCurrency } = useCurrency()
   const { name } = usePoolMetadata(pool)
-  const { needsMigration } = usePoolMigrations()
 
   return (
     <FadeInOnView>
@@ -66,18 +62,9 @@ export const PortfolioTableRow = memo(function PortfolioTableRow({
               <PoolListTableDetailsCell pool={pool} />
             </GridItem>
             <GridItem display="flex" justifyContent="flex-end" px="sm">
-              <HStack>
-                <Text fontWeight="medium">
-                  {toCurrency(pool.poolPositionUsd, { abbreviated: false })}
-                </Text>
-                {needsMigration(pool.protocolVersion, getChainId(pool.chain), pool.id) && (
-                  <TooltipWithTouch label="Migrate your position to the recommended pool">
-                    <Box color="font.warning">
-                      <AlertTriangle size="16" />
-                    </Box>
-                  </TooltipWithTouch>
-                )}
-              </HStack>
+              <Text fontWeight="medium">
+                {toCurrency(pool.poolPositionUsd, { abbreviated: false })}
+              </Text>
             </GridItem>
             <GridItem justifySelf="end" px="sm">
               <MemoizedMainAprTooltip
