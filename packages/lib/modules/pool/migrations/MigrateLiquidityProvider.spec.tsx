@@ -1563,7 +1563,7 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
     })
   })
 
-  it('syncs priceImpactQuery and displays upfront, high, and unknown join price impact in MigrateLiquiditySummary', async () => {
+  it('forces a proportional deposit and reports zero price impact whatever the add-liquidity quote says', async () => {
     const targetPool = makeTarget2TokenPool()
     usePoolMock.mockReturnValue({ pool: targetPool })
 
@@ -1593,14 +1593,16 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
       getMigrationsForTarget: () => [AAVE_3_TO_2_MIGRATION],
     })
 
-    const baseAddLiquidityReturn = {
+    const setWantsProportional = vi.fn()
+
+    useAddLiquidityMock.mockReturnValue({
       transactionSteps: { steps: [], isLoading: false },
       humanAmountsIn: [],
       setHumanAmountsIn: vi.fn(),
       wrapUnderlying: [true, true],
       setWrapUnderlyingByIndex: vi.fn(),
       wantsProportional: false,
-      setWantsProportional: vi.fn(),
+      setWantsProportional,
       referenceAmountAddress: undefined,
       setReferenceAmountAddress: vi.fn(),
       hasQuoteContext: true,
@@ -1613,12 +1615,8 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
         error: null,
         isFetching: false,
       },
+      priceImpactQuery: { data: 0.075, error: null, isFetching: false },
       slippage: '0.5',
-    }
-
-    useAddLiquidityMock.mockReturnValue({
-      ...baseAddLiquidityReturn,
-      priceImpactQuery: { data: 0.004, error: null, isFetching: false },
     })
 
     const TestWrapper = ({ children }: PropsWithChildren) => (
@@ -1633,7 +1631,7 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
       </QueryClientProvider>
     )
 
-    const { rerender } = render(
+    render(
       <MigrateLiquidityProvider migration={AAVE_3_TO_2_MIGRATION}>
         <MigrateLiquiditySummary />
       </MigrateLiquidityProvider>,
@@ -1643,44 +1641,12 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
     await waitFor(() => {
       expect(screen.getByText('Target pool deposit')).toBeTruthy()
       expect(screen.getByText('Potential losses')).toBeTruthy()
-      expect(screen.getByText(/\$0\.40\s*\(0\.40%\)/)).toBeTruthy()
+      expect(screen.getByText(/\$0\.00\s*\(0\.00%\)/)).toBeTruthy()
     })
 
-    useAddLiquidityMock.mockReturnValue({
-      ...baseAddLiquidityReturn,
-      priceImpactQuery: { data: 0.075, error: null, isFetching: false },
-    })
-
-    rerender(
-      <MigrateLiquidityProvider migration={AAVE_3_TO_2_MIGRATION}>
-        <MigrateLiquiditySummary />
-      </MigrateLiquidityProvider>
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText(/\$7\.50\s*\(7\.50%\)/)).toBeTruthy()
-      expect(screen.getByText(/High price impact \(7\.50%\)/i)).toBeTruthy()
-    })
-
-    useAddLiquidityMock.mockReturnValue({
-      ...baseAddLiquidityReturn,
-      priceImpactQuery: {
-        data: undefined,
-        error: Object.assign(new Error('BAL#304'), { name: 'ContractFunctionExecutionError' }),
-        isFetching: false,
-      },
-    })
-
-    rerender(
-      <MigrateLiquidityProvider migration={AAVE_3_TO_2_MIGRATION}>
-        <MigrateLiquiditySummary />
-      </MigrateLiquidityProvider>
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText('Unknown')).toBeTruthy()
-      expect(screen.getByText(/Price impact could not be calculated/i)).toBeTruthy()
-    })
+    expect(setWantsProportional).toHaveBeenCalledWith(true)
+    expect(screen.queryByText(/High price impact \(/)).toBeNull()
+    expect(screen.queryByText(/Price impact could not be calculated/)).toBeNull()
   })
 
   it('resolves migration in PoolMigrationPage and renders a fallback link to /migrate when unmatched', () => {

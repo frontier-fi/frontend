@@ -13,7 +13,6 @@ import {
 } from '@frontier-fi/sdk'
 import { getChainId } from '@repo/lib/config/app.config'
 import { PriceImpactContext } from '@repo/lib/modules/price-impact/PriceImpactProvider'
-import { cannotCalculatePriceImpactError } from '@repo/lib/modules/price-impact/price-impact.utils'
 import { HumanTokenAmount, HumanTokenAmountWithSymbol } from '@repo/lib/modules/tokens/token.types'
 import { useTokens } from '@repo/lib/modules/tokens/TokensProvider'
 import { TransactionStep } from '@repo/lib/modules/transactions/transaction-steps/lib'
@@ -40,11 +39,7 @@ import {
 } from 'react'
 import { Address, formatUnits, parseUnits } from 'viem'
 import { useAddLiquidity } from '../actions/add-liquidity/AddLiquidityProvider'
-import {
-  areEmptyAmounts,
-  LiquidityActionHelpers,
-  requiresProportionalInput,
-} from '../actions/LiquidityActionHelpers'
+import { areEmptyAmounts, LiquidityActionHelpers } from '../actions/LiquidityActionHelpers'
 import { isBoosted, isV3Pool } from '../pool.helpers'
 import { Pool } from '../pool.types'
 import { usePool } from '../PoolProvider'
@@ -350,12 +345,6 @@ export function evaluateDepositableExitValue({
   }
 }
 
-export function isTargetProportionalPool(pool: Pool): boolean {
-  return (
-    requiresProportionalInput(pool) || pool.liquidityManagement?.disableUnbalancedLiquidity === true
-  )
-}
-
 /**
  * Filters Balancer V3 exit amounts to only tokens accepted by `newPool`, derives required
  * `wrapUnderlying` overrides (`false` for wrapped ERC-4626 tokens, `true` for underlying tokens),
@@ -644,28 +633,16 @@ function useMigrateLiquidityLogic(migration: PoolMigration) {
     setReferenceAmountAddress,
     simulationQuery: addSimulationQuery,
     isMinimumDepositMet,
-    priceImpactQuery,
     hasQuoteContext: addLiquidityHasQuoteContext,
   } = useAddLiquidity()
 
   const priceImpactCtx = useContext(PriceImpactContext)
   const setPriceImpact = priceImpactCtx?.setPriceImpact
 
+  // The deposit is always proportional (forced below), so it never has price impact.
   useEffect(() => {
-    if (!setPriceImpact) return
-
-    if (wantsProportional) {
-      setPriceImpact(0)
-      return
-    }
-
-    if (cannotCalculatePriceImpactError(priceImpactQuery?.error ?? null)) {
-      setPriceImpact(null)
-      return
-    }
-
-    setPriceImpact(priceImpactQuery?.data)
-  }, [wantsProportional, priceImpactQuery?.data, priceImpactQuery?.error, setPriceImpact])
+    setPriceImpact?.(0)
+  }, [setPriceImpact])
 
   const livePosition = useMemo(
     () =>

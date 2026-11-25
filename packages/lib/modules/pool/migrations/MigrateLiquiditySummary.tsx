@@ -318,19 +318,10 @@ function PriceImpactCard({
   migrationTotalUsdValue: string
   suppressSimulationErrorAlert: boolean
 }) {
-  const {
-    totalUSDValue: addLiquidityTotalUsdValue,
-    simulationQuery,
-    priceImpactQuery,
-    slippage,
-    wantsProportional,
-  } = useAddLiquidity()
+  const { totalUSDValue: addLiquidityTotalUsdValue, simulationQuery, slippage } = useAddLiquidity()
+  const { priceImpact } = usePriceImpact()
 
-  const { priceImpactLevel, priceImpact } = usePriceImpact()
-
-  const isLoadingDetails = Boolean(
-    simulationQuery?.isFetching || (!wantsProportional && priceImpactQuery?.isFetching)
-  )
+  const isLoadingDetails = Boolean(simulationQuery?.isFetching)
 
   const hasSimulationError = Boolean(simulationQuery?.error) && !suppressSimulationErrorAlert
 
@@ -355,30 +346,6 @@ function PriceImpactCard({
             </Text>
           }
           status="error"
-        />
-      )}
-
-      {!wantsProportional &&
-        !isLoadingDetails &&
-        (priceImpactLevel === 'high' || priceImpactLevel === 'max') && (
-          <BalAlert
-            content={
-              <Text color="black" fontSize="sm">
-                {`High price impact (${fNum('priceImpact', priceImpact ?? 0)}) on the ${PROJECT_CONFIG.projectName} deposit because exited token ratios differ from the target pool's current balances.`}
-              </Text>
-            }
-            status={priceImpactLevel === 'max' ? 'error' : 'warning'}
-          />
-        )}
-
-      {!wantsProportional && !isLoadingDetails && priceImpactLevel === 'unknown' && (
-        <BalAlert
-          content={
-            <Text color="black" fontSize="sm">
-              {`Price impact could not be calculated because this deposit is large relative to the target ${PROJECT_CONFIG.projectName} pool's current liquidity. Review expected output carefully before proceeding.`}
-            </Text>
-          }
-          status="warning"
         />
       )}
 
