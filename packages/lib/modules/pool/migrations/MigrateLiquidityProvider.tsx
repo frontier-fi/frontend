@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@chakra-ui/react'
+import { Button, Tooltip } from '@chakra-ui/react'
 import {
   calculateProportionalAmounts,
   calculateProportionalAmountsBoosted,
@@ -179,6 +179,8 @@ function buildFallbackPoolStateWithBalances(
 }
 
 export const MIN_DEPOSITABLE_EXIT_VALUE_RATIO = 0.5
+
+export const ACCEPT_POOL_RISKS_REASON = 'Please accept the pool risks first'
 
 export type DepositableExitValueCheck = {
   isMostValueDepositable: boolean
@@ -634,6 +636,7 @@ function useMigrateLiquidityLogic(migration: PoolMigration) {
     simulationQuery: addSimulationQuery,
     isMinimumDepositMet,
     hasQuoteContext: addLiquidityHasQuoteContext,
+    acceptPoolRisks,
   } = useAddLiquidity()
 
   const priceImpactCtx = useContext(PriceImpactContext)
@@ -875,7 +878,15 @@ function useMigrateLiquidityLogic(migration: PoolMigration) {
     simulatedDepositableCheck.depositableRatio,
   ])
 
-  const canEnableExitSteps = isLatchedRemoveComplete || isPreExitDepositVerified
+  // Asked for before the first transaction only. Once the exit is done the removed tokens sit in
+  // the wallet, and nothing should stand between them and the deposit.
+  const exitDisabledReason =
+    !isLatchedRemoveComplete && isPreExitDepositVerified && !acceptPoolRisks
+      ? ACCEPT_POOL_RISKS_REASON
+      : undefined
+
+  const canEnableExitSteps =
+    isLatchedRemoveComplete || (isPreExitDepositVerified && !exitDisabledReason)
 
   const unstakeGauge = useUnstakeBalV3GaugeStep({
     oldPool,
@@ -1003,17 +1014,20 @@ function useMigrateLiquidityLogic(migration: PoolMigration) {
         renderAction: () =>
           isCheckingDepositReadiness
             ? createElement(DisabledTransactionButton)
-            : createElement(
-                Button,
-                {
-                  isDisabled: true,
-                  size: 'lg',
-                  variant: 'primary',
-                  w: 'full',
-                  width: 'full',
-                },
-                step.labels.init
-              ),
+            : createElement(Tooltip, {
+                label: exitDisabledReason ?? '',
+                children: createElement(
+                  Button,
+                  {
+                    isDisabled: true,
+                    size: 'lg',
+                    variant: 'primary',
+                    w: 'full',
+                    width: 'full',
+                  },
+                  step.labels.init
+                ),
+              }),
       }
     }
 
@@ -1027,6 +1041,7 @@ function useMigrateLiquidityLogic(migration: PoolMigration) {
   }, [
     hasPosition,
     canEnableExitSteps,
+    exitDisabledReason,
     isCheckingDepositReadiness,
     effectiveLatchedBalances.hadStakedBalance,
     unstakeGauge.step,

@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Card, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Card, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { getChainShortName, getGqlChain } from '@repo/lib/config/app.config'
 import { SupportedChainId } from '@repo/lib/config/config.types'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
@@ -24,6 +24,7 @@ import { MobileStepTracker } from '../../transactions/transaction-steps/step-tra
 import { useUserAccount } from '../../web3/UserAccountProvider'
 import { isInvariantRatioSimulationErrorMessage } from '@repo/lib/shared/utils/error-filters'
 import { useAddLiquidity } from '../actions/add-liquidity/AddLiquidityProvider'
+import { PoolRiskAcknowledgements } from '../actions/add-liquidity/form/PoolRiskAcknowledgements'
 import { ReceiptBptOut } from '../actions/add-liquidity/modal/BptOut'
 import { PoolActionsPriceImpactDetails } from '../actions/PoolActionsPriceImpactDetails'
 import { Pool } from '../pool.types'
@@ -40,7 +41,7 @@ export function MigrateLiquiditySummary({ addLiquidityReceipt }: MigrateLiquidit
   const { isMobile } = useBreakpoints()
   const { isConnected } = useUserAccount()
   const { usdValueForTokenAddress } = useTokens()
-  const { addLiquidityTxHash } = useAddLiquidity()
+  const { addLiquidityTxHash, acceptPoolRisks, setAcceptPoolRisks } = useAddLiquidity()
 
   const {
     oldPool,
@@ -57,6 +58,7 @@ export function MigrateLiquiditySummary({ addLiquidityReceipt }: MigrateLiquidit
     isExitSimulationLoading,
     exitSimulationError,
     depositBlockingReason,
+    isPreExitDepositVerified,
     isBalV3RemoveComplete,
   } = useMigrateLiquidity()
 
@@ -92,6 +94,14 @@ export function MigrateLiquiditySummary({ addLiquidityReceipt }: MigrateLiquidit
     initialTotalBptBalance === 0n &&
     !isBalV3RemoveComplete &&
     !addLiquidityTxHash
+
+  // The exit is the point of no return, so the deposit's risks are accepted before it starts
+  const showPoolRiskAcknowledgements =
+    isConnected &&
+    initialTotalBptBalance > 0n &&
+    !isBalV3RemoveComplete &&
+    !exitSimulationError &&
+    !depositBlockingReason
 
   return (
     <AnimateHeightChange spacing="sm">
@@ -176,6 +186,15 @@ export function MigrateLiquiditySummary({ addLiquidityReceipt }: MigrateLiquidit
           migrationTotalUsdValue={totalUSDValue}
           suppressSimulationErrorAlert={Boolean(depositBlockingReason) && !isBalV3RemoveComplete}
         />
+      )}
+
+      {showPoolRiskAcknowledgements && (
+        <Box pt="xs" px="sm" w="full">
+          <PoolRiskAcknowledgements
+            isDisabled={!isPreExitDepositVerified && !acceptPoolRisks}
+            onChange={setAcceptPoolRisks}
+          />
+        </Box>
       )}
     </AnimateHeightChange>
   )

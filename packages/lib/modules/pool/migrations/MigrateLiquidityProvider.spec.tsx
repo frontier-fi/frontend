@@ -5,7 +5,7 @@ import { testHook } from '@repo/lib/test/utils/custom-renderers'
 import { testQueryClient } from '@repo/lib/test/utils/react-query'
 import { testWagmiConfig } from '@repo/test/anvil/testWagmiConfig'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { PropsWithChildren, ReactNode } from 'react'
 import { Address, encodeAbiParameters, encodeEventTopics, erc20Abi, Log } from 'viem'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -18,6 +18,7 @@ import { ChainSlug } from '../pool.utils'
 import { BALANCER_V3_CONTRACTS } from './balv3.constants'
 import { PoolMigration } from './getPoolMigrations'
 import {
+  ACCEPT_POOL_RISKS_REASON,
   deriveTargetMigrationAmounts,
   evaluateDepositableExitValue,
   MigrateLiquidityProvider,
@@ -49,6 +50,7 @@ const {
   usePoolMock,
   usePoolMigrationsMock,
   useAddLiquidityMock,
+  setAcceptPoolRisksMock,
   useTokensMock,
   useAddLiquidityReceiptMock,
   usePoolRedirectMock,
@@ -67,6 +69,7 @@ const {
   usePoolMock: vi.fn(),
   usePoolMigrationsMock: vi.fn(),
   useAddLiquidityMock: vi.fn(),
+  setAcceptPoolRisksMock: vi.fn(),
   useTokensMock: vi.fn(),
   useAddLiquidityReceiptMock: vi.fn(),
   usePoolRedirectMock: vi.fn(),
@@ -170,10 +173,26 @@ vi.mock(
 
     return {
       ...actual,
-      useAddLiquidity: useAddLiquidityMock,
+      // Pool risks count as accepted unless a test says otherwise
+      useAddLiquidity: () => ({
+        acceptPoolRisks: true,
+        setAcceptPoolRisks: setAcceptPoolRisksMock,
+        ...useAddLiquidityMock(),
+      }),
     }
   }
 )
+
+vi.mock('@repo/lib/modules/pool/metadata/PoolsMetadataProvider', () => ({
+  usePoolsMetadata: () => ({
+    getErc4626Metadata: () => [{ id: 'aave', name: 'Aave Boosted' }],
+    getPoolMetadata: () => undefined,
+  }),
+}))
+
+vi.mock('@repo/lib/modules/pool/PoolDetail/PoolInfo/PoolRisks/PoolRisks', () => ({
+  RisksList: () => <div data-testid="pool-risks-list" />,
+}))
 
 vi.mock('@repo/lib/modules/tokens/TokensProvider', async importOriginal => {
   const actual = await importOriginal<typeof import('@repo/lib/modules/tokens/TokensProvider')>()
@@ -1310,6 +1329,128 @@ describe('MigrateLiquidityProvider', () => {
     expect(exactRatioDerived.hasProportionalDustWarning).toBe(false)
     expect(exactRatioDerived.migratedAmounts).toHaveLength(2)
   })
+
+  it('asks for the pool risks before the first exit step and not again after the exit', async () => {
+    let currentPositions: MigratableBalV3Position[] = [
+      {
+        migration: AAVE_3_TO_2_MIGRATION,
+        walletBptBalance: 100n,
+        stakedBptBalance: 400n,
+        totalBptBalance: 500n,
+        estimatedUsdValue: 150,
+      },
+    ]
+
+    usePoolMigrationsMock.mockImplementation(() => ({
+      migratablePositions: currentPositions,
+      isLoading: false,
+      refetch: refetchPositionsMock,
+      getMigrationsForTarget: () => [AAVE_3_TO_2_MIGRATION],
+    }))
+
+    const addLiquidity = useAddLiquidityMock()
+    useAddLiquidityMock.mockReturnValue({ ...addLiquidity, acceptPoolRisks: false })
+
+    function Wrapper({ children }: PropsWithChildren) {
+      return (
+        <TransactionStateProvider>
+          <MigrateLiquidityProvider migration={AAVE_3_TO_2_MIGRATION}>
+            {children}
+          </MigrateLiquidityProvider>
+        </TransactionStateProvider>
+      )
+    }
+
+    const { result, rerender } = testHook(() => useMigrateLiquidity(), { wrapper: Wrapper })
+
+    await waitFor(() => expect(result.current.isPreExitDepositVerified).toBe(true))
+
+    function renderStepAction(stepId: string) {
+      const step = result.current.migrationSteps.steps.find(s => s.id === stepId)!
+      return render(<ChakraProvider>{step.renderAction()}</ChakraProvider>)
+    }
+
+    expect(result.current.migrationSteps.currentStep?.id).toBe('unstake-balv3-gauge')
+
+    // Not accepted: every exit step renders a disabled button that says why
+    const gatedUnstake = renderStepAction('unstake-balv3-gauge')
+    const unstakeButton = screen.getByRole('button', { name: 'Unstake Aave GHO/USDT/USDC' })
+    expect(unstakeButton).toBeDisabled()
+    expect(screen.queryByTestId('unstake-balv3-gauge')).toBeNull()
+
+    fireEvent.pointerOver(unstakeButton)
+    expect(await screen.findByText(ACCEPT_POOL_RISKS_REASON)).toBeInTheDocument()
+    gatedUnstake.unmount()
+
+    const gatedPermit = renderStepAction('sign-balv3-bpt-permit')
+    expect(screen.getByRole('button', { name: 'Sign permit' })).toBeDisabled()
+    gatedPermit.unmount()
+
+    const gatedRemove = renderStepAction('remove-balv3-liquidity')
+    expect(screen.getByRole('button', { name: 'Remove liquidity' })).toBeDisabled()
+    expect(screen.queryByTestId('remove-balv3-liquidity')).toBeNull()
+    gatedRemove.unmount()
+
+    // Accepted: the real transaction buttons take over
+    useAddLiquidityMock.mockReturnValue({ ...addLiquidity, acceptPoolRisks: true })
+    rerender()
+
+    const unstake = renderStepAction('unstake-balv3-gauge')
+    expect(screen.getByTestId('unstake-balv3-gauge')).toBeInTheDocument()
+    unstake.unmount()
+
+    currentPositions = [
+      {
+        migration: AAVE_3_TO_2_MIGRATION,
+        walletBptBalance: 500n,
+        stakedBptBalance: 0n,
+        totalBptBalance: 500n,
+        estimatedUsdValue: 150,
+      },
+    ]
+
+    rerender()
+
+    renderStepAction('remove-balv3-liquidity')
+    expect(screen.getByTestId('remove-balv3-liquidity')).toBeInTheDocument()
+
+    const txHash = ('0x' + '55'.repeat(32)) as `0x${string}`
+    const vault = BALANCER_V3_CONTRACTS[1].vault
+
+    act(() => {
+      managedSendButtonOnChangeRef.current?.({
+        chainId: 1,
+        simulation: { isLoading: false, isPending: false, isError: false },
+        execution: { isPending: false, isError: false, data: txHash },
+        result: {
+          isLoading: false,
+          isError: false,
+          isSuccess: true,
+          data: {
+            transactionHash: txHash,
+            logs: [
+              makeTransferLog(WAETH_USDT, vault, USER_ADDRESS, 100_000_000n),
+              makeTransferLog(AAVE_PRIME_GHO, vault, USER_ADDRESS, 50_000_000_000_000_000_000n),
+              makeTransferLog(WAETH_USDC, vault, USER_ADDRESS, 80_000_000n),
+            ],
+          },
+        },
+        isSafeTxLoading: false,
+      } as unknown as ManagedResult)
+    })
+
+    await waitFor(() => expect(result.current.isBalV3RemoveComplete).toBe(true))
+
+    // The removed tokens are in the wallet now: the deposit must stay reachable whatever happens
+    // to the acknowledgement afterwards
+    useAddLiquidityMock.mockReturnValue({ ...addLiquidity, acceptPoolRisks: false })
+    rerender()
+
+    expect(result.current.migrationSteps.currentStep?.id).toBe('add-liquidity')
+
+    render(<div>{result.current.migrationSteps.currentStep?.renderAction()}</div>)
+    expect(screen.getByTestId('add-liquidity-btn')).toBeInTheDocument()
+  })
 })
 
 Element.prototype.animate = vi.fn().mockImplementation(() => {
@@ -1647,6 +1788,89 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
     expect(setWantsProportional).toHaveBeenCalledWith(true)
     expect(screen.queryByText(/High price impact \(/)).toBeNull()
     expect(screen.queryByText(/Price impact could not be calculated/)).toBeNull()
+  })
+
+  it('asks for the same pool risk acknowledgements as the add-liquidity form', async () => {
+    usePoolMock.mockReturnValue({ pool: makeTarget2TokenPool() })
+
+    usePublicClientMock.mockReturnValue({
+      simulateContract: vi.fn().mockResolvedValue({
+        result: [100_000_000n, 50_000_000_000_000_000_000n, 80_000_000n],
+      }),
+    })
+
+    useUserSettingsMock.mockReturnValue({ shouldUseSignatures: true, slippage: '0.5' })
+    useIsSafeAccountMock.mockReturnValue(false)
+    useSdkWalletClientMock.mockReturnValue({ sdkClient: undefined, isLoading: false })
+    useTokenApprovalStepsMock.mockReturnValue({ isLoading: false, steps: [] })
+
+    usePoolMigrationsMock.mockReturnValue({
+      migratablePositions: [
+        {
+          migration: AAVE_3_TO_2_MIGRATION,
+          walletBptBalance: 500n,
+          stakedBptBalance: 0n,
+          totalBptBalance: 500n,
+          estimatedUsdValue: 150,
+        },
+      ],
+      isLoading: false,
+      refetch: vi.fn(),
+      getMigrationsForTarget: () => [AAVE_3_TO_2_MIGRATION],
+    })
+
+    useAddLiquidityMock.mockReturnValue({
+      transactionSteps: { steps: [], isLoading: false },
+      humanAmountsIn: [
+        { tokenAddress: WAETH_USDC, humanAmount: '80', symbol: 'waEthUSDC', decimals: 6 },
+        { tokenAddress: WAETH_USDT, humanAmount: '80', symbol: 'waEthUSDT', decimals: 6 },
+      ],
+      setHumanAmountsIn: vi.fn(),
+      wrapUnderlying: [false, false],
+      setWrapUnderlyingByIndex: vi.fn(),
+      wantsProportional: true,
+      setWantsProportional: vi.fn(),
+      referenceAmountAddress: WAETH_USDC,
+      setReferenceAmountAddress: vi.fn(),
+      isMinimumDepositMet: true,
+      hasQuoteContext: true,
+      addLiquidityTxHash: undefined,
+      urlTxHash: undefined,
+      lastTransaction: undefined,
+      totalUSDValue: '160',
+      simulationQuery: {
+        data: { bptOut: { amount: 160_000_000_000_000_000_000n } },
+        error: null,
+        isLoading: false,
+        isFetching: false,
+      },
+      slippage: '0.5',
+      acceptPoolRisks: false,
+    })
+
+    renderWithProviders(
+      <MigrateLiquidityProvider migration={AAVE_3_TO_2_MIGRATION}>
+        <MigrateLiquiditySummary />
+      </MigrateLiquidityProvider>
+    )
+
+    const poolRisks = await screen.findByRole('checkbox', {
+      name: /I accept the risks of interacting with this pool/,
+    })
+
+    // The target is a boosted pool, so the third-party acknowledgement is required as well
+    const boostedRisks = screen.getByRole('checkbox', {
+      name: /I accept that by adding tokens to this rehyped pool, my tokens are deposited into Aave/,
+    })
+
+    await waitFor(() => expect(poolRisks).toBeEnabled())
+
+    fireEvent.click(poolRisks)
+    await waitFor(() => expect(poolRisks).toBeChecked())
+    expect(setAcceptPoolRisksMock).not.toHaveBeenCalledWith(true)
+
+    fireEvent.click(boostedRisks)
+    await waitFor(() => expect(setAcceptPoolRisksMock).toHaveBeenLastCalledWith(true))
   })
 
   it('resolves migration in PoolMigrationPage and renders a fallback link to /migrate when unmatched', () => {
