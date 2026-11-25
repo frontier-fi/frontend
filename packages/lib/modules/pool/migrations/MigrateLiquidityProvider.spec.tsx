@@ -316,26 +316,6 @@ vi.mock('@repo/lib/modules/pool/actions/PoolActionsLayout', () => ({
   ),
 }))
 
-vi.mock('@repo/lib/modules/tokens/TokenRow/TokenRowGroup', () => ({
-  TokenRowGroup: ({
-    label,
-    amounts,
-    rightElement,
-  }: {
-    label: string
-    amounts: Array<{ tokenAddress: string; humanAmount: string; symbol?: string }>
-    rightElement?: ReactNode
-  }) => (
-    <div data-testid="token-row-group">
-      <span>{label}</span>
-      {rightElement}
-      {amounts.map(a => (
-        <span key={a.tokenAddress}>{`${a.symbol ?? a.tokenAddress}:${a.humanAmount}`}</span>
-      ))}
-    </div>
-  ),
-}))
-
 const USER_ADDRESS: Address = '0x1234567890123456789012345678901234567890'
 const WAETH_USDT: Address = '0x7bc3485026ac48b6cf9baf0a377477fff5703af8'
 const USDT: Address = '0xdac17f958d2ee523a2206206994597c13d831ec7'
@@ -1699,9 +1679,18 @@ Element.prototype.animate = vi.fn().mockImplementation(() => {
   return anim as unknown as Animation
 })
 
-async function findTokenRowGroup(label: string): Promise<HTMLElement> {
-  const labelElement = await screen.findByText(label)
-  return labelElement.closest('[data-testid="token-row-group"]') as HTMLElement
+// A section of the breakdown card reads, in this order: its label, the total at its right (when
+// everything is priced), the token amounts, and for the leftover a note that says why
+async function expectBreakdownSection(label: string, ...content: string[]) {
+  const section = await screen.findByRole('group', { name: label })
+
+  await waitFor(() =>
+    expect(
+      within(section)
+        .getAllByText(/./)
+        .map(element => element.textContent)
+    ).toEqual([label, ...content])
+  )
 }
 
 function renderWithProviders(ui: ReactNode) {
@@ -1926,21 +1915,16 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
       </MigrateLiquidityProvider>
     )
 
-    // Exit pays 10 rETH + 15 WETH + 20 GHO; the target takes rETH and WETH 1:1 and no GHO
-    const leftover = within(await findTokenRowGroup('Staying in your wallet'))
+    // Exit pays 10 rETH + 15 WETH + 20 GHO; the target takes rETH and WETH 1:1 and no GHO.
+    // Nothing is priced in this setup, so no dollar totals are shown.
+    await expectBreakdownSection("You're removing", '10 rETH + 15 WETH + 20 GHO')
+    await expectBreakdownSection("You're depositing", '10 rETH + 10 WETH')
 
-    expect(leftover.getByText('WETH:5')).toBeInTheDocument()
-    expect(leftover.getByText('GHO:20')).toBeInTheDocument()
-    expect(leftover.queryByText(/rETH/)).toBeNull()
-
-    expect(
-      screen.getByText(
-        'The target pool takes tokens in its own ratio, so it cannot take everything you remove. GHO is not accepted by the target pool.'
-      )
-    ).toBeInTheDocument()
-
-    expect(within(await findTokenRowGroup("You're removing")).getByText('WETH:15')).toBeTruthy()
-    expect(within(await findTokenRowGroup("You're depositing")).getByText('WETH:10')).toBeTruthy()
+    await expectBreakdownSection(
+      'Staying in your wallet',
+      '5 WETH + 20 GHO',
+      'The target pool only takes tokens in its own ratio. GHO is not accepted by the target pool.'
+    )
   })
 
   it('forces a proportional deposit and reports zero price impact whatever the add-liquidity quote says', async () => {
@@ -2119,14 +2103,8 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
       return addLiquidity
     }
 
-    async function expectTokenRowGroup(label: string, total: string, amounts: string[]) {
-      const group = within(await findTokenRowGroup(label))
-
-      expect(group.getByText(total)).toBeInTheDocument()
-      amounts.forEach(amount => expect(group.getByText(amount)).toBeInTheDocument())
-      // Label, total and one entry per amount: nothing else is listed
-      expect(group.getAllByText(/./).length).toBe(amounts.length + 2)
-    }
+    const RATIO_AND_GHO_NOTE =
+      'The target pool only takes tokens in its own ratio. Aave Prime GHO is not accepted by the target pool.'
 
     it('shows all three before the first step and asks to confirm a large leftover', async () => {
       setupPricedMigration({
@@ -2140,28 +2118,24 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
         </MigrateLiquidityProvider>
       )
 
-      await expectTokenRowGroup("You're removing", '$230.00', [
-        'waEthUSDT:100',
-        'Aave Prime GHO:50',
-        'waEthUSDC:80',
-      ])
+      await expectBreakdownSection(
+        "You're removing",
+        '$230.00',
+        '100 waEthUSDT + 50 Aave Prime GHO + 80 waEthUSDC'
+      )
 
-      await expectTokenRowGroup("You're depositing", '$159.20', [
-        'waEthUSDC:79.6',
-        'waEthUSDT:79.6',
-      ])
+      await expectBreakdownSection(
+        "You're depositing",
+        '$159.20',
+        '79.6 waEthUSDC + 79.6 waEthUSDT'
+      )
 
-      await expectTokenRowGroup('Staying in your wallet', '$70.80 (30.8%)', [
-        'waEthUSDT:20.4',
-        'Aave Prime GHO:50',
-        'waEthUSDC:0.4',
-      ])
-
-      expect(
-        screen.getByText(
-          'The target pool takes tokens in its own ratio, so it cannot take everything you remove. Aave Prime GHO is not accepted by the target pool.'
-        )
-      ).toBeInTheDocument()
+      await expectBreakdownSection(
+        'Staying in your wallet',
+        '$70.80 (30.8%)',
+        '20.4 waEthUSDT + 50 Aave Prime GHO + 0.4 waEthUSDC',
+        RATIO_AND_GHO_NOTE
+      )
 
       // The old summary only said what would be deposited, under this heading
       expect(screen.queryByText("You're migrating")).toBeNull()
@@ -2208,9 +2182,16 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
       ).toBeInTheDocument()
 
       // No dollar figure or percentage is made up for it
-      const leftover = within(await findTokenRowGroup('Staying in your wallet'))
-      expect(leftover.queryByText(/\$/)).toBeNull()
-      expect(leftover.queryByText(/%/)).toBeNull()
+      await expectBreakdownSection(
+        'Staying in your wallet',
+        '20.4 waEthUSDT + 50 Aave Prime GHO + 0.4 waEthUSDC',
+        RATIO_AND_GHO_NOTE
+      )
+
+      await expectBreakdownSection(
+        "You're removing",
+        '100 waEthUSDT + 50 Aave Prime GHO + 80 waEthUSDC'
+      )
     })
 
     it('shows a small leftover without asking to confirm it', async () => {
@@ -2225,18 +2206,14 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
         </MigrateLiquidityProvider>
       )
 
-      await expectTokenRowGroup("You're removing", '$160.00', ['waEthUSDT:80', 'waEthUSDC:80'])
+      await expectBreakdownSection("You're removing", '$160.00', '80 waEthUSDT + 80 waEthUSDC')
 
-      await expectTokenRowGroup('Staying in your wallet', '$0.80 (0.5%)', [
-        'waEthUSDT:0.4',
-        'waEthUSDC:0.4',
-      ])
-
-      expect(
-        screen.getByText(
-          'A small buffer is held back from the deposit to allow for price movement.'
-        )
-      ).toBeInTheDocument()
+      await expectBreakdownSection(
+        'Staying in your wallet',
+        '$0.80 (0.5%)',
+        '0.4 waEthUSDT + 0.4 waEthUSDC',
+        'A small buffer is held back in case prices move.'
+      )
 
       await screen.findByRole('checkbox', {
         name: /I accept the risks of interacting with this pool/,
@@ -2273,11 +2250,12 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
         )
 
       // 1. Before the exit: the exit cannot start until the leftover is confirmed
-      await expectTokenRowGroup('Staying in your wallet', '$70.80 (30.8%)', [
-        'waEthUSDT:20.4',
-        'Aave Prime GHO:50',
-        'waEthUSDC:0.4',
-      ])
+      await expectBreakdownSection(
+        'Staying in your wallet',
+        '$70.80 (30.8%)',
+        '20.4 waEthUSDT + 50 Aave Prime GHO + 0.4 waEthUSDC',
+        RATIO_AND_GHO_NOTE
+      )
 
       expect(screen.getByRole('button', { name: 'Remove liquidity' })).toBeDisabled()
       expect(screen.queryByTestId('remove-balv3-liquidity')).toBeNull()
@@ -2314,23 +2292,24 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
         } as unknown as ManagedResult)
       })
 
-      await expectTokenRowGroup('You removed', '$232.00', [
-        'waEthUSDT:102.5',
-        'Aave Prime GHO:50',
-        'waEthUSDC:79.5',
-      ])
+      const REMOVED = ['$232.00', '102.5 waEthUSDT + 50 Aave Prime GHO + 79.5 waEthUSDC']
+
+      await expectBreakdownSection('You removed', ...REMOVED)
 
       // The quote on screen was made for the simulated amounts, so the deposit falls back to
       // what can be deposited from the tokens actually received until a new quote arrives
-      await expectTokenRowGroup("You're depositing", '$159.00', [
-        'waEthUSDC:79.5',
-        'waEthUSDT:79.5',
-      ])
+      await expectBreakdownSection(
+        "You're depositing",
+        '$159.00',
+        '79.5 waEthUSDC + 79.5 waEthUSDT'
+      )
 
-      await expectTokenRowGroup('Staying in your wallet', '$73.00 (31.5%)', [
-        'waEthUSDT:23',
-        'Aave Prime GHO:50',
-      ])
+      await expectBreakdownSection(
+        'Staying in your wallet',
+        '$73.00 (31.5%)',
+        '23 waEthUSDT + 50 Aave Prime GHO',
+        RATIO_AND_GHO_NOTE
+      )
 
       // Nothing is asked anymore: the deposit is the only way forward now
       expect(screen.queryByRole('checkbox')).toBeNull()
@@ -2351,27 +2330,17 @@ describe('PoolMigrationModal, MigrateLiquiditySummary, and PoolMigrationPage', (
 
       rerenderModal()
 
-      await expectTokenRowGroup('You removed', '$232.00', [
-        'waEthUSDT:102.5',
-        'Aave Prime GHO:50',
-        'waEthUSDC:79.5',
-      ])
+      await expectBreakdownSection('You removed', ...REMOVED)
+      await expectBreakdownSection('You deposited', '$158.40', '79.1 waEthUSDC + 79.3 waEthUSDT')
 
-      await expectTokenRowGroup('You deposited', '$158.40', ['waEthUSDC:79.1', 'waEthUSDT:79.3'])
-
-      await expectTokenRowGroup('Left in your wallet', '$73.60 (31.7%)', [
-        'waEthUSDT:23.2',
-        'Aave Prime GHO:50',
-        'waEthUSDC:0.4',
-      ])
+      await expectBreakdownSection(
+        'Left in your wallet',
+        '$73.60 (31.7%)',
+        '23.2 waEthUSDT + 50 Aave Prime GHO + 0.4 waEthUSDC',
+        RATIO_AND_GHO_NOTE
+      )
 
       expect(screen.getByTestId('bpt-row')).toHaveTextContent('You got:158.4')
-
-      expect(
-        screen.getByText(
-          'The target pool takes tokens in its own ratio, so it could not take everything you removed. Aave Prime GHO is not accepted by the target pool.'
-        )
-      ).toBeInTheDocument()
     })
   })
 
