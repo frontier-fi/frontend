@@ -31,8 +31,8 @@ export function PoolListTable({ pools, count, loading }: Props) {
 
   const rowProps = useMemo(
     () => ({
-      px: { base: 'sm', sm: '0' },
-      gridTemplateColumns: `32px minmax(320px, 1fr) 180px ${
+      px: { base: 'sm', sm: 'md' },
+      gridTemplateColumns: `32px minmax(320px, 1fr) 220px ${
         userAddress ? furthestLeftColWidth : ''
       } ${userAddress ? numberColumnWidth : furthestLeftColWidth} ${numberColumnWidth} 200px`,
       alignItems: 'center',

@@ -14,6 +14,7 @@ import { PreviewPoolCreationCard } from './PreviewPoolCreationCard'
 import { TokenMissingPriceWarning } from '@repo/lib/modules/tokens/TokenMissingPriceWarning'
 import { usePoolTokenPriceWarnings } from '@repo/lib/modules/pool/usePoolTokenPriceWarnings'
 import { useWatch } from 'react-hook-form'
+import { isBnParseable } from '@repo/lib/shared/utils/numbers'
 
 export function PreviewPoolTokens() {
   const { poolCreationForm } = usePoolCreationForm()
@@ -51,7 +52,11 @@ export function PreviewPoolTokens() {
               const { address, chain, symbol, name } = token.data
 
               const tokenUsdValue = token.usdPrice || priceFor(address, chain)
-              const tokenPriceDisplay = toCurrency(tokenUsdValue, { abbreviated: false })
+              const hasValidTokenUsdValue = Boolean(tokenUsdValue) && isBnParseable(tokenUsdValue)
+
+              const tokenPriceDisplay = hasValidTokenUsdValue
+                ? toCurrency(tokenUsdValue, { abbreviated: false })
+                : ''
 
               return (
                 <motion.div
@@ -72,7 +77,7 @@ export function PreviewPoolTokens() {
                           symbol={symbol}
                         />,
                         <HStack justify="end">
-                          {tokenUsdValue ? (
+                          {hasValidTokenUsdValue ? (
                             <Text>{tokenPriceDisplay}</Text>
                           ) : (
                             <TokenMissingPriceWarning message={tokenPriceTip} />
@@ -81,7 +86,7 @@ export function PreviewPoolTokens() {
                         <MarketCapValue
                           address={address as Address}
                           chain={chain}
-                          tokenUsdValue={Number(tokenUsdValue)}
+                          tokenUsdValue={hasValidTokenUsdValue ? Number(tokenUsdValue) : 0}
                         />,
                       ]}
                     />

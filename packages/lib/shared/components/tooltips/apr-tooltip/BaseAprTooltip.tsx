@@ -117,6 +117,10 @@ function BaseAprTooltip({
     chain,
   })
 
+  const shouldDisplayStakingIncentives =
+    stakingIncentivesAprDisplayed.gt(0) &&
+    usedDisplayValueFormatter(stakingIncentivesAprDisplayed) !== '0.0%'
+
   const popoverContent = customPopoverContent || (
     <PopoverContent
       minWidth={['100px', '300px']}
@@ -153,26 +157,28 @@ function BaseAprTooltip({
           </>
         ) : null}
       </TooltipAprItem>
-      <TooltipAprItem
-        {...basePopoverAprItemProps}
-        apr={stakingIncentivesAprDisplayed}
-        aprOpacity={isStakingPresent ? 1 : 0.7}
-        displayValueFormatter={usedDisplayValueFormatter}
-        title="Staking incentives"
-      >
-        {stakingIncentivesDisplayed.map(item => {
-          return (
-            <TooltipAprItem
-              {...subitemPopoverAprItemProps}
-              apr={item.apr}
-              displayValueFormatter={usedDisplayValueFormatter}
-              key={`staking-${item.title}-${item.apr}`}
-              title={item.title}
-              tooltipText={item.tooltipText}
-            />
-          )
-        })}
-      </TooltipAprItem>
+      {shouldDisplayStakingIncentives && (
+        <TooltipAprItem
+          {...basePopoverAprItemProps}
+          apr={stakingIncentivesAprDisplayed}
+          aprOpacity={isStakingPresent ? 1 : 0.7}
+          displayValueFormatter={usedDisplayValueFormatter}
+          title="Staking incentives"
+        >
+          {stakingIncentivesDisplayed.map(item => {
+            return (
+              <TooltipAprItem
+                {...subitemPopoverAprItemProps}
+                apr={item.apr}
+                displayValueFormatter={usedDisplayValueFormatter}
+                key={`staking-${item.title}-${item.apr}`}
+                title={item.title}
+                tooltipText={item.tooltipText}
+              />
+            )
+          })}
+        </TooltipAprItem>
+      )}
       <TooltipAprItem
         {...basePopoverAprItemProps}
         apr={yieldBearingTokensAprDisplayed}

@@ -5,7 +5,7 @@ import { usePoolCreationForm } from '../../PoolCreationFormProvider'
 import { DEFAULT_DECIMALS } from '../../constants'
 import { useWatch } from 'react-hook-form'
 import { calculateRotationComponents } from './gyro.helpers'
-import { parseAmount } from '@repo/lib/shared/utils/numbers'
+import { isBnParseable, parseAmount } from '@repo/lib/shared/utils/numbers'
 
 export function useValidateEclpParams() {
   const { eclpConfigForm, poolCreationForm } = usePoolCreationForm()
@@ -20,7 +20,10 @@ export function useValidateEclpParams() {
 
   const errorMessage = useMemo(() => {
     if (poolType !== PoolType.GyroE) return null
-    if (!alpha || !beta || !c || !s || !lambda) return null
+
+    if (!isBnParseable(alpha) || !isBnParseable(beta) || !c || !s || !isBnParseable(lambda)) {
+      return null
+    }
 
     const rawEclpParams = {
       alpha: parseAmount(alpha, DEFAULT_DECIMALS),

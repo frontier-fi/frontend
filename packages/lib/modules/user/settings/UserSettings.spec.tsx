@@ -84,6 +84,18 @@ describe('SlippageInput', () => {
 
     expect(screen.getByTestId('slippage')).toHaveTextContent('0.5')
   })
+
+  test('normalizes a leading decimal separator to 0.', () => {
+    const setSlippage = vi.fn()
+
+    render(<SlippageInput setSlippage={setSlippage} slippage="0.5" />)
+
+    const input = screen.getByRole('spinbutton')
+    fireEvent.change(input, { target: { value: '.25' } })
+
+    expect(input).toHaveValue(0.25)
+    expect(setSlippage).toHaveBeenCalledWith('0.25')
+  })
 })
 
 describe('Currency selector visibility', () => {

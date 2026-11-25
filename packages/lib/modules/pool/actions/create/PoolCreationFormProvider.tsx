@@ -14,12 +14,11 @@ import {
 import { PoolCreationForm, PoolCreationToken, AutoRangeConfig, EclpConfigForm } from './types'
 import { Address } from 'viem'
 import { useLocalStorage } from 'usehooks-ts'
-import { invertNumber } from '@repo/lib/shared/utils/numbers'
+import { fNumCustom, invertNumber, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { ApiOrCustomToken } from '@repo/lib/modules/tokens/token.types'
 import { useMemo } from 'react'
 import { useTokens } from '@repo/lib/modules/tokens/TokensProvider'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
-import { fNumCustom } from '@repo/lib/shared/utils/numbers'
 import { useWatch } from 'react-hook-form'
 import { useSearchParams } from 'next/navigation'
 import { useFormSteps } from '@repo/lib/shared/hooks/useFormSteps'
@@ -65,9 +64,21 @@ export function usePoolFormLogic() {
 
   const invertAutoRangePriceParams = () => {
     const { initialMinPrice, initialMaxPrice, initialTargetPrice } = autoRangeConfigForm.getValues()
-    autoRangeConfigForm.setValue('initialMinPrice', invertNumber(initialMaxPrice))
-    autoRangeConfigForm.setValue('initialMaxPrice', invertNumber(initialMinPrice))
-    autoRangeConfigForm.setValue('initialTargetPrice', invertNumber(initialTargetPrice))
+
+    autoRangeConfigForm.setValue(
+      'initialMinPrice',
+      isBnParseable(initialMaxPrice) ? invertNumber(initialMaxPrice) : ''
+    )
+
+    autoRangeConfigForm.setValue(
+      'initialMaxPrice',
+      isBnParseable(initialMinPrice) ? invertNumber(initialMinPrice) : ''
+    )
+
+    autoRangeConfigForm.setValue(
+      'initialTargetPrice',
+      isBnParseable(initialTargetPrice) ? invertNumber(initialTargetPrice) : ''
+    )
 
     // keep order of pool tokens consistent with AutoRange params
     const { poolTokens } = poolCreationForm.getValues()
@@ -78,9 +89,9 @@ export function usePoolFormLogic() {
     const { alpha, beta, peakPrice, lambda } = eclpConfigForm.getValues()
 
     eclpConfigForm.reset({
-      alpha: fNumCustom(invertNumber(beta), NUM_FORMAT),
-      beta: fNumCustom(invertNumber(alpha), NUM_FORMAT),
-      peakPrice: fNumCustom(invertNumber(peakPrice), NUM_FORMAT),
+      alpha: isBnParseable(beta) ? fNumCustom(invertNumber(beta), NUM_FORMAT) : '',
+      beta: isBnParseable(alpha) ? fNumCustom(invertNumber(alpha), NUM_FORMAT) : '',
+      peakPrice: isBnParseable(peakPrice) ? fNumCustom(invertNumber(peakPrice), NUM_FORMAT) : '',
       lambda: lambda,
     })
 

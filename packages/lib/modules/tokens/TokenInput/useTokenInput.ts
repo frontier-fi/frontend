@@ -1,9 +1,11 @@
-import { Numberish, bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
+import { Numberish, bn, cleanAmountInput, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { ChangeEvent } from 'react'
 import { useTokenBalances } from '../TokenBalancesProvider'
 import { useTokenInputsValidation } from '../TokenInputsValidationProvider'
 import { Address } from 'viem'
 import { ApiOrCustomToken } from '../token.types'
+
+export { cleanAmountInput }
 
 export function overflowProtected(value: Numberish, decimalLimit: number): string {
   const stringValue = value.toString()
@@ -13,17 +15,6 @@ export function overflowProtected(value: Numberish, decimalLimit: number): strin
     const maxLength = numberSegment.length + decimalLimit + 1
     return stringValue.slice(0, maxLength)
   } else return stringValue
-}
-
-export function cleanAmountInput(newValue: string): string {
-  let cleanValue = newValue.replace(',', '.')
-  cleanValue = cleanValue.replace(/[^\d.]/g, '')
-  let separators = 0 // Keep only the first decimal separator, drop any extras (e.g. pasted '1.2.3')
-  cleanValue = cleanValue.replace(/\./g, () => (separators++ === 0 ? '.' : ''))
-  // A bare leading separator ('.') is not parseable by BigNumber and would crash downstream
-  if (cleanValue.startsWith('.')) cleanValue = '0' + cleanValue
-
-  return cleanValue
 }
 
 type Params = {

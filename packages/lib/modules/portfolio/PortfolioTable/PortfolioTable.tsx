@@ -36,8 +36,8 @@ import { BalAlert } from '@repo/lib/shared/components/alerts/BalAlert'
 import { memo, useMemo } from 'react'
 
 const rowProps = (needsLastColumnWider: boolean) => ({
-  px: [0, 4],
-  gridTemplateColumns: `32px minmax(320px, 1fr) minmax(180px, max-content) 126px ${needsLastColumnWider ? '160px' : 'minmax(100px, max-content)'}`,
+  px: ['ms', 'md'],
+  gridTemplateColumns: `32px minmax(320px, 1fr) 220px 126px ${needsLastColumnWider ? '160px' : '140px'}`,
   alignItems: 'center',
   gap: { base: 'xxs', xl: 'lg' },
 })

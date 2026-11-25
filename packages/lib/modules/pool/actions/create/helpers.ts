@@ -1,9 +1,15 @@
 import { PoolType } from '@frontier-fi/sdk'
 import { isDev } from '@repo/lib/config/app.config'
-import { bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
+import { Address, zeroAddress } from 'viem'
+import { bn, fNumCustom, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import type { GqlPoolType } from '@repo/lib/shared/services/api/generated/graphql'
 import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
-import { fNumCustom } from '@repo/lib/shared/utils/numbers'
+import {
+  isConstantRateProvider,
+  isDynamicRateProvider,
+  isMarketRateProvider,
+} from '@repo/lib/modules/tokens/token.helpers'
+import { ApiOrCustomToken } from '@repo/lib/modules/tokens/token.types'
 import {
   WeightedPoolStructure,
   COW_AMM_RAW_WEIGHT_50,
@@ -12,6 +18,7 @@ import {
   BALANCER_PROTOCOL_ID,
   COW_PROTOCOL_ID,
 } from './constants'
+import { PoolCreationToken } from './types'
 
 const sdkToGqlPoolType: Partial<Record<PoolType, GqlPoolType>> = {
   [PoolType.Weighted]: GqlPoolTypeValues.Weighted,
@@ -72,6 +79,7 @@ export function getCowRawWeight(weight: string | undefined) {
 }
 
 export const formatNumber = (value: string) => {
+  if (!isBnParseable(value)) return ''
   let numFormat = '0.000000'
   if (Number(value) > 1000) numFormat = '0,000.00'
   if (Number(value) > 100000) numFormat = '0,000'
@@ -131,6 +139,31 @@ export function isBalancerProtocol(protocol: string): boolean {
 export function isPoolCreatorEnabled(poolType: PoolType): boolean {
   // AutoRange and eclp factories still require zero address
   return poolType === PoolType.Stable || poolType === PoolType.Weighted
+}
+
+export function getVerifiedRateProviderAddress(
+  token: ApiOrCustomToken | undefined
+): Address | undefined {
+  if (!token || !('priceRateProviderData' in token) || !token.priceRateProviderData) {
+    return undefined
+  }
+
+  if (isConstantRateProvider(token) || isDynamicRateProvider(token)) return undefined
+
+  return token.priceRateProviderData.address as Address | undefined
+}
+
+export function getDefaultPaysYieldFees(
+  token: Pick<PoolCreationToken, 'rateProvider' | 'data'>
+): boolean {
+  const rateProvider = token.rateProvider
+  if (!rateProvider || rateProvider === zeroAddress) return false
+  const verifiedAddress = getVerifiedRateProviderAddress(token.data)
+  if (!verifiedAddress) return false
+  return (
+    verifiedAddress.toLowerCase() === rateProvider.toLowerCase() &&
+    !isMarketRateProvider(token.data)
+  )
 }
 
 export type SwapFeePercentageOption = { value: string; tip: string }

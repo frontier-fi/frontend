@@ -13,19 +13,28 @@ export function useSuggestedGyroEclpConfig() {
   const formValues = useWatch({ control: eclpConfigForm.control })
   const isEmptyEclpConfig = Object.values(formValues).every(value => value === '')
 
-  const alpha = fNumCustom(spotPriceWithoutRate.times(1 - BOUNDARY_FACTOR), NUM_FORMAT)
-  const beta = fNumCustom(spotPriceWithoutRate.times(1 + BOUNDARY_FACTOR), NUM_FORMAT)
+  const hasValidSpotPrice = spotPriceWithoutRate.isFinite() && spotPriceWithoutRate.gt(0)
+
+  const alpha = hasValidSpotPrice
+    ? fNumCustom(spotPriceWithoutRate.times(1 - BOUNDARY_FACTOR), NUM_FORMAT)
+    : ''
+
+  const beta = hasValidSpotPrice
+    ? fNumCustom(spotPriceWithoutRate.times(1 + BOUNDARY_FACTOR), NUM_FORMAT)
+    : ''
 
   const suggestedEclpConfig = {
     alpha,
     beta,
     lambda: '100',
-    peakPrice: fNumCustom(spotPriceWithoutRate, NUM_FORMAT),
+    peakPrice: hasValidSpotPrice ? fNumCustom(spotPriceWithoutRate, NUM_FORMAT) : '',
   }
 
   useEffect(() => {
-    if (isEmptyEclpConfig && !isRateLoading) eclpConfigForm.reset(suggestedEclpConfig)
-  }, [isEmptyEclpConfig, isRateLoading, suggestedEclpConfig])
+    if (hasValidSpotPrice && isEmptyEclpConfig && !isRateLoading) {
+      eclpConfigForm.reset(suggestedEclpConfig)
+    }
+  }, [hasValidSpotPrice, isEmptyEclpConfig, isRateLoading, suggestedEclpConfig])
 
   return suggestedEclpConfig
 }

@@ -27,15 +27,15 @@ describe('useAprTooltip', () => {
     const result = testUseAprTooltip({ aprItems: aprTooltipDataMock.aprItems })
 
     expect(result.current.swapFeesDisplayed.toFixed()).toBe('0.0007')
-    expect(fNum('apr', result.current.swapFeesDisplayed)).toBe('0.07%')
+    expect(fNum('apr', result.current.swapFeesDisplayed)).toBe('<0.1%')
 
     const yieldBearingTokensApr = result.current.yieldBearingTokensDisplayed[0]!.apr
     expect(yieldBearingTokensApr.toFixed()).toBe('0.0068')
-    expect(fNum('apr', yieldBearingTokensApr)).toBe('0.68%')
+    expect(fNum('apr', yieldBearingTokensApr)).toBe('0.7%')
 
     const totalBaseDisplayed = result.current.totalBaseDisplayed
     expect(totalBaseDisplayed.toFixed()).toBe('0.0075')
-    expect(fNum('apr', totalBaseDisplayed)).toBe('0.75%') // 0.07 + 0.0068 + 0.68 = 0.75
+    expect(fNum('apr', totalBaseDisplayed)).toBe('0.8%') // 0.07% + 0.68% = 0.75% -> 0.8%
   })
 })
 

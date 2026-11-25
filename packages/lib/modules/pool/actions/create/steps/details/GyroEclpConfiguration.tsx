@@ -74,7 +74,7 @@ function EclpParamInputs() {
   }, [alpha, beta, peakPrice, lambda, c, s])
 
   const lowerBoundPriceInput = {
-    label: `Lower bound price: ${tokenPricePair}`,
+    label: `Lower bound price (α): ${tokenPricePair}`,
     name: 'alpha' as const,
     placeholder: suggestedEclpConfig.alpha,
     suggestedValue: Number(suggestedEclpConfig.alpha),
@@ -117,7 +117,7 @@ function EclpParamInputs() {
   }
 
   const upperBoundPriceInput = {
-    label: `Upper bound price: ${tokenPricePair}`,
+    label: `Upper bound price (β): ${tokenPricePair}`,
     name: 'beta' as const,
     placeholder: suggestedEclpConfig.beta,
     suggestedValue: Number(suggestedEclpConfig.beta),
@@ -142,7 +142,7 @@ function EclpParamInputs() {
   }
 
   const stretchingFactorInput = {
-    label: `Stretching factor`,
+    label: 'Stretching factor (λ)',
     name: 'lambda' as const,
     placeholder: suggestedEclpConfig.lambda,
     tooltip: 'The concentration of liquidity around the peak price',

@@ -1,4 +1,4 @@
-import { bn, fNum } from '@repo/lib/shared/utils/numbers'
+import { bn, fNum, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { useColorMode, useTheme as useChakraTheme } from '@chakra-ui/react'
 import { createContext, PropsWithChildren, useMemo } from 'react'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
@@ -102,20 +102,16 @@ export function useEclpChartLogic(
     a: string | number | null | undefined,
     b: string | number | null | undefined
   ) {
-    if (a === null || a === undefined || b === null || b === undefined) return false
-    if (!priceRange) return false
-    return bn(a).minus(b).abs().lt(bn(priceRange).times(markPointMargin))
+    if (!isBnParseable(a) || !isBnParseable(b)) return false
+    if (!Number.isFinite(priceRange) || !priceRange) return false
+    return bn(a!).minus(b!).abs().lt(bn(priceRange).times(markPointMargin))
   }
 
   const isSpotPriceNearLowerBound = isNearPrice(poolSpotPrice, xMin)
   const isSpotPriceNearUpperBound = isNearPrice(poolSpotPrice, xMax)
   const isSpotPriceNearBound = isSpotPriceNearLowerBound || isSpotPriceNearUpperBound
 
-  const hasPeakPrice =
-    showPeakPrice &&
-    poolPeakPrice !== null &&
-    poolPeakPrice !== undefined &&
-    bn(poolPeakPrice || 0).gt(0)
+  const hasPeakPrice = showPeakPrice && isBnParseable(poolPeakPrice) && bn(poolPeakPrice!).gt(0)
 
   const isPeakNearSpot = hasPeakPrice && isNearPrice(poolPeakPrice, poolSpotPrice)
 
@@ -167,7 +163,7 @@ export function useEclpChartLogic(
   }
 
   const options = useMemo(() => {
-    if (!data) return
+    if (!data?.length) return
 
     return {
       grid: {
@@ -213,8 +209,9 @@ export function useEclpChartLogic(
             if (value <= xMin + margin) return ''
 
             if (
-              bn(value).gt(bn(poolSpotPrice || 0).minus(margin)) &&
-              bn(value).lt(bn(poolSpotPrice || 0).plus(margin))
+              isBnParseable(poolSpotPrice) &&
+              bn(value).gt(bn(poolSpotPrice!).minus(margin)) &&
+              bn(value).lt(bn(poolSpotPrice!).plus(margin))
             ) {
               return ''
             }
@@ -466,7 +463,7 @@ export function useEclpChartLogic(
                 ? [
                     {
                       coord: [poolSpotPrice, 0],
-                      value: `Price ${fNum('tokenRatio', poolSpotPrice || '0')}`,
+                      value: `Price ${fNum('tokenRatio', isBnParseable(poolSpotPrice) ? poolSpotPrice! : '0')}`,
                       symbol: 'circle',
                       symbolSize: 1,
                       symbolOffset: [0, spotPillOffset],
@@ -580,6 +577,13 @@ export function useEclpChartLogic(
   const inRangeText =
     'The current price is between the liquidity upper and lower bounds for this Concentrated Liquidity Pool (CLP). In range pools earn high swap fees.'
 
+  const markerColors = {
+    lowerBound: chartColors.lowerBound,
+    peakPrice: peakLineColor,
+    currentPrice: backgroundHighlightColor,
+    upperBound: chartColors.upperBound,
+  }
+
   return {
     options,
     hasChartData: data?.length,
@@ -591,6 +595,7 @@ export function useEclpChartLogic(
     outOfRangeText,
     inRangeText,
     tokens,
+    markerColors,
   }
 }
 

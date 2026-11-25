@@ -40,7 +40,6 @@ export const PortfolioTableRow = memo(function PortfolioTableRow({
           bg: 'background.base',
         }}
         key={keyValue}
-        px={{ base: 'ms', sm: '0' }}
         transition="all 0.2s ease-in-out"
         w="full"
       >
@@ -63,7 +62,7 @@ export const PortfolioTableRow = memo(function PortfolioTableRow({
                 poolDisplayType={PROJECT_CONFIG.options.poolDisplayType}
               />
             </GridItem>
-            <GridItem>
+            <GridItem justifySelf="start">
               <PoolListTableDetailsCell pool={pool} />
             </GridItem>
             <GridItem display="flex" justifyContent="flex-end" px="sm">

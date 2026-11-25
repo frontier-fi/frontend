@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 import { PoolType } from '@frontier-fi/sdk'
+import { zeroAddress } from 'viem'
 import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
+import { ApiOrCustomToken } from '@repo/lib/modules/tokens/token.types'
 import {
   COW_AMM_RAW_WEIGHT_20,
   COW_AMM_RAW_WEIGHT_50,
@@ -10,10 +12,12 @@ import {
 import {
   formatNumber,
   getCowRawWeight,
+  getDefaultPaysYieldFees,
   getGqlPoolType,
   getMinSwapFeePercentage,
   getPercentFromPrice,
   getSwapFeePercentageOptions,
+  getVerifiedRateProviderAddress,
   isAutoRangePool,
   isBalancerProtocol,
   isCowPool,
@@ -205,5 +209,73 @@ describe('isEclpCreationDisabled', () => {
       process.env.NEXT_PUBLIC_APP_ENV = originalAppEnv
       vi.resetModules()
     }
+  })
+})
+
+const verifiedRateProvider = '0x1111111111111111111111111111111111111111' as const
+const customRateProvider = '0x2222222222222222222222222222222222222222' as const
+
+function makeToken(
+  rateProviderData?: { address: string; name?: string; warnings?: string[] } | null
+) {
+  return {
+    address: '0x3333333333333333333333333333333333333333',
+    priceRateProviderData: rateProviderData,
+  } as unknown as ApiOrCustomToken
+}
+
+describe('getVerifiedRateProviderAddress', () => {
+  it('returns address for standard verified rate providers and excludes constant/dynamic', () => {
+    expect(
+      getVerifiedRateProviderAddress(makeToken({ address: verifiedRateProvider, name: 'Lido' }))
+    ).toBe(verifiedRateProvider)
+
+    expect(
+      getVerifiedRateProviderAddress(
+        makeToken({ address: verifiedRateProvider, name: 'ConstantRateProvider' })
+      )
+    ).toBeUndefined()
+
+    expect(
+      getVerifiedRateProviderAddress(
+        makeToken({ address: verifiedRateProvider, name: 'Dynamic Rate' })
+      )
+    ).toBeUndefined()
+
+    expect(getVerifiedRateProviderAddress(undefined)).toBeUndefined()
+  })
+})
+
+describe('getDefaultPaysYieldFees', () => {
+  it('returns true only when using a verified non-market rate provider', () => {
+    const yieldToken = makeToken({ address: verifiedRateProvider, name: 'Yield' })
+
+    const marketToken = makeToken({
+      address: verifiedRateProvider,
+      name: 'Market',
+      warnings: ['market-rate'],
+    })
+
+    expect(getDefaultPaysYieldFees({ rateProvider: zeroAddress, data: yieldToken })).toBe(false)
+    expect(getDefaultPaysYieldFees({ rateProvider: '', data: yieldToken })).toBe(false)
+
+    expect(getDefaultPaysYieldFees({ rateProvider: customRateProvider, data: yieldToken })).toBe(
+      false
+    )
+
+    expect(getDefaultPaysYieldFees({ rateProvider: verifiedRateProvider, data: marketToken })).toBe(
+      false
+    )
+
+    expect(getDefaultPaysYieldFees({ rateProvider: verifiedRateProvider, data: yieldToken })).toBe(
+      true
+    )
+
+    expect(
+      getDefaultPaysYieldFees({
+        rateProvider: verifiedRateProvider.toUpperCase() as `0x${string}`,
+        data: yieldToken,
+      })
+    ).toBe(true)
   })
 })
