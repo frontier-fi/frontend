@@ -12,23 +12,28 @@ import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vites
 import {
   BalV3MigrationPromptModal,
   getBalV3PromptDismissKey,
+  isMigratePoolPath,
+  isPoolActionPath,
   SEVEN_DAYS_IN_MS,
 } from './BalV3MigrationPromptModal'
 import { MigrationsOverviewPage } from './MigrationsOverviewPage'
 import { PoolMigration } from './getPoolMigrations'
 import { MigratableBalV3Position } from './useBalV3MigratablePositions'
 
-const { pushMock, useUserAccountMock, usePoolMigrationsMock, useQueryMock } = vi.hoisted(() => ({
-  pushMock: vi.fn(),
-  useUserAccountMock: vi.fn(),
-  usePoolMigrationsMock: vi.fn(),
-  useQueryMock: vi.fn(),
-}))
+const { pushMock, usePathnameMock, useUserAccountMock, usePoolMigrationsMock, useQueryMock } =
+  vi.hoisted(() => ({
+    pushMock: vi.fn(),
+    usePathnameMock: vi.fn(),
+    useUserAccountMock: vi.fn(),
+    usePoolMigrationsMock: vi.fn(),
+    useQueryMock: vi.fn(),
+  }))
 
 vi.mock('next/navigation', async importOriginal => {
   const actual = await importOriginal<typeof import('next/navigation')>()
   return {
     ...actual,
+    usePathname: usePathnameMock,
     useRouter: () => ({
       push: pushMock,
       prefetch: vi.fn(),
@@ -167,6 +172,8 @@ describe('BalV3MigrationPromptModal', () => {
     vi.clearAllMocks()
     mockLocalStorage()
     window.sessionStorage.clear()
+
+    usePathnameMock.mockReturnValue('/pools')
 
     useUserAccountMock.mockReturnValue({
       isConnected: true,
@@ -420,6 +427,85 @@ describe('BalV3MigrationPromptModal', () => {
     const viewAllButton = await screen.findByRole('button', { name: 'View all' })
     fireEvent.click(viewAllButton)
     expect(pushMock).toHaveBeenCalledWith('/migrate')
+  })
+
+  describe('on pool action routes', () => {
+    const promptTitle = `Migrate Balancer V3 positions to ${PROJECT_CONFIG.projectName}`
+    const targetPoolPath = `/pools/ethereum/v3/${MAINNET_MIGRATION.new.id}`
+
+    function rerenderModal(rerender: ReturnType<typeof renderModal>['rerender']) {
+      rerender(
+        <ChakraProvider>
+          <BalV3MigrationPromptModal />
+        </ChakraProvider>
+      )
+    }
+
+    it('stays closed on the migration route and is not shown later in the same session', async () => {
+      usePathnameMock.mockReturnValue(`${targetPoolPath}/migrate-pool`)
+
+      const { rerender } = renderModal()
+
+      expect(screen.queryByText(promptTitle)).not.toBeInTheDocument()
+
+      usePathnameMock.mockReturnValue(targetPoolPath)
+      rerenderModal(rerender)
+
+      expect(screen.queryByText(promptTitle)).not.toBeInTheDocument()
+      expect(window.localStorage.getItem(getBalV3PromptDismissKey(WALLET_A))).toBeNull()
+    })
+
+    it('waits on other pool actions and opens on the next browsing page', async () => {
+      usePathnameMock.mockReturnValue(`${targetPoolPath}/add-liquidity`)
+
+      const { rerender } = renderModal()
+
+      expect(screen.queryByText(promptTitle)).not.toBeInTheDocument()
+
+      usePathnameMock.mockReturnValue(targetPoolPath)
+      rerenderModal(rerender)
+
+      await waitFor(() => {
+        expect(screen.getByText(promptTitle)).toBeInTheDocument()
+      })
+    })
+
+    it('closes an open prompt when navigation reaches a pool action', async () => {
+      const { rerender } = renderModal()
+
+      await waitFor(() => {
+        expect(screen.getByText(promptTitle)).toBeInTheDocument()
+      })
+
+      usePathnameMock.mockReturnValue(`${targetPoolPath}/remove-liquidity`)
+      rerenderModal(rerender)
+
+      await waitFor(() => {
+        expect(screen.queryByText(promptTitle)).not.toBeInTheDocument()
+      })
+    })
+  })
+})
+
+describe('isPoolActionPath and isMigratePoolPath', () => {
+  const poolPath = `/pools/ethereum/v3/${MAINNET_MIGRATION.new.id}`
+
+  it.each([
+    ['/pools', false, false],
+    ['/portfolio', false, false],
+    ['/portfolio/ethereum', false, false],
+    [poolPath, false, false],
+    [`${poolPath}/`, false, false],
+    [`${poolPath}/add-liquidity`, true, false],
+    [`${poolPath}/add-liquidity/0xabc`, true, false],
+    [`${poolPath}/remove-liquidity`, true, false],
+    [`${poolPath}/swap`, true, false],
+    [`${poolPath}/migrate-pool`, true, true],
+    [null, false, false],
+    [undefined, false, false],
+  ])('%s -> action: %s, migrating: %s', (pathname, isAction, isMigrating) => {
+    expect(isPoolActionPath(pathname)).toBe(isAction)
+    expect(isMigratePoolPath(pathname)).toBe(isMigrating)
   })
 })
 

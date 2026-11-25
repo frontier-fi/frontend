@@ -30,7 +30,7 @@ import { GetPoolsDocument, GetPoolsQuery } from '@repo/lib/shared/services/api/g
 import { isSameAddress } from '@repo/lib/shared/utils/addresses'
 import { fNum } from '@repo/lib/shared/utils/numbers'
 import { uniq } from 'lodash'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatUnits } from 'viem'
 import { BPT_DECIMALS } from '../pool.constants'
@@ -82,6 +82,29 @@ export function getPrimaryBalV3MigrationPath(positions: MigratableBalV3Position[
 
 export function getMigrationTargetPoolKey(chainId: number, poolId: string): string {
   return `${chainId}:${poolId.toLowerCase()}`
+}
+
+const MIGRATE_POOL_ACTION = 'migrate-pool'
+
+function getPoolActionSegment(pathname: string | null | undefined): string | undefined {
+  if (!pathname) return undefined
+
+  // /pools/<chain>/<variant>/<id>/<action>/...
+  const [root, , , , action] = pathname.split('/').filter(Boolean)
+
+  return root === 'pools' ? action : undefined
+}
+
+/**
+ * True inside a focused pool action (add, remove, swap, migrate...), where the prompt would cover
+ * the action the user is in the middle of.
+ */
+export function isPoolActionPath(pathname: string | null | undefined): boolean {
+  return getPoolActionSegment(pathname) !== undefined
+}
+
+export function isMigratePoolPath(pathname: string | null | undefined): boolean {
+  return getPoolActionSegment(pathname) === MIGRATE_POOL_ACTION
 }
 
 export function getMigrationDisplayMeta(
@@ -198,6 +221,9 @@ function markPromptedInSession(userAddress: string): void {
 
 export function BalV3MigrationPromptModal() {
   const router = useRouter()
+  const pathname = usePathname()
+  const isActionPath = isPoolActionPath(pathname)
+  const isMigratingPath = isMigratePoolPath(pathname)
   const { isConnected, userAddress } = useUserAccount()
   const { migratablePositions, hasMigratablePositions } = usePoolMigrations()
   const { toCurrency } = useCurrency()
@@ -224,6 +250,18 @@ export function BalV3MigrationPromptModal() {
 
     const normalizedAddress = userAddress.toLowerCase()
 
+    if (isActionPath) {
+      // Someone already in the migration flow does not need it announced later in the session.
+      // On other actions the prompt only waits for the next browsing page.
+      if (isMigratingPath) {
+        promptedInMountRef.current.add(normalizedAddress)
+        markPromptedInSession(normalizedAddress)
+      }
+
+      setIsOpen(false)
+      return
+    }
+
     if (
       promptedInMountRef.current.has(normalizedAddress) ||
       hasPromptedInSession(normalizedAddress) ||
@@ -235,7 +273,7 @@ export function BalV3MigrationPromptModal() {
     promptedInMountRef.current.add(normalizedAddress)
     markPromptedInSession(normalizedAddress)
     setIsOpen(true)
-  }, [hasMigratablePositions, isConnected, userAddress])
+  }, [hasMigratablePositions, isConnected, userAddress, isActionPath, isMigratingPath])
 
   const handleClose = () => {
     setIsOpen(false)
