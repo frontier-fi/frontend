@@ -32,18 +32,28 @@ import {
   createContext,
   createElement,
   PropsWithChildren,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
 } from 'react'
 import { Address, formatUnits, parseUnits } from 'viem'
+import {
+  QueryAddLiquidityOutput,
+  SdkQueryAddLiquidityOutput,
+} from '../actions/add-liquidity/add-liquidity.types'
 import { useAddLiquidity } from '../actions/add-liquidity/AddLiquidityProvider'
 import { areEmptyAmounts, LiquidityActionHelpers } from '../actions/LiquidityActionHelpers'
 import { isBoosted, isV3Pool } from '../pool.helpers'
 import { Pool } from '../pool.types'
 import { usePool } from '../PoolProvider'
 import { PoolMigration, SourceBalV3PoolInfo } from './getPoolMigrations'
+import {
+  calculateMigrationBreakdown,
+  LEFTOVER_ACKNOWLEDGEMENT_RATIO,
+  LEFTOVER_ACKNOWLEDGEMENT_TOLERANCE,
+} from './migrationBreakdown'
 import { usePoolMigrations } from './PoolMigrationsProvider'
 import { useBalV3BptAuthStep } from './steps/useBalV3BptAuthStep'
 import { useBalV3RemoveStep } from './steps/useBalV3RemoveStep'
@@ -181,6 +191,8 @@ function buildFallbackPoolStateWithBalances(
 export const MIN_DEPOSITABLE_EXIT_VALUE_RATIO = 0.5
 
 export const ACCEPT_POOL_RISKS_REASON = 'Please accept the pool risks first'
+
+export const ACKNOWLEDGE_LEFTOVER_REASON = 'Please confirm what stays in your wallet first'
 
 export type DepositableExitValueCheck = {
   isMostValueDepositable: boolean
@@ -592,6 +604,39 @@ export function deriveTargetMigrationAmounts({
   }
 }
 
+/**
+ * The amounts the deposit quote was made for, which is what the deposit transaction is built
+ * from. They sit a little below `migratedAmounts`, because proportional handlers hold the slippage
+ * setting back from the reference amount before quoting. Returns undefined when the quote does not
+ * belong to `migratedAmounts` (it is still loading, or was made for other amounts).
+ */
+export function getQuotedDepositAmounts(
+  queryOutput: QueryAddLiquidityOutput | undefined,
+  migratedAmounts: HumanTokenAmountWithSymbol[]
+): HumanTokenAmountWithSymbol[] | undefined {
+  const quotedAmountsIn = (queryOutput as Partial<SdkQueryAddLiquidityOutput> | undefined)
+    ?.sdkQueryOutput?.amountsIn
+
+  if (!quotedAmountsIn || migratedAmounts.length === 0) return undefined
+
+  const quotedAmounts: HumanTokenAmountWithSymbol[] = []
+
+  for (const migratedAmount of migratedAmounts) {
+    const quoted = quotedAmountsIn.find(amountIn =>
+      isSameAddress(amountIn.token.address, migratedAmount.tokenAddress)
+    )
+
+    if (!quoted || quoted.amount <= 0n) return undefined
+
+    const humanAmount = formatUnits(quoted.amount, quoted.token.decimals) as HumanAmount
+    if (bn(humanAmount).gt(migratedAmount.humanAmount || '0')) return undefined
+
+    quotedAmounts.push({ ...migratedAmount, humanAmount })
+  }
+
+  return quotedAmounts
+}
+
 function areHumanAmountsEqual(
   prev: HumanTokenAmountWithSymbol[],
   next: HumanTokenAmountWithSymbol[]
@@ -789,6 +834,30 @@ function useMigrateLiquidityLogic(migration: PoolMigration) {
     ]
   )
 
+  const usdValueFor = useCallback(
+    (amount: HumanTokenAmount) =>
+      calculateMigrationUsdValue({
+        amounts: [amount],
+        oldPool,
+        newPool,
+        chain: newPool.chain,
+        usdValueForTokenAddress,
+      }),
+    [oldPool, newPool, usdValueForTokenAddress]
+  )
+
+  const simulatedBreakdown = useMemo(
+    () =>
+      calculateMigrationBreakdown({
+        removed: simulatedExitTokens,
+        deposited:
+          getQuotedDepositAmounts(addSimulationQuery?.data, simulatedDerived.migratedAmounts) ??
+          simulatedDerived.migratedAmounts,
+        usdValueFor,
+      }),
+    [simulatedExitTokens, addSimulationQuery?.data, simulatedDerived.migratedAmounts, usdValueFor]
+  )
+
   const hasSimulatedExit = simulatedExitTokens.length > 0 && exitSimulation.rawAmountsOut.length > 0
   const hasSimulatedDepositableAmounts = simulatedDerived.migratedAmounts.length > 0
 
@@ -878,12 +947,37 @@ function useMigrateLiquidityLogic(migration: PoolMigration) {
     simulatedDepositableCheck.depositableRatio,
   ])
 
-  // Asked for before the first transaction only. Once the exit is done the removed tokens sit in
-  // the wallet, and nothing should stand between them and the deposit.
-  const exitDisabledReason =
-    !isLatchedRemoveComplete && isPreExitDepositVerified && !acceptPoolRisks
-      ? ACCEPT_POOL_RISKS_REASON
-      : undefined
+  // The leftover share the user agreed to, kept so that a quote leaving clearly more behind asks again
+  const [leftoverAcknowledgement, setLeftoverAcknowledgement] = useState<
+    { scopeKey: string; leftoverRatio: number } | undefined
+  >()
+
+  const needsLeftoverAcknowledgement =
+    !isLatchedRemoveComplete &&
+    simulatedBreakdown.deposited.length > 0 &&
+    simulatedBreakdown.leftoverRatio > LEFTOVER_ACKNOWLEDGEMENT_RATIO
+
+  const isLeftoverAcknowledged =
+    leftoverAcknowledgement?.scopeKey === scopeKey &&
+    simulatedBreakdown.leftoverRatio <=
+      leftoverAcknowledgement.leftoverRatio + LEFTOVER_ACKNOWLEDGEMENT_TOLERANCE
+
+  const setIsLeftoverAcknowledged = useCallback(
+    (isAcknowledged: boolean) =>
+      setLeftoverAcknowledgement(
+        isAcknowledged ? { scopeKey, leftoverRatio: simulatedBreakdown.leftoverRatio } : undefined
+      ),
+    [scopeKey, simulatedBreakdown.leftoverRatio]
+  )
+
+  // Confirmations are asked for before the first transaction only. Once the exit is done the
+  // removed tokens sit in the wallet, and nothing should stand between them and the deposit.
+  const exitDisabledReason = (() => {
+    if (isLatchedRemoveComplete || !isPreExitDepositVerified) return undefined
+    if (needsLeftoverAcknowledgement && !isLeftoverAcknowledged) return ACKNOWLEDGE_LEFTOVER_REASON
+    if (!acceptPoolRisks) return ACCEPT_POOL_RISKS_REASON
+    return undefined
+  })()
 
   const canEnableExitSteps =
     isLatchedRemoveComplete || (isPreExitDepositVerified && !exitDisabledReason)
@@ -976,6 +1070,28 @@ function useMigrateLiquidityLogic(migration: PoolMigration) {
     referenceAmountAddress: nextReferenceAmountAddress,
     hasProportionalDustWarning,
   } = postExitDerived
+
+  // Simulated until the exit is confirmed, then based on what the exit actually paid out
+  const breakdown = useMemo(
+    () =>
+      balV3Remove.isComplete && balV3Remove.receivedTokens.length > 0
+        ? calculateMigrationBreakdown({
+            removed: amounts,
+            deposited:
+              getQuotedDepositAmounts(addSimulationQuery?.data, migratedAmounts) ?? migratedAmounts,
+            usdValueFor,
+          })
+        : simulatedBreakdown,
+    [
+      balV3Remove.isComplete,
+      balV3Remove.receivedTokens.length,
+      amounts,
+      addSimulationQuery?.data,
+      migratedAmounts,
+      usdValueFor,
+      simulatedBreakdown,
+    ]
+  )
 
   useEffect(() => {
     desiredWrapUpdates.forEach(({ index, value }) => {
@@ -1074,6 +1190,11 @@ function useMigrateLiquidityLogic(migration: PoolMigration) {
     migratedAmounts,
     unmigratedTokens,
     hasProportionalDustWarning,
+    breakdown,
+    usdValueFor,
+    needsLeftoverAcknowledgement,
+    isLeftoverAcknowledged,
+    setIsLeftoverAcknowledged,
     hasQuoteContext,
     hadStakedBalance: effectiveLatchedBalances.hadStakedBalance,
     initialStakedBptBalance: effectiveLatchedBalances.initialStakedBptBalance,

@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Box, Card, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Badge, Card, Checkbox, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { getChainShortName, getGqlChain } from '@repo/lib/config/app.config'
 import { SupportedChainId } from '@repo/lib/config/config.types'
 import { PROJECT_CONFIG } from '@repo/lib/config/getProjectConfig'
@@ -9,6 +9,7 @@ import { AnimateHeightChange } from '@repo/lib/shared/components/animations/Anim
 import { BalBadge } from '@repo/lib/shared/components/badges/BalBadge'
 import { NetworkIcon } from '@repo/lib/shared/components/icons/NetworkIcon'
 import MainAprTooltip from '@repo/lib/shared/components/tooltips/apr-tooltip/MainAprTooltip'
+import { TextShine } from '@repo/lib/shared/components/TextShine/TextShine'
 import { useBreakpoints } from '@repo/lib/shared/hooks/useBreakpoints'
 import { useCurrency } from '@repo/lib/shared/hooks/useCurrency'
 import type { GqlChain } from '@repo/lib/shared/services/api/generated/graphql'
@@ -17,7 +18,6 @@ import { bn, fNum } from '@repo/lib/shared/utils/numbers'
 import { usePriceImpact } from '@repo/lib/modules/price-impact/PriceImpactProvider'
 import { HumanTokenAmountWithSymbol } from '../../tokens/token.types'
 import { TokenRowGroup } from '../../tokens/TokenRow/TokenRowGroup'
-import { useTokens } from '../../tokens/TokensProvider'
 import { GasCostSummaryCard } from '../../transactions/transaction-steps/GasCostSummaryCard'
 import { AddLiquidityReceiptResult } from '../../transactions/transaction-steps/receipts/receipt.hooks'
 import { MobileStepTracker } from '../../transactions/transaction-steps/step-tracker/MobileStepTracker'
@@ -29,7 +29,8 @@ import { ReceiptBptOut } from '../actions/add-liquidity/modal/BptOut'
 import { PoolActionsPriceImpactDetails } from '../actions/PoolActionsPriceImpactDetails'
 import { Pool } from '../pool.types'
 import { SourceBalV3PoolInfo } from './getPoolMigrations'
-import { calculateMigrationUsdValue, useMigrateLiquidity } from './MigrateLiquidityProvider'
+import { useMigrateLiquidity } from './MigrateLiquidityProvider'
+import { calculateMigrationBreakdown, MigrationBreakdown } from './migrationBreakdown'
 
 export { calculateMigrationUsdValue } from './MigrateLiquidityProvider'
 
@@ -40,17 +41,19 @@ type MigrateLiquiditySummaryProps = {
 export function MigrateLiquiditySummary({ addLiquidityReceipt }: MigrateLiquiditySummaryProps) {
   const { isMobile } = useBreakpoints()
   const { isConnected } = useUserAccount()
-  const { usdValueForTokenAddress } = useTokens()
   const { addLiquidityTxHash, acceptPoolRisks, setAcceptPoolRisks } = useAddLiquidity()
 
   const {
     oldPool,
     newPool,
     migrationSteps,
-    amounts,
-    migratedAmounts,
+    breakdown: quotedBreakdown,
+    usdValueFor,
     unmigratedTokens,
     hasProportionalDustWarning,
+    needsLeftoverAcknowledgement,
+    isLeftoverAcknowledged,
+    setIsLeftoverAcknowledged,
     hasQuoteContext,
     hadStakedBalance,
     initialTotalBptBalance,
@@ -64,29 +67,32 @@ export function MigrateLiquiditySummary({ addLiquidityReceipt }: MigrateLiquidit
 
   const isSuccess = Boolean(addLiquidityTxHash && addLiquidityReceipt?.hasReceipt)
 
-  const displayAmounts: HumanTokenAmountWithSymbol[] =
-    isSuccess && addLiquidityReceipt && addLiquidityReceipt.sentTokens.length > 0
-      ? addLiquidityReceipt.sentTokens.map(token => ({
-          ...token,
-          symbol:
-            migratedAmounts.find(m => isSameAddress(m.tokenAddress, token.tokenAddress))?.symbol ??
-            newPool.poolTokens.find(p => isSameAddress(p.address, token.tokenAddress))?.symbol ??
-            '',
-        }))
-      : migratedAmounts.length > 0
-        ? migratedAmounts
-        : amounts
+  // Once the deposit is confirmed, its receipt says what really left the wallet
+  const sentTokens = isSuccess ? (addLiquidityReceipt?.sentTokens ?? []) : []
 
-  const totalUSDValue = calculateMigrationUsdValue({
-    amounts: displayAmounts,
-    oldPool,
-    newPool,
-    chain: newPool.chain,
-    usdValueForTokenAddress,
-  })
+  const breakdown =
+    sentTokens.length > 0
+      ? calculateMigrationBreakdown({
+          removed: quotedBreakdown.removed,
+          deposited: sentTokens.map(token => ({
+            ...token,
+            symbol:
+              quotedBreakdown.removed.find(removed =>
+                isSameAddress(removed.tokenAddress, token.tokenAddress)
+              )?.symbol ??
+              newPool.poolTokens.find(poolToken =>
+                isSameAddress(poolToken.address, token.tokenAddress)
+              )?.symbol ??
+              '',
+          })),
+          usdValueFor,
+        })
+      : quotedBreakdown
+
+  const hasDeposit = breakdown.deposited.length > 0
 
   const isLoadingAmounts =
-    (isPositionsLoading || isExitSimulationLoading) && displayAmounts.length === 0
+    (isPositionsLoading || isExitSimulationLoading) && breakdown.removed.length === 0
 
   const showNoBalanceAlert =
     isConnected &&
@@ -95,13 +101,23 @@ export function MigrateLiquiditySummary({ addLiquidityReceipt }: MigrateLiquidit
     !isBalV3RemoveComplete &&
     !addLiquidityTxHash
 
-  // The exit is the point of no return, so the deposit's risks are accepted before it starts
-  const showPoolRiskAcknowledgements =
+  // The exit is the point of no return, so everything the user has to agree to is asked before it
+  const showAcknowledgements =
     isConnected &&
     initialTotalBptBalance > 0n &&
     !isBalV3RemoveComplete &&
     !exitSimulationError &&
     !depositBlockingReason
+
+  const leftoverInfo = hasDeposit && breakdown.leftover.length > 0 && (
+    <LeftoverInfo
+      breakdown={breakdown}
+      chain={newPool.chain}
+      hasRatioLeftover={hasProportionalDustWarning}
+      isSuccess={isSuccess}
+      unmigratedTokens={unmigratedTokens}
+    />
+  )
 
   return (
     <AnimateHeightChange spacing="sm">
@@ -131,42 +147,26 @@ export function MigrateLiquiditySummary({ addLiquidityReceipt }: MigrateLiquidit
         <BalAlert content={depositBlockingReason} status="error" />
       )}
 
-      {(displayAmounts.length > 0 || isLoadingAmounts) && (
-        <AmountInfo
-          amounts={displayAmounts}
-          chain={newPool.chain}
-          isLoading={isLoadingAmounts}
-          title={isSuccess ? 'You migrated' : "You're migrating"}
-          totalAmount={totalUSDValue}
-        />
-      )}
-
       <SourcePoolCard hadStakedBalance={hadStakedBalance} oldPool={oldPool} />
       <TargetPoolCard pool={newPool} title={`To ${PROJECT_CONFIG.projectName}`} />
 
-      {unmigratedTokens.length > 0 && (
-        <BalAlert
-          content={
-            <Text color="black" fontSize="sm">
-              {`${unmigratedTokens
-                .map(token => `${fNum('token', token.humanAmount || '0')} ${token.symbol}`)
-                .join(', ')} ${
-                unmigratedTokens.length === 1 ? 'is' : 'are'
-              } not accepted by the target pool and will remain in your wallet after exiting Balancer V3.`}
-            </Text>
-          }
-          status="info"
+      {(breakdown.removed.length > 0 || isLoadingAmounts) && (
+        <AmountInfo
+          amounts={breakdown.removed}
+          chain={newPool.chain}
+          isLoading={isLoadingAmounts}
+          title={isBalV3RemoveComplete ? 'You removed' : "You're removing"}
+          totalAmount={breakdown.removedUsd}
         />
       )}
 
-      {hasProportionalDustWarning && (
-        <BalAlert
-          content={
-            <Text color="black" fontSize="sm">
-              {`Deposits use the target pool's exact ratio to avoid price impact and deposit limits. Token amounts are clamped accordingly, and any leftover balances will remain in your wallet.`}
-            </Text>
-          }
-          status="info"
+      {hasDeposit && (
+        <AmountInfo
+          amounts={breakdown.deposited}
+          chain={newPool.chain}
+          isLoading={false}
+          title={isSuccess ? 'You deposited' : "You're depositing"}
+          totalAmount={breakdown.depositedUsd}
         />
       )}
 
@@ -178,25 +178,156 @@ export function MigrateLiquiditySummary({ addLiquidityReceipt }: MigrateLiquidit
               isLoading={addLiquidityReceipt.isLoading}
             />
           </Card>
+          {leftoverInfo}
           <GasCostSummaryCard chain={newPool.chain} transactionSteps={migrationSteps.steps} />
         </>
       ) : (
-        <PriceImpactCard
-          hasMigratedAmounts={migratedAmounts.length > 0}
-          migrationTotalUsdValue={totalUSDValue}
-          suppressSimulationErrorAlert={Boolean(depositBlockingReason) && !isBalV3RemoveComplete}
-        />
+        <>
+          <PriceImpactCard
+            hasMigratedAmounts={hasDeposit}
+            migrationTotalUsdValue={breakdown.depositedUsd}
+            suppressSimulationErrorAlert={Boolean(depositBlockingReason) && !isBalV3RemoveComplete}
+          />
+          {leftoverInfo}
+        </>
       )}
 
-      {showPoolRiskAcknowledgements && (
-        <Box pt="xs" px="sm" w="full">
+      {showAcknowledgements && (
+        <VStack align="start" pt="xs" px="sm" spacing="sm" w="full">
+          {needsLeftoverAcknowledgement && (
+            <LeftoverAcknowledgement
+              breakdown={breakdown}
+              isChecked={isLeftoverAcknowledged}
+              isDisabled={!isPreExitDepositVerified && !isLeftoverAcknowledged}
+              onChange={setIsLeftoverAcknowledged}
+            />
+          )}
           <PoolRiskAcknowledgements
             isDisabled={!isPreExitDepositVerified && !acceptPoolRisks}
             onChange={setAcceptPoolRisks}
           />
-        </Box>
+        </VStack>
       )}
     </AnimateHeightChange>
+  )
+}
+
+function formatTokenAmounts(amounts: HumanTokenAmountWithSymbol[]): string {
+  return formatList(
+    amounts.map(amount => `${fNum('token', amount.humanAmount || '0')} ${amount.symbol}`)
+  )
+}
+
+function formatList(items: string[]): string {
+  if (items.length <= 1) return items.join('')
+  return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`
+}
+
+function formatLeftoverShare(leftoverRatio: number): string {
+  return fNum('weight', leftoverRatio, { abbreviated: false, decimals: 1 })
+}
+
+type LeftoverInfoProps = {
+  breakdown: MigrationBreakdown
+  chain: GqlChain
+  isSuccess: boolean
+  // The target pool takes less of some token than the exit pays out, to keep its ratio
+  hasRatioLeftover: boolean
+  unmigratedTokens: HumanTokenAmountWithSymbol[]
+}
+
+function LeftoverInfo({
+  breakdown,
+  chain,
+  isSuccess,
+  hasRatioLeftover,
+  unmigratedTokens,
+}: LeftoverInfoProps) {
+  const { toCurrency } = useCurrency()
+
+  const reasons: string[] = []
+
+  if (hasRatioLeftover) {
+    reasons.push(
+      isSuccess
+        ? 'The target pool takes tokens in its own ratio, so it could not take everything you removed.'
+        : 'The target pool takes tokens in its own ratio, so it cannot take everything you remove.'
+    )
+  }
+
+  if (unmigratedTokens.length > 0) {
+    reasons.push(
+      `${formatList(unmigratedTokens.map(token => token.symbol))} ${
+        unmigratedTokens.length === 1 ? 'is' : 'are'
+      } not accepted by the target pool.`
+    )
+  }
+
+  if (reasons.length === 0) {
+    reasons.push(
+      isSuccess
+        ? 'A small buffer was held back from the deposit to allow for price movement.'
+        : 'A small buffer is held back from the deposit to allow for price movement.'
+    )
+  }
+
+  return (
+    <Card variant="modalSubSection">
+      <VStack align="stretch" spacing="sm">
+        <TokenRowGroup
+          amounts={breakdown.leftover}
+          chain={chain}
+          label={isSuccess ? 'Left in your wallet' : 'Staying in your wallet'}
+          rightElement={
+            <Text fontSize="sm" fontWeight="bold">
+              {breakdown.isPricedInUsd
+                ? `${toCurrency(breakdown.leftoverUsd, { abbreviated: false })} (${formatLeftoverShare(breakdown.leftoverRatio)})`
+                : ''}
+            </Text>
+          }
+          totalUSDValue={breakdown.leftoverUsd}
+        />
+        <Text color="font.secondary" fontSize="sm">
+          {reasons.join(' ')}
+        </Text>
+      </VStack>
+    </Card>
+  )
+}
+
+type LeftoverAcknowledgementProps = {
+  breakdown: MigrationBreakdown
+  isChecked: boolean
+  isDisabled: boolean
+  onChange: (isAcknowledged: boolean) => void
+}
+
+function LeftoverAcknowledgement({
+  breakdown,
+  isChecked,
+  isDisabled,
+  onChange,
+}: LeftoverAcknowledgementProps) {
+  const { toCurrency } = useCurrency()
+
+  const leftover = breakdown.isPricedInUsd
+    ? `${toCurrency(breakdown.leftoverUsd, { abbreviated: false })} (${formatLeftoverShare(breakdown.leftoverRatio)}) of what I remove`
+    : formatTokenAmounts(breakdown.leftover)
+
+  return (
+    <Checkbox
+      alignItems="flex-start"
+      isChecked={isChecked}
+      isDisabled={isDisabled}
+      onChange={e => onChange(e.target.checked)}
+      size="lg"
+    >
+      <Text as="div" fontSize="md" lineHeight="1" sx={{ textWrap: 'pretty' }}>
+        <TextShine animationDuration="1.5s">
+          {`I understand that ${leftover} will stay in my wallet and will not be deposited`}
+        </TextShine>
+      </Text>
+    </Checkbox>
   )
 }
 
