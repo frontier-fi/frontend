@@ -1,129 +1,47 @@
-import { useGetTokenRates } from './useGetTokenRates'
-import { useMemo, useState } from 'react'
-import { bn } from '@repo/lib/shared/utils/numbers'
-import { drawLiquidityECLP } from '../helpers/drawLiquidityECLP'
-import { calculateSpotPrice, destructureRequiredPoolParams } from '../helpers/calculateSpotPrice'
-import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
+import { useMemo } from 'react'
 import { formatUnits } from 'viem'
-import { getPriceRateRatio } from '../../pool/pool-tokens.utils'
+import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
+import type { GqlPoolGyro } from '@repo/lib/shared/services/api/graphql-derived-types'
+import { useGetTokenRates } from './useGetTokenRates'
+import { calculateSpotPrice, destructureRequiredPoolParams } from '../helpers/calculateSpotPrice'
 import { getPoolActionableTokens } from '../../pool/pool-tokens.utils'
 import { usePool } from '../../pool/PoolProvider'
-import type { GqlPoolGyro } from '@repo/lib/shared/services/api/graphql-derived-types'
 import { isGyroEPool } from '../../pool/pool.helpers'
-import { calculatePeakPrice } from '../../pool/actions/create/steps/details/gyro.helpers'
+import {
+  useEclpLiquidityProfileCore,
+  type ECLPLiquidityProfile,
+} from './useEclpLiquidityProfileCore'
 
-export type ECLPLiquidityProfile = {
-  data: [number, number][] | null
-  poolSpotPrice: string | number | null
-  poolPeakPrice: string | number | null
-  poolIsInRange: boolean
-  xMin: number
-  xMax: number
-  yMax: number
-  isReversed: boolean
-  toggleIsReversed: () => void
-  isLoading: boolean
-  poolTokens: string[]
-}
+export type { ECLPLiquidityProfile }
 
 export function useGetECLPLiquidityProfile(): ECLPLiquidityProfile {
   const { pool } = usePool()
-  const { data: tokenRates, isLoading } = useGetTokenRates(pool)
-  const [isReversed, setIsReversed] = useState(false)
+  const { data: tokenRates, unwrapRates, isLoading } = useGetTokenRates(pool)
 
-  function toggleIsReversed() {
-    setIsReversed(!isReversed)
-  }
+  const gyroPool = pool as GqlPoolGyro
 
-  const tokenRateScalingFactorString = useMemo(() => {
-    if (!tokenRates) return
+  const normalizedSpotPrice = useMemo(() => {
+    if (!tokenRates || !pool?.poolTokens) return null
+    const params = destructureRequiredPoolParams(pool, tokenRates)
+    if (!params) return null
 
-    return bn(tokenRates[0]!).div(bn(tokenRates[1]!)).toString()
-  }, [tokenRates])
+    return formatUnits(calculateSpotPrice(GqlPoolTypeValues.GyroE, params), 18)
+  }, [pool, tokenRates])
 
-  const liquidityData = useMemo(() => {
-    const gyroPool = pool as GqlPoolGyro
+  const poolTokens = useMemo(() => getPoolActionableTokens(pool).map(token => token.symbol), [pool])
 
-    const eclpParams = {
-      alpha: Number(gyroPool.alpha),
-      beta: Number(gyroPool.beta),
-      s: Number(gyroPool.s),
-      c: Number(gyroPool.c),
-      lambda: Number(gyroPool.lambda),
-    }
-
-    return drawLiquidityECLP(isGyroEPool(pool), eclpParams, tokenRateScalingFactorString)
-  }, [pool, tokenRateScalingFactorString])
-
-  const priceRateRatio = getPriceRateRatio(pool)
-
-  const params = pool && pool.poolTokens ? destructureRequiredPoolParams(pool, tokenRates) : null
-
-  const originalPoolSpotPrice = params
-    ? bn(formatUnits(calculateSpotPrice(GqlPoolTypeValues.GyroE, params), 18))
-        .div(priceRateRatio)
-        .toNumber()
-    : null
-
-  const poolSpotPrice = useMemo(() => {
-    if (!originalPoolSpotPrice) return null
-    return isReversed ? bn(1).div(bn(originalPoolSpotPrice)).toString() : originalPoolSpotPrice
-  }, [originalPoolSpotPrice, isReversed])
-
-  const poolPeakPrice = useMemo(() => {
-    const gyroPool = pool as GqlPoolGyro
-    if (!gyroPool?.c || !gyroPool?.s) return null
-
-    const rawPeak = calculatePeakPrice({ c: gyroPool.c, s: gyroPool.s })
-    if (!rawPeak) return null
-
-    // Scale the same way the curve (drawLiquidityECLP) and spot price (calculateSpotPrice) are
-    // scaled — by rate0 / rate1 — before normalising by priceRateRatio.
-    const scalingFactor = tokenRateScalingFactorString ?? '1'
-    const displayedPeak = bn(rawPeak).times(scalingFactor).div(priceRateRatio)
-    if (!displayedPeak.isFinite() || displayedPeak.lte(0)) return null
-
-    return isReversed ? bn(1).div(displayedPeak).toString() : displayedPeak.toNumber()
-  }, [pool, priceRateRatio, isReversed, tokenRateScalingFactorString])
-
-  const data = useMemo(() => {
-    if (!liquidityData) return null
-
-    const transformedData = liquidityData
-      .filter(([price]) => price !== 0) // filter out zero price to prevent infinity on reverse
-      .map(([price, liquidity]) => {
-        const displayedPrice = bn(price).div(priceRateRatio).toNumber()
-        return isReversed ? [1 / displayedPrice, liquidity] : [displayedPrice, liquidity]
-      })
-
-    return transformedData.sort((a, b) => a[0]! - b[0]!) as [number, number][]
-  }, [liquidityData, isReversed, priceRateRatio])
-
-  const xMin = useMemo(() => (data ? Math.min(...data.map(([x]) => x)) : 0), [data])
-  const xMax = useMemo(() => (data ? Math.max(...data.map(([x]) => x)) : 0), [data])
-  //const yMin = useMemo(() => (data ? Math.min(...data.map(([, y]) => y)) : 0), [data])
-  const yMax = useMemo(() => (data ? Math.max(...data.map(([, y]) => y)) : 0), [data])
-
-  const poolIsInRange = useMemo(() => {
-    const margin = 0.00005 // if spot price is within the margin on both sides it's considered out of range
-
-    return (
-      bn(poolSpotPrice || 0).gt(xMin * (1 + margin)) &&
-      bn(poolSpotPrice || 0).lt(xMax * (1 - margin))
-    )
-  }, [xMin, xMax, poolSpotPrice])
-
-  return {
-    data,
-    poolSpotPrice,
-    poolPeakPrice,
-    poolIsInRange,
-    xMin,
-    xMax,
-    yMax,
-    isReversed,
-    toggleIsReversed,
+  return useEclpLiquidityProfileCore({
+    isGyroEclp: isGyroEPool(pool),
+    alpha: gyroPool.alpha,
+    beta: gyroPool.beta,
+    c: gyroPool.c,
+    s: gyroPool.s,
+    lambda: gyroPool.lambda,
+    normalizedSpotPrice,
+    tokenRates,
+    unwrapRates,
+    poolTokens,
     isLoading,
-    poolTokens: getPoolActionableTokens(pool).map(token => token.symbol),
-  }
+    allowReverse: true,
+  })
 }

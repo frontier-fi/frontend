@@ -26,6 +26,7 @@ import { PeriodSelect } from './PeriodSelect'
 import ButtonGroup from '@repo/lib/shared/components/btns/button-group/ButtonGroup'
 import { PoolChartsProvider, usePoolCharts } from './PoolChartsProvider'
 import { EclpChart } from '@repo/lib/modules/eclp/components/EclpChart'
+import { EclpPriceModeToggle } from '@repo/lib/modules/eclp/components/EclpPriceModeToggle'
 import { PoolCharts } from './PoolCharts'
 import { ReversedToggleButton } from '@repo/lib/shared/components/btns/ReversedToggleButton'
 import { ThumbsDown, ThumbsUp } from 'lucide-react'
@@ -71,6 +72,9 @@ function PoolChartsContent({ ...props }: any) {
     outOfRangeText: eclpOutOfRangeText,
     inRangeText: eclpInRangeText,
     toggleIsReversed: toggleIsReversedEclp,
+    hasRateAdjustment,
+    isNormalized,
+    setIsNormalized,
     tokens: tokensEclp,
   } = useEclpChart()
 
@@ -114,10 +118,19 @@ function PoolChartsContent({ ...props }: any) {
                     size="xxs"
                   />
                   {showLiquidityProfileChart && (
-                    <ReversedToggleButton
-                      toggleIsReversed={toggleIsReversedEclp}
-                      tokenPair={tokensEclp}
-                    />
+                    <>
+                      <ReversedToggleButton
+                        toggleIsReversed={toggleIsReversedEclp}
+                        tokenPair={tokensEclp}
+                      />
+                      {hasRateAdjustment && (
+                        <EclpPriceModeToggle
+                          groupId="pool-eclp-price-mode"
+                          isNormalized={isNormalized}
+                          setIsNormalized={setIsNormalized}
+                        />
+                      )}
+                    </>
                   )}
                   {showPoolCharts && (
                     <Box w="max-content">

@@ -3,52 +3,64 @@ import { usePoolCreationForm } from '../PoolCreationFormProvider'
 import { RefreshCcw } from 'lucide-react'
 import { bn, fNumCustom, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { NUM_FORMAT } from '../constants'
-import ReactECharts from 'echarts-for-react'
+import { EclpChart } from '@repo/lib/modules/eclp/components/EclpChart'
 import { useEclpChart } from '@repo/lib/modules/eclp/hooks/EclpChartProvider'
+import { EclpPriceModeToggle } from '@repo/lib/modules/eclp/components/EclpPriceModeToggle'
 import { useWatch } from 'react-hook-form'
 
-export function PreviewGyroEclpConfig() {
-  const { eclpConfigForm, poolCreationForm, invertGyroEclpPriceParams, isBeforeStep } =
-    usePoolCreationForm()
+function formatCardValue(val: string | number | null | undefined): string {
+  return isBnParseable(val) && bn(val!).isFinite() && bn(val!).gt(0)
+    ? fNumCustom(String(val), NUM_FORMAT)
+    : '-'
+}
 
-  const [alpha, beta, peakPrice] = useWatch({
-    control: eclpConfigForm.control,
-    name: ['alpha', 'beta', 'peakPrice'],
-  })
+export function PreviewGyroEclpConfig() {
+  const { poolCreationForm, invertGyroEclpPriceParams, isBeforeStep } = usePoolCreationForm()
 
   const poolTokens = useWatch({ control: poolCreationForm.control, name: 'poolTokens' })
 
-  const { options, poolSpotPrice, markerColors } = useEclpChart()
+  const {
+    poolSpotPrice,
+    poolPeakPrice,
+    poolLowerBound,
+    poolUpperBound,
+    markerColors,
+    tokens,
+    hasRateAdjustment,
+    isNormalized,
+    setIsNormalized,
+  } = useEclpChart()
 
   const priceDisplayCards = [
     {
       color: markerColors.lowerBound,
       label: 'Lower bound',
-      value: isBnParseable(alpha) ? fNumCustom(alpha, NUM_FORMAT) : '-',
+      value: formatCardValue(poolLowerBound),
     },
     {
       color: markerColors.peakPrice,
       label: 'Peak price',
-      value: isBnParseable(peakPrice) ? fNumCustom(peakPrice, NUM_FORMAT) : '-',
+      value: formatCardValue(poolPeakPrice),
     },
     {
       color: markerColors.currentPrice,
       label: 'Current price',
       // spot price is 'NaN' / 'Infinity' when either token lacks a USD price
-      value:
-        isBnParseable(poolSpotPrice) && bn(poolSpotPrice!).isFinite() && bn(poolSpotPrice!).gt(0)
-          ? fNumCustom(String(poolSpotPrice), NUM_FORMAT)
-          : '-',
+      value: formatCardValue(poolSpotPrice),
     },
     {
       color: markerColors.upperBound,
       label: 'Upper bound',
-      value: isBnParseable(beta) ? fNumCustom(beta, NUM_FORMAT) : '-',
+      value: formatCardValue(poolUpperBound),
     },
   ]
 
-  const tokenSymbols = poolTokens.map(token => token.data?.symbol).filter(Boolean)
-  const tokenSymbolsString = tokenSymbols.join(' / ')
+  const fallbackTokenSymbols = poolTokens
+    .map(token => token.data?.symbol)
+    .filter(Boolean)
+    .join(' / ')
+
+  const tokenSymbolsString = tokens || fallbackTokenSymbols
 
   if (isBeforeStep('Details')) return null
 
@@ -87,9 +99,7 @@ export function PreviewGyroEclpConfig() {
         <Divider />
 
         <Box h={333} w="full">
-          {options && (
-            <ReactECharts notMerge option={options} style={{ height: '100%', width: '100%' }} />
-          )}
+          <EclpChart />
         </Box>
 
         <Divider />
@@ -110,6 +120,13 @@ export function PreviewGyroEclpConfig() {
               </Text>
             </HStack>
           </Button>
+          {hasRateAdjustment && (
+            <EclpPriceModeToggle
+              groupId="preview-eclp-price-mode"
+              isNormalized={isNormalized}
+              setIsNormalized={setIsNormalized}
+            />
+          )}
         </HStack>
       </VStack>
     </Card>
