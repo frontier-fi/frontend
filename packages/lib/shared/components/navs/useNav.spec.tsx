@@ -22,6 +22,7 @@ describe('useNav', () => {
       { href: '/swap', label: 'Swap' },
       { href: '/portfolio', label: 'Portfolio' },
       { href: '/create', label: 'Create' },
+      { href: '/migrate', label: 'Migrate' },
     ])
   })
 
@@ -33,5 +34,19 @@ describe('useNav', () => {
 
     expect(result.current.linkColorFor('/create')).toBe('font.highlight')
     expect(result.current.linkColorFor('/pools')).toBe('font.primary')
+  })
+
+  it('highlights Migrate on /migrate and /migrate-pool routes', () => {
+    mockParams = {}
+
+    mockPathname = '/migrate'
+    const { result: overviewResult } = renderHook(() => useNav())
+    expect(overviewResult.current.linkColorFor('/migrate')).toBe('font.highlight')
+    expect(overviewResult.current.linkColorFor('/pools')).toBe('font.primary')
+
+    mockPathname = '/pools/ethereum/v3/0x0a22eae1008c218d22c27a00b6f712483e32229a/migrate-pool'
+    const { result: poolMigrateResult } = renderHook(() => useNav())
+    expect(poolMigrateResult.current.linkColorFor('/migrate')).toBe('font.highlight')
+    expect(poolMigrateResult.current.linkColorFor('/pools')).toBe('font.primary')
   })
 })

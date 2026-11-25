@@ -87,7 +87,9 @@ export function shouldIgnore(message: string, stackTrace = ''): boolean {
   /*
     Wallets without EIP-5792 support reject `wallet_getCapabilities` — handled as unsupported.
   */
-  if (message.includes('wallet_getCapabilities')) return true
+  if (message.includes('wallet_getCapabilities') || stackTrace.includes('getCapabilities')) {
+    return true
+  }
 
   /*
     More info: https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
