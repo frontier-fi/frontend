@@ -28,6 +28,8 @@ import { FeeManagersProvider } from '@repo/lib/modules/fee-managers/FeeManagersP
 import { getFeeManagersMetadata } from '@repo/lib/modules/fee-managers/getFeeManagersMetadata'
 import { getPoolMigrations } from '@repo/lib/modules/pool/migrations/getPoolMigrations'
 import { PoolMigrationsProvider } from '@repo/lib/modules/pool/migrations/PoolMigrationsProvider'
+import { getAggregatorsMetadata } from '@repo/lib/modules/aggregators/getAggregatorsMetadata'
+import { AggregatorsProvider } from '@repo/lib/modules/aggregators/AggregatorsProvider'
 
 const isProductionBuild = process.env.NEXT_PHASE === 'phase-production-build'
 
@@ -68,6 +70,7 @@ export async function ApolloGlobalDataProvider({ children }: PropsWithChildren) 
     poolsMetadata,
     feeManagersMetadata,
     poolMigrations,
+    aggregatorsMetadata,
   ] = await Promise.all([
     getFxRates(),
     getHooksMetadata(),
@@ -76,6 +79,7 @@ export async function ApolloGlobalDataProvider({ children }: PropsWithChildren) 
     getPoolsMetadata(),
     getFeeManagersMetadata(),
     getPoolMigrations(),
+    getAggregatorsMetadata(),
   ])
 
   return (
@@ -90,7 +94,7 @@ export async function ApolloGlobalDataProvider({ children }: PropsWithChildren) 
                   poolsMetadata={poolsMetadata}
                 >
                   <PoolMigrationsProvider poolMigrations={poolMigrations}>
-                    {children}
+                    <AggregatorsProvider data={aggregatorsMetadata}>{children}</AggregatorsProvider>
                   </PoolMigrationsProvider>
                 </PoolsMetadataProvider>
               </ProtocolStatsProvider>

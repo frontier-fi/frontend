@@ -9,6 +9,7 @@ import {
   useTheme,
   Badge,
   BadgeProps,
+  Image,
 } from '@chakra-ui/react'
 import { useCurrency } from '@repo/lib/shared/hooks/useCurrency'
 import FadeInOnView from '@repo/lib/shared/components/containers/FadeInOnView'
@@ -21,6 +22,9 @@ import React from 'react'
 import { usePool } from '../../PoolProvider'
 import { getBlockExplorerTxUrl } from '@repo/lib/shared/utils/blockExplorer'
 import { EnsOrAddress } from '@repo/lib/modules/user/EnsOrAddress'
+import { useSwapAggregator } from '@repo/lib/modules/aggregators/useSwapAggregator'
+import { AggregatorMetadata } from '@repo/lib/modules/aggregators/getAggregatorsMetadata'
+import { TooltipWithTouch } from '@repo/lib/shared/components/tooltips/TooltipWithTouch'
 
 interface Props extends GridProps {
   event: PoolActivityEl
@@ -71,12 +75,35 @@ function TransactionDetails({
   )
 }
 
+function AggregatorTag({ aggregator }: { aggregator: AggregatorMetadata }) {
+  return (
+    <TooltipWithTouch label={`Swapped via ${aggregator.name}`} placement="top">
+      <Image
+        alt={aggregator.name}
+        borderColor="border.base"
+        borderWidth={1}
+        h="5"
+        minW="5"
+        rounded="full"
+        src={aggregator.logoUrl}
+        w="5"
+      />
+    </TooltipWithTouch>
+  )
+}
+
 export function PoolActivityTableRow({ event, keyValue, ...rest }: Props) {
   const { toCurrency } = useCurrency()
   const theme = useTheme()
   const { chain } = usePool()
 
   const poolEvent = event[2]
+
+  const aggregator = useSwapAggregator({
+    tx: poolEvent.tx,
+    chain,
+    enabled: poolEvent.action === 'swap',
+  })
 
   return (
     <FadeInOnView>
@@ -109,12 +136,15 @@ export function PoolActivityTableRow({ event, keyValue, ...rest }: Props) {
             </HStack>
           </GridItem>
           <GridItem>
-            <TransactionDetails
-              action={poolEvent.action}
-              px="sm"
-              py="2"
-              tokens={poolEvent.tokens}
-            />
+            <HStack gap="sm">
+              <TransactionDetails
+                action={poolEvent.action}
+                px="sm"
+                py="2"
+                tokens={poolEvent.tokens}
+              />
+              {aggregator && <AggregatorTag aggregator={aggregator} />}
+            </HStack>
           </GridItem>
           <GridItem textAlign="right">
             <Text>{toCurrency(poolEvent.usdValue)}</Text>
