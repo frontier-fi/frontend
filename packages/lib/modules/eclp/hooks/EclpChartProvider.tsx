@@ -173,6 +173,15 @@ export function useEclpChartLogic(
     text: theme.colors.gray[400],
   }
 
+  // Distance-to-peak works on every eCLP chart, even where the peak marker itself is hidden.
+  const canShowDistanceToPeak =
+    Boolean(data?.length) &&
+    isBnParseable(poolPeakPrice) &&
+    bn(poolPeakPrice!).isFinite() &&
+    bn(poolPeakPrice!).gt(0)
+
+  const isMeasuringPeak = canShowDistanceToPeak && showDistanceToPeak
+
   const options = useMemo(() => {
     if (!data?.length) return
 
@@ -193,6 +202,24 @@ export function useEclpChartLogic(
         showContent: true,
         trigger: 'axis',
         confine: true,
+        // While measuring, the distance label sits at the hovered height on the curve —
+        // pin the price tooltip to the top of the chart so it doesn't cover the label.
+        ...(isMeasuringPeak
+          ? {
+              position: (
+                point: number[],
+                _params: unknown,
+                _dom: unknown,
+                _rect: unknown,
+                size: any
+              ) => {
+                const [viewWidth] = size.viewSize as [number, number]
+                const [boxWidth] = size.contentSize as [number, number]
+                const x = point[0]! + 12
+                return [x + boxWidth > viewWidth ? point[0]! - boxWidth - 12 : x, 4]
+              },
+            }
+          : {}),
         extraCssText: `padding-right:2rem;border: none;${toolTipTheme.container}`,
         formatter: (params: any) => {
           const data = Array.isArray(params) ? params[0] : params
@@ -579,6 +606,7 @@ export function useEclpChartLogic(
     chartColors,
     peakLineColor,
     colorMode,
+    isMeasuringPeak,
   ])
 
   const outOfRangeText =
@@ -593,13 +621,6 @@ export function useEclpChartLogic(
     currentPrice: backgroundHighlightColor,
     upperBound: chartColors.upperBound,
   }
-
-  // Distance-to-peak works on every eCLP chart, even where the peak marker itself is hidden.
-  const canShowDistanceToPeak =
-    Boolean(data?.length) &&
-    isBnParseable(poolPeakPrice) &&
-    bn(poolPeakPrice!).isFinite() &&
-    bn(poolPeakPrice!).gt(0)
 
   return {
     options,
@@ -623,7 +644,7 @@ export function useEclpChartLogic(
     quoteTokenSymbol,
     quoteTokenUsdPrice,
     canShowDistanceToPeak,
-    showDistanceToPeak: canShowDistanceToPeak && showDistanceToPeak,
+    showDistanceToPeak: isMeasuringPeak,
     setShowDistanceToPeak,
   }
 }

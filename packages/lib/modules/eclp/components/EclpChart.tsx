@@ -133,9 +133,9 @@ export function EclpChart() {
           <Checkbox
             isChecked={showDistanceToPeak}
             onChange={event => setShowDistanceToPeak(event.target.checked)}
-            size="sm"
+            size="md"
           >
-            <Text color="font.secondary" fontSize="xs">
+            <Text color="font.secondary" fontSize="sm">
               Distance to peak
             </Text>
           </Checkbox>
@@ -184,9 +184,11 @@ function DistanceToPeakOverlay({
 }) {
   const { peakPx, hover, chartWidth } = measure
 
-  const mid: Point | null = hover
-    ? [(hover.px[0] + peakPx[0]) / 2, (hover.px[1] + peakPx[1]) / 2]
-    : null
+  // L-shaped measure: a vertical drop from the peak down to the hovered height, then
+  // straight across to the hovered point — like a ruler between two spots on a map.
+  const corner: Point | null = hover ? [peakPx[0], hover.px[1]] : null
+
+  const mid: Point | null = hover ? [(hover.px[0] + peakPx[0]) / 2, hover.px[1]] : null
 
   const labelLeft = mid
     ? Math.min(Math.max(mid[0], LABEL_EDGE_PADDING), Math.max(chartWidth - LABEL_EDGE_PADDING, 0))
@@ -202,18 +204,29 @@ function DistanceToPeakOverlay({
       zIndex={1}
     >
       <svg height="100%" style={{ overflow: 'visible' }} width="100%">
-        {hover && (
+        {hover && corner && (
           <>
+            <line
+              stroke={color}
+              strokeDasharray="2 4"
+              strokeLinecap="round"
+              strokeWidth={1.5}
+              x1={peakPx[0]}
+              x2={corner[0]}
+              y1={peakPx[1]}
+              y2={corner[1]}
+            />
             <line
               stroke={color}
               strokeDasharray="5 4"
               strokeLinecap="round"
               strokeWidth={1.75}
-              x1={hover.px[0]}
-              x2={peakPx[0]}
-              y1={hover.px[1]}
-              y2={peakPx[1]}
+              x1={corner[0]}
+              x2={hover.px[0]}
+              y1={corner[1]}
+              y2={hover.px[1]}
             />
+            <circle cx={corner[0]} cy={corner[1]} fill={color} r={2.5} />
             <circle
               cx={hover.px[0]}
               cy={hover.px[1]}
