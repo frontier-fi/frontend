@@ -135,7 +135,10 @@ export function EclpChart() {
             onChange={event => setShowDistanceToPeak(event.target.checked)}
             size="md"
             // Theme's unchecked control blends into the chart card — give it a visible outline.
+            // global.css forces `border-color: inherit !important` on focused elements, and the
+            // control keeps focus after a click, so the root must carry the same border colour.
             sx={{
+              borderColor: 'font.secondary',
               '.chakra-checkbox__control:not([data-checked])': {
                 borderColor: 'font.secondary',
                 borderWidth: '1.5px',
