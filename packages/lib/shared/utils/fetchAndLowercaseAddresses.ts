@@ -14,6 +14,11 @@ export async function fetchAndMapMetadata<T>(
       next: { revalidate: mins(revalidateMins).toSecs() },
     })
 
+    if (!res.ok) {
+      console.warn(`Unable to fetch metadata from ${url}: ${res.status} ${res.statusText}`)
+      return undefined
+    }
+
     const metadata = (await res.json()) as T[]
     return mapFn(metadata)
   } catch (error) {
