@@ -134,6 +134,13 @@ export function EclpChart() {
             isChecked={showDistanceToPeak}
             onChange={event => setShowDistanceToPeak(event.target.checked)}
             size="md"
+            // Theme's unchecked control blends into the chart card — give it a visible outline.
+            sx={{
+              '.chakra-checkbox__control:not([data-checked])': {
+                borderColor: 'font.secondary',
+                borderWidth: '1.5px',
+              },
+            }}
           >
             <Text color="font.secondary" fontSize="sm">
               Distance to peak
