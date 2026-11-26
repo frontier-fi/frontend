@@ -9,8 +9,10 @@ import {
   formatSignedPercent,
   formatSignedTokenAmount,
   formatSignedUsd,
+  getSwapDirectionToPeak,
   interpolateCurveY,
   isAtPeak,
+  type SwapDirection,
 } from '../helpers/distanceToPeak'
 
 type Point = [number, number]
@@ -26,7 +28,7 @@ type AxisPointerEvent = {
 }
 
 // Keeps the label pill from being clipped at the chart edges.
-const LABEL_EDGE_PADDING = 80
+const LABEL_EDGE_PADDING = 120
 
 export function EclpChart() {
   const {
@@ -34,6 +36,7 @@ export function EclpChart() {
     data,
     poolPeakPrice,
     peakLineColor,
+    baseTokenSymbol,
     quoteTokenSymbol,
     quoteTokenUsdPrice,
     canShowDistanceToPeak,
@@ -176,6 +179,9 @@ export function EclpChart() {
                 : null
             }
             measure={measure}
+            swapDirection={
+              distance ? getSwapDirectionToPeak(distance, baseTokenSymbol, quoteTokenSymbol) : null
+            }
           />
         )}
       </Box>
@@ -187,10 +193,12 @@ function DistanceToPeakOverlay({
   measure,
   color,
   distanceLabel,
+  swapDirection,
 }: {
   measure: PeakMeasure
   color: string
   distanceLabel: string | null
+  swapDirection: SwapDirection | null
 }) {
   const { peakPx, hover, chartWidth } = measure
 
@@ -270,11 +278,18 @@ function DistanceToPeakOverlay({
           px="2"
           py="0.5"
           shadow="md"
+          textAlign="center"
           top={`${mid[1]}px`}
           transform="translate(-50%, calc(-100% - 8px))"
+          w="max-content"
           whiteSpace="pre"
         >
           {distanceLabel}
+          {swapDirection && (
+            <Text color="gray.300" fontSize="xs" fontWeight="medium" lineHeight="1.4">
+              Swap {swapDirection.sell} → {swapDirection.buy} to reach peak
+            </Text>
+          )}
         </Box>
       )}
     </Box>

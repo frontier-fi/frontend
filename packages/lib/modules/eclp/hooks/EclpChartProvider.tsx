@@ -94,6 +94,7 @@ export function useEclpChartLogic(
   }, [poolTokens, isReversed])
 
   // Chart price is base quoted in quote — the quote token is the second displayed symbol.
+  const baseTokenSymbol = (isReversed ? poolTokens[1] : poolTokens[0]) ?? ''
   const quoteTokenSymbol = (isReversed ? poolTokens[0] : poolTokens[1]) ?? ''
 
   const secondaryFontColor = selectColor('font', colorMode === 'light' ? 'primary' : 'secondary')
@@ -641,6 +642,7 @@ export function useEclpChartLogic(
     tokens,
     markerColors,
     peakLineColor,
+    baseTokenSymbol,
     quoteTokenSymbol,
     quoteTokenUsdPrice,
     canShowDistanceToPeak,

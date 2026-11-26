@@ -140,3 +140,22 @@ export function calculateQuoteTokenUsdPrice({
 
   return usdPrice / rateNum
 }
+
+export type SwapDirection = { sell: string; buy: string }
+
+/**
+ * Which swap moves the pool price towards the peak. The chart price is the base token
+ * quoted in the quote token, so it rises when traders buy the base token out of the pool
+ * (sell quote → buy base) and falls when they sell base into it.
+ */
+export function getSwapDirectionToPeak(
+  distance: DistanceToPeak,
+  baseTokenSymbol: string,
+  quoteTokenSymbol: string
+): SwapDirection | null {
+  if (!baseTokenSymbol || !quoteTokenSymbol || isAtPeak(distance)) return null
+
+  return distance.priceDelta > 0
+    ? { sell: quoteTokenSymbol, buy: baseTokenSymbol }
+    : { sell: baseTokenSymbol, buy: quoteTokenSymbol }
+}

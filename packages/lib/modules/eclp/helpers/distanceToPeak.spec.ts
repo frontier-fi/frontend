@@ -5,6 +5,7 @@ import {
   formatSignedPercent,
   formatSignedTokenAmount,
   formatSignedUsd,
+  getSwapDirectionToPeak,
   interpolateCurveY,
   isAtPeak,
 } from './distanceToPeak'
@@ -121,5 +122,24 @@ describe('calculateQuoteTokenUsdPrice', () => {
   test('returns null without a USD price', () => {
     expect(calculateQuoteTokenUsdPrice({ ...base, tokenUsdPrices: [3000, 0] })).toBeNull()
     expect(calculateQuoteTokenUsdPrice({ ...base, tokenUsdPrices: null })).toBeNull()
+  })
+})
+
+describe('getSwapDirectionToPeak', () => {
+  test('peak above: buy the base token with the quote token to push price up', () => {
+    const d = calculateDistanceToPeak(0.998, 0.9995)!
+
+    expect(getSwapDirectionToPeak(d, 'avUSD', 'USDC')).toEqual({ sell: 'USDC', buy: 'avUSD' })
+  })
+
+  test('peak below: sell the base token for the quote token to push price down', () => {
+    const d = calculateDistanceToPeak(2000, 1800)!
+
+    expect(getSwapDirectionToPeak(d, 'WETH', 'USDC')).toEqual({ sell: 'WETH', buy: 'USDC' })
+  })
+
+  test('no direction at the peak or without symbols', () => {
+    expect(getSwapDirectionToPeak(calculateDistanceToPeak(1, 1)!, 'A', 'B')).toBeNull()
+    expect(getSwapDirectionToPeak(calculateDistanceToPeak(1, 2)!, '', 'B')).toBeNull()
   })
 })
