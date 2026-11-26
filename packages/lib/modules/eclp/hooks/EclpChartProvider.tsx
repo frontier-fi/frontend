@@ -79,6 +79,7 @@ export function useEclpChartLogic(
     isLoading,
     poolTokens,
     quoteTokenUsdPrice = null,
+    calcSwapToPeak,
   } = eclpLiquidityProfile
 
   const [showDistanceToPeak, setShowDistanceToPeak] = useState(false)
@@ -645,6 +646,7 @@ export function useEclpChartLogic(
     baseTokenSymbol,
     quoteTokenSymbol,
     quoteTokenUsdPrice,
+    calcSwapToPeak,
     canShowDistanceToPeak,
     showDistanceToPeak: isMeasuringPeak,
     setShowDistanceToPeak,

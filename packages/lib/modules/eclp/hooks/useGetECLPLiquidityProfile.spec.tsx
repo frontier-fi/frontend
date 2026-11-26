@@ -3,6 +3,7 @@ import { parseUnits } from 'viem'
 import { GqlChainValues, GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import type { Pool } from '../../pool/pool.types'
 import { ONE_E18 } from '../helpers/eclpRateScaling'
+import { calculateSpotPrice, destructureRequiredPoolParams } from '../helpers/calculateSpotPrice'
 import { useGetECLPLiquidityProfile } from './useGetECLPLiquidityProfile'
 
 const mockUsePool = vi.fn()
@@ -269,6 +270,53 @@ describe('useGetECLPLiquidityProfile', () => {
     expect(result.current.xMin).toBeCloseTo(1 / 1.079669, 5)
     expect(result.current.xMax).toBeCloseTo(1 / 1.056821, 5)
     expect(Number(result.current.poolSpotPrice)).toBeCloseTo(1 / 1.065331, 5)
+  })
+
+  it('calcSwapToPeak returns the swap that moves the on-chain spot price to the peak', () => {
+    const pool = createMainnetWstEthREthPool()
+    const liveRates: readonly [bigint, bigint] = [1_255081969318627477n, 1_176331165938233836n]
+    const unwrapRates: readonly [bigint, bigint] = [1_004027778713733055n, ONE_E18]
+
+    mockUsePool.mockReturnValue({ pool })
+    mockUseGetTokenRates.mockReturnValue({ data: liveRates, unwrapRates, isLoading: false })
+
+    const { result } = renderHook(() => useGetECLPLiquidityProfile())
+
+    const swap = result.current.calcSwapToPeak!(Number(result.current.poolSpotPrice))!
+
+    // Spot (1.0025 normalized) is above the peak (1.001): sell wstETH to push the price down.
+    expect(swap.sellSymbol).toBe('wstETH')
+    expect(swap.buySymbol).toBe('rETH')
+    expect(swap.sellAmount).toBeGreaterThan(0)
+    expect(swap.buyAmount).toBeGreaterThan(0)
+
+    // Displayed amounts are underlying units; convert back to pool (wrapped) token amounts.
+    const unwrap = unwrapRates.map(r => Number(r) / 1e18)
+    const [token0, token1] = pool.poolTokens
+
+    const nextPool = {
+      ...pool,
+      poolTokens: [
+        { ...token0, balance: String(Number(token0!.balance) + swap.sellAmount / unwrap[0]!) },
+        { ...token1, balance: String(Number(token1!.balance) - swap.buyAmount / unwrap[1]!) },
+      ],
+    } as unknown as Pool
+
+    const params = destructureRequiredPoolParams(nextPool, liveRates)!
+    const nextSpot = Number(calculateSpotPrice(GqlPoolTypeValues.GyroE, params)) / 1e18
+
+    expect(nextSpot).toBeCloseTo(1.001, 6)
+
+    // Same swap regardless of display mode or pair direction.
+    act(() => {
+      result.current.toggleIsReversed()
+      result.current.setIsNormalized(true)
+    })
+
+    const reversed = result.current.calcSwapToPeak!(Number(result.current.poolSpotPrice))!
+    expect(reversed.sellSymbol).toBe('wstETH')
+    expect(reversed.sellAmount).toBeCloseTo(swap.sellAmount, 8)
+    expect(reversed.buyAmount).toBeCloseTo(swap.buyAmount, 8)
   })
 
   it('pins underlying bounds and omits toggle when plain ERC-4626 unwrap matches live tokenRates', () => {

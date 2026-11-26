@@ -3,7 +3,9 @@ import { Box, Checkbox, Flex, HStack, Text } from '@chakra-ui/react'
 import ReactECharts from 'echarts-for-react'
 import type { EChartsType } from 'echarts'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { fNum } from '@repo/lib/shared/utils/numbers'
 import { useEclpChart } from '../hooks/EclpChartProvider'
+import type { EclpSwapToPeak } from '../hooks/useEclpLiquidityProfileCore'
 import {
   calculateDistanceToPeak,
   formatSignedPercent,
@@ -39,6 +41,7 @@ export function EclpChart() {
     baseTokenSymbol,
     quoteTokenSymbol,
     quoteTokenUsdPrice,
+    calcSwapToPeak,
     canShowDistanceToPeak,
     showDistanceToPeak,
     setShowDistanceToPeak,
@@ -182,6 +185,11 @@ export function EclpChart() {
             swapDirection={
               distance ? getSwapDirectionToPeak(distance, baseTokenSymbol, quoteTokenSymbol) : null
             }
+            swapToPeak={
+              distance && !isAtPeak(distance) && measure.hover && calcSwapToPeak
+                ? calcSwapToPeak(measure.hover.price)
+                : null
+            }
           />
         )}
       </Box>
@@ -194,11 +202,13 @@ function DistanceToPeakOverlay({
   color,
   distanceLabel,
   swapDirection,
+  swapToPeak,
 }: {
   measure: PeakMeasure
   color: string
   distanceLabel: string | null
   swapDirection: SwapDirection | null
+  swapToPeak: EclpSwapToPeak | null
 }) {
   const { peakPx, hover, chartWidth } = measure
 
@@ -285,10 +295,22 @@ function DistanceToPeakOverlay({
           whiteSpace="pre"
         >
           {distanceLabel}
-          {swapDirection && (
-            <Text color="gray.300" fontSize="xs" fontWeight="medium" lineHeight="1.4">
-              Swap {swapDirection.sell} → {swapDirection.buy} to reach peak
-            </Text>
+          {swapToPeak ? (
+            <>
+              <Text color="gray.300" fontSize="xs" fontWeight="medium" lineHeight="1.4">
+                Swap {fNum('token', swapToPeak.sellAmount)} {swapToPeak.sellSymbol} →{' '}
+                {fNum('token', swapToPeak.buyAmount)} {swapToPeak.buySymbol}
+              </Text>
+              <Text color="gray.400" fontSize="2xs" lineHeight="1.3">
+                to reach peak · before fees
+              </Text>
+            </>
+          ) : (
+            swapDirection && (
+              <Text color="gray.300" fontSize="xs" fontWeight="medium" lineHeight="1.4">
+                Swap {swapDirection.sell} → {swapDirection.buy} to reach peak
+              </Text>
+            )
           )}
         </Box>
       )}

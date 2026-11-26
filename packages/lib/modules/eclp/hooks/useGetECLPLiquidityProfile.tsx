@@ -4,7 +4,11 @@ import { formatUnits } from 'viem'
 import { GqlPoolTypeValues } from '@repo/lib/shared/services/api/graphql-enums'
 import type { GqlPoolGyro } from '@repo/lib/shared/services/api/graphql-derived-types'
 import { useGetTokenRates } from './useGetTokenRates'
-import { calculateSpotPrice, destructureRequiredPoolParams } from '../helpers/calculateSpotPrice'
+import {
+  calculateGyroEInvariant,
+  calculateSpotPrice,
+  destructureRequiredPoolParams,
+} from '../helpers/calculateSpotPrice'
 import { getPoolActionableTokens } from '../../pool/pool-tokens.utils'
 import { usePool } from '../../pool/PoolProvider'
 import { isGyroEPool } from '../../pool/pool.helpers'
@@ -23,12 +27,15 @@ export function useGetECLPLiquidityProfile(): ECLPLiquidityProfile {
 
   const gyroPool = pool as GqlPoolGyro
 
-  const normalizedSpotPrice = useMemo(() => {
-    if (!tokenRates || !pool?.poolTokens) return null
+  const { normalizedSpotPrice, invariant } = useMemo(() => {
+    if (!tokenRates || !pool?.poolTokens) return { normalizedSpotPrice: null, invariant: null }
     const params = destructureRequiredPoolParams(pool, tokenRates)
-    if (!params) return null
+    if (!params) return { normalizedSpotPrice: null, invariant: null }
 
-    return formatUnits(calculateSpotPrice(GqlPoolTypeValues.GyroE, params), 18)
+    return {
+      normalizedSpotPrice: formatUnits(calculateSpotPrice(GqlPoolTypeValues.GyroE, params), 18),
+      invariant: Number(formatUnits(calculateGyroEInvariant(params), 18)),
+    }
   }, [pool, tokenRates])
 
   const poolTokens = useMemo(() => getPoolActionableTokens(pool).map(token => token.symbol), [pool])
@@ -55,6 +62,7 @@ export function useGetECLPLiquidityProfile(): ECLPLiquidityProfile {
     unwrapRates,
     poolTokens,
     tokenUsdPrices,
+    invariant,
     isLoading,
     allowReverse: true,
   })

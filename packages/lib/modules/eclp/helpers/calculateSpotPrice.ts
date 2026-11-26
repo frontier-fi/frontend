@@ -83,7 +83,7 @@ export function calculateSpotPrice(poolType: GqlPoolType | string, params: GyroE
   return 0n
 }
 
-function calculateGyroESpotPrice(params: GyroEParams): bigint {
+function getScaledBalances(params: GyroEParams): [bigint, bigint] {
   const normalizedBalances = normalizeBalances(
     [params.balanceIn, params.balanceOut],
     [params.decimalsIn, params.decimalsOut]
@@ -91,13 +91,33 @@ function calculateGyroESpotPrice(params: GyroEParams): bigint {
 
   const [rate0, rate1] = params.tokenRates ?? []
 
-  const scaledBalances: [bigint, bigint] =
-    rate0 && rate1
-      ? [
-          MathSol.mulDownFixed(normalizedBalances[0], rate0),
-          MathSol.mulDownFixed(normalizedBalances[1], rate1),
-        ]
-      : normalizedBalances
+  return rate0 && rate1
+    ? [
+        MathSol.mulDownFixed(normalizedBalances[0], rate0),
+        MathSol.mulDownFixed(normalizedBalances[1], rate1),
+      ]
+    : normalizedBalances
+}
+
+/**
+ * The pool's 18-decimal invariant r in normalized (Vault rate-scaled) space, or 0n for an
+ * empty pool.
+ */
+export function calculateGyroEInvariant(params: GyroEParams): bigint {
+  const scaledBalances = getScaledBalances(params)
+  if (scaledBalances[0] === 0n && scaledBalances[1] === 0n) return 0n
+
+  const [invariant] = GyroECLPMath.calculateInvariantWithError(
+    scaledBalances,
+    params.gyroEParams,
+    params.derivedGyroEParams
+  )
+
+  return invariant
+}
+
+function calculateGyroESpotPrice(params: GyroEParams): bigint {
+  const scaledBalances = getScaledBalances(params)
 
   if (scaledBalances[0] === 0n && scaledBalances[1] === 0n) {
     return 0n
