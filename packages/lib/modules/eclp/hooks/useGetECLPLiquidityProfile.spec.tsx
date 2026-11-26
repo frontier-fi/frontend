@@ -16,6 +16,10 @@ vi.mock('./useGetTokenRates', () => ({
   useGetTokenRates: (pool: Pool) => mockUseGetTokenRates(pool),
 }))
 
+vi.mock('../../tokens/TokensProvider', () => ({
+  useTokens: () => ({ priceFor: () => 0 }),
+}))
+
 function createBaseGyroEPool({ useUnderlying }: { useUnderlying: boolean }): Pool {
   return {
     id: '0x919a6c3fe7a5b9c62be0b6577a7343d404a4beab',

@@ -1,6 +1,6 @@
 import { bn, fNum, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { useColorMode, useTheme as useChakraTheme } from '@chakra-ui/react'
-import { createContext, PropsWithChildren, useMemo } from 'react'
+import { createContext, PropsWithChildren, useMemo, useState } from 'react'
 import { useMandatoryContext } from '@repo/lib/shared/utils/contexts'
 import { useSelectColor } from '@repo/lib/shared/hooks/useSelectColor'
 import { type ECLPLiquidityProfile } from './useGetECLPLiquidityProfile'
@@ -78,7 +78,10 @@ export function useEclpChartLogic(
     setIsNormalized,
     isLoading,
     poolTokens,
+    quoteTokenUsdPrice = null,
   } = eclpLiquidityProfile
+
+  const [showDistanceToPeak, setShowDistanceToPeak] = useState(false)
 
   const theme = useChakraTheme()
   const { colorMode } = useColorMode()
@@ -89,6 +92,9 @@ export function useEclpChartLogic(
   const tokens = useMemo(() => {
     return isReversed ? [...poolTokens].reverse().join(' / ') : poolTokens.join(' / ')
   }, [poolTokens, isReversed])
+
+  // Chart price is base quoted in quote — the quote token is the second displayed symbol.
+  const quoteTokenSymbol = (isReversed ? poolTokens[0] : poolTokens[1]) ?? ''
 
   const secondaryFontColor = selectColor('font', colorMode === 'light' ? 'primary' : 'secondary')
 
@@ -588,8 +594,16 @@ export function useEclpChartLogic(
     upperBound: chartColors.upperBound,
   }
 
+  // Distance-to-peak works on every eCLP chart, even where the peak marker itself is hidden.
+  const canShowDistanceToPeak =
+    Boolean(data?.length) &&
+    isBnParseable(poolPeakPrice) &&
+    bn(poolPeakPrice!).isFinite() &&
+    bn(poolPeakPrice!).gt(0)
+
   return {
     options,
+    data,
     hasChartData: data?.length,
     poolIsInRange,
     poolSpotPrice,
@@ -605,6 +619,12 @@ export function useEclpChartLogic(
     inRangeText,
     tokens,
     markerColors,
+    peakLineColor,
+    quoteTokenSymbol,
+    quoteTokenUsdPrice,
+    canShowDistanceToPeak,
+    showDistanceToPeak: canShowDistanceToPeak && showDistanceToPeak,
+    setShowDistanceToPeak,
   }
 }
 

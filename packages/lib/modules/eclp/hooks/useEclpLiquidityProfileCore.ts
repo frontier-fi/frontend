@@ -4,6 +4,7 @@ import { bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { drawNormalizedLiquidityECLP } from '../helpers/drawLiquidityECLP'
 import { calculateMarketRateMultiplier } from '../helpers/eclpRateScaling'
 import { calculatePeakPrice } from '../../pool/actions/create/steps/details/gyro.helpers'
+import { calculateQuoteTokenUsdPrice } from '../helpers/distanceToPeak'
 
 export type ECLPLiquidityProfile = {
   data: [number, number][] | null
@@ -22,6 +23,8 @@ export type ECLPLiquidityProfile = {
   setIsNormalized: (isNormalized: boolean) => void
   isLoading: boolean
   poolTokens: string[]
+  /** USD value of one displayed quote-token unit (the second symbol in the displayed pair). */
+  quoteTokenUsdPrice?: number | null
 }
 
 export type EclpLiquidityProfileCoreInput = {
@@ -36,6 +39,8 @@ export type EclpLiquidityProfileCoreInput = {
   tokenRates: readonly [bigint, bigint] | null
   unwrapRates: readonly [bigint, bigint] | null
   poolTokens: string[]
+  /** USD prices of the pool tokens in pool token order ([token0, token1]). */
+  tokenUsdPrices?: readonly [number, number] | null
   isLoading: boolean
   allowReverse?: boolean
 }
@@ -79,6 +84,7 @@ export function useEclpLiquidityProfileCore({
   tokenRates,
   unwrapRates,
   poolTokens,
+  tokenUsdPrices,
   isLoading,
   allowReverse = false,
 }: EclpLiquidityProfileCoreInput): ECLPLiquidityProfile {
@@ -220,6 +226,18 @@ export function useEclpLiquidityProfileCore({
     )
   }, [data, xMin, xMax, poolSpotPrice])
 
+  const quoteTokenUsdPrice = useMemo(
+    () =>
+      calculateQuoteTokenUsdPrice({
+        tokenUsdPrices,
+        tokenRates,
+        unwrapRates,
+        isNormalized,
+        isReversed,
+      }),
+    [tokenUsdPrices, tokenRates, unwrapRates, isNormalized, isReversed]
+  )
+
   return {
     data,
     poolSpotPrice,
@@ -237,5 +255,6 @@ export function useEclpLiquidityProfileCore({
     setIsNormalized,
     isLoading,
     poolTokens,
+    quoteTokenUsdPrice,
   }
 }

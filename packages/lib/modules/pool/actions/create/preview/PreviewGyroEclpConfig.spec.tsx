@@ -194,6 +194,47 @@ describe('PreviewGyroEclpConfig', () => {
     expect(screen.queryByText('Normalized')).not.toBeInTheDocument()
   })
 
+  test('shows a Distance to peak toggle on the preview chart', () => {
+    mockChartRender.mockClear()
+    mockSpotPrice.numerator = '1'
+    mockSpotPrice.denominator = '1'
+
+    currentEclpValues = {
+      alpha: '0.99',
+      beta: '1.0001',
+      peakPrice: '0.9995',
+      lambda: '100',
+    }
+
+    render(<PreviewHarness />)
+
+    const checkbox = screen.getByRole('checkbox', { name: 'Distance to peak' })
+    expect(checkbox).not.toBeChecked()
+    expect(screen.queryByTestId('eclp-distance-to-peak')).not.toBeInTheDocument()
+
+    fireEvent.click(checkbox)
+
+    expect(checkbox).toBeChecked()
+
+    // Hover events bind to the final echarts instance handed to onChartReady.
+    expect(mockChartRender).toHaveBeenLastCalledWith(
+      expect.objectContaining({ onChartReady: expect.any(Function) })
+    )
+  })
+
+  test('hides the Distance to peak toggle when there is no chart', () => {
+    currentEclpValues = {
+      alpha: '.',
+      beta: '.',
+      peakPrice: '.',
+      lambda: '100',
+    }
+
+    render(<PreviewHarness />)
+
+    expect(screen.queryByRole('checkbox', { name: 'Distance to peak' })).not.toBeInTheDocument()
+  })
+
   test('shows market-scaled summary cards by default and switches between Market and Normalized', () => {
     const r0 = '1.255081969318627477'
     const u0 = 1_004027778713733055n
