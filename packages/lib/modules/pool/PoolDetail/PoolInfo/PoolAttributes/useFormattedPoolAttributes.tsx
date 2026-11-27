@@ -59,10 +59,14 @@ export function getRehypothecatedText(
 
   const tagProtocols = (pool.tags ?? [])
     .filter((tag): tag is string => !!tag && /^boosted_/i.test(tag))
-    .map(tag => {
-      const name = tag.replace(/^boosted_/i, '')
-      return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
-    })
+    .map(tag =>
+      tag
+        .replace(/^boosted_/i, '')
+        .split('_')
+        .filter(Boolean)
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
+    )
 
   return tagProtocols.length > 0 ? [...new Set(tagProtocols)].join(', ') : 'Yes'
 }

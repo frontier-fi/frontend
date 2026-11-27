@@ -103,6 +103,10 @@ export function getYieldBearingTokenUrl({
     return undefined
   }
 
+  if (protocolId === 'boosted_aave_pro') {
+    return 'https://pro.aave.com/explore/earn'
+  }
+
   if (protocolId === 'boosted_neverland') {
     return underlyingSymbol
       ? `https://app.neverland.money/markets?asset=${encodeURIComponent(underlyingSymbol.toLowerCase())}`

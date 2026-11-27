@@ -131,7 +131,7 @@ it('parses per-opportunity Merkl items with asset title and clickable Merkl URLs
   ])
 })
 
-it('builds yield-bearing token URLs for Aave, Neverland, and Euler', () => {
+it('builds yield-bearing token URLs for Aave, Aave Pro, Neverland, and Euler', () => {
   expect(
     getYieldBearingTokenUrl({
       protocolId: 'boosted_aave',
@@ -143,6 +143,16 @@ it('builds yield-bearing token URLs for Aave, Neverland, and Euler', () => {
   ).toBe(
     'https://app.aave.com/reserve-overview/?underlyingAsset=0x754704bc059f8c67012fed69bc8a327a5aafb603&marketName=proto_monad_v3'
   )
+
+  expect(
+    getYieldBearingTokenUrl({
+      protocolId: 'boosted_aave_pro',
+      chain: GqlChainValues.Mainnet,
+      tokenAddress: '0x531e90a2376902de8915789fcc1075e3b0c153e7',
+      underlyingAddress: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      underlyingSymbol: 'USDC',
+    })
+  ).toBe('https://pro.aave.com/explore/earn')
 
   expect(
     getYieldBearingTokenUrl({
