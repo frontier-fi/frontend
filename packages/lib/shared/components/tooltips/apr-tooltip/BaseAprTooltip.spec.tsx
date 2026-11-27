@@ -23,6 +23,15 @@ function buildTooltipState(overrides: {
   stakingIncentivesAprDisplayed: BigNumber
   isStakingPresent?: boolean
   stakingIncentivesDisplayed?: { title: string; apr: BigNumber; tooltipText: string }[]
+  merklIncentivesAprDisplayed?: BigNumber
+  merklTokensDisplayed?: {
+    id: string
+    title: string
+    apr: BigNumber
+    opportunityId?: string
+    opportunityUrl?: string
+  }[]
+  hasMerklIncentives?: boolean
 }) {
   return {
     totalBaseDisplayed: bn('0.01'),
@@ -34,9 +43,9 @@ function buildTooltipState(overrides: {
     isStakingPresent: overrides.isStakingPresent ?? overrides.stakingIncentivesAprDisplayed.gt(0),
     yieldBearingTokensDisplayed: [],
     stakingIncentivesDisplayed: overrides.stakingIncentivesDisplayed ?? [],
-    merklIncentivesAprDisplayed: bn(0),
-    merklTokensDisplayed: [],
-    hasMerklIncentives: false,
+    merklIncentivesAprDisplayed: overrides.merklIncentivesAprDisplayed ?? bn(0),
+    merklTokensDisplayed: overrides.merklTokensDisplayed ?? [],
+    hasMerklIncentives: overrides.hasMerklIncentives ?? false,
     surplusIncentivesAprDisplayed: bn(0),
     votingAprDisplayed: bn(0),
     lockingAprDisplayed: bn(0),
@@ -125,5 +134,59 @@ describe('BaseAprTooltip staking incentives visibility', () => {
     expect(screen.getByText('Staking incentives')).toBeInTheDocument()
     expect(screen.getByText('AURA')).toBeInTheDocument()
     expect(screen.getAllByText('5.0%').length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('renders a separate row with clickable opportunity link for each Merkl campaign', async () => {
+    mockUseAprTooltip.mockReturnValue(
+      buildTooltipState({
+        stakingIncentivesAprDisplayed: bn(0),
+        hasMerklIncentives: true,
+        merklIncentivesAprDisplayed: bn('0.0424'),
+        merklTokensDisplayed: [
+          {
+            id: 'pool-1-merkl-3250124745872902091',
+            title: '0xFF-avUSD-waMonUSDC',
+            apr: bn('0.0372'),
+            opportunityId: '3250124745872902091',
+            opportunityUrl: 'https://app.merkl.xyz/opportunities/3250124745872902091',
+          },
+          {
+            id: 'pool-1-merkl-9212343318075137075',
+            title: 'waMonUSDC',
+            apr: bn('0.0052'),
+            opportunityId: '9212343318075137075',
+            opportunityUrl: 'https://app.merkl.xyz/opportunities/9212343318075137075',
+          },
+        ],
+      })
+    )
+
+    await renderAndOpenTooltip()
+
+    expect(screen.getByText('Merkl.xyz incentives')).toBeInTheDocument()
+    expect(screen.getByText('0xFF-avUSD-waMonUSDC')).toBeInTheDocument()
+    expect(screen.getByText('waMonUSDC')).toBeInTheDocument()
+
+    const poolOppLink = screen.getByRole('link', {
+      name: 'Merkl opportunity 3250124745872902091',
+    })
+
+    expect(poolOppLink).toHaveAttribute(
+      'href',
+      'https://app.merkl.xyz/opportunities/3250124745872902091'
+    )
+
+    expect(poolOppLink).toHaveAttribute('target', '_blank')
+
+    const tokenOppLink = screen.getByRole('link', {
+      name: 'Merkl opportunity 9212343318075137075',
+    })
+
+    expect(tokenOppLink).toHaveAttribute(
+      'href',
+      'https://app.merkl.xyz/opportunities/9212343318075137075'
+    )
+
+    expect(tokenOppLink).toHaveAttribute('target', '_blank')
   })
 })

@@ -2,6 +2,8 @@ import type { GqlPoolAprItem } from '@repo/lib/shared/services/api/graphql-deriv
 import type { GqlHookType, GqlPoolType } from '@repo/lib/shared/services/api/generated/graphql'
 import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import {
+  HStack,
+  Link,
   PlacementWithLogical,
   Popover,
   PopoverContent,
@@ -9,7 +11,9 @@ import {
   Divider,
   Stack,
   Portal,
+  Text,
 } from '@chakra-ui/react'
+import { ArrowUpRight } from 'lucide-react'
 import {
   swapFeesTooltipText,
   useAprTooltip,
@@ -208,14 +212,55 @@ function BaseAprTooltip({
           tooltipText={merklIncentivesTooltipText}
         >
           {merklTokensDisplayed
-            .filter(item => item.title !== '') // filter out rewards where the token symbol empty
+            .filter(item => item.title !== '' || Boolean(item.opportunityId))
             .map(item => (
               <TooltipAprItem
                 {...subitemPopoverAprItemProps}
                 apr={item.apr}
                 displayValueFormatter={usedDisplayValueFormatter}
-                key={`merkl-${item.title}-${item.apr}`}
-                title={item.title}
+                key={item.id || `merkl-${item.title}-${item.apr}`}
+                title={
+                  item.opportunityId && item.opportunityUrl ? (
+                    <HStack gap={1} whiteSpace="nowrap">
+                      {item.title && (
+                        <Text
+                          as="span"
+                          color={subitemPopoverAprItemProps.fontColor}
+                          fontSize="sm"
+                          fontWeight={500}
+                        >
+                          {item.title}
+                        </Text>
+                      )}
+                      <Text
+                        alignItems="center"
+                        as="span"
+                        color={subitemPopoverAprItemProps.fontColor}
+                        display="inline-flex"
+                        fontSize="xs"
+                        fontWeight={500}
+                        lineHeight="1"
+                      >
+                        (
+                        <Link
+                          alignItems="center"
+                          aria-label={`Merkl opportunity ${item.opportunityId}`}
+                          color="font.link"
+                          display="inline-flex"
+                          href={item.opportunityUrl}
+                          isExternal
+                          onClick={e => e.stopPropagation()}
+                          rel="noopener noreferrer"
+                        >
+                          <ArrowUpRight size={10} />
+                        </Link>
+                        )
+                      </Text>
+                    </HStack>
+                  ) : (
+                    item.title
+                  )
+                }
               />
             ))}
         </TooltipAprItem>

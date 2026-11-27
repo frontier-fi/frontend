@@ -11,12 +11,12 @@ import {
 import type BigNumber from 'bignumber.js'
 import { ReactNode } from 'react'
 
-interface PopoverAprItemProps extends BoxProps {
+interface PopoverAprItemProps extends Omit<BoxProps, 'title'> {
   fontWeight?: number
   fontColor?: string
   valueFontColor?: string
 
-  title: string
+  title: ReactNode
   apr: BigNumber
   aprOpacity?: number
   displayValueFormatter: (value: BigNumber) => string
@@ -48,17 +48,29 @@ export function TooltipAprItem({
 }: PopoverAprItemProps) {
   return (
     <Box background={boxBackground} bg={bg} fontSize="sm" {...props}>
-      <HStack justifyContent="space-between">
-        <Text
-          background={textBackground}
-          backgroundClip={textBackgroundClip}
-          color={fontColor}
-          fontSize="sm"
-          fontWeight={fontWeight}
-          variant={textVariant}
-        >
-          {title}
-        </Text>
+      <HStack gap={4} justifyContent="space-between">
+        {typeof title === 'string' ? (
+          <Text
+            background={textBackground}
+            backgroundClip={textBackgroundClip}
+            color={fontColor}
+            fontSize="sm"
+            fontWeight={fontWeight}
+            variant={textVariant}
+          >
+            {title}
+          </Text>
+        ) : (
+          <Box
+            background={textBackground}
+            backgroundClip={textBackgroundClip}
+            color={fontColor}
+            fontSize="sm"
+            fontWeight={fontWeight}
+          >
+            {title}
+          </Box>
+        )}
         {tooltipText ? (
           <Popover trigger="hover">
             <PopoverTrigger>

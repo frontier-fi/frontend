@@ -80,8 +80,53 @@ it('When the pool has multiple MERKL token incentives', () => {
     [
       {
         "apr": "0.0178",
+        "id": "0x10a04efba5b880e169920fd4348527c64fb29d4d-morpho",
         "title": "MORPHO",
       },
     ]
   `)
+})
+
+it('parses per-opportunity Merkl items with asset title and clickable Merkl URLs', () => {
+  const aprItems: GqlPoolAprItem[] = [
+    {
+      __typename: 'GqlPoolAprItem',
+      id: '0x43b9b77653f4240e764546d921df5c08b4c66a28-merkl-3250124745872902091',
+      title: '0xFF-avUSD-waMonUSDC',
+      apr: 0.0372,
+      type: 'MERKL',
+      rewardTokenAddress: '0x3bd359c1119da7da1d913d1c4d2b7c461115433a',
+      rewardTokenSymbol: 'WMON',
+    },
+    {
+      __typename: 'GqlPoolAprItem',
+      id: '0x43b9b77653f4240e764546d921df5c08b4c66a28-merkl-9212343318075137075',
+      title: 'waMonUSDC',
+      apr: 0.0052,
+      type: 'MERKL',
+      rewardTokenAddress: '0x561ad6156d0106e7a59ee788759df7b7ec679bd0',
+      rewardTokenSymbol: 'WMON',
+    },
+  ]
+
+  const result = testUseAprTooltip({ aprItems })
+
+  expect(result.current.merklIncentivesAprDisplayed.toFixed(4)).toBe('0.0424')
+
+  expect(result.current.merklTokensDisplayed).toEqual([
+    {
+      id: '0x43b9b77653f4240e764546d921df5c08b4c66a28-merkl-3250124745872902091',
+      title: '0xFF-avUSD-waMonUSDC',
+      apr: bn('0.0372'),
+      opportunityId: '3250124745872902091',
+      opportunityUrl: 'https://app.merkl.xyz/opportunities/3250124745872902091',
+    },
+    {
+      id: '0x43b9b77653f4240e764546d921df5c08b4c66a28-merkl-9212343318075137075',
+      title: 'waMonUSDC',
+      apr: bn('0.0052'),
+      opportunityId: '9212343318075137075',
+      opportunityUrl: 'https://app.merkl.xyz/opportunities/9212343318075137075',
+    },
+  ])
 })

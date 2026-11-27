@@ -41,6 +41,24 @@ export const dynamicSwapFeesTooltipText: Record<SupportedHookType, string> = {
     'Additional swap fees from the directional fee StableSurge hook that dynamically adjusts to protect stable-asset pegs during volatility. These fees auto-compound and are shared with LPs proportionately.',
 }
 
+const MERKL_OPPORTUNITY_ID_REGEX = /-merkl-(\d+)$/
+
+export function getMerklOpportunityId(itemId: string): string | undefined {
+  return itemId.match(MERKL_OPPORTUNITY_ID_REGEX)?.[1]
+}
+
+export function getMerklOpportunityUrl(opportunityId: string): string {
+  return `https://app.merkl.xyz/opportunities/${opportunityId}`
+}
+
+export interface MerklAprSubItem {
+  id: string
+  title: string
+  apr: BigNumber
+  opportunityId?: string
+  opportunityUrl?: string
+}
+
 // Types that must be added to the total base (Frontier APR enum subset)
 const TOTAL_BASE_APR_TYPES: GqlPoolAprItemType[] = [
   GqlPoolAprItemTypeValues.SwapFee24h,
@@ -110,10 +128,17 @@ export function useAprTooltip({
     return item.type === GqlPoolAprItemTypeValues.Merkl
   })
 
-  const merklTokensDisplayed = merklTokens.map(item => ({
-    title: item.rewardTokenSymbol || '',
-    apr: numberFormatter(item.apr.toString()),
-  }))
+  const merklTokensDisplayed: MerklAprSubItem[] = merklTokens.map(item => {
+    const opportunityId = getMerklOpportunityId(item.id)
+    const opportunityUrl = opportunityId ? getMerklOpportunityUrl(opportunityId) : undefined
+
+    return {
+      id: item.id,
+      title: opportunityId ? item.title : item.rewardTokenSymbol || '',
+      apr: numberFormatter(item.apr.toString()),
+      ...(opportunityId ? { opportunityId, opportunityUrl } : {}),
+    }
+  })
 
   // Surplus incentives
   const surplusIncentives = filterByType(aprItems, GqlPoolAprItemTypeValues.Surplus24h)
