@@ -78,11 +78,10 @@ export function useEclpChartLogic(
     setIsNormalized,
     isLoading,
     poolTokens,
-    quoteTokenUsdPrice = null,
-    calcSwapToPeak,
+    calcSwapFromSpot,
   } = eclpLiquidityProfile
 
-  const [showDistanceToPeak, setShowDistanceToPeak] = useState(false)
+  const [showPriceMeasure, setShowPriceMeasure] = useState(false)
 
   const theme = useChakraTheme()
   const { colorMode } = useColorMode()
@@ -175,14 +174,15 @@ export function useEclpChartLogic(
     text: theme.colors.gray[400],
   }
 
-  // Distance-to-peak works on every eCLP chart, even where the peak marker itself is hidden.
-  const canShowDistanceToPeak =
+  // Measuring from the current price vertical is available whenever the spot marker is rendered.
+  const canMeasureFromSpot =
     Boolean(data?.length) &&
-    isBnParseable(poolPeakPrice) &&
-    bn(poolPeakPrice!).isFinite() &&
-    bn(poolPeakPrice!).gt(0)
+    poolIsInRange &&
+    isBnParseable(poolSpotPrice) &&
+    bn(poolSpotPrice!).isFinite() &&
+    bn(poolSpotPrice!).gt(0)
 
-  const isMeasuringPeak = canShowDistanceToPeak && showDistanceToPeak
+  const isMeasuringFromSpot = canMeasureFromSpot && showPriceMeasure
 
   const options = useMemo(() => {
     if (!data?.length) return
@@ -201,27 +201,11 @@ export function useEclpChartLogic(
       },
       tooltip: {
         show: true,
-        showContent: true,
+        // Keep axisPointer active while measuring, but suppress ECharts' floating price box so
+        // it never collides with the measure card.
+        showContent: !isMeasuringFromSpot,
         trigger: 'axis',
         confine: true,
-        // While measuring, the distance label sits on the curve between the current price and
-        // the peak — pin the price tooltip to the top of the chart so it doesn't cover the label.
-        ...(isMeasuringPeak
-          ? {
-              position: (
-                point: number[],
-                _params: unknown,
-                _dom: unknown,
-                _rect: unknown,
-                size: any
-              ) => {
-                const [viewWidth] = size.viewSize as [number, number]
-                const [boxWidth] = size.contentSize as [number, number]
-                const x = point[0]! + 12
-                return [x + boxWidth > viewWidth ? point[0]! - boxWidth - 12 : x, 4]
-              },
-            }
-          : {}),
         extraCssText: `padding-right:2rem;border: none;${toolTipTheme.container}`,
         formatter: (params: any) => {
           const data = Array.isArray(params) ? params[0] : params
@@ -608,7 +592,7 @@ export function useEclpChartLogic(
     chartColors,
     peakLineColor,
     colorMode,
-    isMeasuringPeak,
+    isMeasuringFromSpot,
   ])
 
   const outOfRangeText =
@@ -633,6 +617,9 @@ export function useEclpChartLogic(
     poolPeakPrice,
     poolLowerBound,
     poolUpperBound,
+    xMin,
+    xMax,
+    yMax,
     toggleIsReversed,
     hasRateAdjustment,
     isNormalized,
@@ -642,14 +629,13 @@ export function useEclpChartLogic(
     inRangeText,
     tokens,
     markerColors,
-    peakLineColor,
+    spotLineColor: fontHighlightColor,
     baseTokenSymbol,
     quoteTokenSymbol,
-    quoteTokenUsdPrice,
-    calcSwapToPeak,
-    canShowDistanceToPeak,
-    showDistanceToPeak: isMeasuringPeak,
-    setShowDistanceToPeak,
+    calcSwapFromSpot,
+    canMeasureFromSpot,
+    showPriceMeasure: isMeasuringFromSpot,
+    setShowPriceMeasure,
   }
 }
 

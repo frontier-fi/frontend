@@ -194,7 +194,7 @@ describe('PreviewGyroEclpConfig', () => {
     expect(screen.queryByText('Normalized')).not.toBeInTheDocument()
   })
 
-  test('shows a Distance to peak toggle on the preview chart', () => {
+  test('shows Show price impact toggle when in range and hides floating ECharts tooltip content while active', () => {
     mockChartRender.mockClear()
     mockSpotPrice.numerator = '1'
     mockSpotPrice.denominator = '1'
@@ -208,21 +208,35 @@ describe('PreviewGyroEclpConfig', () => {
 
     render(<PreviewHarness />)
 
-    const checkbox = screen.getByRole('checkbox', { name: 'Distance to peak' })
+    const checkbox = screen.getByRole('checkbox', { name: 'Show price impact' })
     expect(checkbox).not.toBeChecked()
-    expect(screen.queryByTestId('eclp-distance-to-peak')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('eclp-price-measure')).not.toBeInTheDocument()
+
+    expect(mockChartRender).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        option: expect.objectContaining({
+          tooltip: expect.objectContaining({ show: true, showContent: true }),
+        }),
+      })
+    )
 
     fireEvent.click(checkbox)
 
     expect(checkbox).toBeChecked()
 
-    // Chart events bind to the final echarts instance handed to onChartReady.
+    // Hover events bind to the final echarts instance handed to onChartReady, and floating
+    // tooltip content is suppressed so it doesn't collide with the measure card.
     expect(mockChartRender).toHaveBeenLastCalledWith(
-      expect.objectContaining({ onChartReady: expect.any(Function) })
+      expect.objectContaining({
+        onChartReady: expect.any(Function),
+        option: expect.objectContaining({
+          tooltip: expect.objectContaining({ show: true, showContent: false }),
+        }),
+      })
     )
   })
 
-  test('Distance to peak measures from the current price to the peak', () => {
+  test('Show price impact measures from current price vertical and tracks cursor Y', () => {
     mockChartRender.mockClear()
     mockSpotPrice.numerator = '1'
     mockSpotPrice.denominator = '1'
@@ -235,15 +249,26 @@ describe('PreviewGyroEclpConfig', () => {
     }
 
     render(<PreviewHarness />)
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Distance to peak' }))
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Show price impact' }))
+
+    const chartHandlers: Record<string, (event: unknown) => void> = {}
+    const zrHandlers: Record<string, (event: unknown) => void> = {}
 
     const fakeChart = {
       isDisposed: () => false,
       getWidth: () => 600,
       getHeight: () => 300,
       convertToPixel: (_finder: unknown, [x, y]: [number, number]) => [x * 100, 300 - y],
-      on: vi.fn(),
+      on: vi.fn((event: string, handler: (event: unknown) => void) => {
+        chartHandlers[event] = handler
+      }),
       off: vi.fn(),
+      getZr: () => ({
+        on: vi.fn((event: string, handler: (event: unknown) => void) => {
+          zrHandlers[event] = handler
+        }),
+        off: vi.fn(),
+      }),
     }
 
     const { onChartReady } = mockChartRender.mock.lastCall![0] as {
@@ -252,15 +277,31 @@ describe('PreviewGyroEclpConfig', () => {
 
     act(() => onChartReady(fakeChart))
 
-    const overlay = screen.getByTestId('eclp-distance-to-peak')
-    // Current price 1 → peak 0.9995 is a 0.05% drop, so the price must be pushed down.
-    expect(overlay).toHaveTextContent('-0.05%')
-    // Only re-render events are needed — the measure no longer follows the cursor.
+    expect(fakeChart.on).toHaveBeenCalledWith('updateAxisPointer', expect.any(Function))
     expect(fakeChart.on).toHaveBeenCalledWith('finished', expect.any(Function))
-    expect(fakeChart.on).not.toHaveBeenCalledWith('updateAxisPointer', expect.any(Function))
+    expect(screen.queryByTestId('eclp-price-measure')).not.toBeInTheDocument()
+
+    act(() => {
+      zrHandlers.mousemove?.({ offsetY: 220 })
+      chartHandlers.updateAxisPointer?.({ axesInfo: [{ axisDim: 'x', value: 0.9995 }] })
+    })
+
+    const overlay = screen.getByTestId('eclp-price-measure')
+    expect(overlay).toHaveTextContent('0.9995')
+    expect(overlay).toHaveTextContent('-0.05%')
+    expect(overlay.querySelector('line')).toHaveAttribute('y1', '220')
+
+    act(() => {
+      zrHandlers.mousemove?.({ offsetY: 250 })
+    })
+
+    expect(screen.getByTestId('eclp-price-measure').querySelector('line')).toHaveAttribute(
+      'y1',
+      '250'
+    )
   })
 
-  test('hides the Distance to peak toggle when there is no chart', () => {
+  test('hides Show price impact toggle when there is no chart or when current price is out of range', () => {
     currentEclpValues = {
       alpha: '.',
       beta: '.',
@@ -268,9 +309,23 @@ describe('PreviewGyroEclpConfig', () => {
       lambda: '100',
     }
 
-    render(<PreviewHarness />)
+    const { rerender } = render(<PreviewHarness />)
+    expect(screen.queryByRole('checkbox', { name: 'Show price impact' })).not.toBeInTheDocument()
 
-    expect(screen.queryByRole('checkbox', { name: 'Distance to peak' })).not.toBeInTheDocument()
+    // Spot (1.5) outside [0.99, 1.01] -> out of range -> toggle hidden
+    mockSpotPrice.numerator = '1.5'
+    mockSpotPrice.denominator = '1'
+
+    currentEclpValues = {
+      alpha: '0.99',
+      beta: '1.01',
+      peakPrice: '1',
+      lambda: '100',
+    }
+
+    rerender(<PreviewHarness />)
+    expect(screen.getByTestId('eclp-echarts')).toBeInTheDocument()
+    expect(screen.queryByRole('checkbox', { name: 'Show price impact' })).not.toBeInTheDocument()
   })
 
   test('shows market-scaled summary cards by default and switches between Market and Normalized', () => {

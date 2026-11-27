@@ -100,27 +100,17 @@ function getScaledBalances(params: GyroEParams): [bigint, bigint] {
 }
 
 /**
- * The pool's 18-decimal invariant r in normalized (Vault rate-scaled) space, or 0n for an
- * empty pool.
+ * Computes the pool's 18-decimal normalized (Vault-scaled) spot price and invariant `r`
+ * in a single pass so callers don't compute the invariant twice.
  */
-export function calculateGyroEInvariant(params: GyroEParams): bigint {
-  const scaledBalances = getScaledBalances(params)
-  if (scaledBalances[0] === 0n && scaledBalances[1] === 0n) return 0n
-
-  const [invariant] = GyroECLPMath.calculateInvariantWithError(
-    scaledBalances,
-    params.gyroEParams,
-    params.derivedGyroEParams
-  )
-
-  return invariant
-}
-
-function calculateGyroESpotPrice(params: GyroEParams): bigint {
+export function calculateGyroESpotPriceAndInvariant(params: GyroEParams): {
+  spotPrice: bigint
+  invariant: bigint
+} {
   const scaledBalances = getScaledBalances(params)
 
   if (scaledBalances[0] === 0n && scaledBalances[1] === 0n) {
-    return 0n
+    return { spotPrice: 0n, invariant: 0n }
   }
 
   const [invariant] = GyroECLPMath.calculateInvariantWithError(
@@ -129,12 +119,16 @@ function calculateGyroESpotPrice(params: GyroEParams): bigint {
     params.derivedGyroEParams
   )
 
-  // Returns the 18-decimal normalized (Vault-scaled) spot price in [alpha, beta];
-  // callers apply the display multiplier once.
-  return GyroECLPMath.calcSpotPrice0in1(
+  const spotPrice = GyroECLPMath.calcSpotPrice0in1(
     scaledBalances,
     params.gyroEParams,
     params.derivedGyroEParams,
     invariant
   )
+
+  return { spotPrice, invariant }
+}
+
+function calculateGyroESpotPrice(params: GyroEParams): bigint {
+  return calculateGyroESpotPriceAndInvariant(params).spotPrice
 }

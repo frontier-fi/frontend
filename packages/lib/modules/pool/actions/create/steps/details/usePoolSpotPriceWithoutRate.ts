@@ -49,13 +49,5 @@ export function usePoolSpotPriceWithoutRate() {
 
   const spotPriceWithoutRate = adjustedPriceTokenA.div(adjustedPriceTokenB)
 
-  return {
-    spotPriceWithoutRate,
-    rateTokenA,
-    rateTokenB,
-    isRateLoading,
-    /** Raw (pool token) USD prices, before scaling to underlying. */
-    usdPriceTokenA: isBnParseable(priceTokenA) ? Number(priceTokenA) : 0,
-    usdPriceTokenB: isBnParseable(priceTokenB) ? Number(priceTokenB) : 0,
-  }
+  return { spotPriceWithoutRate, rateTokenA, rateTokenB, isRateLoading }
 }
