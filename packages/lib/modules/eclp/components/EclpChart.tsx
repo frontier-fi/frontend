@@ -21,12 +21,15 @@ type Point = [number, number]
 
 type PeakMeasure = {
   chartWidth: number
+  chartHeight: number
   peakPx: Point
   current?: { price: number; px: Point }
 }
 
 // Keeps the label pill from being clipped at the chart edges.
 const LABEL_EDGE_PADDING = 120
+// Rough label height plus its gap — below this much room, the label flips above the line.
+const LABEL_FLIP_ROOM = 72
 
 export function EclpChart() {
   const {
@@ -68,7 +71,7 @@ export function EclpChart() {
     if (!peakPx) return null
 
     const chartWidth = chartInstance.getWidth()
-    const measure: PeakMeasure = { chartWidth, peakPx }
+    const measure: PeakMeasure = { chartWidth, chartHeight: chartInstance.getHeight(), peakPx }
 
     if (currentPrice !== null && Number.isFinite(currentPrice) && currentPrice > 0) {
       const currentPx = toPixel([currentPrice, interpolateCurveY(data, currentPrice)])
@@ -194,7 +197,7 @@ function DistanceToPeakOverlay({
   swapDirection: SwapDirection | null
   swapToPeak: EclpSwapToPeak | null
 }) {
-  const { peakPx, current, chartWidth } = measure
+  const { peakPx, current, chartWidth, chartHeight } = measure
 
   // L-shaped measure: a vertical drop from the peak down to the current price's height, then
   // straight across to the current price — like a ruler between two spots on a map.
@@ -274,7 +277,13 @@ function DistanceToPeakOverlay({
           shadow="md"
           textAlign="center"
           top={`${mid[1]}px`}
-          transform="translate(-50%, calc(-100% - 8px))"
+          // Sits under the horizontal line so the measure stays visible, unless the line is
+          // too close to the bottom of the chart.
+          transform={
+            mid[1] + LABEL_FLIP_ROOM > chartHeight
+              ? 'translate(-50%, calc(-100% - 8px))'
+              : 'translate(-50%, 8px)'
+          }
           w="max-content"
           whiteSpace="pre"
         >
@@ -308,6 +317,7 @@ function isSameMeasure(a: PeakMeasure | null, b: PeakMeasure | null) {
 
   return (
     a.chartWidth === b.chartWidth &&
+    a.chartHeight === b.chartHeight &&
     a.peakPx[0] === b.peakPx[0] &&
     a.peakPx[1] === b.peakPx[1] &&
     a.current?.price === b.current?.price &&

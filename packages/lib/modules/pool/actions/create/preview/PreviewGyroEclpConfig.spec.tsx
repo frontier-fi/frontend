@@ -240,6 +240,7 @@ describe('PreviewGyroEclpConfig', () => {
     const fakeChart = {
       isDisposed: () => false,
       getWidth: () => 600,
+      getHeight: () => 300,
       convertToPixel: (_finder: unknown, [x, y]: [number, number]) => [x * 100, 300 - y],
       on: vi.fn(),
       off: vi.fn(),
