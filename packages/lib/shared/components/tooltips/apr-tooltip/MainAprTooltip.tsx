@@ -147,6 +147,7 @@ function MainAprTooltip({
       {...props}
       chain={pool.chain}
       hookType={isPool(pool) ? pool.hook?.type : undefined}
+      poolTokens={pool.poolTokens}
       poolType={pool.type}
       totalBaseText="Total APR"
     >
