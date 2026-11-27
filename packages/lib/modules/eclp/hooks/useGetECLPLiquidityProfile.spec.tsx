@@ -8,6 +8,7 @@ import { useGetECLPLiquidityProfile } from './useGetECLPLiquidityProfile'
 
 const mockUsePool = vi.fn()
 const mockUseGetTokenRates = vi.fn()
+const mockPriceFor = vi.fn<(address: string, chain: string) => number>(() => 0)
 
 vi.mock('../../pool/PoolProvider', () => ({
   usePool: () => mockUsePool(),
@@ -18,7 +19,7 @@ vi.mock('./useGetTokenRates', () => ({
 }))
 
 vi.mock('../../tokens/TokensProvider', () => ({
-  useTokens: () => ({ priceFor: () => 0 }),
+  useTokens: () => ({ priceFor: (address: string, chain: string) => mockPriceFor(address, chain) }),
 }))
 
 function createBaseGyroEPool({ useUnderlying }: { useUnderlying: boolean }): Pool {
@@ -272,7 +273,14 @@ describe('useGetECLPLiquidityProfile', () => {
     expect(Number(result.current.poolSpotPrice)).toBeCloseTo(1 / 1.065331, 5)
   })
 
-  it('calcSwapToPeak returns the swap that moves the on-chain spot price to the peak', () => {
+  it('calcSwapFromSpot computes exact swaps to a target price with invariant notionalUsd and zero-rate guard', () => {
+    mockPriceFor.mockImplementation((address: string) => {
+      // Underlying wstETH priced; wrapped token returns 0 to verify underlying fallback priority
+      if (address.toLowerCase() === '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0') return 3800
+      if (address.toLowerCase() === '0xae78736cd615f374d3085123a210448e74fc6393') return 3560
+      return 0
+    })
+
     const pool = createMainnetWstEthREthPool()
     const liveRates: readonly [bigint, bigint] = [1_255081969318627477n, 1_176331165938233836n]
     const unwrapRates: readonly [bigint, bigint] = [1_004027778713733055n, ONE_E18]
@@ -282,23 +290,44 @@ describe('useGetECLPLiquidityProfile', () => {
 
     const { result } = renderHook(() => useGetECLPLiquidityProfile())
 
-    const swap = result.current.calcSwapToPeak!(Number(result.current.poolSpotPrice))!
+    // Move spot UP above current display price (need to sell rETH to buy wstETH out of pool)
+    const upTargetDisplay = Number(result.current.poolSpotPrice) * 1.005
+    const swapUp = result.current.calcSwapFromSpot!(upTargetDisplay)!
+    expect(swapUp.sellSymbol).toBe('rETH')
+    expect(swapUp.buySymbol).toBe('wstETH')
+    expect(swapUp.sellAmount).toBeGreaterThan(0)
+    expect(swapUp.buyAmount).toBeGreaterThan(0)
+    expect(swapUp.notionalUsd).toBeCloseTo(swapUp.sellAmount * 3560, 6)
 
-    // Spot (1.0025 normalized) is above the peak (1.001): sell wstETH to push the price down.
-    expect(swap.sellSymbol).toBe('wstETH')
-    expect(swap.buySymbol).toBe('rETH')
-    expect(swap.sellAmount).toBeGreaterThan(0)
-    expect(swap.buyAmount).toBeGreaterThan(0)
+    // Move spot DOWN toward 1.001 normalized: sell wstETH to buy rETH
+    const mult =
+      Number(liveRates[0]) /
+      Number(unwrapRates[0]) /
+      (Number(liveRates[1]) / Number(unwrapRates[1]))
 
-    // Displayed amounts are underlying units; convert back to pool (wrapped) token amounts.
+    const targetDownDisplay = 1.001 * mult
+    const swapDown = result.current.calcSwapFromSpot!(targetDownDisplay)!
+
+    expect(swapDown.sellSymbol).toBe('wstETH')
+    expect(swapDown.buySymbol).toBe('rETH')
+    expect(swapDown.sellAmount).toBeGreaterThan(0)
+    expect(swapDown.buyAmount).toBeGreaterThan(0)
+    expect(swapDown.notionalUsd).toBeCloseTo(swapDown.sellAmount * 3800, 6)
+
+    // Displayed amounts include 1 / (1 - swapFee) gross-up; feed net curve amount to verify spot.
     const unwrap = unwrapRates.map(r => Number(r) / 1e18)
     const [token0, token1] = pool.poolTokens
 
     const nextPool = {
       ...pool,
       poolTokens: [
-        { ...token0, balance: String(Number(token0!.balance) + swap.sellAmount / unwrap[0]!) },
-        { ...token1, balance: String(Number(token1!.balance) - swap.buyAmount / unwrap[1]!) },
+        {
+          ...token0,
+          balance: String(
+            Number(token0!.balance) + (swapDown.sellAmount * (1 - 0.0001)) / unwrap[0]!
+          ),
+        },
+        { ...token1, balance: String(Number(token1!.balance) - swapDown.buyAmount / unwrap[1]!) },
       ],
     } as unknown as Pool
 
@@ -307,16 +336,57 @@ describe('useGetECLPLiquidityProfile', () => {
 
     expect(nextSpot).toBeCloseTo(1.001, 6)
 
-    // Same swap regardless of display mode or pair direction.
+    // Same swap amounts & notional USD regardless of Market/Normalized mode or pair reversal.
     act(() => {
       result.current.toggleIsReversed()
       result.current.setIsNormalized(true)
     })
 
-    const reversed = result.current.calcSwapToPeak!(Number(result.current.poolSpotPrice))!
-    expect(reversed.sellSymbol).toBe('wstETH')
-    expect(reversed.sellAmount).toBeCloseTo(swap.sellAmount, 8)
-    expect(reversed.buyAmount).toBeCloseTo(swap.buyAmount, 8)
+    const reversedNormalized = result.current.calcSwapFromSpot!(1 / 1.001)!
+    expect(reversedNormalized.sellSymbol).toBe('wstETH')
+    expect(reversedNormalized.sellAmount).toBeCloseTo(swapDown.sellAmount, 8)
+    expect(reversedNormalized.buyAmount).toBeCloseTo(swapDown.buyAmount, 8)
+    expect(reversedNormalized.notionalUsd).toBeCloseTo(swapDown.notionalUsd!, 8)
+
+    // Gross-up scales sellAmount linearly with 1 / (1 - swapFee) while keeping buyAmount fixed.
+    const netSell = swapDown.sellAmount * (1 - 0.0001)
+
+    for (const feeStr of ['0.00005', '0.003']) {
+      const feePool = { ...pool, dynamicData: { ...pool.dynamicData, swapFee: feeStr } } as Pool
+      mockUsePool.mockReturnValue({ pool: feePool })
+      const { result: feeResult } = renderHook(() => useGetECLPLiquidityProfile())
+      const feeSwap = feeResult.current.calcSwapFromSpot!(targetDownDisplay)!
+
+      expect(feeSwap.sellAmount).toBeCloseTo(netSell / (1 - Number(feeStr)), 10)
+      expect(feeSwap.buyAmount).toBeCloseTo(swapDown.buyAmount, 10)
+    }
+
+    mockUsePool.mockReturnValue({ pool })
+
+    // Falls back to wrapped token price / unwrapRate when underlying price is 0.
+    mockPriceFor.mockImplementation((address: string) => {
+      if (address.toLowerCase() === '0x775f661b0bd1739349b9a2a3ef60be277c5d2d29') {
+        return 3800 * (Number(unwrapRates[0]) / 1e18)
+      }
+
+      return 0
+    })
+
+    const { result: fallbackResult } = renderHook(() => useGetECLPLiquidityProfile())
+    const fallbackSwap = fallbackResult.current.calcSwapFromSpot!(targetDownDisplay)!
+    expect(fallbackSwap.notionalUsd).toBeCloseTo(swapDown.notionalUsd!, 6)
+
+    // Zero-rate safety guard
+    mockUseGetTokenRates.mockReturnValue({
+      data: [0n, ONE_E18] as const,
+      unwrapRates,
+      isLoading: false,
+    })
+
+    const { result: zeroRateResult } = renderHook(() => useGetECLPLiquidityProfile())
+    expect(zeroRateResult.current.calcSwapFromSpot).toBeUndefined()
+
+    mockPriceFor.mockReturnValue(0)
   })
 
   it('pins underlying bounds and omits toggle when plain ERC-4626 unwrap matches live tokenRates', () => {

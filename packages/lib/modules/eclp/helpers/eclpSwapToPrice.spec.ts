@@ -100,6 +100,55 @@ describe('calcEclpReserveDeltas', () => {
   test('rejects invalid input', () => {
     expect(calcEclpReserveDeltas(curve, 0, 1.05, 1.1)).toBeNull()
     expect(calcEclpReserveDeltas({ ...curve, beta: 1 }, invariant, 1.05, 1.1)).toBeNull()
+    expect(calcEclpReserveDeltas({ ...curve, c: 0, s: 0 }, invariant, 1.05, 1.1)).toBeNull()
+  })
+
+  test('remains accurate and sign-consistent in high-lambda tails without cancellation', () => {
+    const c = Math.SQRT1_2
+    const s = Math.SQRT1_2
+
+    for (const [lambda, from, to] of [
+      [1e6, 1.05, 1.0501],
+      [1e7, 1.05, 1.0501],
+      [1e8, 1.05, 1.0501],
+      [1e8, 1.2, 1.20001],
+    ] as const) {
+      const highLambdaCurve = { alpha: 0.99, beta: 1.5, c, s, lambda }
+      const swap = calcEclpSwapToPrice(highLambdaCurve, 1e6, from, to)!
+
+      expect(swap).not.toBeNull()
+      expect(swap.sellIndex).toBe(1)
+      expect(swap.sellAmount).toBeGreaterThan(0)
+      expect(swap.buyAmount).toBeGreaterThan(0)
+
+      const effectivePrice = swap.sellAmount / swap.buyAmount
+      expect(effectivePrice).toBeGreaterThanOrEqual(from)
+      expect(effectivePrice).toBeLessThanOrEqual(to)
+    }
+  })
+
+  test('handles high-lambda swaps crossing opposite sides of peak and non-unit dSq', () => {
+    const highLambda = { alpha: 0.8, beta: 1.2, c: Math.SQRT1_2, s: Math.SQRT1_2, lambda: 1e8 }
+    const cross = calcEclpSwapToPrice(highLambda, 1e6, 0.9, 1.1)!
+    expect(cross.sellIndex).toBe(1)
+    expect(cross.sellAmount).toBeGreaterThan(0)
+    expect(cross.buyAmount).toBeGreaterThan(0)
+    expect(cross.sellAmount / cross.buyAmount).toBeCloseTo(1, 6)
+
+    // Non-unit c^2 + s^2: since ||A(t - a)|| = r scales linearly with (c, s), scaling both
+    // (c, s) and the invariant by the same factor leaves reserve deltas invariant.
+    const scale = 1.000004
+
+    const scaled = calcEclpReserveDeltas(
+      { ...curve, c: curve.c * scale, s: curve.s * scale },
+      invariant * scale,
+      1.05,
+      1.12
+    )!
+
+    const base = calcEclpReserveDeltas(curve, invariant, 1.05, 1.12)!
+    expect(scaled.dx).toBeCloseTo(base.dx, 10)
+    expect(scaled.dy).toBeCloseTo(base.dy, 10)
   })
 })
 

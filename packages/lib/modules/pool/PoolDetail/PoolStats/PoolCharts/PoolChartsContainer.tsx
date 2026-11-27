@@ -26,6 +26,7 @@ import { PeriodSelect } from './PeriodSelect'
 import ButtonGroup from '@repo/lib/shared/components/btns/button-group/ButtonGroup'
 import { PoolChartsProvider, usePoolCharts } from './PoolChartsProvider'
 import { EclpChart } from '@repo/lib/modules/eclp/components/EclpChart'
+import { EclpMeasureToggle } from '@repo/lib/modules/eclp/components/EclpMeasureToggle'
 import { EclpPriceModeToggle } from '@repo/lib/modules/eclp/components/EclpPriceModeToggle'
 import { PoolCharts } from './PoolCharts'
 import { ReversedToggleButton } from '@repo/lib/shared/components/btns/ReversedToggleButton'
@@ -130,6 +131,7 @@ function PoolChartsContent({ ...props }: any) {
                           setIsNormalized={setIsNormalized}
                         />
                       )}
+                      <EclpMeasureToggle />
                     </>
                   )}
                   {showPoolCharts && (

@@ -4,6 +4,7 @@ import { RefreshCcw } from 'lucide-react'
 import { bn, fNumCustom, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { NUM_FORMAT } from '../constants'
 import { EclpChart } from '@repo/lib/modules/eclp/components/EclpChart'
+import { EclpMeasureToggle } from '@repo/lib/modules/eclp/components/EclpMeasureToggle'
 import { useEclpChart } from '@repo/lib/modules/eclp/hooks/EclpChartProvider'
 import { EclpPriceModeToggle } from '@repo/lib/modules/eclp/components/EclpPriceModeToggle'
 import { useWatch } from 'react-hook-form'
@@ -104,7 +105,7 @@ export function PreviewGyroEclpConfig() {
 
         <Divider />
 
-        <HStack justify="space-between" w="full">
+        <HStack gap="sm" justify="space-between" w="full" wrap="wrap">
           <Button
             flexDirection="row"
             gap="2"
@@ -120,13 +121,16 @@ export function PreviewGyroEclpConfig() {
               </Text>
             </HStack>
           </Button>
-          {hasRateAdjustment && (
-            <EclpPriceModeToggle
-              groupId="preview-eclp-price-mode"
-              isNormalized={isNormalized}
-              setIsNormalized={setIsNormalized}
-            />
-          )}
+          <HStack gap="md">
+            {hasRateAdjustment && (
+              <EclpPriceModeToggle
+                groupId="preview-eclp-price-mode"
+                isNormalized={isNormalized}
+                setIsNormalized={setIsNormalized}
+              />
+            )}
+            <EclpMeasureToggle />
+          </HStack>
         </HStack>
       </VStack>
     </Card>
