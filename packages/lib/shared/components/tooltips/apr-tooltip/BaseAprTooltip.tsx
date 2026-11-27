@@ -2,6 +2,8 @@ import type { GqlPoolAprItem } from '@repo/lib/shared/services/api/graphql-deriv
 import type { GqlHookType, GqlPoolType } from '@repo/lib/shared/services/api/generated/graphql'
 import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
 import {
+  HStack,
+  Link,
   PlacementWithLogical,
   Popover,
   PopoverContent,
@@ -9,7 +11,9 @@ import {
   Divider,
   Stack,
   Portal,
+  Text,
 } from '@chakra-ui/react'
+import { ArrowUpRight } from 'lucide-react'
 import {
   swapFeesTooltipText,
   useAprTooltip,
@@ -19,13 +23,15 @@ import {
   merklIncentivesTooltipText,
   surplusIncentivesTooltipText,
   SupportedHookType,
+  YieldBearingPoolToken,
   dynamicSwapFeesTooltipText as dynamicSwapFeesTooltipTextByHook,
 } from '@repo/lib/shared/hooks/useAprTooltip'
+import { PoolsMetadataContext } from '@repo/lib/modules/pool/metadata/PoolsMetadataProvider'
 import { TooltipAprItem } from './TooltipAprItem'
 import type BigNumber from 'bignumber.js'
 import { bn, fNum } from '@repo/lib/shared/utils/numbers'
 import { isCowAmmPool, isVebalPool } from '@repo/lib/modules/pool/pool.helpers'
-import { ReactNode } from 'react'
+import { ReactNode, useContext } from 'react'
 
 interface Props {
   aprItems: GqlPoolAprItem[]
@@ -33,6 +39,7 @@ interface Props {
   displayValueFormatter?: (value: BigNumber) => string
   placement?: PlacementWithLogical
   poolId: string
+  poolTokens?: YieldBearingPoolToken[]
   poolType: GqlPoolType
   totalBaseText: string
   customPopoverContent?: ReactNode
@@ -68,6 +75,7 @@ function getDynamicSwapFeesLabel(_hookType: GqlHookType) {
 function BaseAprTooltip({
   aprItems,
   poolId,
+  poolTokens,
   numberFormatter,
   displayValueFormatter,
   placement,
@@ -81,6 +89,7 @@ function BaseAprTooltip({
   hookType,
 }: Props) {
   const isVebal = isVebalPool(poolId)
+  const poolsMetadata = useContext(PoolsMetadataContext)
 
   const usedDisplayValueFormatter =
     displayValueFormatter || defaultDisplayValueFormatterWithCanBeNegative
@@ -115,7 +124,43 @@ function BaseAprTooltip({
     aprItems,
     numberFormatter: usedNumberFormatter,
     chain,
+    poolTokens,
+    getErc4626ProtocolId: poolsMetadata?.getErc4626ProtocolId,
   })
+
+  const renderSubitemTitleWithLink = (title: string, href: string, ariaLabel: string) => (
+    <HStack gap={1} whiteSpace="nowrap">
+      {title && (
+        <Text as="span" color={subitemPopoverAprItemProps.fontColor} fontSize="sm" fontWeight={500}>
+          {title}
+        </Text>
+      )}
+      <Text
+        alignItems="center"
+        as="span"
+        color={subitemPopoverAprItemProps.fontColor}
+        display="inline-flex"
+        fontSize="xs"
+        fontWeight={500}
+        lineHeight="1"
+      >
+        (
+        <Link
+          alignItems="center"
+          aria-label={ariaLabel}
+          color="font.link"
+          display="inline-flex"
+          href={href}
+          isExternal
+          onClick={e => e.stopPropagation()}
+          rel="noopener noreferrer"
+        >
+          <ArrowUpRight size={10} />
+        </Link>
+        )
+      </Text>
+    </HStack>
+  )
 
   const shouldDisplayStakingIncentives =
     stakingIncentivesAprDisplayed.gt(0) &&
@@ -193,7 +238,11 @@ function BaseAprTooltip({
               apr={item.apr}
               displayValueFormatter={usedDisplayValueFormatter}
               key={`yield-bearing-${item.title}-${item.apr}`}
-              title={item.title}
+              title={
+                item.url
+                  ? renderSubitemTitleWithLink(item.title, item.url, `${item.title} yield source`)
+                  : item.title
+              }
               tooltipText={inherentTokenYieldTooltipText}
             />
           )
@@ -208,14 +257,22 @@ function BaseAprTooltip({
           tooltipText={merklIncentivesTooltipText}
         >
           {merklTokensDisplayed
-            .filter(item => item.title !== '') // filter out rewards where the token symbol empty
+            .filter(item => item.title !== '' || Boolean(item.opportunityId))
             .map(item => (
               <TooltipAprItem
                 {...subitemPopoverAprItemProps}
                 apr={item.apr}
                 displayValueFormatter={usedDisplayValueFormatter}
-                key={`merkl-${item.title}-${item.apr}`}
-                title={item.title}
+                key={item.id || `merkl-${item.title}-${item.apr}`}
+                title={
+                  item.opportunityId && item.opportunityUrl
+                    ? renderSubitemTitleWithLink(
+                        item.title,
+                        item.opportunityUrl,
+                        `Merkl opportunity ${item.opportunityId}`
+                      )
+                    : item.title
+                }
               />
             ))}
         </TooltipAprItem>
