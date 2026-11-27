@@ -83,6 +83,10 @@ describe('getRehypothecatedText', () => {
       getRehypothecatedText({ protocolVersion: 3, tags: ['BOOSTED', 'BOOSTED_EULER'] }, [])
     ).toBe('Euler')
 
+    expect(
+      getRehypothecatedText({ protocolVersion: 3, tags: ['BOOSTED', 'BOOSTED_AAVE_PRO'] }, [])
+    ).toBe('Aave Pro')
+
     expect(getRehypothecatedText({ protocolVersion: 3, tags: ['BOOSTED'] }, [])).toBe('Yes')
   })
 })

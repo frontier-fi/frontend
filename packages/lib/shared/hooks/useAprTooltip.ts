@@ -67,6 +67,55 @@ const AAVE_MARKET_NAME_BY_CHAIN: Partial<Record<AppChain, string>> = {
   [GqlChainValues.Gnosis]: 'proto_gnosis_v3',
 }
 
+const AAVE_PRO_HUBS_BY_CHAIN: Partial<
+  Record<
+    AppChain,
+    {
+      chainId: number
+      hubs: readonly { prefix: string; hubAddress: string }[]
+    }
+  >
+> = {
+  [GqlChainValues.Mainnet]: {
+    chainId: 1,
+    hubs: [
+      { prefix: 'wacore', hubAddress: '0xCca852Bc40e560adC3b1Cc58CA5b55638ce826c9' },
+      { prefix: 'waplus', hubAddress: '0x06002e9c4412CB7814a791eA3666D905871E536A' },
+      { prefix: 'waprime', hubAddress: '0x943827DCA022D0F354a8a8c332dA1e5Eb9f9F931' },
+      { prefix: 'wapaxos', hubAddress: '0x62d63197660c080236193CA60b70E49A08E90368' },
+      { prefix: 'waglobaldollar', hubAddress: '0x62d63197660c080236193CA60b70E49A08E90368' },
+      { prefix: 'wasentora', hubAddress: '0xD138FcB0E8C52fDbB2Ac4573FA4d8925cf11e9c2' },
+    ],
+  },
+  [GqlChainValues.Base]: {
+    chainId: 8453,
+    hubs: [{ prefix: 'waequities', hubAddress: '0xa4d5947Eb727A052bae69C593FfC84247EC9864E' }],
+  },
+}
+
+function getAaveProHubUrl(
+  chain: AppChain,
+  tokenSymbol: string | null | undefined,
+  underlyingAddress: string | null | undefined
+): string {
+  const chainConfig = AAVE_PRO_HUBS_BY_CHAIN[chain]
+
+  if (chainConfig && tokenSymbol && underlyingAddress) {
+    const normalizedSymbol = tokenSymbol.toLowerCase()
+    const matchedHub = chainConfig.hubs.find(({ prefix }) => normalizedSymbol.startsWith(prefix))
+
+    if (matchedHub) {
+      const encodedHubId = encodeURIComponent(
+        btoa(`${chainConfig.chainId}::${matchedHub.hubAddress}`)
+      )
+
+      return `https://pro.aave.com/explore/earn/${chainConfig.chainId}/${encodedHubId}/${underlyingAddress.toLowerCase()}`
+    }
+  }
+
+  return 'https://pro.aave.com/explore/earn'
+}
+
 const EULER_NETWORK_BY_CHAIN: Partial<Record<AppChain, string>> = {
   [GqlChainValues.Mainnet]: 'ethereum',
   [GqlChainValues.Base]: 'base',
@@ -82,12 +131,14 @@ export function getYieldBearingTokenUrl({
   protocolId,
   chain,
   tokenAddress,
+  tokenSymbol,
   underlyingAddress,
   underlyingSymbol,
 }: {
   protocolId?: string
   chain: AppChain
   tokenAddress?: string | null
+  tokenSymbol?: string | null
   underlyingAddress?: string | null
   underlyingSymbol?: string | null
 }): string | undefined {
@@ -101,6 +152,10 @@ export function getYieldBearingTokenUrl({
     }
 
     return undefined
+  }
+
+  if (protocolId === 'boosted_aave_pro') {
+    return getAaveProHubUrl(chain, tokenSymbol, underlyingAddress)
   }
 
   if (protocolId === 'boosted_neverland') {
@@ -123,8 +178,11 @@ export function getYieldBearingTokenUrl({
 }
 
 export type YieldBearingPoolToken = Pick<GqlPoolTokenDetail, 'address' | 'underlyingToken'> & {
+  symbol?: string | null
   nestedPool?: {
-    tokens?: Pick<GqlPoolTokenDetail, 'address' | 'underlyingToken'>[]
+    tokens?: (Pick<GqlPoolTokenDetail, 'address' | 'underlyingToken'> & {
+      symbol?: string | null
+    })[]
   } | null
 }
 
@@ -196,6 +254,7 @@ export function useAprTooltip({
       protocolId,
       chain,
       tokenAddress: matchingToken?.address ?? item.rewardTokenAddress,
+      tokenSymbol: matchingToken?.symbol ?? item.rewardTokenSymbol,
       underlyingAddress: matchingToken?.underlyingToken?.address,
       underlyingSymbol: matchingToken?.underlyingToken?.symbol,
     })
