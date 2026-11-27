@@ -148,7 +148,34 @@ it('builds yield-bearing token URLs for Aave, Aave Pro, Neverland, and Euler', (
     getYieldBearingTokenUrl({
       protocolId: 'boosted_aave_pro',
       chain: GqlChainValues.Mainnet,
+      tokenAddress: '0x5ec44a70f309854fe04d495cfe1b5da63dd1cc73',
+      tokenSymbol: 'waCoreUSDT',
+      underlyingAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      underlyingSymbol: 'USDT',
+    })
+  ).toBe(
+    'https://pro.aave.com/explore/earn/1/MTo6MHhDY2E4NTJCYzQwZTU2MGFkQzNiMUNjNThDQTViNTU2MzhjZTgyNmM5/0xdac17f958d2ee523a2206206994597c13d831ec7'
+  )
+
+  expect(
+    getYieldBearingTokenUrl({
+      protocolId: 'boosted_aave_pro',
+      chain: GqlChainValues.Base,
+      tokenAddress: '0x7081ce7eb1282c53cf38ea9b622f6269cb8fefdc',
+      tokenSymbol: 'waEquitiesUSDC',
+      underlyingAddress: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+      underlyingSymbol: 'USDC',
+    })
+  ).toBe(
+    'https://pro.aave.com/explore/earn/8453/ODQ1Mzo6MHhhNGQ1OTQ3RWI3MjdBMDUyYmFlNjlDNTkzRmZDODQyNDdFQzk4NjRF/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'
+  )
+
+  expect(
+    getYieldBearingTokenUrl({
+      protocolId: 'boosted_aave_pro',
+      chain: GqlChainValues.Mainnet,
       tokenAddress: '0x531e90a2376902de8915789fcc1075e3b0c153e7',
+      tokenSymbol: 'waUnknownUSDC',
       underlyingAddress: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
       underlyingSymbol: 'USDC',
     })
