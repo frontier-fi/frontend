@@ -204,8 +204,8 @@ export function useEclpChartLogic(
         showContent: true,
         trigger: 'axis',
         confine: true,
-        // While measuring, the distance label sits at the hovered height on the curve —
-        // pin the price tooltip to the top of the chart so it doesn't cover the label.
+        // While measuring, the distance label sits on the curve between the current price and
+        // the peak — pin the price tooltip to the top of the chart so it doesn't cover the label.
         ...(isMeasuringPeak
           ? {
               position: (

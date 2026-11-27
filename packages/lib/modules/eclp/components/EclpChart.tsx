@@ -2,8 +2,8 @@
 import { Box, Checkbox, Flex, HStack, Text } from '@chakra-ui/react'
 import ReactECharts from 'echarts-for-react'
 import type { EChartsType } from 'echarts'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { fNum } from '@repo/lib/shared/utils/numbers'
+import { useCallback, useEffect, useState } from 'react'
+import { fNum, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { useEclpChart } from '../hooks/EclpChartProvider'
 import type { EclpSwapToPeak } from '../hooks/useEclpLiquidityProfileCore'
 import {
@@ -22,11 +22,7 @@ type Point = [number, number]
 type PeakMeasure = {
   chartWidth: number
   peakPx: Point
-  hover?: { price: number; px: Point }
-}
-
-type AxisPointerEvent = {
-  axesInfo?: { axisDim?: string; value?: number }[]
+  current?: { price: number; px: Point }
 }
 
 // Keeps the label pill from being clipped at the chart edges.
@@ -36,6 +32,7 @@ export function EclpChart() {
   const {
     options,
     data,
+    poolSpotPrice,
     poolPeakPrice,
     peakLineColor,
     baseTokenSymbol,
@@ -49,87 +46,74 @@ export function EclpChart() {
 
   // echarts-for-react creates a temporary instance on mount and replaces it after the first
   // render, so events bound via its `onEvents` prop in between are silently lost. Bind them
-  // ourselves to the final instance handed to `onChartReady`.
+  // ourselves to the final instance handed to `onChartReady`, which also does the pixel maths.
   const [chartInstance, setChartInstance] = useState<EChartsType | null>(null)
   const [measure, setMeasure] = useState<PeakMeasure | null>(null)
 
   const peakPrice = canShowDistanceToPeak ? Number(poolPeakPrice) : null
+  const currentPrice = isBnParseable(poolSpotPrice) ? Number(poolSpotPrice) : null
 
-  const computeMeasure = useCallback(
-    (hoverPrice?: number): PeakMeasure | null => {
-      if (!chartInstance || chartInstance.isDisposed()) return null
-      if (!data?.length || peakPrice === null) return null
+  const computeMeasure = useCallback((): PeakMeasure | null => {
+    if (!chartInstance || chartInstance.isDisposed()) return null
+    if (!data?.length || peakPrice === null) return null
 
-      const toPixel = (value: Point): Point | null => {
-        const px = chartInstance.convertToPixel({ gridIndex: 0 }, value) as number[] | undefined
-        if (!px || !Number.isFinite(px[0]) || !Number.isFinite(px[1])) return null
+    const toPixel = (value: Point): Point | null => {
+      const px = chartInstance.convertToPixel({ gridIndex: 0 }, value) as number[] | undefined
+      if (!px || !Number.isFinite(px[0]) || !Number.isFinite(px[1])) return null
 
-        return [px[0]!, px[1]!]
+      return [px[0]!, px[1]!]
+    }
+
+    const peakPx = toPixel([peakPrice, interpolateCurveY(data, peakPrice)])
+    if (!peakPx) return null
+
+    const chartWidth = chartInstance.getWidth()
+    const measure: PeakMeasure = { chartWidth, peakPx }
+
+    if (currentPrice !== null && Number.isFinite(currentPrice) && currentPrice > 0) {
+      const currentPx = toPixel([currentPrice, interpolateCurveY(data, currentPrice)])
+
+      // An out-of-range price can sit beyond the x-axis — pin its marker to the chart edge.
+      if (currentPx) {
+        measure.current = {
+          price: currentPrice,
+          px: [Math.min(Math.max(currentPx[0], 0), chartWidth), currentPx[1]],
+        }
       }
+    }
 
-      const peakPx = toPixel([peakPrice, interpolateCurveY(data, peakPrice)])
-      if (!peakPx) return null
+    return measure
+  }, [chartInstance, data, peakPrice, currentPrice])
 
-      const measure: PeakMeasure = { chartWidth: chartInstance.getWidth(), peakPx }
-
-      if (hoverPrice !== undefined && Number.isFinite(hoverPrice)) {
-        const hoverPx = toPixel([hoverPrice, interpolateCurveY(data, hoverPrice)])
-        if (hoverPx) measure.hover = { price: hoverPrice, px: hoverPx }
-      }
-
-      return measure
-    },
-    [chartInstance, data, peakPrice]
-  )
-
-  // Last hovered price, so re-renders (resize, data change) can redraw without a mouse move.
-  const hoverPriceRef = useRef<number | undefined>(undefined)
-
+  // The measure is fixed between the current price and the peak, so it only needs
+  // recomputing when the chart re-renders (resize, data or option change moves the grid).
   useEffect(() => {
     if (!showDistanceToPeak) {
-      hoverPriceRef.current = undefined
       setMeasure(null)
       return
     }
 
-    setMeasure(computeMeasure(hoverPriceRef.current))
+    setMeasure(computeMeasure())
 
     if (!chartInstance || chartInstance.isDisposed()) return
 
-    const onAxisPointer = (event: unknown) => {
-      const xInfo = (event as AxisPointerEvent).axesInfo?.find(info => info.axisDim === 'x')
-      hoverPriceRef.current = typeof xInfo?.value === 'number' ? xInfo.value : undefined
-      setMeasure(computeMeasure(hoverPriceRef.current))
-    }
-
-    const onGlobalOut = () => {
-      hoverPriceRef.current = undefined
-      setMeasure(computeMeasure())
-    }
-
-    // Re-render (resize, option update) moves the grid — recompute pixel positions.
     const onFinished = () => {
       setMeasure(prev => {
-        const next = computeMeasure(hoverPriceRef.current)
+        const next = computeMeasure()
         return isSameMeasure(prev, next) ? prev : next
       })
     }
 
-    chartInstance.on('updateAxisPointer', onAxisPointer)
-    chartInstance.on('globalout', onGlobalOut)
     chartInstance.on('finished', onFinished)
 
     return () => {
-      if (chartInstance.isDisposed()) return
-      chartInstance.off('updateAxisPointer', onAxisPointer)
-      chartInstance.off('globalout', onGlobalOut)
-      chartInstance.off('finished', onFinished)
+      if (!chartInstance.isDisposed()) chartInstance.off('finished', onFinished)
     }
   }, [showDistanceToPeak, chartInstance, computeMeasure])
 
   const distance =
-    measure?.hover && peakPrice !== null
-      ? calculateDistanceToPeak(measure.hover.price, peakPrice, quoteTokenUsdPrice)
+    measure?.current && peakPrice !== null
+      ? calculateDistanceToPeak(measure.current.price, peakPrice, quoteTokenUsdPrice)
       : null
 
   return (
@@ -186,8 +170,8 @@ export function EclpChart() {
               distance ? getSwapDirectionToPeak(distance, baseTokenSymbol, quoteTokenSymbol) : null
             }
             swapToPeak={
-              distance && !isAtPeak(distance) && measure.hover && calcSwapToPeak
-                ? calcSwapToPeak(measure.hover.price)
+              distance && !isAtPeak(distance) && measure.current && calcSwapToPeak
+                ? calcSwapToPeak(measure.current.price)
                 : null
             }
           />
@@ -210,13 +194,13 @@ function DistanceToPeakOverlay({
   swapDirection: SwapDirection | null
   swapToPeak: EclpSwapToPeak | null
 }) {
-  const { peakPx, hover, chartWidth } = measure
+  const { peakPx, current, chartWidth } = measure
 
-  // L-shaped measure: a vertical drop from the peak down to the hovered height, then
-  // straight across to the hovered point — like a ruler between two spots on a map.
-  const corner: Point | null = hover ? [peakPx[0], hover.px[1]] : null
+  // L-shaped measure: a vertical drop from the peak down to the current price's height, then
+  // straight across to the current price — like a ruler between two spots on a map.
+  const corner: Point | null = current ? [peakPx[0], current.px[1]] : null
 
-  const mid: Point | null = hover ? [(hover.px[0] + peakPx[0]) / 2, hover.px[1]] : null
+  const mid: Point | null = current ? [(current.px[0] + peakPx[0]) / 2, current.px[1]] : null
 
   const labelLeft = mid
     ? Math.min(Math.max(mid[0], LABEL_EDGE_PADDING), Math.max(chartWidth - LABEL_EDGE_PADDING, 0))
@@ -232,7 +216,7 @@ function DistanceToPeakOverlay({
       zIndex={1}
     >
       <svg height="100%" style={{ overflow: 'visible' }} width="100%">
-        {hover && corner && (
+        {current && corner && (
           <>
             <line
               stroke={color}
@@ -250,14 +234,14 @@ function DistanceToPeakOverlay({
               strokeLinecap="round"
               strokeWidth={1.75}
               x1={corner[0]}
-              x2={hover.px[0]}
+              x2={current.px[0]}
               y1={corner[1]}
-              y2={hover.px[1]}
+              y2={current.px[1]}
             />
             <circle cx={corner[0]} cy={corner[1]} fill={color} r={2.5} />
             <circle
-              cx={hover.px[0]}
-              cy={hover.px[1]}
+              cx={current.px[0]}
+              cy={current.px[1]}
               fill="white"
               r={4}
               stroke={color}
@@ -326,8 +310,8 @@ function isSameMeasure(a: PeakMeasure | null, b: PeakMeasure | null) {
     a.chartWidth === b.chartWidth &&
     a.peakPx[0] === b.peakPx[0] &&
     a.peakPx[1] === b.peakPx[1] &&
-    a.hover?.price === b.hover?.price &&
-    a.hover?.px[0] === b.hover?.px[0] &&
-    a.hover?.px[1] === b.hover?.px[1]
+    a.current?.price === b.current?.price &&
+    a.current?.px[0] === b.current?.px[0] &&
+    a.current?.px[1] === b.current?.px[1]
   )
 }

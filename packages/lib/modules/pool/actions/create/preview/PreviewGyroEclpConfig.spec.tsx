@@ -2,7 +2,7 @@ import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import { PoolType } from '@frontier-fi/sdk'
 import { EclpChartProvider } from '@repo/lib/modules/eclp/hooks/EclpChartProvider'
 import { bn, fNumCustom } from '@repo/lib/shared/utils/numbers'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { useForm } from 'react-hook-form'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { EclpConfigForm, PoolCreationForm } from '../types'
@@ -216,10 +216,47 @@ describe('PreviewGyroEclpConfig', () => {
 
     expect(checkbox).toBeChecked()
 
-    // Hover events bind to the final echarts instance handed to onChartReady.
+    // Chart events bind to the final echarts instance handed to onChartReady.
     expect(mockChartRender).toHaveBeenLastCalledWith(
       expect.objectContaining({ onChartReady: expect.any(Function) })
     )
+  })
+
+  test('Distance to peak measures from the current price to the peak', () => {
+    mockChartRender.mockClear()
+    mockSpotPrice.numerator = '1'
+    mockSpotPrice.denominator = '1'
+
+    currentEclpValues = {
+      alpha: '0.99',
+      beta: '1.0001',
+      peakPrice: '0.9995',
+      lambda: '100',
+    }
+
+    render(<PreviewHarness />)
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Distance to peak' }))
+
+    const fakeChart = {
+      isDisposed: () => false,
+      getWidth: () => 600,
+      convertToPixel: (_finder: unknown, [x, y]: [number, number]) => [x * 100, 300 - y],
+      on: vi.fn(),
+      off: vi.fn(),
+    }
+
+    const { onChartReady } = mockChartRender.mock.lastCall![0] as {
+      onChartReady: (chart: unknown) => void
+    }
+
+    act(() => onChartReady(fakeChart))
+
+    const overlay = screen.getByTestId('eclp-distance-to-peak')
+    // Current price 1 → peak 0.9995 is a 0.05% drop, so the price must be pushed down.
+    expect(overlay).toHaveTextContent('-0.05%')
+    // Only re-render events are needed — the measure no longer follows the cursor.
+    expect(fakeChart.on).toHaveBeenCalledWith('finished', expect.any(Function))
+    expect(fakeChart.on).not.toHaveBeenCalledWith('updateAxisPointer', expect.any(Function))
   })
 
   test('hides the Distance to peak toggle when there is no chart', () => {
