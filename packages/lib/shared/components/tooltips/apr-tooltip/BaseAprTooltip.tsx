@@ -23,13 +23,15 @@ import {
   merklIncentivesTooltipText,
   surplusIncentivesTooltipText,
   SupportedHookType,
+  YieldBearingPoolToken,
   dynamicSwapFeesTooltipText as dynamicSwapFeesTooltipTextByHook,
 } from '@repo/lib/shared/hooks/useAprTooltip'
+import { PoolsMetadataContext } from '@repo/lib/modules/pool/metadata/PoolsMetadataProvider'
 import { TooltipAprItem } from './TooltipAprItem'
 import type BigNumber from 'bignumber.js'
 import { bn, fNum } from '@repo/lib/shared/utils/numbers'
 import { isCowAmmPool, isVebalPool } from '@repo/lib/modules/pool/pool.helpers'
-import { ReactNode } from 'react'
+import { ReactNode, useContext } from 'react'
 
 interface Props {
   aprItems: GqlPoolAprItem[]
@@ -37,6 +39,7 @@ interface Props {
   displayValueFormatter?: (value: BigNumber) => string
   placement?: PlacementWithLogical
   poolId: string
+  poolTokens?: YieldBearingPoolToken[]
   poolType: GqlPoolType
   totalBaseText: string
   customPopoverContent?: ReactNode
@@ -72,6 +75,7 @@ function getDynamicSwapFeesLabel(_hookType: GqlHookType) {
 function BaseAprTooltip({
   aprItems,
   poolId,
+  poolTokens,
   numberFormatter,
   displayValueFormatter,
   placement,
@@ -85,6 +89,7 @@ function BaseAprTooltip({
   hookType,
 }: Props) {
   const isVebal = isVebalPool(poolId)
+  const poolsMetadata = useContext(PoolsMetadataContext)
 
   const usedDisplayValueFormatter =
     displayValueFormatter || defaultDisplayValueFormatterWithCanBeNegative
@@ -119,7 +124,43 @@ function BaseAprTooltip({
     aprItems,
     numberFormatter: usedNumberFormatter,
     chain,
+    poolTokens,
+    getErc4626ProtocolId: poolsMetadata?.getErc4626ProtocolId,
   })
+
+  const renderSubitemTitleWithLink = (title: string, href: string, ariaLabel: string) => (
+    <HStack gap={1} whiteSpace="nowrap">
+      {title && (
+        <Text as="span" color={subitemPopoverAprItemProps.fontColor} fontSize="sm" fontWeight={500}>
+          {title}
+        </Text>
+      )}
+      <Text
+        alignItems="center"
+        as="span"
+        color={subitemPopoverAprItemProps.fontColor}
+        display="inline-flex"
+        fontSize="xs"
+        fontWeight={500}
+        lineHeight="1"
+      >
+        (
+        <Link
+          alignItems="center"
+          aria-label={ariaLabel}
+          color="font.link"
+          display="inline-flex"
+          href={href}
+          isExternal
+          onClick={e => e.stopPropagation()}
+          rel="noopener noreferrer"
+        >
+          <ArrowUpRight size={10} />
+        </Link>
+        )
+      </Text>
+    </HStack>
+  )
 
   const shouldDisplayStakingIncentives =
     stakingIncentivesAprDisplayed.gt(0) &&
@@ -197,7 +238,11 @@ function BaseAprTooltip({
               apr={item.apr}
               displayValueFormatter={usedDisplayValueFormatter}
               key={`yield-bearing-${item.title}-${item.apr}`}
-              title={item.title}
+              title={
+                item.url
+                  ? renderSubitemTitleWithLink(item.title, item.url, `${item.title} yield source`)
+                  : item.title
+              }
               tooltipText={inherentTokenYieldTooltipText}
             />
           )
@@ -220,46 +265,13 @@ function BaseAprTooltip({
                 displayValueFormatter={usedDisplayValueFormatter}
                 key={item.id || `merkl-${item.title}-${item.apr}`}
                 title={
-                  item.opportunityId && item.opportunityUrl ? (
-                    <HStack gap={1} whiteSpace="nowrap">
-                      {item.title && (
-                        <Text
-                          as="span"
-                          color={subitemPopoverAprItemProps.fontColor}
-                          fontSize="sm"
-                          fontWeight={500}
-                        >
-                          {item.title}
-                        </Text>
-                      )}
-                      <Text
-                        alignItems="center"
-                        as="span"
-                        color={subitemPopoverAprItemProps.fontColor}
-                        display="inline-flex"
-                        fontSize="xs"
-                        fontWeight={500}
-                        lineHeight="1"
-                      >
-                        (
-                        <Link
-                          alignItems="center"
-                          aria-label={`Merkl opportunity ${item.opportunityId}`}
-                          color="font.link"
-                          display="inline-flex"
-                          href={item.opportunityUrl}
-                          isExternal
-                          onClick={e => e.stopPropagation()}
-                          rel="noopener noreferrer"
-                        >
-                          <ArrowUpRight size={10} />
-                        </Link>
-                        )
-                      </Text>
-                    </HStack>
-                  ) : (
-                    item.title
-                  )
+                  item.opportunityId && item.opportunityUrl
+                    ? renderSubitemTitleWithLink(
+                        item.title,
+                        item.opportunityUrl,
+                        `Merkl opportunity ${item.opportunityId}`
+                      )
+                    : item.title
                 }
               />
             ))}

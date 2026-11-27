@@ -23,6 +23,9 @@ function buildTooltipState(overrides: {
   stakingIncentivesAprDisplayed: BigNumber
   isStakingPresent?: boolean
   stakingIncentivesDisplayed?: { title: string; apr: BigNumber; tooltipText: string }[]
+  yieldBearingTokensAprDisplayed?: BigNumber
+  isYieldPresent?: boolean
+  yieldBearingTokensDisplayed?: { title: string; apr: BigNumber; url?: string }[]
   merklIncentivesAprDisplayed?: BigNumber
   merklTokensDisplayed?: {
     id: string
@@ -35,13 +38,13 @@ function buildTooltipState(overrides: {
 }) {
   return {
     totalBaseDisplayed: bn('0.01'),
-    yieldBearingTokensAprDisplayed: bn(0),
+    yieldBearingTokensAprDisplayed: overrides.yieldBearingTokensAprDisplayed ?? bn(0),
     stakingIncentivesAprDisplayed: overrides.stakingIncentivesAprDisplayed,
     swapFeesDisplayed: bn('0.01'),
     isSwapFeePresent: true,
-    isYieldPresent: false,
+    isYieldPresent: overrides.isYieldPresent ?? false,
     isStakingPresent: overrides.isStakingPresent ?? overrides.stakingIncentivesAprDisplayed.gt(0),
-    yieldBearingTokensDisplayed: [],
+    yieldBearingTokensDisplayed: overrides.yieldBearingTokensDisplayed ?? [],
     stakingIncentivesDisplayed: overrides.stakingIncentivesDisplayed ?? [],
     merklIncentivesAprDisplayed: overrides.merklIncentivesAprDisplayed ?? bn(0),
     merklTokensDisplayed: overrides.merklTokensDisplayed ?? [],
@@ -188,5 +191,35 @@ describe('BaseAprTooltip staking incentives visibility', () => {
     )
 
     expect(tokenOppLink).toHaveAttribute('target', '_blank')
+  })
+
+  it('renders a clickable yield source link for supported yield-bearing tokens', async () => {
+    mockUseAprTooltip.mockReturnValue(
+      buildTooltipState({
+        stakingIncentivesAprDisplayed: bn(0),
+        yieldBearingTokensAprDisplayed: bn('0.0202'),
+        isYieldPresent: true,
+        yieldBearingTokensDisplayed: [
+          {
+            title: 'waMonUSDC',
+            apr: bn('0.0202'),
+            url: 'https://app.aave.com/reserve-overview/?underlyingAsset=0x754704bc059f8c67012fed69bc8a327a5aafb603&marketName=proto_monad_v3',
+          },
+        ],
+      })
+    )
+
+    await renderAndOpenTooltip()
+
+    expect(screen.getByText('waMonUSDC')).toBeInTheDocument()
+
+    const yieldLink = screen.getByRole('link', { name: 'waMonUSDC yield source' })
+
+    expect(yieldLink).toHaveAttribute(
+      'href',
+      'https://app.aave.com/reserve-overview/?underlyingAsset=0x754704bc059f8c67012fed69bc8a327a5aafb603&marketName=proto_monad_v3'
+    )
+
+    expect(yieldLink).toHaveAttribute('target', '_blank')
   })
 })

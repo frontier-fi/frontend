@@ -33,7 +33,21 @@ export function usePoolsMetadataLogic(
     return poolsMetadata?.[poolChainId]?.[pool.address]
   }
 
-  return { getErc4626Metadata, getPoolMetadata }
+  function getErc4626ProtocolId(
+    chain: PoolCore['chain'],
+    tokenAddress: string
+  ): string | undefined {
+    if (!erc4626Metadata) return undefined
+
+    const chainKey = String(getChainId(chain))
+    const target = tokenAddress.toLowerCase()
+
+    return erc4626Metadata.find(metadata =>
+      metadata.addresses[chainKey]?.some(address => address.toLowerCase() === target)
+    )?.id
+  }
+
+  return { getErc4626Metadata, getErc4626ProtocolId, getPoolMetadata }
 }
 
 export function PoolsMetadataProvider({

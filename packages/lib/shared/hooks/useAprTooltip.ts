@@ -1,8 +1,12 @@
 import { useColorModeValue } from '@chakra-ui/react'
-import type { GqlPoolAprItem } from '../services/api/graphql-derived-types'
+import type { GqlPoolAprItem, GqlPoolTokenDetail } from '../services/api/graphql-derived-types'
 import type { GqlPoolAprItemType } from '@repo/lib/shared/services/api/generated/graphql'
 import type { AppChain } from '@repo/lib/shared/services/api/graphql-enums'
-import { GqlHookTypeValues, GqlPoolAprItemTypeValues } from '../services/api/graphql-enums'
+import {
+  GqlChainValues,
+  GqlHookTypeValues,
+  GqlPoolAprItemTypeValues,
+} from '../services/api/graphql-enums'
 import { bn } from '../utils/numbers'
 import type BigNumber from 'bignumber.js'
 
@@ -51,6 +55,79 @@ export function getMerklOpportunityUrl(opportunityId: string): string {
   return `https://app.merkl.xyz/opportunities/${opportunityId}`
 }
 
+const AAVE_MARKET_NAME_BY_CHAIN: Partial<Record<AppChain, string>> = {
+  [GqlChainValues.Mainnet]: 'proto_mainnet_v3',
+  [GqlChainValues.Base]: 'proto_base_v3',
+  [GqlChainValues.Monad]: 'proto_monad_v3',
+  [GqlChainValues.Sepolia]: 'proto_sepolia_v3',
+  [GqlChainValues.Arbitrum]: 'proto_arbitrum_v3',
+  [GqlChainValues.Optimism]: 'proto_optimism_v3',
+  [GqlChainValues.Polygon]: 'proto_polygon_v3',
+  [GqlChainValues.Avalanche]: 'proto_avalanche_v3',
+  [GqlChainValues.Gnosis]: 'proto_gnosis_v3',
+}
+
+const EULER_NETWORK_BY_CHAIN: Partial<Record<AppChain, string>> = {
+  [GqlChainValues.Mainnet]: 'ethereum',
+  [GqlChainValues.Base]: 'base',
+  [GqlChainValues.Monad]: 'monad',
+  [GqlChainValues.Arbitrum]: 'arbitrum',
+  [GqlChainValues.Optimism]: 'optimism',
+  [GqlChainValues.Polygon]: 'polygon',
+  [GqlChainValues.Avalanche]: 'avalanche',
+  [GqlChainValues.Gnosis]: 'gnosis',
+}
+
+export function getYieldBearingTokenUrl({
+  protocolId,
+  chain,
+  tokenAddress,
+  underlyingAddress,
+  underlyingSymbol,
+}: {
+  protocolId?: string
+  chain: AppChain
+  tokenAddress?: string | null
+  underlyingAddress?: string | null
+  underlyingSymbol?: string | null
+}): string | undefined {
+  if (!protocolId) return undefined
+
+  if (protocolId === 'boosted_aave') {
+    const marketName = AAVE_MARKET_NAME_BY_CHAIN[chain]
+
+    if (underlyingAddress && marketName) {
+      return `https://app.aave.com/reserve-overview/?underlyingAsset=${underlyingAddress.toLowerCase()}&marketName=${marketName}`
+    }
+
+    return undefined
+  }
+
+  if (protocolId === 'boosted_neverland') {
+    return underlyingSymbol
+      ? `https://app.neverland.money/markets?asset=${encodeURIComponent(underlyingSymbol.toLowerCase())}`
+      : 'https://app.neverland.money/markets'
+  }
+
+  if (protocolId === 'boosted_euler') {
+    const network = EULER_NETWORK_BY_CHAIN[chain]
+
+    if (tokenAddress && network) {
+      return `https://app.euler.finance/vault/${tokenAddress}?network=${network}`
+    }
+
+    return undefined
+  }
+
+  return undefined
+}
+
+export type YieldBearingPoolToken = Pick<GqlPoolTokenDetail, 'address' | 'underlyingToken'> & {
+  nestedPool?: {
+    tokens?: Pick<GqlPoolTokenDetail, 'address' | 'underlyingToken'>[]
+  } | null
+}
+
 export interface MerklAprSubItem {
   id: string
   title: string
@@ -73,10 +150,15 @@ export const TOTAL_APR_TYPES: GqlPoolAprItemType[] = [...TOTAL_BASE_APR_TYPES]
 export function useAprTooltip({
   aprItems,
   numberFormatter,
+  chain,
+  poolTokens,
+  getErc4626ProtocolId,
 }: {
   aprItems: GqlPoolAprItem[]
   numberFormatter: (value: string) => BigNumber
   chain: AppChain
+  poolTokens?: YieldBearingPoolToken[]
+  getErc4626ProtocolId?: (chain: AppChain, tokenAddress: string) => string | undefined
 }) {
   // Swap fees
   const swapFee = aprItems.find(item => item.type === GqlPoolAprItemTypeValues.SwapFee24h)
@@ -96,10 +178,34 @@ export function useAprTooltip({
     return item.type === GqlPoolAprItemTypeValues.IbYield
   })
 
-  const yieldBearingTokensDisplayed = yieldBearingTokens.map(item => ({
-    title: item.rewardTokenSymbol || '',
-    apr: numberFormatter(item.apr.toString()),
-  }))
+  const flattenedPoolTokens = poolTokens
+    ? poolTokens.flatMap(token => [token, ...(token.nestedPool?.tokens ?? [])])
+    : []
+
+  const yieldBearingTokensDisplayed = yieldBearingTokens.map(item => {
+    const tokenAddress = item.rewardTokenAddress?.toLowerCase()
+
+    const matchingToken = tokenAddress
+      ? flattenedPoolTokens.find(token => token.address.toLowerCase() === tokenAddress)
+      : undefined
+
+    const protocolId =
+      tokenAddress && getErc4626ProtocolId ? getErc4626ProtocolId(chain, tokenAddress) : undefined
+
+    const url = getYieldBearingTokenUrl({
+      protocolId,
+      chain,
+      tokenAddress: matchingToken?.address ?? item.rewardTokenAddress,
+      underlyingAddress: matchingToken?.underlyingToken?.address,
+      underlyingSymbol: matchingToken?.underlyingToken?.symbol,
+    })
+
+    return {
+      title: item.rewardTokenSymbol || '',
+      apr: numberFormatter(item.apr.toString()),
+      ...(url ? { url } : {}),
+    }
+  })
 
   const yieldBearingTokensAprDisplayed = yieldBearingTokensDisplayed.reduce(
     (acc, item) => acc.plus(item.apr),

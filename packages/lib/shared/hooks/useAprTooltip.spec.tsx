@@ -1,6 +1,6 @@
 import { testHook } from '@repo/lib/test/utils/custom-renderers'
 import { bn, fNum } from '../utils/numbers'
-import { useAprTooltip } from './useAprTooltip'
+import { getYieldBearingTokenUrl, useAprTooltip } from './useAprTooltip'
 import { aprTooltipDataMock } from './_mocks_/aprTooltipDataMock'
 import BigNumber from 'bignumber.js'
 import type { GqlPoolAprItem } from '../services/api/graphql-derived-types'
@@ -129,4 +129,46 @@ it('parses per-opportunity Merkl items with asset title and clickable Merkl URLs
       opportunityUrl: 'https://app.merkl.xyz/opportunities/9212343318075137075',
     },
   ])
+})
+
+it('builds yield-bearing token URLs for Aave, Neverland, and Euler', () => {
+  expect(
+    getYieldBearingTokenUrl({
+      protocolId: 'boosted_aave',
+      chain: GqlChainValues.Monad,
+      tokenAddress: '0xc554affe2f581f5e0811e0d42d484ecac5c6b8e2',
+      underlyingAddress: '0x754704Bc059F8C67012fEd69BC8A327a5aafb603',
+      underlyingSymbol: 'USDC',
+    })
+  ).toBe(
+    'https://app.aave.com/reserve-overview/?underlyingAsset=0x754704bc059f8c67012fed69bc8a327a5aafb603&marketName=proto_monad_v3'
+  )
+
+  expect(
+    getYieldBearingTokenUrl({
+      protocolId: 'boosted_neverland',
+      chain: GqlChainValues.Monad,
+      tokenAddress: '0x8d5c2df3eef09088fcccf3376d8ecd0dd505f642',
+      underlyingAddress: '0x754704bc059f8c67012fed69bc8a327a5aafb603',
+      underlyingSymbol: 'USDC',
+    })
+  ).toBe('https://app.neverland.money/markets?asset=usdc')
+
+  expect(
+    getYieldBearingTokenUrl({
+      protocolId: 'boosted_euler',
+      chain: GqlChainValues.Monad,
+      tokenAddress: '0xe1bca19baa63894d374578320551633320436523',
+      underlyingAddress: '0x754704bc059f8c67012fed69bc8a327a5aafb603',
+      underlyingSymbol: 'USDC',
+    })
+  ).toBe('https://app.euler.finance/vault/0xe1bca19baa63894d374578320551633320436523?network=monad')
+
+  expect(
+    getYieldBearingTokenUrl({
+      protocolId: 'boosted_unknown',
+      chain: GqlChainValues.Monad,
+      tokenAddress: '0x1234',
+    })
+  ).toBeUndefined()
 })
