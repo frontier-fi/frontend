@@ -24,8 +24,19 @@ export function usePreviewEclpLiquidityProfile(): ECLPLiquidityProfile {
     name: ['alpha', 'beta', 'peakPrice', 'lambda'],
   })
 
-  const { spotPriceWithoutRate, rateTokenA, rateTokenB, isRateLoading } =
-    usePoolSpotPriceWithoutRate()
+  const {
+    spotPriceWithoutRate,
+    rateTokenA,
+    rateTokenB,
+    isRateLoading,
+    usdPriceTokenA,
+    usdPriceTokenB,
+  } = usePoolSpotPriceWithoutRate()
+
+  const tokenUsdPrices = useMemo(
+    () => [usdPriceTokenA ?? 0, usdPriceTokenB ?? 0] as const,
+    [usdPriceTokenA, usdPriceTokenB]
+  )
 
   const parsedTokenRates = useMemo(
     () => [parseRateTo18(rateTokenA), parseRateTo18(rateTokenB)] as const,
@@ -62,6 +73,7 @@ export function usePreviewEclpLiquidityProfile(): ECLPLiquidityProfile {
     tokenRates,
     unwrapRates,
     poolTokens: poolTokensSymbols,
+    tokenUsdPrices,
     isLoading: isRateLoading || isUnwrapLoading,
     allowReverse: false,
   })

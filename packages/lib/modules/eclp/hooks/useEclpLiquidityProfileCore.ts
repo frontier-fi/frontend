@@ -4,6 +4,15 @@ import { bn, isBnParseable } from '@repo/lib/shared/utils/numbers'
 import { drawNormalizedLiquidityECLP } from '../helpers/drawLiquidityECLP'
 import { calculateMarketRateMultiplier } from '../helpers/eclpRateScaling'
 import { calculatePeakPrice } from '../../pool/actions/create/steps/details/gyro.helpers'
+import { calculateQuoteTokenUsdPrice } from '../helpers/distanceToPeak'
+import { calcEclpSwapToPrice } from '../helpers/eclpSwapToPrice'
+
+export type EclpSwapToPeak = {
+  sellSymbol: string
+  sellAmount: number
+  buySymbol: string
+  buyAmount: number
+}
 
 export type ECLPLiquidityProfile = {
   data: [number, number][] | null
@@ -22,6 +31,13 @@ export type ECLPLiquidityProfile = {
   setIsNormalized: (isNormalized: boolean) => void
   isLoading: boolean
   poolTokens: string[]
+  /** USD value of one displayed quote-token unit (the second symbol in the displayed pair). */
+  quoteTokenUsdPrice?: number | null
+  /**
+   * Swap (before fees) that would move the pool from `displayPrice` to the peak, in the
+   * displayed tokens. Null when the pool's liquidity is unknown (e.g. pool creator preview).
+   */
+  calcSwapToPeak?: (displayPrice: number) => EclpSwapToPeak | null
 }
 
 export type EclpLiquidityProfileCoreInput = {
@@ -36,6 +52,10 @@ export type EclpLiquidityProfileCoreInput = {
   tokenRates: readonly [bigint, bigint] | null
   unwrapRates: readonly [bigint, bigint] | null
   poolTokens: string[]
+  /** USD prices of the pool tokens in pool token order ([token0, token1]). */
+  tokenUsdPrices?: readonly [number, number] | null
+  /** Pool invariant r in normalized (Vault rate-scaled) space, when the pool has liquidity. */
+  invariant?: number | null
   isLoading: boolean
   allowReverse?: boolean
 }
@@ -79,6 +99,8 @@ export function useEclpLiquidityProfileCore({
   tokenRates,
   unwrapRates,
   poolTokens,
+  tokenUsdPrices,
+  invariant,
   isLoading,
   allowReverse = false,
 }: EclpLiquidityProfileCoreInput): ECLPLiquidityProfile {
@@ -181,17 +203,20 @@ export function useEclpLiquidityProfileCore({
     return scaleDisplayValue(normalizedSpotPrice, activeMultiplier, isReversed)
   }, [hasRates, normalizedSpotPrice, activeMultiplier, isReversed])
 
-  const poolPeakPrice = useMemo(() => {
-    if (!hasRates) return null
-
-    const rawPeak =
+  const rawPeakPrice = useMemo(
+    () =>
       normalizedPeakPrice ??
       (c !== null && c !== undefined && s !== null && s !== undefined
         ? calculatePeakPrice({ c: String(c), s: String(s) })
-        : null)
+        : null),
+    [normalizedPeakPrice, c, s]
+  )
 
-    return scaleDisplayValue(rawPeak, activeMultiplier, isReversed)
-  }, [hasRates, normalizedPeakPrice, c, s, activeMultiplier, isReversed])
+  const poolPeakPrice = useMemo(() => {
+    if (!hasRates) return null
+
+    return scaleDisplayValue(rawPeakPrice, activeMultiplier, isReversed)
+  }, [hasRates, rawPeakPrice, activeMultiplier, isReversed])
 
   const { poolLowerBound, poolUpperBound } = useMemo(() => {
     if (data?.length) {
@@ -220,6 +245,71 @@ export function useEclpLiquidityProfileCore({
     )
   }, [data, xMin, xMax, poolSpotPrice])
 
+  const quoteTokenUsdPrice = useMemo(
+    () =>
+      calculateQuoteTokenUsdPrice({
+        tokenUsdPrices,
+        tokenRates,
+        unwrapRates,
+        isNormalized,
+        isReversed,
+      }),
+    [tokenUsdPrices, tokenRates, unwrapRates, isNormalized, isReversed]
+  )
+
+  const calcSwapToPeak = useMemo(() => {
+    if (!invariant || !Number.isFinite(invariant) || invariant <= 0) return undefined
+    if (!tokenRates || !unwrapRates || !isValidNumberish(rawPeakPrice)) return undefined
+    if (![alpha, beta, c, s, lambda].every(isValidNumberish)) return undefined
+
+    const curve = {
+      alpha: Number(alpha),
+      beta: Number(beta),
+      c: Number(c),
+      s: Number(s),
+      lambda: Number(lambda),
+    }
+
+    const peak = Number(rawPeakPrice)
+    const mult = activeMultiplier.toNumber()
+
+    // Rate-scaled pool amount -> displayed token amount (underlying when unwrapped).
+    const toDisplayAmount = (index: 0 | 1, scaled: number) =>
+      (scaled * Number(unwrapRates[index])) / Number(tokenRates[index])
+
+    return (displayPrice: number): EclpSwapToPeak | null => {
+      if (!Number.isFinite(displayPrice) || displayPrice <= 0) return null
+
+      const marketPrice = isReversed ? 1 / displayPrice : displayPrice
+      const normalizedPrice = marketPrice / mult
+
+      const swap = calcEclpSwapToPrice(curve, invariant, normalizedPrice, peak)
+      if (!swap) return null
+
+      const buyIndex = swap.sellIndex === 0 ? 1 : 0
+
+      return {
+        sellSymbol: poolTokens[swap.sellIndex] ?? '',
+        sellAmount: toDisplayAmount(swap.sellIndex, swap.sellAmount),
+        buySymbol: poolTokens[buyIndex] ?? '',
+        buyAmount: toDisplayAmount(buyIndex, swap.buyAmount),
+      }
+    }
+  }, [
+    invariant,
+    tokenRates,
+    unwrapRates,
+    rawPeakPrice,
+    alpha,
+    beta,
+    c,
+    s,
+    lambda,
+    activeMultiplier,
+    isReversed,
+    poolTokens,
+  ])
+
   return {
     data,
     poolSpotPrice,
@@ -237,5 +327,7 @@ export function useEclpLiquidityProfileCore({
     setIsNormalized,
     isLoading,
     poolTokens,
+    quoteTokenUsdPrice,
+    calcSwapToPeak,
   }
 }
